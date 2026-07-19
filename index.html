@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NCAA Legends — Main Dynasty</title>
+<meta name="description" content="NCAA Legends Main Dynasty — an EA Sports College Football 27 online dynasty league. Schedule, power rankings, and roster.">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+
+<!-- ============================================================
+     LINK PREVIEWS (Discord, iMessage, Slack, Twitter)
+     These MUST be absolute URLs — a relative path shows no preview
+     at all. If the Pages URL ever changes (renaming the repo, or
+     adding a custom domain), update all four below.
+
+     Note the doubled path: the repo is named "ncaalegends.github.io"
+     under the account "jbwestfall", so GitHub serves it as a project
+     page and the repo name becomes a path segment.
+     ============================================================ -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="NCAA Legends">
+<meta property="og:title" content="NCAA Legends — Main Dynasty">
+<meta property="og:description" content="EA Sports College Football 27 online dynasty. Schedule, power rankings, and the coach roster.">
+<meta property="og:url" content="https://jbwestfall.github.io/ncaalegends.github.io/">
+<meta property="og:image" content="https://jbwestfall.github.io/ncaalegends.github.io/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="NCAA Legends — Main Dynasty">
+<meta name="twitter:description" content="EA Sports College Football 27 online dynasty. Schedule, power rankings, and the coach roster.">
+<meta name="twitter:image" content="https://jbwestfall.github.io/ncaalegends.github.io/og-image.png">
+<link rel="canonical" href="https://jbwestfall.github.io/ncaalegends.github.io/">
+<meta name="theme-color" content="#060b16">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<!-- Filled by renderTicker() from the data files — see script.js -->
+<div class="ticker" aria-hidden="true">
+  <div class="ticker-track" id="ticker-track"></div>
+</div>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="league-mark">
+      <span class="hash">//</span>
+      <span class="league-name" id="league-name">NCAA LEGENDS</span>
+      <span class="league-badge">MAIN DYNASTY</span>
+    </div>
+    <nav class="tabs" id="tabs" role="tablist" aria-label="Sections">
+      <button class="tab-btn active" data-tab="home" role="tab" aria-selected="true" aria-controls="home">Home</button>
+      <button class="tab-btn" data-tab="schedule" role="tab" aria-selected="false" aria-controls="schedule">Schedule</button>
+      <button class="tab-btn" data-tab="rankings" role="tab" aria-selected="false" aria-controls="rankings">Rankings</button>
+      <button class="tab-btn" data-tab="roster" role="tab" aria-selected="false" aria-controls="roster">Roster</button>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- HOME -->
+  <section id="home" class="tab-panel active" role="tabpanel" tabindex="-1">
+
+    <div class="hero">
+      <div class="hero-bg"></div>
+      <div class="hero-stripe"></div>
+      <p class="hero-eyebrow">EA SPORTS COLLEGE FOOTBALL 27 &middot; ONLINE DYNASTY</p>
+      <h1 class="hero-title">NCAA <span>LEGENDS</span></h1>
+      <p class="hero-sub">MAIN DYNASTY</p>
+
+      <div class="hero-status">
+        <span class="status-dot"></span>
+        <span id="launch-status">PRE-SEASON — COACHES SIGNING UP</span>
+      </div>
+    </div>
+
+    <div class="jumbotron">
+      <div class="jumbo-glow"></div>
+      <div class="jumbo-frame" id="jumbo-frame"></div>
+      <p class="jumbo-sub" id="week-summary"></p>
+    </div>
+
+    <div class="section-block">
+      <div class="section-head">
+        <h2 class="section-title">This Week's Games</h2>
+        <span class="section-tag" id="this-week-tag"></span>
+      </div>
+      <div id="this-week-games"></div>
+    </div>
+
+    <div class="section-block">
+      <h2 class="section-title">Recent Results</h2>
+      <ul class="results-ticker" id="recent-results"></ul>
+    </div>
+
+    <div class="section-block">
+      <div class="section-head">
+        <h2 class="section-title">Top 5</h2>
+        <button class="link-btn" data-tab="rankings">Full poll &rarr;</button>
+      </div>
+      <ol class="poll-list poll-preview" id="rankings-preview"></ol>
+    </div>
+
+  </section>
+
+  <!-- SCHEDULE -->
+  <section id="schedule" class="tab-panel" role="tabpanel" tabindex="-1">
+    <div class="section-head">
+      <h2 class="section-title">Schedule</h2>
+      <span class="section-tag" id="schedule-coverage-tag"></span>
+    </div>
+
+    <div class="sched-toggle">
+      <button class="sched-toggle-btn active" data-sched-view="weekly">Weekly</button>
+      <button class="sched-toggle-btn" data-sched-view="team">By Team</button>
+    </div>
+
+    <div id="sched-weekly" class="sched-view active">
+      <div class="sched-controls">
+        <label for="week-select">Week</label>
+        <select id="week-select"></select>
+      </div>
+      <div id="weekly-games"></div>
+    </div>
+
+    <div id="sched-team" class="sched-view">
+      <div class="sched-controls">
+        <label for="team-select">Team</label>
+        <select id="team-select"></select>
+      </div>
+      <div id="team-schedule"></div>
+    </div>
+  </section>
+
+  <!-- RANKINGS -->
+  <section id="rankings" class="tab-panel" role="tabpanel" tabindex="-1">
+    <div class="section-head">
+      <h2 class="section-title">Power Rankings</h2>
+      <span class="section-tag" id="rankings-week-label"></span>
+    </div>
+    <p class="rankings-note">Ranks league games only — coach vs. coach results, not CPU matchups.</p>
+    <ol class="poll-list" id="full-rankings"></ol>
+  </section>
+
+  <!-- ROSTER -->
+  <section id="roster" class="tab-panel" role="tabpanel" tabindex="-1">
+    <div class="section-head">
+      <h2 class="section-title">Coaches &amp; Teams</h2>
+      <span class="section-tag" id="roster-count-tag"></span>
+    </div>
+    <div class="roster-grid" id="roster-grid"></div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-status" id="footer-status"></div>
+  <div class="footer-links" id="footer-links"></div>
+</footer>
+
+<!-- Data files load before the logic. defer keeps them in order
+     and waits for the DOM, so no DOMContentLoaded wrapper needed. -->
+<script src="league-data.js" defer></script>
+<script src="schedule-data.js" defer></script>
+<script src="script.js" defer></script>
+</body>
+</html>

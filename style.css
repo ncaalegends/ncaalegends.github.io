@@ -1,0 +1,1275 @@
+/* ============================================================
+   DESIGN TOKENS
+   Palette: EA Sports "gameday" HUD — deep navy field-under-lights,
+   chrome steel, and a hot gold accent, with crimson reserved for
+   live/urgent states. Diagonal-cut panels and angular buttons
+   echo the menu language of EA Sports College Football 27.
+   Type: Oswald (condensed display), Work Sans (body),
+   JetBrains Mono (stats + digits).
+   ============================================================ */
+:root {
+  --navy-deep: #060b16;
+  --navy: #0b1526;
+  --navy-panel: #101d33;
+  /* --steel is the muted TEXT tone (4.9:1 on panels — readable).
+     --steel-dim is 2.4:1 and must only ever be used for borders,
+     separators and backgrounds. Never put text in steel-dim. */
+  --steel: #7f8ba3;
+  --steel-dim: #4d5872;
+
+  /* Per-team accent. Set inline as --team on roster cards and
+     schedule headers; falls back to gold when a team has none. */
+  --team: var(--gold);
+  --chalk: #f2f4f8;
+  --gold: #f2c14e;
+  --gold-bright: #ffd873;
+  --gold-dim: rgba(242, 193, 78, 0.14);
+  --crimson: #e0263a;
+  --win: #3ecf7e;
+
+  /* Twitch purple, lifted. The official #9146FF only manages 4.2:1
+     against dark text at this size; this reads the same at a glance
+     and clears AA at 7.4:1. */
+  --twitch: #b388ff;
+  --twitch-bright: #c9a8ff;
+  --line: rgba(242, 244, 248, 0.09);
+  --line-gold: rgba(242, 193, 78, 0.35);
+
+  --font-display: 'Oswald', sans-serif;
+  --font-body: 'Work Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --cut: 14px; /* diagonal clip amount used across panels */
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(1100px 500px at 50% -10%, rgba(242, 193, 78, 0.07), transparent 60%),
+    var(--navy-deep);
+  color: var(--chalk);
+  font-family: var(--font-body);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 { margin: 0; }
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+}
+
+a { color: var(--gold); }
+
+::selection { background: var(--gold); color: var(--navy-deep); }
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  background: var(--gold);
+  color: var(--navy-deep);
+  padding: 10px 16px;
+  font-weight: 700;
+}
+.skip-link:focus { left: 0; }
+
+/* ============================================================
+   TICKER (top HUD strip)
+   ============================================================ */
+.ticker {
+  background: var(--navy-deep);
+  border-bottom: 1px solid var(--line-gold);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.ticker-track {
+  display: inline-flex;
+  gap: 48px;
+  padding: 6px 0;
+  animation: ticker-scroll 26s linear infinite;
+  will-change: transform;
+}
+
+/* Now that the ticker carries real content it runs quiet, with
+   only the league name in gold — otherwise a full-width band of
+   gold text competes with the hero directly beneath it. */
+.ticker-track span {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  color: var(--steel);
+  text-transform: uppercase;
+  padding: 0 24px;
+  position: relative;
+}
+
+/* Keyed by class, not :first-child — the track contains several
+   repetitions and the lead segment of each one must be gold, or the
+   highlight jumps position every time the loop wraps. */
+.ticker-track .ts-lead { color: var(--gold); }
+
+.ticker-track span::after {
+  content: '';
+  position: absolute;
+  right: -24px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 4px;
+  background: var(--steel-dim);
+  border-radius: 50%;
+}
+
+@keyframes ticker-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* ============================================================
+   HEADER / NAV
+   ============================================================ */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: linear-gradient(180deg, var(--navy-panel), var(--navy));
+  border-bottom: 1px solid var(--line);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.header-inner {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.league-mark {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.league-mark .hash {
+  color: var(--gold);
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+
+.league-name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  font-size: 1.35rem;
+  text-transform: uppercase;
+  background: linear-gradient(180deg, var(--chalk) 40%, var(--steel) 140%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.league-badge {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--navy-deep);
+  background: var(--gold);
+  padding: 3px 8px;
+  clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+}
+
+.tabs {
+  display: flex;
+  gap: 3px;
+  background: var(--navy-deep);
+  padding: 4px;
+  border: 1px solid var(--line);
+}
+
+.tab-btn {
+  padding: 9px 18px;
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--steel);
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+  transition: color 0.15s, background 0.15s;
+}
+
+.tab-btn:hover { color: var(--chalk); }
+
+.tab-btn.active {
+  background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+  color: var(--navy-deep);
+}
+
+/* ============================================================
+   LAYOUT
+   ============================================================ */
+main {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 32px 24px 80px;
+}
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+.section-block { margin-top: 48px; }
+
+.section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-size: 1.5rem;
+  color: var(--chalk);
+  position: relative;
+  padding-left: 14px;
+}
+
+.section-title::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 4px;
+  background: var(--steel);
+}
+
+.section-tag {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--steel);
+}
+
+.link-btn {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--gold);
+  font-weight: 600;
+}
+.link-btn:hover { text-decoration: underline; }
+
+/* ============================================================
+   HERO  (NCAA Legends wordmark + launch status)
+   ============================================================ */
+.hero {
+  position: relative;
+  overflow: hidden;
+  padding: 56px 28px 40px;
+  text-align: center;
+  border: 1px solid var(--line);
+  background: var(--navy);
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 22px), calc(100% - 22px) 100%, 0 100%);
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(120deg, rgba(242, 193, 78, 0.10) 0%, transparent 40%),
+    repeating-linear-gradient(
+      -35deg,
+      rgba(242, 244, 248, 0.025) 0px,
+      rgba(242, 244, 248, 0.025) 1px,
+      transparent 1px,
+      transparent 46px
+    );
+  pointer-events: none;
+}
+
+.hero-stripe {
+  position: absolute;
+  top: 0;
+  left: -10%;
+  width: 46%;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(242, 193, 78, 0.16), transparent 80%);
+  transform: skewX(-18deg);
+  pointer-events: none;
+}
+
+.hero-eyebrow {
+  position: relative;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.28em;
+  color: var(--steel);
+  text-transform: uppercase;
+}
+
+.hero-title {
+  position: relative;
+  margin: 14px 0 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(2.6rem, 9vw, 5rem);
+  letter-spacing: 0.01em;
+  line-height: 0.95;
+  color: var(--chalk);
+  text-transform: uppercase;
+}
+
+.hero-title span {
+  display: block;
+  color: var(--gold);
+  text-shadow: 0 0 36px rgba(242, 193, 78, 0.45);
+}
+
+.hero-sub {
+  position: relative;
+  margin: 10px 0 0;
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.4em;
+  color: var(--steel);
+}
+
+.hero-status {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 26px;
+  padding: 8px 16px;
+  border: 1px solid var(--line-gold);
+  background: var(--gold-dim);
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--gold-bright);
+  text-transform: uppercase;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 0 0 rgba(242, 193, 78, 0.6);
+  animation: pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(242, 193, 78, 0.55); }
+  70%  { box-shadow: 0 0 0 8px rgba(242, 193, 78, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(242, 193, 78, 0); }
+}
+
+/* ============================================================
+   JUMBOTRON
+   ============================================================ */
+.jumbotron {
+  position: relative;
+  margin-top: 24px;
+  background: linear-gradient(180deg, var(--navy-panel), var(--navy));
+  border: 1px solid var(--line);
+  border-top: 2px solid var(--gold);
+  padding: 40px 24px;
+  text-align: center;
+  overflow: hidden;
+  clip-path: polygon(18px 0, 100% 0, 100% 100%, 0 100%, 0 18px);
+}
+
+.jumbo-preseason {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(2.4rem, 8vw, 3.6rem);
+  letter-spacing: 0.08em;
+  color: var(--gold);
+  text-shadow: 0 0 24px rgba(242, 193, 78, 0.55), 0 0 4px rgba(242, 193, 78, 0.8);
+  margin-top: 8px;
+  text-transform: uppercase;
+}
+
+.jumbo-glow {
+  position: absolute;
+  top: -60%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 500px;
+  height: 320px;
+  background: radial-gradient(circle, var(--gold-dim) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.jumbo-frame {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+.jumbo-label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.3em;
+  color: var(--steel);
+}
+
+.jumbo-word {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.6rem;
+  letter-spacing: 0.15em;
+  color: var(--chalk);
+  margin-top: 8px;
+}
+
+.jumbo-number {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 5.5rem;
+  line-height: 1;
+  color: var(--gold);
+  text-shadow: 0 0 24px rgba(242, 193, 78, 0.55), 0 0 4px rgba(242, 193, 78, 0.8);
+  margin-top: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+.jumbo-sub {
+  position: relative;
+  margin: 16px 0 0;
+  color: var(--steel);
+  font-size: 0.95rem;
+}
+
+/* ============================================================
+   GAME CARDS
+   ============================================================ */
+.game-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.game-card {
+  background: var(--navy-panel);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--steel-dim);
+  padding: 16px;
+  transition: background 0.15s, border-left-color 0.15s, transform 0.15s;
+}
+
+.game-card:hover {
+  background: #13233d;
+  transform: translateY(-1px);
+}
+
+/* Coach vs. coach — the games that actually matter to the league. */
+.game-card.is-league { border-left-color: var(--gold); }
+
+.game-card.is-live {
+  border-left-color: var(--crimson);
+  box-shadow: inset 0 0 0 1px rgba(224, 38, 58, 0.35);
+}
+
+.game-card .matchup {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.game-card .team { flex: 1; min-width: 0; }
+.game-card .team.home { text-align: right; }
+.game-card .at { color: var(--steel); font-size: 0.78rem; flex: 0 0 auto; }
+
+/* Winner reads bright, loser recedes — one glance per card. */
+.game-card .team.won { color: var(--chalk); }
+.game-card .team.lost { color: var(--steel); }
+
+.game-card .score {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-top: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.game-card .score .s.won { color: var(--gold); }
+.game-card .score .s.lost { color: var(--steel); font-weight: 400; }
+.game-card .score .dash { color: var(--steel); font-weight: 400; }
+
+.game-card .status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 10px;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--steel);
+}
+
+.game-card.is-live .status { color: var(--crimson); font-weight: 700; }
+
+/* ============================================================
+   RESULTS TICKER
+   ============================================================ */
+.results-ticker {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--line);
+}
+
+.results-ticker li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 4px;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+}
+
+.results-ticker .week-chip {
+  flex: 0 0 auto;
+  font-size: 0.7rem;
+  color: var(--steel);
+  background: transparent;
+  border: 1px solid var(--line-gold);
+  padding: 2px 8px;
+  font-weight: 700;
+}
+
+.results-ticker .r-line {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.results-ticker .r-team { color: var(--steel); }
+.results-ticker .r-team.won { color: var(--chalk); font-weight: 600; }
+.results-ticker .r-at { color: var(--steel); font-size: 0.75rem; }
+
+.results-ticker .r-score {
+  color: var(--steel);
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+}
+.results-ticker .r-score.won { color: var(--gold); font-weight: 700; }
+
+/* ============================================================
+   POLL / RANKINGS
+   ============================================================ */
+.poll-list {
+  list-style: none;
+  counter-reset: rank;
+  margin: 0;
+  padding: 0;
+}
+
+/* 4 columns, and each row supplies exactly 4 items: the ::before
+   counter plus .p-main, .p-record, .p-trend. Add an element in
+   rankingRowHtml() and you must add a column here, or rows wrap. */
+.poll-list li {
+  counter-increment: rank;
+  display: grid;
+  grid-template-columns: 44px 1fr auto 48px;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 8px;
+  border-bottom: 1px solid var(--line);
+  transition: background 0.15s;
+}
+
+.poll-list li:hover { background: rgba(242, 244, 248, 0.03); }
+
+.poll-list li::before {
+  content: counter(rank);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: var(--steel);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Gold marks the top of the poll rather than every rank number. */
+.poll-list li:nth-child(-n + 3)::before { color: var(--chalk); }
+.poll-list li:first-child::before { color: var(--gold); }
+
+.poll-list .p-main {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.poll-list .p-text { min-width: 0; }
+.poll-list .p-team { font-weight: 600; display: block; }
+.poll-list .p-coach { font-size: 0.8rem; color: var(--steel); display: block; }
+.poll-list .p-record {
+  font-family: var(--font-mono);
+  color: var(--steel);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.poll-list .p-trend {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: center;
+  cursor: default;
+}
+.p-trend.up { color: var(--win); }
+.p-trend.down { color: var(--crimson); }
+.p-trend.same { color: var(--steel); }
+
+.poll-list.is-empty li::before { content: none; }
+
+.poll-list li.poll-empty-msg {
+  display: block;
+  color: var(--steel);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  padding: 20px 8px;
+  border-bottom: none;
+}
+
+.rankings-note {
+  margin: -6px 0 18px;
+  color: var(--steel);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+}
+
+/* ============================================================
+   TEAM MARKS — logo with monogram underneath
+   The monogram sits in normal flow and the logo is layered on
+   top of it. If the image 404s it removes itself and the
+   monogram shows through, so nothing ever collapses.
+   ============================================================ */
+.team-mark {
+  position: relative;
+  flex: 0 0 auto;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(242, 244, 248, 0.94);
+  overflow: hidden;
+}
+
+.tm-fallback {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--navy-deep);
+  line-height: 1;
+}
+
+/* While an image is present, the monogram stays hidden — otherwise
+   it shows through the transparent parts of a logo. The <img>
+   deletes itself on error, at which point this rule stops matching
+   and the monogram becomes visible again. */
+.team-mark:has(.tm-img) .tm-fallback { visibility: hidden; }
+
+/* Light plate behind every logo — a lot of college marks are
+   black or navy and would disappear against this background. */
+.tm-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 14%;
+  background: rgba(242, 244, 248, 0.94);
+}
+
+.tm-sm { width: 26px; height: 26px; }
+.tm-sm .tm-fallback { font-size: 0.6rem; }
+.tm-md { width: 34px; height: 34px; }
+.tm-md .tm-fallback { font-size: 0.72rem; }
+.tm-lg { width: 63px; height: 63px; }
+.tm-lg .tm-fallback { font-size: 1.25rem; }
+.tm-xl { width: 60px; height: 60px; }
+.tm-xl .tm-fallback { font-size: 1.15rem; }
+
+/* ============================================================
+   ROSTER
+   ============================================================ */
+.roster-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+/* Flex column so the Twitch button can pin to the bottom — otherwise
+   the 21 cards without a link leave a button-sized void and the row
+   height jumps around. */
+.roster-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  background: var(--navy-panel);
+  border: 1px solid var(--line);
+  padding: 18px;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+  transition: background 0.15s, transform 0.15s;
+}
+
+/* Team color as a ring around the logo. Far more legible than a 3px
+   hairline at the card's edge, and it puts the color next to the
+   thing it identifies. */
+.roster-card .team-mark {
+  box-shadow: 0 0 0 3px var(--team), 0 0 0 4px rgba(6, 11, 22, 0.55);
+  margin-bottom: 14px;
+}
+
+.roster-card:hover {
+  background: #13233d;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+}
+
+/* The ring is the card's only team-color cue now, so it brightens
+   on hover rather than the card border doing the work. */
+.roster-card:hover .team-mark {
+  box-shadow: 0 0 0 3px var(--team), 0 0 0 7px color-mix(in srgb, var(--team) 30%, transparent);
+}
+
+/* At-a-glance: has this coach turned in their schedule screenshots? */
+.roster-card .r-sched {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.roster-card .r-sched.in { color: var(--win); }
+.roster-card .r-sched.out { color: var(--steel); }
+
+.roster-card .r-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+  margin-top: 10px;
+}
+
+.roster-card .r-conf {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--chalk);
+  background: rgba(242, 244, 248, 0.08);
+  padding: 2px 7px;
+}
+
+.roster-card .r-team {
+  font-family: var(--font-display);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 1.1rem;
+  letter-spacing: 0.02em;
+}
+
+.roster-card .r-coach {
+  color: var(--steel);
+  font-size: 0.85rem;
+  margin: 3px 0 0;
+}
+
+.roster-card .twitch-link { margin-top: auto; padding-top: 6px; }
+.roster-card .r-meta { margin-bottom: 14px; }
+
+.twitch-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--navy-deep);
+  background: var(--twitch);
+  padding: 6px 12px;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.twitch-link:hover { background: var(--twitch-bright); }
+
+.no-stream {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--steel);
+}
+
+/* ============================================================
+   SCHEDULE — Weekly / By Team toggle + views
+   ============================================================ */
+.sched-toggle {
+  display: inline-flex;
+  gap: 3px;
+  background: var(--navy-deep);
+  padding: 4px;
+  border: 1px solid var(--line);
+  margin-bottom: 20px;
+}
+
+.sched-toggle-btn {
+  padding: 8px 20px;
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--steel);
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+  transition: color 0.15s, background 0.15s;
+}
+
+.sched-toggle-btn:hover { color: var(--chalk); }
+
+.sched-toggle-btn.active {
+  background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+  color: var(--navy-deep);
+}
+
+.sched-view { display: none; }
+.sched-view.active { display: block; }
+
+.sched-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.sched-controls label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  color: var(--steel);
+  text-transform: uppercase;
+}
+
+.sched-controls select {
+  appearance: none;
+  background: var(--navy-panel);
+  border: 1px solid var(--line-gold);
+  color: var(--chalk);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+  padding: 8px 32px 8px 14px;
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+  background-image: linear-gradient(45deg, transparent 50%, var(--steel) 50%), linear-gradient(135deg, var(--steel) 50%, transparent 50%);
+  background-position: calc(100% - 18px) center, calc(100% - 12px) center;
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+  cursor: pointer;
+}
+
+.sched-empty {
+  color: var(--steel);
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+}
+
+/* Weekly view */
+.week-game-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  background: var(--navy-panel);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--steel-dim);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  transition: background 0.15s;
+}
+
+.week-game-row:hover { background: #13233d; }
+
+.week-game-row.is-league {
+  border-left-color: var(--gold);
+  background: linear-gradient(90deg, rgba(242, 193, 78, 0.06), transparent 40%), var(--navy-panel);
+}
+
+.wg-teams {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--chalk);
+}
+
+.wg-team.won { color: var(--chalk); }
+.wg-team.lost { color: var(--steel); }
+
+.wg-at { color: var(--steel); font-size: 0.8rem; }
+
+.wg-score {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+}
+.wg-score.won { color: var(--gold); }
+.wg-score.lost { color: var(--steel); font-weight: 400; }
+
+.wg-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--steel);
+}
+
+.wg-league-tag {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--navy-deep);
+  background: var(--gold);
+  padding: 2px 8px;
+  text-transform: uppercase;
+}
+
+.wg-final-tag {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--chalk);
+  background: var(--steel-dim);
+  padding: 2px 8px;
+  text-transform: uppercase;
+}
+
+.sched-off-block {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.sched-off-label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  color: var(--steel);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.sched-off-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.sched-off-chip {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--chalk);
+  background: var(--navy);
+  border: 1px solid var(--line);
+  padding: 6px 10px;
+}
+
+.sched-off-chip i { color: var(--steel); font-style: normal; }
+
+/* By Team view */
+/* Logo | name+meta | record. Grid rather than wrapping flex, so a long
+   team or coach name reflows predictably instead of shoving the record
+   onto its own ragged line. */
+.team-sched-head {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  column-gap: 14px;
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 3px solid var(--team);
+}
+
+.tsh-text { min-width: 0; }
+
+.tsh-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 10px;
+  margin-top: 2px;
+}
+
+.team-sched-name {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.6rem;
+  line-height: 1.1;
+  text-transform: uppercase;
+  color: var(--chalk);
+  overflow-wrap: anywhere;
+}
+
+.team-sched-conf {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--steel);
+  text-transform: uppercase;
+}
+
+.team-sched-coach {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--steel);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.team-sched-coach::before { content: "Coach: "; }
+
+.team-sched-record {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--gold);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* 5 columns: week, vs/at, opponent, stadium, score. */
+.team-sched-row {
+  display: grid;
+  grid-template-columns: 88px 40px 1fr auto 72px;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 4px;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+}
+
+.team-sched-row.is-current {
+  background: linear-gradient(90deg, rgba(242, 193, 78, 0.10), transparent 60%);
+  box-shadow: inset 3px 0 0 var(--gold);
+}
+
+.team-sched-row.is-note {
+  grid-template-columns: 88px 1fr;
+  color: var(--steel);
+  font-style: italic;
+}
+
+.tsr-week {
+  white-space: nowrap;
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--chalk);
+  text-transform: uppercase;
+  font-size: 0.85rem;
+}
+
+.tsr-loc {
+  color: var(--steel);
+  font-size: 0.75rem;
+}
+
+.tsr-opp {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--chalk);
+  font-weight: 600;
+}
+
+.tsr-stadium {
+  color: var(--steel);
+  font-size: 0.8rem;
+  text-align: right;
+}
+
+.tsr-score {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-align: right;
+}
+
+.tsr-score.win { color: var(--win); }
+.tsr-score.loss { color: var(--crimson); }
+.tsr-score.tie { color: var(--steel); }
+.tsr-score.pending { color: var(--steel); }
+
+@media (max-width: 640px) {
+  /* Drop the stadium, never the score — the result is the whole
+     point of the row, and hiding it left phones with no results. */
+  .team-sched-row {
+    grid-template-columns: 64px 26px 1fr 60px;
+    column-gap: 10px;
+    font-size: 0.82rem;
+  }
+  .team-sched-row.is-note { grid-template-columns: 64px 1fr; }
+  .tsr-stadium { display: none; }
+
+  /* Keep the League tag on mobile — it's the whole point of the
+     view. Only the coach name inside it gets dropped, and the
+     opponent block wraps so the tag sits under a long name. */
+  .tsr-opp {
+    flex-wrap: wrap;
+    gap: 3px 6px;
+    align-items: baseline;
+  }
+  .tsr-opp .wg-league-tag { display: inline-block; font-size: 0.58rem; padding: 1px 5px; }
+  .lt-coach { display: none; }
+  .tsr-week { font-size: 0.75rem; }
+
+  /* Header stacks: logo beside the name, meta and record beneath. */
+  .team-sched-head {
+    grid-template-columns: auto 1fr;
+    row-gap: 8px;
+    align-items: center;
+  }
+  .team-sched-name { font-size: 1.2rem; }
+  .tsh-meta { font-size: 0.9em; }
+  .team-sched-record {
+    grid-column: 1 / -1;
+    justify-self: start;
+    font-size: 0.85rem;
+  }
+}
+
+/* Very narrow phones — the meta line gets its own row entirely. */
+@media (max-width: 400px) {
+  .team-sched-head { grid-template-columns: auto 1fr; column-gap: 10px; }
+  .team-sched-name { font-size: 1.05rem; }
+  .tsh-meta { flex-direction: column; gap: 2px; }
+  .team-sched-row { grid-template-columns: 56px 22px 1fr 54px; column-gap: 8px; }
+  .team-sched-row.is-note { grid-template-columns: 56px 1fr; }
+  .tm-xl { width: 38px; height: 38px; }
+}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+.site-footer {
+  text-align: center;
+  padding: 22px 24px 28px;
+  border-top: 1px solid var(--line);
+  background: linear-gradient(180deg, transparent, rgba(242, 193, 78, 0.03));
+}
+
+/* Status bar — every segment is computed, never hand-edited. */
+.footer-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--steel);
+}
+
+/* League name leads, current phase closes in gold. */
+.footer-status .fs-seg:first-child { color: var(--chalk); }
+.footer-status .fs-seg:last-child { color: var(--gold); }
+
+.fs-sep { color: var(--steel); }
+
+.footer-links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+.footer-links:empty { display: none; }
+
+.footer-links a {
+  color: var(--steel);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.footer-links a:hover { color: var(--gold); text-decoration: underline; }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 560px) {
+  main { padding: 24px 16px 64px; }
+  .jumbo-number { font-size: 4rem; }
+  .header-inner { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .hero { padding: 44px 18px 32px; }
+
+  /* Hiding .p-record drops the row to 3 items, matching 3 columns. */
+  .poll-list li { grid-template-columns: 28px 1fr 38px; gap: 8px; }
+  .tm-xl { width: 44px; height: 44px; }
+  .tm-xl .tm-fallback { font-size: 0.9rem; }
+  .poll-list .p-record { display: none; }
+
+  .tabs { width: 100%; }
+  .tab-btn { flex: 1; padding: 9px 4px; text-align: center; }
+
+  .game-grid { grid-template-columns: 1fr; }
+  .week-game-row { gap: 8px; }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; scroll-behavior: auto !important; }
+  .ticker-track { animation: none; }
+  .status-dot { animation: none; }
+  .game-card:hover, .roster-card:hover { transform: none; }
+}
+
+/* Focus visibility */
+button:focus-visible, a:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}

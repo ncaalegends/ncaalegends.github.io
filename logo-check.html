@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Logo Check — NCAA Legends</title>
+<meta name="robots" content="noindex">
+<style>
+  body { margin:0; padding:32px; background:#060b16; color:#f2f4f8;
+         font-family: system-ui, sans-serif; }
+  h1 { font-size:1.4rem; margin:0 0 6px; }
+  p  { color:#7f8ba3; font-size:0.9rem; margin:0 0 4px; max-width:60ch; line-height:1.5; }
+  code { background:#101d33; padding:1px 5px; }
+  .legend { margin:20px 0 24px; font-size:0.85rem; color:#7f8ba3; }
+  .dot { display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:6px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:14px; }
+  .card { background:#101d33; border:1px solid rgba(242,244,248,.09);
+          border-left:4px solid var(--team,#f2c14e); padding:14px; text-align:center; }
+  .card.unverified { border-top:2px solid #e0263a; }
+  .plate { width:82px; height:82px; margin:0 auto 10px; border-radius:50%;
+           background:rgba(242,244,248,.94); display:grid; place-items:center;
+           position:relative; overflow:hidden; }
+  .plate img { position:absolute; inset:0; width:100%; height:100%;
+               object-fit:contain; padding:12%; background:rgba(242,244,248,.94); }
+  .mono { font-weight:800; color:#060b16; font-size:1.2rem; }
+  /* Monogram only appears if the image failed and removed itself. */
+  .plate:has(img) .mono { visibility:hidden; }
+  .team { font-weight:700; font-size:1rem; }
+  .coach { color:#7f8ba3; font-size:0.8rem; margin-top:2px; }
+  .id { font-family:ui-monospace,monospace; font-size:0.75rem; margin-top:8px; color:#7f8ba3; }
+  .flag { display:inline-block; font-size:0.65rem; font-weight:700; letter-spacing:.06em;
+          padding:2px 7px; margin-top:8px; }
+  .flag.v { background:rgba(62,207,126,.15); color:#3ecf7e; }
+  .flag.u { background:rgba(224,38,58,.15); color:#e0263a; }
+  .fail { margin-top:24px; padding:12px; background:#101d33; border-left:3px solid #e0263a;
+          font-size:0.85rem; display:none; }
+</style>
+</head>
+<body>
+
+<h1>Logo check</h1>
+<p>
+  Every league team, pulled live from ESPN's CDN. A <strong>wrong</strong> ID
+  doesn't error — it quietly shows another school's logo — so this page exists
+  to be eyeballed. Confirm each mark matches the school name under it.
+</p>
+<p>
+  If one is wrong, look up the right ID and edit <code>espnId</code> in
+  <code>league-data.js</code>. If a mark shows letters instead of a logo, that
+  ID 404'd and the monogram fallback took over.
+</p>
+
+<div class="legend">
+  <span class="dot" style="background:#3ecf7e"></span>verified against ESPN's API
+  &nbsp;&nbsp;
+  <span class="dot" style="background:#e0263a"></span>unverified — needs your eyes
+</div>
+
+<div class="grid" id="grid"></div>
+<div class="fail" id="fail"></div>
+
+<script src="league-data.js"></script>
+<script>
+  // IDs confirmed by matching ESPN's own team list exactly.
+  const VERIFIED = new Set(["2579","228","194","38","201","61","25","333","57","97","130","2628","52","2567"]);
+  const BASE = "https://a.espncdn.com/i/teamlogos/ncaa/500/";
+
+  const mono = (n) => {
+    const w = String(n).trim().split(/\s+/);
+    return w.length === 1 ? w[0].slice(0,3).toUpperCase()
+                          : w.slice(0,3).map(x => x[0]).join("").toUpperCase();
+  };
+
+  const failed = [];
+  document.getElementById("grid").innerHTML = [...COACHES]
+    .sort((a,b) => a.team.localeCompare(b.team))
+    .map(c => {
+      const ok = VERIFIED.has(String(c.espnId));
+      return `
+      <div class="card ${ok ? "" : "unverified"}" style="--team:${c.color}">
+        <div class="plate">
+          <span class="mono">${mono(c.team)}</span>
+          <img src="${BASE}${c.espnId}.png" alt=""
+               onerror="this.remove();window.__logoFail(${JSON.stringify(c.team)},'${c.espnId}')">
+        </div>
+        <div class="team">${c.team}</div>
+        <div class="coach">${c.name}</div>
+        <div class="id">espnId ${c.espnId}</div>
+        <span class="flag ${ok ? "v" : "u"}">${ok ? "VERIFIED" : "CHECK ME"}</span>
+      </div>`;
+    }).join("");
+
+  window.__logoFail = (team, id) => {
+    failed.push(`${team} (id ${id})`);
+    const el = document.getElementById("fail");
+    el.style.display = "block";
+    el.innerHTML = "<strong>Logos that failed to load — bad or missing ID:</strong><br>"
+                 + failed.join("<br>");
+  };
+</script>
+</body>
+</html>
