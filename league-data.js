@@ -20,12 +20,22 @@
    set it to the week number (0-15) you're currently playing.
    That one value drives the Home tab, the "current week" flag on
    the schedule, and which results count as recent.
+
+   nextAdvance is the only real-world date on the site — it's a
+   scheduling deadline for coaches, not part of season chronology.
    ------------------------------------------------------------ */
 const SEASON = {
-  currentWeek: "PRESEASON",
+  currentWeek: 0,
 
   // Shown in the hero. Update as the league moves through phases.
-  statusLine: "PRE-SEASON — COACHES SIGNING UP",
+  statusLine: "WEEK 0 — SEASON KICKOFF",
+
+  /* ADVANCE DEADLINE — the one place real-world time appears.
+     League rule: the next advance happens no later than 6:00 PM EDT
+     three days after the last advance. Update this every time you
+     advance; it's plain text, so write it however reads best.
+     Set it to "" to hide the countdown line entirely. */
+  nextAdvance: "Wednesday, July 22 · 6:00 PM EDT",
 };
 
 /* ------------------------------------------------------------

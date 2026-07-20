@@ -263,6 +263,25 @@ function renderLaunchStatus() {
   if (el) el.textContent = SEASON.statusLine || "";
 }
 
+/* Advance deadline. Hidden entirely when nextAdvance is blank or
+   missing, so an empty value degrades quietly instead of showing
+   a dangling label. */
+function renderNextAdvance() {
+  const el = document.getElementById("next-advance");
+  if (!el) return;
+
+  const when = String(SEASON.nextAdvance ?? "").trim();
+  if (!when) {
+    el.hidden = true;
+    return;
+  }
+
+  el.hidden = false;
+  el.innerHTML =
+    `<span class="advance-label">NEXT ADVANCE</span>` +
+    `<span class="advance-when">${esc(when)}</span>`;
+}
+
 function renderJumbotron() {
   const frame = document.getElementById("jumbo-frame");
   const sub = document.getElementById("week-summary");
@@ -883,6 +902,7 @@ function init() {
 
   renderLaunchStatus();
   renderJumbotron();
+  renderNextAdvance();
   renderThisWeekGames();
   renderRecentResults();
   renderRankings();
