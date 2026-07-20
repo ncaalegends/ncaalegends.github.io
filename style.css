@@ -801,16 +801,6 @@ main {
   box-shadow: 0 0 0 3px var(--team), 0 0 0 7px color-mix(in srgb, var(--team) 30%, transparent);
 }
 
-/* At-a-glance: has this coach turned in their schedule screenshots? */
-.roster-card .r-sched {
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-.roster-card .r-sched.in { color: var(--win); }
-.roster-card .r-sched.out { color: var(--steel); }
-
 .roster-card .r-meta {
   display: flex;
   align-items: center;

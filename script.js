@@ -485,9 +485,6 @@ function renderRankings() {
    ROSTER
    ------------------------------------------------------------ */
 function renderRoster() {
-  const tagEl = document.getElementById("roster-count-tag");
-  if (tagEl) tagEl.textContent = `${ROSTER.length} SIGNED UP`;
-
   const grid = document.getElementById("roster-grid");
   if (!grid) return;
 
@@ -496,20 +493,16 @@ function renderRoster() {
   grid.innerHTML = sorted
     .map((c) => {
       const url = safeUrl(c.twitch);
-      const hasSchedule = SCHEDULES.some((t) => rosterKeyFor(t.team) === rosterKeyFor(c.team));
       const color = safeHex(c.color);
       return `
       <article class="roster-card"${color ? ` style="--team:${color}"` : ""}>
         ${teamMarkHtml(c.team, "lg")}
         <div class="r-team">${esc(c.team)}</div>
         <div class="r-coach">${esc(c.name)}</div>
-        ${/* Conference sits with the schedule status as a quiet meta
-             line rather than competing with the logo up top. */ ""}
+        ${/* Conference sits in a quiet meta line rather than
+             competing with the logo up top. */ ""}
         <div class="r-meta">
           ${c.conference ? `<span class="r-conf">${esc(c.conference)}</span>` : ""}
-          <span class="r-sched ${hasSchedule ? "in" : "out"}">
-            ${hasSchedule ? "Schedule in" : "Schedule pending"}
-          </span>
         </div>
         ${
           url
@@ -563,12 +556,6 @@ function populateTeamSelect() {
     .map((t) => `<option value="${esc(t.team)}">${esc(t.team)}</option>`)
     .join("");
   sel.addEventListener("change", renderTeamSchedule);
-}
-
-function renderScheduleCoverage() {
-  const tag = document.getElementById("schedule-coverage-tag");
-  if (!tag) return;
-  tag.textContent = `${SCHEDULES.length} OF ${ROSTER.length} TEAMS IN`;
 }
 
 function renderWeeklyGames() {
@@ -711,7 +698,6 @@ function initSchedule() {
   setupScheduleToggle();
   populateWeekSelect();
   populateTeamSelect();
-  renderScheduleCoverage();
   renderWeeklyGames();
   renderTeamSchedule();
 }

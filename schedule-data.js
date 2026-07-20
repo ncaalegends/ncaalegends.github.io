@@ -220,7 +220,7 @@ const TEAM_SCHEDULES = [
       { week: 6, opponent: "Florida", location: "at", stadium: "Ben Hill Griffin Stadium" },
       { week: 7, note: "BYE" },
       { week: 8, opponent: "Tennessee", location: "vs", stadium: "Williams-Brice Stadium" },
-      { week: 9, opponent: "Oklahoma", location: "at", stadium: "Gaylord-Oklahoma Memorial" },
+      { week: 9, opponent: "Oklahoma", location: "at", stadium: "Gaylord Family Oklahoma Memorial Stadium" },
       { week: 10, opponent: "Texas A&M", location: "vs", stadium: "Williams-Brice Stadium" },
       { week: 11, opponent: "Arkansas", location: "at", stadium: "DW Reynolds Razorback Stadium" },
       { week: 12, opponent: "Georgia", location: "vs", stadium: "Williams-Brice Stadium" },
@@ -498,6 +498,76 @@ const TEAM_SCHEDULES = [
       { week: 15, note: "SEC Championship", stadium: "Mercedes-Benz Stadium" },
     ],
   },
+  {
+    team: "Oklahoma",
+    conference: "SEC",
+    weeks: [
+      { week: 0, note: "BYE" },
+      { week: 1, opponent: "UTEP", location: "vs", stadium: "Gaylord Family Oklahoma Memorial Stadium" },
+      { week: 2, opponent: "Michigan", location: "at", stadium: "Michigan Stadium" },
+      { week: 3, opponent: "New Mexico", location: "vs", stadium: "Gaylord Family Oklahoma Memorial Stadium" },
+      { week: 4, opponent: "Georgia", location: "at", stadium: "Sanford Stadium" },
+      { week: 5, note: "BYE" },
+      // Red River rivalry - listed "vs" on Oklahoma's screen but played
+      // at the neutral-site Cotton Bowl, which is what Texas's file says.
+      { week: 6, opponent: "Texas", location: "vs", stadium: "Cotton Bowl" },
+      { week: 7, opponent: "Kentucky", location: "vs", stadium: "Gaylord Family Oklahoma Memorial Stadium" },
+      { week: 8, opponent: "Mississippi State", location: "at", stadium: "Davis Wade Stadium" },
+      { week: 9, opponent: "South Carolina", location: "vs", stadium: "Gaylord Family Oklahoma Memorial Stadium" },
+      { week: 10, opponent: "Florida", location: "at", stadium: "Ben Hill Griffin Stadium" },
+      { week: 11, opponent: "Ole Miss", location: "vs", stadium: "Gaylord Family Oklahoma Memorial Stadium" },
+      { week: 12, opponent: "Texas A&M", location: "vs", stadium: "Gaylord Family Oklahoma Memorial Stadium" },
+      { week: 13, opponent: "Missouri", location: "at", stadium: "Faurot Field at Memorial Stadium" },
+      { week: 14, note: "Army-Navy Week" },
+      { week: 15, note: "SEC Championship", stadium: "Mercedes-Benz Stadium" },
+    ],
+  },
+  {
+    team: "Alabama",
+    conference: "SEC",
+    weeks: [
+      { week: 0, note: "BYE" },
+      { week: 1, opponent: "East Carolina", location: "vs", stadium: "Saban Field at Bryant-Denny Stadium" },
+      { week: 2, opponent: "Kentucky", location: "at", stadium: "Kroger Field" },
+      { week: 3, opponent: "Florida State", location: "vs", stadium: "Saban Field at Bryant-Denny Stadium" },
+      { week: 4, opponent: "South Carolina", location: "vs", stadium: "Saban Field at Bryant-Denny Stadium" },
+      { week: 5, opponent: "Mississippi State", location: "at", stadium: "Davis Wade Stadium" },
+      { week: 6, opponent: "Georgia", location: "vs", stadium: "Saban Field at Bryant-Denny Stadium" },
+      { week: 7, opponent: "Tennessee", location: "at", stadium: "Neyland Stadium" },
+      { week: 8, opponent: "Texas A&M", location: "vs", stadium: "Saban Field at Bryant-Denny Stadium" },
+      { week: 9, note: "BYE" },
+      { week: 10, opponent: "LSU", location: "at", stadium: "Tiger Stadium" },
+      { week: 11, opponent: "Vanderbilt", location: "at", stadium: "FirstBank Stadium" },
+      { week: 12, opponent: "FCS Southeast", location: "vs", stadium: "Saban Field at Bryant-Denny Stadium" },
+      { week: 13, opponent: "Auburn", location: "vs", stadium: "Saban Field at Bryant-Denny Stadium" },
+      { week: 14, note: "Army-Navy Week" },
+      { week: 15, note: "SEC Championship", stadium: "Mercedes-Benz Stadium" },
+    ],
+  },
+  {
+    team: "Louisville",
+    conference: "ACC",
+    weeks: [
+      { week: 0, note: "BYE" },
+      // Neutral site - listed "vs" on both teams' screens but played at
+      // Nissan Stadium in Nashville, which matches Ole Miss's file.
+      { week: 1, opponent: "Ole Miss", location: "vs", stadium: "Nissan Stadium" },
+      { week: 2, opponent: "FCS Southeast", location: "vs", stadium: "L&N Stadium" },
+      { week: 3, opponent: "SMU", location: "vs", stadium: "L&N Stadium" },
+      { week: 4, opponent: "Wake Forest", location: "vs", stadium: "L&N Stadium" },
+      { week: 5, opponent: "NC State", location: "at", stadium: "Carter-Finley Stadium" },
+      { week: 6, opponent: "Florida State", location: "vs", stadium: "L&N Stadium" },
+      { week: 7, opponent: "Syracuse", location: "at", stadium: "JMA Wireless Dome" },
+      { week: 8, note: "BYE" },
+      { week: 9, opponent: "Stanford", location: "vs", stadium: "L&N Stadium" },
+      { week: 10, opponent: "Georgia Tech", location: "at", stadium: "Bobby Dodd Stadium" },
+      { week: 11, opponent: "North Carolina", location: "at", stadium: "Kenan Stadium" },
+      { week: 12, opponent: "Pittsburgh", location: "vs", stadium: "L&N Stadium" },
+      { week: 13, opponent: "Kentucky", location: "at", stadium: "Kroger Field" },
+      { week: 14, note: "Army-Navy Week" },
+      { week: 15, note: "ACC Championship", stadium: "Bank of America Stadium" },
+    ],
+  },
 ];
 
 /* Schedule-team-name -> roster-team-name, for the handful of cases
@@ -507,5 +577,3 @@ const SCHEDULE_TEAM_ALIASES = {
   "California": "Cal",
   "Florida State": "FSU",
 };
-
-// Touched to retrigger GitHub Pages deployment (previous deploy hit a 503).
