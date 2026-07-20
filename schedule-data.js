@@ -449,6 +449,55 @@ const TEAM_SCHEDULES = [
       { week: 15, note: "ACC Championship", stadium: "Bank of America Stadium" },
     ],
   },
+  {
+    team: "Notre Dame",
+    conference: "Independent",
+    weeks: [
+      { week: 0, note: "BYE" },
+      { week: 1, opponent: "Wisconsin", location: "vs", stadium: "Notre Dame Stadium" },
+      { week: 2, opponent: "Rice", location: "vs", stadium: "Notre Dame Stadium" },
+      { week: 3, opponent: "Michigan State", location: "vs", stadium: "Notre Dame Stadium" },
+      { week: 4, opponent: "Purdue", location: "at", stadium: "Ross-Ade Stadium" },
+      { week: 5, opponent: "North Carolina", location: "at", stadium: "Kenan Stadium" },
+      { week: 6, opponent: "Stanford", location: "vs", stadium: "Notre Dame Stadium" },
+      { week: 7, opponent: "BYU", location: "at", stadium: "LaVell Edwards Stadium" },
+      { week: 8, note: "BYE" },
+      { week: 9, opponent: "Navy", location: "at", stadium: "Gillette Stadium" },
+      { week: 10, opponent: "Miami", location: "vs", stadium: "Notre Dame Stadium" },
+      { week: 11, opponent: "Boston College", location: "vs", stadium: "Notre Dame Stadium" },
+      { week: 12, opponent: "SMU", location: "vs", stadium: "Notre Dame Stadium" },
+      { week: 13, opponent: "Syracuse", location: "at", stadium: "JMA Wireless Dome" },
+      { week: 14, note: "Army-Navy Week" },
+      // Week 15 was not visible in the screenshots. Notre Dame is an
+      // independent so it plays no conference championship - confirm
+      // whether the game shows OPEN here and adjust if needed.
+      { week: 15, note: "No conference championship (Independent)" },
+    ],
+  },
+  {
+    team: "Ole Miss",
+    conference: "SEC",
+    weeks: [
+      { week: 0, note: "BYE" },
+      // Neutral site - listed "vs" in-game but played at Nissan Stadium
+      // in Nashville, not Vaught-Hemingway.
+      { week: 1, opponent: "Louisville", location: "vs", stadium: "Nissan Stadium" },
+      { week: 2, opponent: "Charlotte", location: "vs", stadium: "Vaught-Hemingway Stadium" },
+      { week: 3, opponent: "LSU", location: "vs", stadium: "Vaught-Hemingway Stadium" },
+      { week: 4, opponent: "Florida", location: "at", stadium: "Ben Hill Griffin Stadium" },
+      { week: 5, note: "BYE" },
+      { week: 6, opponent: "Vanderbilt", location: "at", stadium: "FirstBank Stadium" },
+      { week: 7, opponent: "Missouri", location: "vs", stadium: "Vaught-Hemingway Stadium" },
+      { week: 8, opponent: "Texas", location: "at", stadium: "Texas Memorial Stadium" },
+      { week: 9, opponent: "Auburn", location: "vs", stadium: "Vaught-Hemingway Stadium" },
+      { week: 10, opponent: "Georgia", location: "vs", stadium: "Vaught-Hemingway Stadium" },
+      { week: 11, opponent: "Oklahoma", location: "at", stadium: "Gaylord Family Oklahoma Memorial Stadium" },
+      { week: 12, opponent: "FCS Southeast", location: "vs", stadium: "Vaught-Hemingway Stadium" },
+      { week: 13, opponent: "Mississippi St", location: "vs", stadium: "Vaught-Hemingway Stadium" },
+      { week: 14, note: "Army-Navy Week" },
+      { week: 15, note: "SEC Championship", stadium: "Mercedes-Benz Stadium" },
+    ],
+  },
 ];
 
 /* Schedule-team-name -> roster-team-name, for the handful of cases
