@@ -954,8 +954,9 @@ main {
 }
 
 /* Flex column so the Twitch button can pin to the bottom — otherwise
-   the 21 cards without a link leave a button-sized void and the row
-   height jumps around. */
+   cards without a link leave a button-sized void and the row height
+   jumps around. (Deliberately not stating how many lack links: that
+   number changes every time a coach sends one in.) */
 .roster-card {
   display: flex;
   flex-direction: column;
@@ -1041,6 +1042,44 @@ main {
   font-family: var(--font-mono);
   font-size: 0.8rem;
   color: var(--steel);
+}
+
+/* ------------------------------------------------------------
+   LIVE BADGE
+   Sits in .r-meta beside the conference chip. Same height as
+   .r-conf on purpose — it appears and disappears while the page
+   is open, and matching the chip means no reflow when it does.
+   ------------------------------------------------------------ */
+.live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #fff;
+  background: #e02b3c;
+  padding: 2px 7px;
+}
+
+.live-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #fff;
+  animation: live-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
+}
+
+/* A live card earns a red edge — the badge alone is easy to miss in
+   a grid of 24. */
+.roster-card.is-live {
+  border-color: rgba(224, 43, 60, 0.55);
 }
 
 /* ============================================================
@@ -1477,6 +1516,7 @@ main {
   * { transition: none !important; scroll-behavior: auto !important; }
   .ticker-track { animation: none; }
   .status-dot { animation: none; }
+  .live-dot { animation: none; }
   .game-card:hover, .roster-card:hover { transform: none; }
 }
 

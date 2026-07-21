@@ -501,6 +501,84 @@ function renderRankings() {
 /* ------------------------------------------------------------
    ROSTER
    ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   LIVE STATUS
+   ------------------------------------------------------------
+   Filled in by a background fetch after first paint. The roster
+   renders immediately without it, then re-renders once the answer
+   arrives — so a slow or dead Worker costs nothing but the badges.
+   ------------------------------------------------------------ */
+const LIVE_NOW = new Set();
+
+const LIVE_CFG =
+  typeof LIVE_STATUS !== "undefined"
+    ? LIVE_STATUS
+    : { endpoint: "", refreshSeconds: 120 };
+
+/* The channel name out of a Twitch URL — the last path segment.
+   This has to come from the URL rather than the coach name: plenty
+   of handles don't match (Miles streams as kyrvach, Woody as
+   mldwoody), so deriving from the name would silently mark the
+   wrong people live. */
+function twitchLogin(url) {
+  const u = safeUrl(url);
+  if (!u) return "";
+  try {
+    const seg = new URL(u).pathname.split("/").filter(Boolean)[0] ?? "";
+    return /^[a-z0-9_]{3,25}$/i.test(seg) ? seg.toLowerCase() : "";
+  } catch {
+    return "";
+  }
+}
+
+const isLive = (coach) => {
+  const login = twitchLogin(coach.twitch);
+  return login !== "" && LIVE_NOW.has(login);
+};
+
+async function refreshLiveStatus() {
+  const endpoint = safeUrl(LIVE_CFG.endpoint);
+  if (!endpoint) return;
+
+  const logins = [
+    ...new Set(ROSTER.map((c) => twitchLogin(c.twitch)).filter(Boolean)),
+  ].sort();
+  if (logins.length === 0) return;
+
+  try {
+    const res = await fetch(`${endpoint}?logins=${logins.join(",")}`);
+    if (!res.ok) return;
+
+    const data = await res.json();
+    if (!Array.isArray(data.live)) return;
+
+    LIVE_NOW.clear();
+    data.live.forEach((l) => LIVE_NOW.add(String(l).toLowerCase()));
+    renderRoster();
+  } catch {
+    /* Offline, blocked, Worker down — leave the last known state
+       alone and try again on the next tick. Never surface this to
+       the page; a missing badge is not worth an error message. */
+  }
+}
+
+function initLiveStatus() {
+  if (!safeUrl(LIVE_CFG.endpoint)) return;
+
+  refreshLiveStatus();
+
+  const secs = Number(LIVE_CFG.refreshSeconds) || 120;
+  setInterval(() => {
+    // Don't poll a tab nobody is looking at.
+    if (document.visibilityState === "visible") refreshLiveStatus();
+  }, Math.max(30, secs) * 1000);
+
+  // Coming back to a backgrounded tab should show current reality.
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") refreshLiveStatus();
+  });
+}
+
 function renderRoster() {
   const grid = document.getElementById("roster-grid");
   if (!grid) return;
@@ -511,15 +589,19 @@ function renderRoster() {
     .map((c) => {
       const url = safeUrl(c.twitch);
       const color = safeHex(c.color);
+      const live = isLive(c);
       return `
-      <article class="roster-card"${color ? ` style="--team:${color}"` : ""}>
+      <article class="roster-card${live ? " is-live" : ""}"${color ? ` style="--team:${color}"` : ""}>
         ${teamMarkHtml(c.team, "lg")}
         <div class="r-team">${esc(c.team)}</div>
         <div class="r-coach">${esc(c.name)}</div>
         ${/* Conference sits in a quiet meta line rather than
-             competing with the logo up top. */ ""}
+             competing with the logo up top. The LIVE badge joins it
+             there so it can't shift the card's height when it
+             appears mid-session. */ ""}
         <div class="r-meta">
           ${c.conference ? `<span class="r-conf">${esc(c.conference)}</span>` : ""}
+          ${live ? `<span class="live-badge"><span class="live-dot"></span>LIVE</span>` : ""}
         </div>
         ${
           url
@@ -1001,6 +1083,7 @@ function init() {
   renderRecentResults();
   renderRankings();
   renderRoster();
+  initLiveStatus();
   initSchedule();
   renderTicker();
   renderFooter();

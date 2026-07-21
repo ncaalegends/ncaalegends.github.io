@@ -63,6 +63,27 @@ const SITE_LEAGUES = [
   { dir: "1star", label: "1-Star Dynasty", accent: "#f2894e" },
 ];
 
+/* ------------------------------------------------------------
+   LIVE STATUS
+   ------------------------------------------------------------
+   The Cloudflare Worker that answers "who is streaming right now".
+   Source and setup steps are in worker/ — the Twitch client secret
+   lives in the Worker's environment, never here, because this file
+   is served publicly.
+
+   Leave `endpoint` empty to switch the feature off: script.js skips
+   the fetch entirely and roster cards render exactly as they did
+   before live status existed.
+
+   refreshSeconds only controls how often an already-open tab
+   re-checks. The Worker caches for 60s regardless, so setting this
+   lower than that just returns the same cached answer.
+   ------------------------------------------------------------ */
+const LIVE_STATUS = {
+  endpoint: "https://ncaa-legends-live.westfall-105.workers.dev",
+  refreshSeconds: 120,
+};
+
 /* Variant spelling -> canonical key, for cases normalisation alone
    can't resolve (a coach who changed handles, say). Both sides are
    compared normalised, so casing here doesn't matter.
