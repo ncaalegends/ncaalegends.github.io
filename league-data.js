@@ -28,14 +28,14 @@ const SEASON = {
   currentWeek: 0,
 
   // Shown in the hero. Update as the league moves through phases.
-  statusLine: "WEEK 0 — SEASON KICKOFF",
+  statusLine: "WEEK 0",
 
   /* ADVANCE DEADLINE — the one place real-world time appears.
      League rule: the next advance happens no later than 6:00 PM EDT
      three days after the last advance. Update this every time you
      advance; it's plain text, so write it however reads best.
      Set it to "" to hide the countdown line entirely. */
-  nextAdvance: "Wednesday, July 22 · 6:00 PM EDT",
+  nextAdvance: "Wednesday, July 22 - 6:00 PM EDT",
 };
 
 /* ------------------------------------------------------------

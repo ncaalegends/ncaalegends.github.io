@@ -5,3 +5,6 @@ desktop.ini
 *.swp
 .vscode/
 .idea/
+
+# Discord webhook URL — secret, never commit
+tools/config.json
