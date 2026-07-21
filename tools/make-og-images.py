@@ -11,7 +11,8 @@ link previews as the main dynasty.
     python3 tools/make-og-images.py
 
 Writes:
-    og-image.png          main   (gold)
+    og-image.png          community — the landing page (gold, no league name)
+    main/og-image.png     main   (gold)
     3star/og-image.png    3-star (ice blue)
     1star/og-image.png    1-star (copper)
 
@@ -45,10 +46,22 @@ MONO_FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf"
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 
-LEAGUES = [
-    ("",      "MAIN DYNASTY",   (242, 193, 78)),
-    ("3star", "3-STAR DYNASTY", (78, 195, 242)),
-    ("1star", "1-STAR DYNASTY", (242, 137, 78)),
+GOLD = (242, 193, 78)
+ICE = (78, 195, 242)
+COPPER = (242, 137, 78)
+
+# (folder, tagline, subline, accent, chips)
+#
+# The root card is the community one — it fronts the landing page,
+# which is about all three dynasties rather than any single league.
+# It keeps the gold identity but carries no league name, and shows
+# the three accents as chips so it reads as the set rather than as
+# the main dynasty wearing a different subtitle.
+CARDS = [
+    ("",      "THREE DYNASTIES", "MAIN  ·  3-STAR  ·  1-STAR",            GOLD,   [GOLD, ICE, COPPER]),
+    ("main",  "MAIN DYNASTY",    "SCHEDULE  ·  POWER RANKINGS  ·  ROSTER", GOLD,   []),
+    ("3star", "3-STAR DYNASTY",  "SCHEDULE  ·  POWER RANKINGS  ·  ROSTER", ICE,    []),
+    ("1star", "1-STAR DYNASTY",  "SCHEDULE  ·  POWER RANKINGS  ·  ROSTER", COPPER, []),
 ]
 
 
@@ -56,7 +69,7 @@ def blend(c1, c2, t):
     return tuple(round(a + (b - a) * t) for a, b in zip(c1, c2))
 
 
-def build(tag, accent):
+def build(tag, subline, accent, chips):
     img = Image.new("RGB", (W, H), NAVY_DEEP)
     d = ImageDraw.Draw(img, "RGBA")
 
@@ -117,7 +130,13 @@ def build(tag, accent):
     d.text((210, 310), "LEGENDS", font=f_legends, fill=accent)
 
     d.text((212, 466), tag, font=f_tag, fill=STEEL)
-    d.text((212, 508), "SCHEDULE  ·  POWER RANKINGS  ·  ROSTER", font=f_sub, fill=STEEL)
+    d.text((212, 508), subline, font=f_sub, fill=STEEL)
+
+    # Community card only: one angled chip per league, in league order,
+    # so the card shows the whole set at a glance.
+    for i, c in enumerate(chips):
+        x = 212 + i * 58
+        d.polygon([(x + 8, 560), (x + 46, 560), (x + 38, 574), (x, 574)], fill=c)
 
     return img
 
@@ -133,14 +152,17 @@ def main():
     # the original.
     include_main = "--include-main" in sys.argv
 
-    for d_name, tag, accent in LEAGUES:
-        if not d_name and not include_main:
-            print("  og-image.png             skipped (use --include-main to rebuild)")
+    for d_name, tag, subline, accent, chips in CARDS:
+        # main/og-image.png predates this script and was made with real
+        # Oswald. Rebuilding it here would quietly swap in the
+        # substitute font, so it's left alone unless asked.
+        if d_name == "main" and not include_main:
+            print("  main/og-image.png        skipped (use --include-main to rebuild)")
             continue
         out_dir = os.path.join(ROOT, d_name) if d_name else ROOT
         os.makedirs(out_dir, exist_ok=True)
         out = os.path.join(out_dir, "og-image.png")
-        build(tag, accent).save(out, optimize=True)
+        build(tag, subline, accent, chips).save(out, optimize=True)
         size = os.path.getsize(out) / 1024
         print(f"  {out.replace(ROOT + os.sep, ''):24} {size:6.1f} KB  {tag}")
 
