@@ -72,7 +72,7 @@ const COACHES = [
   { name: "Trick whitey",    team: "Maryland",           conference: "B1G", color: "#FFD24D", twitch: "https://www.twitch.tv/trickwhitey44", espnId: "120" },
   { name: "Texan_hog",       team: "North Dakota State", conference: "SEC", color: "#35B86A", twitch: "https://www.twitch.tv/texan_hog08", espnId: "2449" },
   { name: "RonRicoFSU",      team: "Colorado",           conference: "XII", color: "#CFB87C", twitch: "https://www.twitch.tv/ronricofsu", espnId: "38" },
-  { name: "EHDC12",          team: "North Carolina",     conference: "ACC", color: "#7BAFD4", twitch: "", espnId: "153" },
+  { name: "EHDC12",          team: "North Carolina",     conference: "ACC", color: "#7BAFD4", twitch: "https://www.twitch.tv/DCGQManOfTheYear7", espnId: "153" },
   { name: "wacky9speedy",    team: "Charlotte",          conference: "SEC", color: "#4FAE84", twitch: "https://www.twitch.tv/wacky9speedy", espnId: "2429" },
   { name: "EYEDONTPULL19",   team: "UCF",                conference: "XII", color: "#E0C158", twitch: "", espnId: "2116" },
   { name: "CoachLawless",    team: "Rutgers",            conference: "B1G", color: "#E03A57", twitch: "https://www.twitch.tv/coachlawless", espnId: "164" },
