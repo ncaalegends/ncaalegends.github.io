@@ -3,6 +3,25 @@
 Commissioner tooling. Nothing in here ships to the site — GitHub Pages
 serves the root, and this folder is just scripts you run locally.
 
+## preview.cmd / serve.js
+
+Double-click `preview.cmd` to view the site locally at
+`http://localhost:8080`.
+
+**Don't open `index.html` directly from the folder.** It looks like it
+should work and then fails in two confusing ways:
+
+- `file://` has no directory index, so clicking a league on the landing
+  page shows a *folder listing* instead of the page
+- `fetch()` is blocked on `file://` origins, so the landing page can't
+  read each league's data and every card reads "Unavailable".
+  `logo-check.html` breaks identically.
+
+Both are artifacts of opening files off the disk, not site bugs — over
+HTTP they behave correctly, which is what this server gives you.
+
+Node's built-ins only. Nothing to install, no network needed.
+
 ## advance.js
 
 Does both halves of a week advance in one command: updates the site's
@@ -10,7 +29,29 @@ season state and announces the new week in Discord.
 
 ```
 node tools/advance.js --week 5 --next "Sunday, July 26 · 6:00 PM EDT"
+node tools/advance.js --league 3star --week 2 --no-post
 ```
+
+### Leagues
+
+`--league` picks which folder to operate on. Defaults to `main`.
+
+| Slug | Folder | Discord |
+|---|---|---|
+| `main` | `/main/` | posts to the main channel |
+| `3star` | `/3star/` | no webhook — use `--no-post` |
+| `1star` | `/1star/` | no webhook — use `--no-post` |
+
+The 1-star and 3-star dynasties are run by other commissioners who
+haven't opted into the automation. Their webhooks are blank in
+`config.json`, and the script refuses to post rather than silently
+doing nothing. `advance.cmd` passes `--no-post` for them automatically.
+
+Discord IDs in `config.json` are shared across all three leagues,
+keyed by coach name — a person has one Discord account regardless of
+how many dynasties they're in. Coaches who only play 1-star or 3-star
+have no ID yet and will show as bold text instead of a ping, which the
+script warns about on every run.
 
 What it does:
 

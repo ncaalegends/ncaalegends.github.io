@@ -108,7 +108,7 @@ const COACHES = [
   { name: "EYEDONTPULL19",   team: "SMU",                          conference: "ACC", color: "#5A6FD1", twitch: "", espnId: "2567" },
   { name: "wacky9speedy",    team: "Miami",                        conference: "ACC", color: "#F47321", twitch: "", espnId: "2390" },  // UNVERIFIED — confirm via logo-check.html
   { name: "BluBus",          team: "USC",                          conference: "B1G", color: "#FFC72C", twitch: "", espnId: "30" },  // UNVERIFIED — confirm via logo-check.html
-  { name: "Brian",           team: "Notre Dame",                   conference: "IND", color: "#C99700", twitch: "", espnId: "87" },   // UNVERIFIED — confirm via logo-check.html
+  { name: "Brian52682",    team: "Notre Dame",                   conference: "IND", color: "#C99700", twitch: "", espnId: "87" },   // UNVERIFIED — confirm via logo-check.html
   { name: "II_PROGGY_II",    team: "Ole Miss",                     conference: "SEC", color: "#CE1126", twitch: "", espnId: "145" },  // UNVERIFIED — confirm via logo-check.html
 ];
 

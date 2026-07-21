@@ -56,11 +56,26 @@
   <span class="dot" style="background:#e0263a"></span>unverified — needs your eyes
 </div>
 
+<p class="legend" id="league-switch"></p>
+
 <div class="grid" id="grid"></div>
 <div class="fail" id="fail"></div>
 
-<script src="league-data.js"></script>
 <script>
+  /* Which league to check, from ?league= in the URL. Defaults to
+     main. The 1-star dynasty uses local logo files rather than ESPN
+     IDs, so it's excluded — there's nothing here to verify for it. */
+  const CHECKABLE = ["main", "3star"];
+  const slug = CHECKABLE.includes(new URLSearchParams(location.search).get("league"))
+    ? new URLSearchParams(location.search).get("league")
+    : "main";
+
+  document.getElementById("league-switch").innerHTML =
+    CHECKABLE.map((s) =>
+      s === slug ? `<strong>${s}</strong>` : `<a href="?league=${s}">${s}</a>`
+    ).join(" &nbsp;·&nbsp; ") +
+    ' &nbsp;·&nbsp; <span style="opacity:.6">1star uses local logo files, nothing to verify</span>';
+
   // IDs confirmed by matching ESPN's own team list exactly.
   const VERIFIED = new Set(["2579","228","194","38","201","61","25","333","57","97","130","2628","52","2567"]);
   const BASE = "https://a.espncdn.com/i/teamlogos/ncaa/500/";
@@ -72,6 +87,22 @@
   };
 
   const failed = [];
+
+  /* Data files are plain top-level `const` declarations, not modules.
+     Fetching the text and running it in a Function body gives it its
+     own scope, so switching leagues can't collide with anything. */
+  async function loadCoaches(slug) {
+    const res = await fetch(`${slug}/league-data.js`, { cache: "no-cache" });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return new Function(`${await res.text()}\nreturn COACHES;`)();
+  }
+
+  loadCoaches(slug).then(render).catch((e) => {
+    document.getElementById("grid").innerHTML =
+      `<p style="opacity:.7">Couldn't load ${slug}/league-data.js — ${e.message}</p>`;
+  });
+
+  function render(COACHES) {
   document.getElementById("grid").innerHTML = [...COACHES]
     .sort((a,b) => a.team.localeCompare(b.team))
     .map(c => {
@@ -89,6 +120,7 @@
         <span class="flag ${ok ? "v" : "u"}">${ok ? "VERIFIED" : "CHECK ME"}</span>
       </div>`;
     }).join("");
+  }
 
   window.__logoFail = (team, id) => {
     failed.push(`${team} (id ${id})`);

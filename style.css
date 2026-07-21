@@ -35,6 +35,9 @@
   --line: rgba(242, 244, 248, 0.09);
   --line-gold: rgba(242, 193, 78, 0.35);
 
+  /* Ambient wash behind the page, tinted by the league accent. */
+  --accent-glow: rgba(242, 193, 78, 0.07);
+
   --font-display: 'Oswald', sans-serif;
   --font-body: 'Work Sans', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
@@ -42,12 +45,50 @@
   --cut: 14px; /* diagonal clip amount used across panels */
 }
 
+/* ============================================================
+   PER-LEAGUE ACCENTS
+   ------------------------------------------------------------
+   The three leagues share this entire stylesheet. The ONLY visual
+   difference between them is the accent ramp below, swapped by the
+   data-league attribute on <body>.
+
+   The variables keep their "gold" names on purpose. Every rule in
+   this file already reads --gold / --gold-bright / --gold-dim /
+   --line-gold, and renaming them to --accent would mean touching
+   several hundred declarations for no functional gain. Read "gold"
+   as "the league accent" throughout.
+
+     main    #f2c14e  gold      (original)
+     3star   #4ec3f2  ice blue
+     1star   #f2894e  copper
+
+   Any accent added later must clear the reserved colors: crimson
+   (#e0263a, live/urgent), win green (#3ecf7e), and Twitch purple
+   (#b388ff). Mint and chrome were rejected for colliding with the
+   first two.
+   ============================================================ */
+body[data-league="3star"] {
+  --gold: #4ec3f2;
+  --gold-bright: #86d9fa;
+  --gold-dim: rgba(78, 195, 242, 0.14);
+  --line-gold: rgba(78, 195, 242, 0.35);
+  --accent-glow: rgba(78, 195, 242, 0.07);
+}
+
+body[data-league="1star"] {
+  --gold: #f2894e;
+  --gold-bright: #ffab7a;
+  --gold-dim: rgba(242, 137, 78, 0.14);
+  --line-gold: rgba(242, 137, 78, 0.35);
+  --accent-glow: rgba(242, 137, 78, 0.07);
+}
+
 * { box-sizing: border-box; }
 
 body {
   margin: 0;
   background:
-    radial-gradient(1100px 500px at 50% -10%, rgba(242, 193, 78, 0.07), transparent 60%),
+    radial-gradient(1100px 500px at 50% -10%, var(--accent-glow), transparent 60%),
     var(--navy-deep);
   color: var(--chalk);
   font-family: var(--font-body);
@@ -169,6 +210,25 @@ a { color: var(--gold); }
   font-weight: 700;
 }
 
+/* The // mark doubles as the way back to the league picker. Kept
+   visually identical to the old static mark so the header doesn't
+   grow a second piece of chrome — it just becomes clickable. */
+.league-home {
+  text-decoration: none;
+  display: inline-flex;
+  padding: 2px 4px;
+  margin: -2px -4px;
+  border-radius: 3px;
+  transition: background 0.15s;
+}
+
+.league-home:hover { background: var(--gold-dim); }
+
+.league-home:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 1px;
+}
+
 .league-name {
   font-family: var(--font-display);
   font-weight: 600;
@@ -192,12 +252,138 @@ a { color: var(--gold); }
   clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
 }
 
+/* ============================================================
+   LEAGUE SWITCHER
+   ------------------------------------------------------------
+   The badge is a <summary>, so it opens the menu on click and on
+   Enter/Space with no JS. Everything here is presentational; the
+   items themselves are built by renderLeagueSwitch().
+   ============================================================ */
+.league-switch {
+  position: relative;
+}
+
+/* Kills the default disclosure triangle in every engine. */
+.league-switch > summary {
+  /* Extra right padding so the caret clears the badge's angled
+     clip-path, which would otherwise shave it off. */
+  padding-right: 13px;
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.league-switch > summary::-webkit-details-marker { display: none; }
+.league-switch > summary::marker { content: ""; }
+
+/* A caret drawn in CSS rather than a glyph, so it can't pick up a
+   font fallback and render as a box on someone's machine. */
+.league-switch > summary::after {
+  content: "";
+  width: 0;
+  height: 0;
+  border-left: 3.5px solid transparent;
+  border-right: 3.5px solid transparent;
+  border-top: 4px solid currentColor;
+  opacity: 0.75;
+  transition: transform 0.15s;
+}
+
+.league-switch[open] > summary::after { transform: rotate(180deg); }
+
+.league-switch > summary:focus-visible {
+  outline: 2px solid var(--chalk);
+  outline-offset: 2px;
+}
+
+/* When there's only one league, the badge stays a plain label. */
+.league-switch.no-switch > summary { cursor: default; }
+.league-switch.no-switch > summary::after { display: none; }
+
+.league-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 20;
+  min-width: 210px;
+  background: var(--navy-panel);
+  border: 1px solid var(--line);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.5);
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.league-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 11px;
+  text-decoration: none;
+  color: var(--chalk);
+  font-family: var(--font-display);
+  font-size: 0.86rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  border-left: 2px solid transparent;
+  transition: background 0.12s, border-color 0.12s;
+}
+
+.league-menu-item:hover,
+.league-menu-item:focus-visible {
+  background: var(--navy);
+  border-left-color: var(--team);
+  outline: none;
+}
+
+/* The dot carries each league's own accent, not the current page's,
+   so the menu previews where you're going. */
+.lm-dot {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--team);
+}
+
+.lm-label { flex: 1 1 auto; }
+
+.lm-here {
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.08em;
+  color: var(--steel);
+  text-transform: uppercase;
+}
+
+.league-menu-item.is-current {
+  background: var(--navy);
+  border-left-color: var(--team);
+}
+
+/* The container slants to match its buttons — it was the only square
+   edge left in a header where the tabs, the badge and every panel are
+   cut on the diagonal.
+
+   The offset is 10px, not the buttons' 8px, because the container is
+   taller. An identical pixel offset over a taller box produces a
+   shallower angle, and the mismatch is visible where a button's edge
+   sits near the container's.
+
+   No border: clip-path cuts the element's border along with its box,
+   so the diagonal edges would lose their line and only the top and
+   bottom would keep one. The dark fill against the header gradient
+   carries the shape on its own. */
 .tabs {
   display: flex;
   gap: 3px;
   background: var(--navy-deep);
-  padding: 4px;
-  border: 1px solid var(--line);
+  padding: 4px 6px;
+  clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
 }
 
 .tab-btn {
@@ -293,7 +479,7 @@ main {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(120deg, rgba(242, 193, 78, 0.10) 0%, transparent 40%),
+    linear-gradient(120deg, color-mix(in srgb, var(--gold) 10%, transparent) 0%, transparent 40%),
     repeating-linear-gradient(
       -35deg,
       rgba(242, 244, 248, 0.025) 0px,
@@ -310,7 +496,7 @@ main {
   left: -10%;
   width: 46%;
   height: 100%;
-  background: linear-gradient(90deg, rgba(242, 193, 78, 0.16), transparent 80%);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--gold) 16%, transparent), transparent 80%);
   transform: skewX(-18deg);
   pointer-events: none;
 }
@@ -340,7 +526,7 @@ main {
 .hero-title span {
   display: block;
   color: var(--gold);
-  text-shadow: 0 0 36px rgba(242, 193, 78, 0.45);
+  text-shadow: 0 0 36px color-mix(in srgb, var(--gold) 45%, transparent);
 }
 
 .hero-sub {
@@ -376,14 +562,14 @@ main {
   height: 7px;
   border-radius: 50%;
   background: var(--gold);
-  box-shadow: 0 0 0 0 rgba(242, 193, 78, 0.6);
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--gold) 60%, transparent);
   animation: pulse 1.8s ease-in-out infinite;
 }
 
 @keyframes pulse {
-  0%   { box-shadow: 0 0 0 0 rgba(242, 193, 78, 0.55); }
-  70%  { box-shadow: 0 0 0 8px rgba(242, 193, 78, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(242, 193, 78, 0); }
+  0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--gold) 55.00000000000001%, transparent); }
+  70%  { box-shadow: 0 0 0 8px color-mix(in srgb, var(--gold) 0%, transparent); }
+  100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--gold) 0%, transparent); }
 }
 
 /* ============================================================
@@ -407,7 +593,7 @@ main {
   font-size: clamp(2.4rem, 8vw, 3.6rem);
   letter-spacing: 0.08em;
   color: var(--gold);
-  text-shadow: 0 0 24px rgba(242, 193, 78, 0.55), 0 0 4px rgba(242, 193, 78, 0.8);
+  text-shadow: 0 0 24px color-mix(in srgb, var(--gold) 55.00000000000001%, transparent), 0 0 4px color-mix(in srgb, var(--gold) 80%, transparent);
   margin-top: 8px;
   text-transform: uppercase;
 }
@@ -453,7 +639,7 @@ main {
   font-size: 5.5rem;
   line-height: 1;
   color: var(--gold);
-  text-shadow: 0 0 24px rgba(242, 193, 78, 0.55), 0 0 4px rgba(242, 193, 78, 0.8);
+  text-shadow: 0 0 24px color-mix(in srgb, var(--gold) 55.00000000000001%, transparent), 0 0 4px color-mix(in srgb, var(--gold) 80%, transparent);
   margin-top: 4px;
   font-variant-numeric: tabular-nums;
 }
@@ -860,12 +1046,17 @@ main {
 /* ============================================================
    SCHEDULE — Weekly / By Team toggle + views
    ============================================================ */
+/* Same treatment as .tabs in the header — see the note there. Same
+   10px offset deliberately, not one re-derived for this control's
+   slightly shorter buttons: these are the same component pattern in
+   two places, and matching them exactly matters more than a pixel of
+   angle purity. */
 .sched-toggle {
   display: inline-flex;
   gap: 3px;
   background: var(--navy-deep);
-  padding: 4px;
-  border: 1px solid var(--line);
+  padding: 4px 6px;
+  clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
   margin-bottom: 20px;
 }
 
@@ -949,7 +1140,7 @@ main {
 
 .week-game-row.is-league {
   border-left-color: var(--gold);
-  background: linear-gradient(90deg, rgba(242, 193, 78, 0.06), transparent 40%), var(--navy-panel);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--gold) 6%, transparent), transparent 40%), var(--navy-panel);
 }
 
 .wg-teams {
@@ -1111,7 +1302,7 @@ main {
 }
 
 .team-sched-row.is-current {
-  background: linear-gradient(90deg, rgba(242, 193, 78, 0.10), transparent 60%);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--gold) 10%, transparent), transparent 60%);
   box-shadow: inset 3px 0 0 var(--gold);
 }
 
@@ -1216,7 +1407,7 @@ main {
   text-align: center;
   padding: 22px 24px 28px;
   border-top: 1px solid var(--line);
-  background: linear-gradient(180deg, transparent, rgba(242, 193, 78, 0.03));
+  background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--gold) 3%, transparent));
 }
 
 /* Status bar — every segment is computed, never hand-edited. */
@@ -1293,4 +1484,108 @@ main {
 button:focus-visible, a:focus-visible {
   outline: 2px solid var(--gold);
   outline-offset: 2px;
+}
+
+/* ============================================================
+   LEAGUE PICKER (root landing page)
+   ------------------------------------------------------------
+   The root page has no tabs, no ticker and no data files of its
+   own — just the hero and three cards. It borrows --team as the
+   per-card accent, exactly like roster cards do, so a new league
+   only needs a colour in the LEAGUES array on that page.
+   ============================================================ */
+.picker-page {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 24px 64px;
+}
+
+.picker-grid {
+  display: grid;
+  gap: 14px;
+  margin-top: 32px;
+}
+
+.picker-card {
+  display: flex;
+  align-items: stretch;
+  gap: 18px;
+  background: var(--navy-panel);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--team);
+  text-decoration: none;
+  color: inherit;
+  padding: 0;
+  clip-path: polygon(var(--cut) 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%, 0 var(--cut));
+  transition: background 0.15s, transform 0.15s;
+}
+
+.picker-card:hover {
+  background: #16263f;
+  transform: translateX(3px);
+}
+
+.picker-card:focus-visible {
+  outline: 2px solid var(--team);
+  outline-offset: 2px;
+}
+
+.picker-bar {
+  width: 6px;
+  flex: 0 0 auto;
+  background: var(--team);
+  opacity: 0.35;
+}
+
+.picker-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 20px 0;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.picker-label {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--chalk);
+}
+
+.picker-week {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--team);
+}
+
+.picker-status,
+.picker-meta {
+  font-size: 0.78rem;
+  color: var(--steel);
+}
+
+.picker-status {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+}
+
+.picker-go {
+  display: grid;
+  place-items: center;
+  padding: 0 24px;
+  font-size: 1.4rem;
+  color: var(--team);
+  flex: 0 0 auto;
+}
+
+@media (min-width: 720px) {
+  .picker-grid { grid-template-columns: 1fr; }
 }

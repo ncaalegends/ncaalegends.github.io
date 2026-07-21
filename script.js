@@ -132,19 +132,36 @@ function monogramFor(name) {
   return words.slice(0, 3).map((w) => w[0]).join("").toUpperCase();
 }
 
+/* Two ways a team can have a logo, checked in this order:
+
+     1. a local `logo` path on the roster entry — used by the 1-star
+        league, whose teams are Team Builder originals with no
+        real-world counterpart to hotlink
+     2. an `espnId` — hotlinked from ESPN's CDN
+
+   Local wins when both are set. Either way a failed load removes
+   the <img> and the monogram underneath shows through, so a bad
+   path degrades exactly like a bad id. */
+function logoSrcFor(entry) {
+  const local = String(entry?.logo ?? "").trim();
+  if (local) return local;
+
+  const id = String(entry?.espnId ?? "").trim();
+  const useEspn = INFO.useEspnLogos !== false;
+  return useEspn && /^\d+$/.test(id) ? `${ESPN_LOGO}${id}.png` : "";
+}
+
 function teamMarkHtml(scheduleName, size = "md") {
   const entry = rosterEntryFor(scheduleName);
   const color = safeHex(entry?.color);
-  const id = String(entry?.espnId ?? "").trim();
-  const useLogos = INFO.useEspnLogos !== false;
-  const showImg = useLogos && /^\d+$/.test(id);
+  const src = logoSrcFor(entry);
 
   return `
     <span class="team-mark tm-${esc(size)}"${color ? ` style="--team:${color}"` : ""}>
       <span class="tm-fallback">${esc(monogramFor(entry?.team || scheduleName))}</span>
       ${
-        showImg
-          ? `<img class="tm-img" src="${ESPN_LOGO}${esc(id)}.png" alt="" loading="lazy"
+        src
+          ? `<img class="tm-img" src="${esc(src)}" alt="" loading="lazy"
                   onerror="this.remove()">`
           : ""
       }
@@ -695,6 +712,28 @@ function renderTeamSchedule() {
 }
 
 function initSchedule() {
+  /* A league with no schedule at all is a different situation from a
+     week with no games in it. Without this, both the Weekly and By
+     Team views would render an empty dropdown next to a vague "no
+     games" line, which reads like a bug rather than "we haven't
+     transcribed the screenshots yet". */
+  if (!SCHEDULES.length) {
+    const panel = document.getElementById("schedule");
+    if (panel) {
+      const toggle = panel.querySelector(".sched-toggle");
+      const weekly = document.getElementById("sched-weekly");
+      const byTeam = document.getElementById("sched-team");
+      if (toggle) toggle.hidden = true;
+      if (byTeam) byTeam.hidden = true;
+      if (weekly) {
+        weekly.innerHTML =
+          '<p class="sched-empty">No schedule posted yet. Once coaches share their ' +
+          'in-game schedule screenshots, every week and matchup shows up here.</p>';
+      }
+    }
+    return;
+  }
+
   setupScheduleToggle();
   populateWeekSelect();
   populateTeamSelect();
@@ -877,11 +916,80 @@ function setupTabs() {
 }
 
 /* ------------------------------------------------------------
+   LEAGUE SWITCHER
+   ------------------------------------------------------------
+   The header badge opens into the other dynasties. Built from
+   SITE_LEAGUES in people.js so adding a league doesn't mean editing
+   three near-identical index.html files.
+
+   Which league we're on comes from <body data-league>, the same
+   attribute that drives the accent palette — one source of truth
+   rather than parsing the URL, which would break on local preview
+   and on any future custom domain.
+
+   <details> handles open/close and keyboard access for free. The
+   only things it doesn't do are close on outside click and close on
+   Escape, both added below.
+   ------------------------------------------------------------ */
+function renderLeagueSwitch() {
+  const wrap = document.getElementById("league-switch");
+  const menu = document.getElementById("league-menu");
+  const leagues = typeof SITE_LEAGUES !== "undefined" ? SITE_LEAGUES : [];
+
+  // Degrade to a plain, non-interactive badge if anything's missing.
+  if (!wrap || !menu || leagues.length < 2) {
+    if (wrap) wrap.classList.add("no-switch");
+    return;
+  }
+
+  const current = document.body.dataset.league || "";
+
+  menu.innerHTML = leagues
+    .map((l) => {
+      const here = l.dir === current;
+      return `
+        <a class="league-menu-item${here ? " is-current" : ""}"
+           href="../${esc(l.dir)}/"
+           style="--team:${esc(l.accent)}"
+           ${here ? 'aria-current="page"' : ""}>
+          <span class="lm-dot"></span>
+          <span class="lm-label">${esc(l.label)}</span>
+          ${here ? '<span class="lm-here">You are here</span>' : ""}
+        </a>`;
+    })
+    .join("");
+
+  document.addEventListener("click", (e) => {
+    if (wrap.open && !wrap.contains(e.target)) wrap.open = false;
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && wrap.open) {
+      wrap.open = false;
+      wrap.querySelector("summary")?.focus();
+    }
+  });
+}
+
+/* ------------------------------------------------------------
    INIT
    ------------------------------------------------------------ */
 function init() {
+  /* Everything league-specific in the page shell is filled from
+     LEAGUE_INFO, so the three index.html files stay byte-identical
+     apart from their <meta> tags — which have to be static because
+     crawlers and link-preview bots don't run JavaScript. */
   const nameEl = document.getElementById("league-name");
   if (nameEl) nameEl.textContent = INFO.name.toUpperCase();
+
+  const badgeEl = document.getElementById("league-badge");
+  if (badgeEl) badgeEl.textContent = (INFO.tag || "").toUpperCase();
+
+  renderLeagueSwitch();
+
+  const heroSubEl = document.getElementById("hero-sub");
+  if (heroSubEl) heroSubEl.textContent = (INFO.tag || "").toUpperCase();
+
   document.title = INFO.tag ? `${INFO.name} — ${INFO.tag}` : INFO.name;
 
   validateData();

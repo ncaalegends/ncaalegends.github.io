@@ -12,8 +12,10 @@
 
    USAGE
      node tools/advance.js --week 5 --next "Sunday, July 26 - 6:00 PM EDT"
+     node tools/advance.js --league 3star --week 2 --no-post
 
    FLAGS
+     --league SLUG     main | 3star | 1star. Defaults to main.
      --week N          the week now being played (0-15). Required.
      --next "..."      advance deadline, free text. Required unless --no-post.
      --status "..."    override the hero status line. Defaults to "WEEK N".
@@ -21,9 +23,12 @@
      --no-post         update the data file but skip Discord.
      --no-write        post to Discord but leave the data file alone.
 
-   WEBHOOK
+   WEBHOOK — per league
      Read from env DISCORD_WEBHOOK_URL, or from tools/config.json:
-       { "webhookUrl": "https://discord.com/api/webhooks/..." }
+       { "leagues": { "main": { "webhookUrl": "https://discord.com/..." } } }
+     Only main has one today. The 1-star and 3-star dynasties are run
+     by other commissioners who haven't opted into the automation, so
+     those leagues are file-only — use --no-post.
      config.json is gitignored — the URL is a secret. Anyone holding
      it can post to the channel as the bot.
 
@@ -36,9 +41,18 @@ const path = require("path");
 const vm = require("vm");
 
 const ROOT = path.resolve(__dirname, "..");
-const LEAGUE_FILE = path.join(ROOT, "league-data.js");
-const SCHEDULE_FILE = path.join(ROOT, "schedule-data.js");
 const CONFIG_FILE = path.join(__dirname, "config.json");
+
+/* Every league is a folder at the repo root holding its own pair of
+   data files. Adding a fourth league means adding a folder and one
+   line here — nothing else in this script is league-specific. */
+const LEAGUES = {
+  main: { label: "Main Dynasty", dir: "main" },
+  "3star": { label: "3-Star Dynasty", dir: "3star" },
+  "1star": { label: "1-Star Dynasty", dir: "1star" },
+};
+
+const SITE_ROOT = "https://ncaalegends.github.io";
 
 /* ------------------------------------------------------------
    ARGS
@@ -74,10 +88,10 @@ function die(msg) {
    step, no module wrapper, and the files stay exactly as the site
    expects them.
    ------------------------------------------------------------ */
-function loadData() {
+function loadData(paths) {
   const ctx = {};
   vm.createContext(ctx);
-  for (const file of [LEAGUE_FILE, SCHEDULE_FILE]) {
+  for (const file of [paths.league, paths.schedule]) {
     if (!fs.existsSync(file)) die(`missing data file: ${file}`);
     // `var` so the declarations land on the context object.
     const src = fs.readFileSync(file, "utf8").replace(/^const /gm, "var ");
@@ -263,10 +277,9 @@ function makeMentioner(cfg) {
 /* ------------------------------------------------------------
    MESSAGE
    ------------------------------------------------------------ */
-const SITE_URL = "https://ncaalegends.github.io";
 const CONTENT_LIMIT = 2000;
 
-function buildMessage(data, week, wk, nextAdvance, cfg) {
+function buildMessage(data, week, wk, nextAdvance, cfg, siteUrl) {
   const label = weekLabel(week);
   const M = makeMentioner(cfg);
 
@@ -361,9 +374,9 @@ function buildMessage(data, week, wk, nextAdvance, cfg) {
       embeds: [
         {
           title: label.toUpperCase(),
-          url: SITE_URL,
+          url: siteUrl,
           color: 0xc9a227,
-          description: `Full schedule, rosters, and rankings at ${SITE_URL}`,
+          description: `Full schedule, rosters, and rankings at ${siteUrl}`,
           fields,
           footer: { text: `${data.LEAGUE_INFO.name} · ${data.LEAGUE_INFO.tag || ""}`.trim() },
           timestamp: new Date().toISOString(),
@@ -394,9 +407,9 @@ function truncate(s, max) {
    it, to real assignment lines (indented, ending in a comma) rather
    than mentions inside block comments.
    ------------------------------------------------------------ */
-function seasonBlock(src) {
+function seasonBlock(src, leagueFile) {
   const start = src.search(/const\s+SEASON\s*=\s*\{/);
-  if (start === -1) die("could not find `const SEASON = {` in league-data.js");
+  if (start === -1) die(`could not find \`const SEASON = {\` in ${leagueFile}`);
 
   const open = src.indexOf("{", start);
   let depth = 0;
@@ -407,12 +420,12 @@ function seasonBlock(src) {
       if (depth === 0) return { open, close: i, body: src.slice(open, i + 1) };
     }
   }
-  die("SEASON block in league-data.js is never closed — unbalanced braces");
+  die(`SEASON block in ${leagueFile} is never closed — unbalanced braces`);
 }
 
-function updateSeason(week, statusLine, nextAdvance) {
-  const src = fs.readFileSync(LEAGUE_FILE, "utf8");
-  const { open, close, body } = seasonBlock(src);
+function updateSeason(leagueFile, week, statusLine, nextAdvance) {
+  const src = fs.readFileSync(leagueFile, "utf8");
+  const { open, close, body } = seasonBlock(src, path.basename(leagueFile));
 
   let next = body;
   next = replaceOne(next, /^(\s*currentWeek:\s*)(?:"PRESEASON"|\d+)(,)/m, `$1${week}$2`, "currentWeek");
@@ -438,7 +451,7 @@ function updateSeason(week, statusLine, nextAdvance) {
      the file simply already says what we want it to say. */
   if (next === body) return false;
 
-  fs.writeFileSync(LEAGUE_FILE, src.slice(0, open) + next + src.slice(close + 1), "utf8");
+  fs.writeFileSync(leagueFile, src.slice(0, open) + next + src.slice(close + 1), "utf8");
   return true;
 }
 
@@ -461,9 +474,18 @@ function loadConfig() {
   }
 }
 
-function webhookUrl(cfg) {
+/* Per-league webhook, with the pre-multi-league top-level
+   `webhookUrl` still honoured for main so an older config keeps
+   working. Env var overrides everything, for one-off testing. */
+function webhookUrl(cfg, slug) {
   if (process.env.DISCORD_WEBHOOK_URL) return process.env.DISCORD_WEBHOOK_URL.trim();
-  if (cfg.webhookUrl && !cfg.webhookUrl.includes("PASTE")) return cfg.webhookUrl.trim();
+
+  const perLeague = cfg.leagues?.[slug]?.webhookUrl;
+  if (perLeague && !perLeague.includes("PASTE")) return perLeague.trim();
+
+  if (slug === "main" && cfg.webhookUrl && !cfg.webhookUrl.includes("PASTE")) {
+    return cfg.webhookUrl.trim();
+  }
   return "";
 }
 
@@ -488,24 +510,35 @@ async function main() {
   const noPost = args.flags.has("no-post") || dryRun;
   const noWrite = args.flags.has("no-write") || dryRun;
 
+  const slug = args.league || "main";
+  if (!LEAGUES[slug]) {
+    die(`unknown --league "${slug}". Options: ${Object.keys(LEAGUES).join(", ")}`);
+  }
+  const meta = LEAGUES[slug];
+  const paths = {
+    league: path.join(ROOT, meta.dir, "league-data.js"),
+    schedule: path.join(ROOT, meta.dir, "schedule-data.js"),
+  };
+  const siteUrl = `${SITE_ROOT}/${meta.dir}/`;
+
   if (args.week === undefined) die('missing --week. Example: --week 5 --next "Sunday 6PM EDT"');
   const week = Number(args.week);
   if (!Number.isInteger(week) || week < 0 || week > 15) die(`--week must be 0-15, got "${args.week}"`);
 
-  const data = loadData();
+  const data = loadData(paths);
   const wk = buildWeek(data, week);
   const label = weekLabel(week);
   const statusLine = args.status || label.toUpperCase();
   const nextAdvance = args.next !== undefined ? args.next : data.SEASON.nextAdvance;
 
   // Report before doing anything irreversible.
-  console.log(`\n  ${label} — ${wk.league.length} H2H, ${wk.cpu.length} CPU, ${wk.notes.length} bye/off`);
+  console.log(`\n  ${meta.label} · ${label} — ${wk.league.length} H2H, ${wk.cpu.length} CPU, ${wk.notes.length} bye/off`);
   if (wk.missing.length) {
     console.log(`  WARNING: no week ${week} entry for: ${wk.missing.join(", ")}`);
   }
 
   const cfg = loadConfig();
-  const built = buildMessage(data, week, wk, nextAdvance, cfg);
+  const built = buildMessage(data, week, wk, nextAdvance, cfg, siteUrl);
   const { payload } = built;
 
   /* Mention health. A missing ID is silent in Discord — the name just
@@ -538,22 +571,23 @@ async function main() {
   }
 
   if (!noWrite) {
-    const changed = updateSeason(week, statusLine, nextAdvance);
+    const changed = updateSeason(paths.league, week, statusLine, nextAdvance);
     console.log(
       changed
-        ? `  league-data.js updated → currentWeek ${week}, next advance "${nextAdvance}"`
-        : `  league-data.js already at week ${week} with this deadline — left as is`
+        ? `  ${meta.dir}/league-data.js updated → currentWeek ${week}, next advance "${nextAdvance}"`
+        : `  ${meta.dir}/league-data.js already at week ${week} with this deadline — left as is`
     );
   }
 
   if (!noPost) {
-    const url = webhookUrl(cfg);
+    const url = webhookUrl(cfg, slug);
     if (!url) {
       die(
-        "no Discord webhook configured.\n" +
+        `no Discord webhook configured for "${slug}".\n` +
           "  Create one in Discord: Server Settings > Integrations > Webhooks > New Webhook,\n" +
           "  pick the channel, Copy Webhook URL, then put it in tools/config.json:\n" +
-          '    { "webhookUrl": "https://discord.com/api/webhooks/..." }'
+          `    { "leagues": { "${slug}": { "webhookUrl": "https://discord.com/api/webhooks/..." } } }\n` +
+          "  Or run with --no-post to update the site files only."
       );
     }
     await post(url, payload);
@@ -561,7 +595,7 @@ async function main() {
   }
 
   console.log(
-    `\n  Done. Commit and push to publish:\n    git add -A && git commit -m "Advance to ${label}" && git push\n`
+    `\n  Done. Commit and push to publish:\n    git add -A && git commit -m "${meta.label}: advance to ${label}" && git push\n`
   );
 }
 
