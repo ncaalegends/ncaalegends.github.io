@@ -156,6 +156,93 @@ GitHub Pages picks it up within a minute or so.
 
 ### Adding scores
 
-`advance.js` doesn't touch scores — add `teamScore` / `opponentScore` to
-the week entry on **both** coaches' schedules in `schedule-data.js`, as
-described at the top of that file.
+`advance.js` doesn't touch scores — that's `scores.js`, below.
+
+## scores.js
+
+Records final scores into `schedule-data.js`. Double-click
+`scores.cmd`, or:
+
+```
+node tools/scores.js --week 4                     interactive
+node tools/scores.js --week 4 --set "California 27-24"
+node tools/scores.js --week 4 --dry-run
+```
+
+**Why this exists:** a head-to-head score has to be written twice —
+once on each coach's schedule, with the numbers flipped on the second
+one. Miss that and the game shows as final on one coach's page and
+still upcoming on the other's. This tool writes both sides from one
+answer, so they can't disagree.
+
+Interactive mode lists every game that week — H2H and CPU — and asks
+for each in turn:
+
+```
+  [3/18] Clemson at California
+        Temptiger  vs  BlueMiniMeaniee
+        Clemson scored: 27-24
+```
+
+Blank line skips a game, `q` stops and saves what you've entered. Games
+that are already final are skipped unless you pass `--all`.
+
+### Score format
+
+Always from the named team's point of view, home or away:
+`--set "California 27-24"` means California scored 27, their opponent
+24. The site works out home/away itself. `27-24`, `27 24` and `27:24`
+all parse.
+
+For an H2H game either team names it — `"Clemson 24-27"` records the
+same result. For a CPU game, name the **coach's** team, not the CPU
+opponent; several coaches can draw the same CPU team in a week, so the
+CPU name alone doesn't identify a game. The script says so if you try.
+
+### Flags
+
+| Flag | Meaning |
+|---|---|
+| `--league SLUG` | `main` \| `3star` \| `1star`. Defaults to main. |
+| `--week N` | Week whose games are final, 0–15. Required. |
+| `--set "T A-B"` | Non-interactive. Repeatable — pass several. |
+| `--dry-run` | Show the exact before/after lines. Write nothing. |
+| `--force` | Overwrite a score that's already recorded. |
+| `--all` | Include already-final games in the prompts. |
+
+### Guardrails
+
+Everything below fails loudly rather than writing something wrong:
+
+- a team name that doesn't match any game that week
+- a name matching more than one game
+- a tie score (college games can't end tied — it's always a typo)
+- a bye or championship-placeholder week, which has no opponent
+- a game that's already final, unless `--force`
+
+Editing is line-surgical: it rewrites only the one `{ week: N, ... }`
+line per team, so the explanatory comments and hand-formatting in
+`schedule-data.js` survive untouched. The worked examples in those
+comments look exactly like real entries — they're deliberately skipped.
+
+Ctrl-D or a closed input stream mid-run saves what you've already
+entered instead of discarding it.
+
+### After
+
+`scores.js` never posts to Discord and never commits. Check it locally
+with `preview.cmd`, then:
+
+```
+git add -A && git commit -m "Week 4 scores" && git push
+```
+
+## lib/league.js
+
+Shared by `advance.js` and `scores.js`: loading the data files,
+resolving team names against the roster and alias table, and turning a
+week number into its list of matchups.
+
+It's one copy on purpose. The roster-matching logic here mirrors
+`script.js`, and when it lived in two places the risk was Discord and
+the site quietly describing the same game differently.

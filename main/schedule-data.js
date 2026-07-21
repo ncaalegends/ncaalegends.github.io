@@ -57,7 +57,7 @@ const TEAM_SCHEDULES = [
     team: "TCU",
     conference: "Big 12",
     weeks: [
-      { week: 0, opponent: "North Carolina", location: "vs", stadium: "Dublin Stadium" },
+      { week: 0, opponent: "North Carolina", location: "vs", stadium: "Dublin Stadium", teamScore: 27, opponentScore: 17 },
       { week: 1, note: "BYE" },
       { week: 2, opponent: "FCS Midwest", location: "vs", stadium: "Amon G. Carter Stadium" },
       { week: 3, opponent: "Arkansas State", location: "vs", stadium: "Amon G. Carter Stadium" },
@@ -145,7 +145,7 @@ const TEAM_SCHEDULES = [
     team: "Florida State",
     conference: "ACC",
     weeks: [
-      { week: 0, opponent: "New Mexico St.", location: "vs", stadium: "Doak Campbell Stadium" },
+      { week: 0, opponent: "New Mexico St.", location: "vs", stadium: "Doak Campbell Stadium", teamScore: 49, opponentScore: 37 },
       { week: 1, opponent: "SMU", location: "vs", stadium: "Doak Campbell Stadium" },
       { week: 2, note: "BYE" },
       { week: 3, opponent: "Alabama", location: "at", stadium: "Saban Field at Bryant-Denny Stadium" },
@@ -277,7 +277,7 @@ const TEAM_SCHEDULES = [
     team: "USC",
     conference: "Big Ten",
     weeks: [
-      { week: 0, opponent: "San Jose State", location: "vs", stadium: "Los Angeles Memorial Coliseum" },
+      { week: 0, opponent: "San Jose State", location: "vs", stadium: "Los Angeles Memorial Coliseum", teamScore: 38, opponentScore: 14 },
       { week: 1, opponent: "Fresno State", location: "vs", stadium: "Los Angeles Memorial Coliseum" },
       { week: 2, opponent: "Louisiana", location: "vs", stadium: "Los Angeles Memorial Coliseum" },
       { week: 3, opponent: "Rutgers", location: "at", stadium: "SHI Stadium" },

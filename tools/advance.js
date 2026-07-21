@@ -38,180 +38,21 @@
 
 const fs = require("fs");
 const path = require("path");
-const vm = require("vm");
 
-const ROOT = path.resolve(__dirname, "..");
-const CONFIG_FILE = path.join(__dirname, "config.json");
-
-/* Every league is a folder at the repo root holding its own pair of
-   data files. Adding a fourth league means adding a folder and one
-   line here — nothing else in this script is league-specific. */
-const LEAGUES = {
-  main: { label: "Main Dynasty", dir: "main" },
-  "3star": { label: "3-Star Dynasty", dir: "3star" },
-  "1star": { label: "1-Star Dynasty", dir: "1star" },
-};
-
-const SITE_ROOT = "https://ncaalegends.github.io";
-
-/* ------------------------------------------------------------
-   ARGS
-   ------------------------------------------------------------ */
-function parseArgs(argv) {
-  const out = { flags: new Set() };
-  for (let i = 0; i < argv.length; i++) {
-    const a = argv[i];
-    if (!a.startsWith("--")) continue;
-    const key = a.slice(2);
-    const next = argv[i + 1];
-    if (next === undefined || next.startsWith("--")) {
-      out.flags.add(key);
-    } else {
-      out[key] = next;
-      i++;
-    }
-  }
-  return out;
-}
-
-function die(msg) {
-  console.error(`\n  ERROR: ${msg}\n`);
-  process.exit(1);
-}
-
-/* ------------------------------------------------------------
-   LOAD DATA
-   ------------------------------------------------------------
-   The two data files are plain top-level `const` declarations meant
-   for a <script> tag. Running them in a VM context and reading the
-   globals back is the least invasive way to get at them — no build
-   step, no module wrapper, and the files stay exactly as the site
-   expects them.
-   ------------------------------------------------------------ */
-function loadData(paths) {
-  const ctx = {};
-  vm.createContext(ctx);
-  for (const file of [paths.league, paths.schedule]) {
-    if (!fs.existsSync(file)) die(`missing data file: ${file}`);
-    // `var` so the declarations land on the context object.
-    const src = fs.readFileSync(file, "utf8").replace(/^const /gm, "var ");
-    try {
-      vm.runInContext(src, ctx, { filename: path.basename(file) });
-    } catch (e) {
-      die(`could not parse ${path.basename(file)} — ${e.message}`);
-    }
-  }
-  return {
-    SEASON: ctx.SEASON || {},
-    COACHES: ctx.COACHES || [],
-    TEAM_SCHEDULES: ctx.TEAM_SCHEDULES || [],
-    ALIASES: ctx.SCHEDULE_TEAM_ALIASES || {},
-    LEAGUE_INFO: ctx.LEAGUE_INFO || { name: "League" },
-  };
-}
-
-/* ------------------------------------------------------------
-   NAME RESOLUTION — mirrors script.js exactly
-   ------------------------------------------------------------ */
-function makeResolver({ COACHES, ALIASES }) {
-  const normalize = (s) => String(s ?? "").trim().toLowerCase();
-
-  const rosterKeys = new Set();
-  COACHES.forEach((c) => {
-    String(c.team)
-      .split("/")
-      .forEach((part) => {
-        const k = normalize(part);
-        if (k) rosterKeys.add(k);
-      });
-  });
-
-  const rosterKeyFor = (scheduleName) => {
-    const aliased = ALIASES[scheduleName];
-    return aliased ? normalize(aliased) : normalize(scheduleName);
-  };
-
-  const isLeagueTeam = (n) => rosterKeys.has(rosterKeyFor(n));
-
-  const entryFor = (n) => {
-    const key = rosterKeyFor(n);
-    return COACHES.find((c) =>
-      String(c.team).split("/").some((part) => normalize(part) === key)
-    );
-  };
-
-  const coachFor = (n) => entryFor(n)?.name || "";
-
-  return { normalize, rosterKeyFor, isLeagueTeam, entryFor, coachFor };
-}
-
-/* ------------------------------------------------------------
-   BUILD THE WEEK
-   ------------------------------------------------------------
-   An H2H (user vs user) game lives in BOTH coaches' schedules, so
-   it has to be
-   deduped down to one matchup. A CPU game only ever appears once,
-   under the coach playing it.
-   ------------------------------------------------------------ */
-function buildWeek(data, week) {
-  const R = makeResolver(data);
-  const league = new Map(); // pairKey -> matchup
-  const cpu = [];
-  const notes = []; // byes, Army-Navy, championship weeks
-  const missing = []; // coaches with no entry for this week at all
-
-  data.TEAM_SCHEDULES.forEach((t) => {
-    const entry = (t.weeks || []).find((w) => Number(w.week) === week);
-
-    if (!entry) {
-      missing.push(t.team);
-      return;
-    }
-
-    if (entry.note || !entry.opponent) {
-      notes.push({ team: t.team, coach: R.coachFor(t.team), note: entry.note || "No game listed" });
-      return;
-    }
-
-    const home = entry.location === "at" ? entry.opponent : t.team;
-    const away = entry.location === "at" ? t.team : entry.opponent;
-
-    if (R.isLeagueTeam(entry.opponent)) {
-      const pairKey = [R.rosterKeyFor(t.team), R.rosterKeyFor(entry.opponent)].sort().join("::");
-      if (!league.has(pairKey)) {
-        league.set(pairKey, {
-          home,
-          away,
-          homeCoach: R.coachFor(home),
-          awayCoach: R.coachFor(away),
-          stadium: entry.stadium || "",
-        });
-      }
-    } else {
-      cpu.push({
-        team: t.team,
-        coach: R.coachFor(t.team),
-        opponent: entry.opponent,
-        location: entry.location,
-        stadium: entry.stadium || "",
-      });
-    }
-  });
-
-  cpu.sort((a, b) => a.coach.localeCompare(b.coach));
-  notes.sort((a, b) => a.coach.localeCompare(b.coach));
-
-  return { league: [...league.values()], cpu, notes, missing };
-}
-
-/* ------------------------------------------------------------
-   WEEK LABEL — matches the site's own naming
-   ------------------------------------------------------------ */
-function weekLabel(week) {
-  if (week === 14) return "Week 14 (Army-Navy)";
-  if (week === 15) return "Week 15 (Championships)";
-  return `Week ${week}`;
-}
+/* Data loading, roster/alias resolution and the week breakdown are
+   shared with scores.js — see tools/lib/league.js. Keeping one copy
+   is what guarantees Discord and the site never disagree about who
+   plays whom. */
+const {
+  parseArgs,
+  die,
+  resolveLeague,
+  loadData,
+  buildWeek,
+  weekLabel,
+  parseWeek,
+  loadConfig,
+} = require("./lib/league");
 
 /* ------------------------------------------------------------
    MENTIONS
@@ -465,15 +306,6 @@ function replaceOne(src, re, repl, field) {
 /* ------------------------------------------------------------
    DISCORD
    ------------------------------------------------------------ */
-function loadConfig() {
-  if (!fs.existsSync(CONFIG_FILE)) return {};
-  try {
-    return JSON.parse(fs.readFileSync(CONFIG_FILE, "utf8"));
-  } catch (e) {
-    die(`tools/config.json is not valid JSON — ${e.message}`);
-  }
-}
-
 /* Per-league webhook, with the pre-multi-league top-level
    `webhookUrl` still honoured for main so an older config keeps
    working. Env var overrides everything, for one-off testing. */
@@ -510,20 +342,13 @@ async function main() {
   const noPost = args.flags.has("no-post") || dryRun;
   const noWrite = args.flags.has("no-write") || dryRun;
 
-  const slug = args.league || "main";
-  if (!LEAGUES[slug]) {
-    die(`unknown --league "${slug}". Options: ${Object.keys(LEAGUES).join(", ")}`);
-  }
-  const meta = LEAGUES[slug];
-  const paths = {
-    league: path.join(ROOT, meta.dir, "league-data.js"),
-    schedule: path.join(ROOT, meta.dir, "schedule-data.js"),
-  };
-  const siteUrl = `${SITE_ROOT}/${meta.dir}/`;
+  const L = resolveLeague(args.league || "main");
+  const slug = L.slug;
+  const meta = { label: L.label, dir: L.dir };
+  const paths = L.paths;
+  const siteUrl = L.siteUrl;
 
-  if (args.week === undefined) die('missing --week. Example: --week 5 --next "Sunday 6PM EDT"');
-  const week = Number(args.week);
-  if (!Number.isInteger(week) || week < 0 || week > 15) die(`--week must be 0-15, got "${args.week}"`);
+  const week = parseWeek(args.week, '--week 5 --next "Sunday 6PM EDT"');
 
   const data = loadData(paths);
   const wk = buildWeek(data, week);
