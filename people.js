@@ -1,9 +1,15 @@
 /* ============================================================
    PEOPLE — cross-league identity resolution
    ------------------------------------------------------------
-   32 distinct people play across the three dynasties, and 13 of
+   31 distinct people play across the three dynasties, and 13 of
    them play in more than one. This file answers exactly one
    question: "are these two roster entries the same human?"
+
+   Counted 2026-07-21 from the three league-data.js COACHES
+   arrays: 47 roster entries total (24 main / 15 3-star / 8 1-star)
+   = 3 people in all three leagues, 10 in two, 18 in one. Said 32
+   before this; the overlap count was right, so it was one
+   single-league coach who left without the comment being updated.
 
    WHAT'S DELIBERATELY NOT HERE
    ----------------------------

@@ -72,11 +72,11 @@ const COACHES = [
   { name: "BluBus",     team: "Dillon Panthers",             conference: "Sun Belt", color: "#5990E3", twitch: "https://www.twitch.tv/blubusbandit", logo: "logos/dillon-panthers.png",            location: "Dillon, TX",      replacing: "Georgia Southern" },
   { name: "Alex",       team: "North Shore Fighting Moose",  conference: "MAC",      color: "#4FAE6E", twitch: "https://www.twitch.tv/alexgators1", logo: "logos/north-shore-fighting-moose.png", location: "Duluth, MN",      replacing: "Akron" },
   { name: "Dway",       team: "Minneapolis Monsters",        conference: "MAC",      color: "#C3E63F", twitch: "https://www.twitch.tv/dwayinspired", logo: "logos/minneapolis-monsters.png",       location: "Minneapolis, MN", replacing: "Kent State" },
-  { name: "Salzy",      team: "New Glarus Spotted Cows",     conference: "MAC",      color: "#E6E1D3", twitch: "", logo: "logos/new-glarus-spotted-cows.png",    location: "New Glarus, WI",  replacing: "Ball State" },
+  { name: "Salzy",      team: "New Glarus Spotted Cows",     conference: "MAC",      color: "#E6E1D3", twitch: "https://www.twitch.tv/salzy117", logo: "logos/new-glarus-spotted-cows.png",    location: "New Glarus, WI",  replacing: "Ball State" },
   { name: "Bl00dVayN3", team: "Westeros White Walkers",      conference: "CUSA",     color: "#A8D5E8", twitch: "https://www.twitch.tv/bl00dvayn3", logo: "logos/westeros-white-walkers.png",     location: "Boise, ID",       replacing: "Western Kentucky" },
-  { name: "Woody",      team: "Baldwin Wallace",             conference: "Sun Belt", color: "#F3CD49", twitch: "", logo: "logos/baldwin-wallace.png",            location: "Berea, OH",       replacing: "South Alabama" },
+  { name: "Woody",      team: "Baldwin Wallace",             conference: "Sun Belt", color: "#F3CD49", twitch: "https://www.twitch.tv/mldwoody", logo: "logos/baldwin-wallace.png",            location: "Berea, OH",       replacing: "South Alabama" },
   { name: "Brian52682", team: "Patriot Tech Minutemen",      conference: "CUSA",     color: "#DE4B5C", twitch: "https://www.twitch.tv/brian52682", logo: "logos/patriot-tech-minutemen.png",     location: "",                replacing: "Liberty" },
-  { name: "Bayside",    team: "Wawa University Hoagiemakers", conference: "CUSA",    color: "#EE4B3C", twitch: "", logo: "logos/wawa-university.png",            location: "Media, PA",       replacing: "FIU" },
+  { name: "Bayside",    team: "Wawa University Hoagiemakers", conference: "CUSA",    color: "#EE4B3C", twitch: "https://www.twitch.tv/baysideblitz", logo: "logos/wawa-university.png",            location: "Media, PA",       replacing: "FIU" },
 ];
 
 /* ------------------------------------------------------------

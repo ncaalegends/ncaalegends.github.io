@@ -66,7 +66,7 @@ const COACHES = [
   { name: "DiabeticSnail22", team: "North Texas",        conference: "SEC", color: "#35B06A", twitch: "https://www.twitch.tv/diabeticsnail22", espnId: "249" },
   { name: "Brian52682",      team: "Baylor",             conference: "XII", color: "#F5C542", twitch: "https://www.twitch.tv/brian52682", espnId: "239" },
   { name: "Dway",            team: "Iowa State",         conference: "XII", color: "#D6394E", twitch: "https://www.twitch.tv/dwayinspired", espnId: "66" },
-  { name: "Salzy",           team: "Wisconsin",          conference: "B1G", color: "#D63B45", twitch: "", espnId: "275" },
+  { name: "Salzy",           team: "Wisconsin",          conference: "B1G", color: "#D63B45", twitch: "https://www.twitch.tv/salzy117", espnId: "275" },
   { name: "Oldarmy324",      team: "Pittsburgh",         conference: "ACC", color: "#F5C542", twitch: "https://www.twitch.tv/oldarmy324", espnId: "221" },
   { name: "Cleveland",       team: "Virginia Tech",      conference: "ACC", color: "#E8703F", twitch: "", espnId: "259" },
   { name: "Trick whitey",    team: "Maryland",           conference: "B1G", color: "#FFD24D", twitch: "", espnId: "120" },
@@ -75,7 +75,7 @@ const COACHES = [
   { name: "EHDC12",          team: "North Carolina",     conference: "ACC", color: "#7BAFD4", twitch: "", espnId: "153" },
   { name: "wacky9speedy",    team: "Charlotte",          conference: "SEC", color: "#4FAE84", twitch: "https://www.twitch.tv/wacky9speedy", espnId: "2429" },
   { name: "EYEDONTPULL19",   team: "UCF",                conference: "XII", color: "#E0C158", twitch: "", espnId: "2116" },
-  { name: "CoachLawless",    team: "Rutgers",            conference: "B1G", color: "#E03A57", twitch: "", espnId: "164" },
+  { name: "CoachLawless",    team: "Rutgers",            conference: "B1G", color: "#E03A57", twitch: "https://www.twitch.tv/coachlawless", espnId: "164" },
 ];
 
 /* ------------------------------------------------------------
