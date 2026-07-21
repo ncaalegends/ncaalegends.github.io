@@ -86,30 +86,30 @@ const LEAGUE_INFO = {
                only ever used as a graphic accent, never as text.
    ------------------------------------------------------------ */
 const COACHES = [
-  { name: "Bl00dVayN3",      team: "South Carolina",               conference: "SEC", color: "#A6192E", twitch: "", espnId: "2579" },
-  { name: "Temptiger",       team: "Clemson",                      conference: "ACC", color: "#F56600", twitch: "", espnId: "228" },
+  { name: "Bl00dVayN3",      team: "South Carolina",               conference: "SEC", color: "#A6192E", twitch: "https://www.twitch.tv/bl00dvayn3", espnId: "2579" },
+  { name: "Temptiger",       team: "Clemson",                      conference: "ACC", color: "#F56600", twitch: "https://www.twitch.tv/temptiger", espnId: "228" },
   { name: "RekenCrew",       team: "Ohio State",                   conference: "B1G", color: "#CE2029", twitch: "https://www.twitch.tv/rekencrew", espnId: "194" },
-  { name: "Turt17",          team: "Colorado",                     conference: "XII", color: "#CFB87C", twitch: "", espnId: "38" },
+  { name: "Turt17",          team: "Colorado",                     conference: "XII", color: "#CFB87C", twitch: "https://www.twitch.tv/turt17", espnId: "38" },
   { name: "Davey88",         team: "Oregon",                       conference: "B1G", color: "#FEE123", twitch: "", espnId: "2483" },  // UNVERIFIED — confirm via logo-check.html
   { name: "Pointdexter420",  team: "Oklahoma",                     conference: "SEC", color: "#C8102E", twitch: "", espnId: "201" },
-  { name: "Texan_hog",       team: "Washington",                   conference: "B1G", color: "#7A5BB5", twitch: "", espnId: "264" },  // UNVERIFIED — confirm via logo-check.html
-  { name: "Miles",           team: "Georgia",                      conference: "SEC", color: "#D6203A", twitch: "", espnId: "61" },
-  { name: "BlueMiniMeaniee", team: "Cal",                          conference: "ACC", color: "#FDB515", twitch: "", espnId: "25" },
+  { name: "Texan_hog",       team: "Washington",                   conference: "B1G", color: "#7A5BB5", twitch: "https://www.twitch.tv/texan_hog08", espnId: "264" },  // UNVERIFIED — confirm via logo-check.html
+  { name: "Miles",           team: "Georgia",                      conference: "SEC", color: "#D6203A", twitch: "https://www.twitch.tv/kyrvach", espnId: "61" },
+  { name: "BlueMiniMeaniee", team: "Cal",                          conference: "ACC", color: "#FDB515", twitch: "https://www.twitch.tv/blueminimeaniee", espnId: "25" },
   { name: "Woogity",         team: "Alabama",                      conference: "SEC", color: "#C7304A", twitch: "", espnId: "333" },
-  { name: "Alex",            team: "Florida",                      conference: "SEC", color: "#FA4616", twitch: "", espnId: "57" },
-  { name: "brewma",          team: "Wake Forest",                  conference: "ACC", color: "#C9A227", twitch: "", espnId: "154" },  // UNVERIFIED — confirm via logo-check.html
+  { name: "Alex",            team: "Florida",                      conference: "SEC", color: "#FA4616", twitch: "https://www.twitch.tv/alexgators1", espnId: "57" },
+  { name: "brewma",          team: "Wake Forest",                  conference: "ACC", color: "#C9A227", twitch: "https://www.twitch.tv/brewma2020", espnId: "154" },  // UNVERIFIED — confirm via logo-check.html
   { name: "Jake",            team: "Louisville",                   conference: "ACC", color: "#CB3B47", twitch: "", espnId: "97" },
-  { name: "Projekt",         team: "Michigan",                     conference: "B1G", color: "#FFCB05", twitch: "", espnId: "130" },
-  { name: "Dway",            team: "UCLA",                         conference: "B1G", color: "#4B92DB", twitch: "", espnId: "26" },  // UNVERIFIED — confirm via logo-check.html
-  { name: "DiabeticSnail22", team: "West Virginia",                conference: "XII", color: "#EAAA00", twitch: "", espnId: "277" },  // UNVERIFIED — confirm via logo-check.html
-  { name: "Oldarmy324",      team: "TCU",                          conference: "XII", color: "#8A7FD1", twitch: "", espnId: "2628" },
-  { name: "ronricofsu",      team: "FSU",                          conference: "ACC", color: "#CEB888", twitch: "", espnId: "52" },
+  { name: "Projekt",         team: "Michigan",                     conference: "B1G", color: "#FFCB05", twitch: "https://www.twitch.tv/projekt6868", espnId: "130" },
+  { name: "Dway",            team: "UCLA",                         conference: "B1G", color: "#4B92DB", twitch: "https://www.twitch.tv/dwayinspired", espnId: "26" },  // UNVERIFIED — confirm via logo-check.html
+  { name: "DiabeticSnail22", team: "West Virginia",                conference: "XII", color: "#EAAA00", twitch: "https://www.twitch.tv/diabeticsnail22", espnId: "277" },  // UNVERIFIED — confirm via logo-check.html
+  { name: "Oldarmy324",      team: "TCU",                          conference: "XII", color: "#8A7FD1", twitch: "https://www.twitch.tv/oldarmy324", espnId: "2628" },
+  { name: "ronricofsu",      team: "FSU",                          conference: "ACC", color: "#CEB888", twitch: "https://www.twitch.tv/ronricofsu", espnId: "52" },
   { name: "Big_Ry",          team: "Texas",                        conference: "SEC", color: "#BF5700", twitch: "", espnId: "251" },  // UNVERIFIED — confirm via logo-check.html
   { name: "EYEDONTPULL19",   team: "SMU",                          conference: "ACC", color: "#5A6FD1", twitch: "", espnId: "2567" },
-  { name: "wacky9speedy",    team: "Miami",                        conference: "ACC", color: "#F47321", twitch: "", espnId: "2390" },  // UNVERIFIED — confirm via logo-check.html
-  { name: "BluBus",          team: "USC",                          conference: "B1G", color: "#FFC72C", twitch: "", espnId: "30" },  // UNVERIFIED — confirm via logo-check.html
-  { name: "Brian52682",    team: "Notre Dame",                   conference: "IND", color: "#C99700", twitch: "", espnId: "87" },   // UNVERIFIED — confirm via logo-check.html
-  { name: "II_PROGGY_II",    team: "Ole Miss",                     conference: "SEC", color: "#CE1126", twitch: "", espnId: "145" },  // UNVERIFIED — confirm via logo-check.html
+  { name: "wacky9speedy",    team: "Miami",                        conference: "ACC", color: "#F47321", twitch: "https://www.twitch.tv/wacky9speedy", espnId: "2390" },  // UNVERIFIED — confirm via logo-check.html
+  { name: "BluBus",          team: "USC",                          conference: "B1G", color: "#FFC72C", twitch: "https://www.twitch.tv/blubusbandit", espnId: "30" },  // UNVERIFIED — confirm via logo-check.html
+  { name: "Brian52682",    team: "Notre Dame",                   conference: "IND", color: "#C99700", twitch: "https://www.twitch.tv/brian52682", espnId: "87" },   // UNVERIFIED — confirm via logo-check.html
+  { name: "II_PROGGY_II",    team: "Ole Miss",                     conference: "SEC", color: "#CE1126", twitch: "https://www.twitch.tv/ii_proggy_ii", espnId: "145" },  // UNVERIFIED — confirm via logo-check.html
 ];
 
 /* ------------------------------------------------------------
