@@ -555,6 +555,7 @@ async function refreshLiveStatus() {
     LIVE_NOW.clear();
     data.live.forEach((l) => LIVE_NOW.add(String(l).toLowerCase()));
     renderRoster();
+    renderLiveNow();
   } catch {
     /* Offline, blocked, Worker down — leave the last known state
        alone and try again on the next tick. Never surface this to
@@ -577,6 +578,58 @@ function initLiveStatus() {
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") refreshLiveStatus();
   });
+}
+
+/* ------------------------------------------------------------
+   CURRENTLY LIVE — Home tab
+   ------------------------------------------------------------
+   A band at the top of Home listing this league's coaches who are
+   streaming right now. It only exists when someone is live: no
+   live coaches means the container is emptied, so there's no
+   header, no border, no gap — Home looks exactly as it did before
+   the feature. Same LIVE_NOW set that drives the roster badges, so
+   the two can never disagree.
+   ------------------------------------------------------------ */
+function renderLiveNow() {
+  const box = document.getElementById("live-now");
+  if (!box) return;
+
+  // ROSTER holds each coach once per league, so no cross-league
+  // dedupe is needed here — that's only a concern on the landing
+  // page, which spans all three.
+  const live = ROSTER.filter(isLive).sort((a, b) => a.team.localeCompare(b.team));
+
+  if (live.length === 0) {
+    box.innerHTML = "";
+    return;
+  }
+
+  const cards = live
+    .map((c) => {
+      const url = safeUrl(c.twitch);
+      const color = safeHex(c.color);
+      return `
+      <article class="live-card"${color ? ` style="--team:${color}"` : ""}>
+        ${teamMarkHtml(c.team, "md")}
+        <div class="live-card-text">
+          <div class="live-card-coach">${esc(c.name)}</div>
+          <div class="live-card-team">${esc(c.team)}</div>
+        </div>
+        ${
+          url
+            ? `<a class="live-card-btn" href="${esc(url)}" target="_blank" rel="noopener noreferrer">Watch &rarr;</a>`
+            : ""
+        }
+      </article>`;
+    })
+    .join("");
+
+  box.innerHTML = `
+    <div class="live-now-head">
+      <span class="live-now-dot"></span>
+      <h2 class="live-now-title">Currently Live on Twitch</h2>
+    </div>
+    <div class="live-now-grid">${cards}</div>`;
 }
 
 function renderRoster() {
@@ -1083,6 +1136,7 @@ function init() {
   renderRecentResults();
   renderRankings();
   renderRoster();
+  renderLiveNow();
   initLiveStatus();
   initSchedule();
   renderTicker();
