@@ -1,0 +1,505 @@
+/* ============================================================
+   COMMISSIONER TOOLS — page logic
+   ------------------------------------------------------------
+   Three jobs:
+     1. exchange an access code for a name and a league list
+     2. render the week's games from the league's own data files
+     3. hand a submission to the Worker
+
+   It never decides anything. Which games exist comes from
+   week-core.js (the same code the CLI tools use); whether a
+   submission is allowed comes from the Worker; whether it's valid
+   comes from tools/apply.js. This file's checks exist to catch
+   mistakes early and give a useful message, not to be the last
+   line of defence.
+   ============================================================ */
+
+/* ------------------------------------------------------------
+   CONFIG
+   ------------------------------------------------------------
+   The Worker's URL. Deploy steps are in worker/ADMIN-SETUP.md.
+   Leave it blank and the page will say so instead of failing with
+   a network error nobody can interpret.
+   ------------------------------------------------------------ */
+const ADMIN_API = "https://ncaa-legends-admin.westfall-105.workers.dev/";
+
+/* ------------------------------------------------------------
+   STATE
+   ------------------------------------------------------------
+   The access code is held in a variable and nowhere else — not in
+   localStorage, not in sessionStorage, not in the URL. That means
+   a refresh asks for it again, which is mildly annoying and the
+   right trade: these get used on phones that get handed around,
+   and a code sitting in browser storage outlives any intent to
+   share it. Signing out or closing the tab genuinely ends it.
+   ------------------------------------------------------------ */
+let accessCode = "";
+let me = null; // { name, leagues: [] }
+let data = null; // loaded league + schedule data for the current league
+let games = []; // scoreableGames() for the selected week
+let unlocked = new Set(); // indexes of already-final games the user chose to edit
+
+const $ = (id) => document.getElementById(id);
+
+const esc = (s) =>
+  String(s == null ? "" : s).replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])
+  );
+
+function message(el, kind, text) {
+  if (!text) {
+    el.innerHTML = "";
+    return;
+  }
+  el.innerHTML = `<div class="msg msg-${kind}">${esc(text)}</div>`;
+}
+
+/* Week 14 and 15 carry names on the site; matching them here means
+   the dropdown reads the way the schedule does. */
+function weekOptionLabel(w) {
+  if (w === 14) return "Week 14 — Army-Navy";
+  if (w === 15) return "Week 15 — Championships";
+  return `Week ${w}`;
+}
+
+/* ------------------------------------------------------------
+   API
+   ------------------------------------------------------------ */
+async function api(route, body) {
+  if (!ADMIN_API) {
+    throw new Error(
+      "This page isn't connected to its server yet. The ADMIN_API setting in admin/admin.js is blank — see worker/ADMIN-SETUP.md."
+    );
+  }
+
+  let res;
+  try {
+    res = await fetch(`${ADMIN_API.replace(/\/+$/, "")}${route}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+  } catch (e) {
+    throw new Error("Couldn't reach the server. Check your connection and try again.");
+  }
+
+  let json = {};
+  try {
+    json = await res.json();
+  } catch (e) {
+    /* Non-JSON reply means something upstream broke, not the app. */
+    throw new Error(`Server returned an unexpected response (${res.status}).`);
+  }
+
+  if (!res.ok) throw new Error(json.error || `Something went wrong (${res.status}).`);
+  return json;
+}
+
+/* ------------------------------------------------------------
+   LEAGUE DATA
+   ------------------------------------------------------------
+   Same trick the landing page uses: the data files are plain
+   top-level `const` declarations meant for a <script> tag, so
+   fetching the text and running it inside a Function body gives
+   each league its own scope. That's what makes it safe to switch
+   leagues without the constants colliding.
+   ------------------------------------------------------------ */
+async function fetchText(url) {
+  const res = await fetch(url, { cache: "no-cache" });
+  if (!res.ok) throw new Error(`Couldn't load ${url} (HTTP ${res.status})`);
+  return res.text();
+}
+
+async function loadLeagueData(slug) {
+  const [leagueSrc, scheduleSrc] = await Promise.all([
+    fetchText(`../${slug}/league-data.js`),
+    fetchText(`../${slug}/schedule-data.js`),
+  ]);
+
+  /* Not every league defines an alias table, so each global is
+     probed rather than assumed — a missing one is a legitimate
+     state, not an error. */
+  return new Function(`
+    ${leagueSrc}
+    ${scheduleSrc}
+    return {
+      SEASON:         typeof SEASON !== "undefined" ? SEASON : {},
+      COACHES:        typeof COACHES !== "undefined" ? COACHES : [],
+      LEAGUE_INFO:    typeof LEAGUE_INFO !== "undefined" ? LEAGUE_INFO : {},
+      TEAM_SCHEDULES: typeof TEAM_SCHEDULES !== "undefined" ? TEAM_SCHEDULES : [],
+      ALIASES:        typeof SCHEDULE_TEAM_ALIASES !== "undefined" ? SCHEDULE_TEAM_ALIASES : {}
+    };
+  `)();
+}
+
+/* ------------------------------------------------------------
+   SIGN IN
+   ------------------------------------------------------------ */
+$("signin-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const btn = $("signin-btn");
+  const code = $("code-input").value.trim();
+  if (!code) return;
+
+  btn.disabled = true;
+  message($("signin-msg"), "warn", "Checking…");
+
+  try {
+    const who = await api("/whoami", { code });
+    accessCode = code;
+    me = who;
+
+    $("code-input").value = "";
+    message($("signin-msg"), "");
+    $("signin-panel").classList.add("hidden");
+    $("workspace").classList.remove("hidden");
+    $("who-name").textContent = who.name;
+
+    const sel = $("league-select");
+    sel.innerHTML = who.leagues
+      .map((l) => `<option value="${esc(l)}">${esc(leagueLabel(l))}</option>`)
+      .join("");
+
+    await switchLeague(who.leagues[0]);
+  } catch (err) {
+    message($("signin-msg"), "error", err.message);
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+function leagueLabel(slug) {
+  const found = (typeof SITE_LEAGUES !== "undefined" ? SITE_LEAGUES : []).find(
+    (l) => l.dir === slug
+  );
+  return found ? found.label : slug;
+}
+
+$("signout-btn").addEventListener("click", () => {
+  accessCode = "";
+  me = null;
+  data = null;
+  games = [];
+  unlocked.clear();
+  $("workspace").classList.add("hidden");
+  $("signin-panel").classList.remove("hidden");
+  message($("signin-msg"), "");
+  message($("scores-msg"), "");
+  message($("advance-msg"), "");
+});
+
+/* ------------------------------------------------------------
+   LEAGUE + WEEK SELECTION
+   ------------------------------------------------------------ */
+async function switchLeague(slug) {
+  /* Drives the accent colour, exactly as on the league pages. */
+  document.body.setAttribute("data-league", slug);
+
+  message($("scores-msg"), "warn", "Loading…");
+  try {
+    data = await loadLeagueData(slug);
+  } catch (err) {
+    message($("scores-msg"), "error", err.message);
+    return;
+  }
+  message($("scores-msg"), "");
+
+  const current = Number(data.SEASON.currentWeek) || 0;
+
+  const opts = [];
+  for (let w = 0; w <= 15; w++) {
+    opts.push(`<option value="${w}">${esc(weekOptionLabel(w))}</option>`);
+  }
+  $("week-select").innerHTML = opts.join("");
+  $("week-select").value = String(current);
+
+  $("advance-week").innerHTML = opts.join("");
+  $("advance-week").value = String(Math.min(current + 1, 15));
+
+  $("advance-next").value = data.SEASON.nextAdvance || "";
+
+  $("current-week").textContent =
+    `Currently on ${weekOptionLabel(current).toUpperCase()}` +
+    (data.SEASON.nextAdvance ? ` · next deadline ${data.SEASON.nextAdvance}` : "");
+
+  renderGames();
+}
+
+$("league-select").addEventListener("change", (e) => switchLeague(e.target.value));
+$("week-select").addEventListener("change", () => renderGames());
+
+/* ------------------------------------------------------------
+   RENDER THE WEEK
+   ------------------------------------------------------------ */
+function renderGames() {
+  unlocked.clear();
+  const week = Number($("week-select").value);
+  const wk = WeekCore.buildWeek(data, week);
+  games = WeekCore.scoreableGames(wk);
+
+  const host = $("games");
+
+  if (!games.length) {
+    const why = wk.notes.length
+      ? "Everyone is on a bye or off week."
+      : "No games are listed for this week.";
+    host.innerHTML = `<p class="note-line">${esc(why)}</p>`;
+    updateCount();
+    return;
+  }
+
+  host.innerHTML = games.map((g, i) => gameHtml(g, i)).join("");
+
+  /* Byes and notes are shown but not scoreable — seeing them
+     confirms the week loaded correctly rather than leaving a coach
+     wondering why their team is missing. */
+  if (wk.notes.length) {
+    host.insertAdjacentHTML(
+      "beforeend",
+      `<p class="note-line" style="margin-top:14px;">` +
+        wk.notes.map((n) => `${esc(n.team)} &mdash; ${esc(n.note)}`).join("<br>") +
+        `</p>`
+    );
+  }
+
+  host.querySelectorAll("[data-edit]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const i = Number(btn.getAttribute("data-edit"));
+      if (!confirm(`Replace the recorded result for ${games[i].label}?`)) return;
+      unlocked.add(i);
+      const row = host.querySelector(`[data-game="${i}"]`);
+      row.classList.remove("is-final");
+      row.querySelector(".final-line").remove();
+      row.insertAdjacentHTML("beforeend", scoreInputsHtml(games[i], i, games[i].scoredPair));
+      wireInputs(row);
+    });
+  });
+
+  wireInputs(host);
+  updateCount();
+}
+
+function gameHtml(g, i) {
+  const tag = g.kind === "cpu" ? `<span class="game-tag">CPU</span>` : "";
+  const head =
+    `<div class="game-label">${esc(g.label)}${tag}</div>` +
+    (g.subtitle ? `<div class="game-sub">${esc(g.subtitle)}</div>` : "");
+
+  if (g.scored) {
+    return (
+      `<div class="game is-final" data-game="${i}">${head}` +
+      `<div class="final-line">FINAL &nbsp;${esc(g.scored)}` +
+      `<button type="button" class="lock btn-quiet" data-edit="${i}" ` +
+      `style="background:none;border:0;color:var(--steel);text-decoration:underline;cursor:pointer;">Edit</button>` +
+      `</div></div>`
+    );
+  }
+
+  return `<div class="game" data-game="${i}">${head}${scoreInputsHtml(g, i, null)}</div>`;
+}
+
+/* Two labelled boxes rather than one "27-24" field. The text form
+   is fine at a terminal where the prompt names the team; on a
+   phone it's ambiguous which number belongs to whom, and getting
+   that backwards is the mistake that's hardest to spot afterwards. */
+function scoreInputsHtml(g, i, prefill) {
+  const a = prefill ? prefill.team : "";
+  const b = prefill ? prefill.opponent : "";
+  return (
+    `<div class="score-row" data-inputs="${i}">` +
+    `<span class="score-side">${esc(g.perspective)}</span>` +
+    `<input class="score-box" type="number" inputmode="numeric" min="0" max="200" ` +
+    `data-side="team" data-i="${i}" value="${esc(a)}" aria-label="${esc(g.perspective)} score">` +
+    `<span class="score-dash">&ndash;</span>` +
+    `<input class="score-box" type="number" inputmode="numeric" min="0" max="200" ` +
+    `data-side="opp" data-i="${i}" value="${esc(b)}" aria-label="${esc(g.other)} score">` +
+    `<span class="score-side" style="text-align:right;">${esc(g.other)}</span>` +
+    `</div>`
+  );
+}
+
+function wireInputs(scope) {
+  scope.querySelectorAll(".score-box").forEach((el) => {
+    el.addEventListener("input", updateCount);
+  });
+}
+
+/* ------------------------------------------------------------
+   COLLECT WHAT'S BEEN TYPED
+   ------------------------------------------------------------
+   Returns { entries, problems }. A row with one box filled and the
+   other empty is a problem, not a silent skip — that's a half-typed
+   score, and dropping it quietly is how a result goes missing.
+   ------------------------------------------------------------ */
+function collect() {
+  const entries = [];
+  const problems = [];
+
+  games.forEach((g, i) => {
+    const row = document.querySelector(`[data-inputs="${i}"]`);
+    if (!row) return; // already final and not unlocked
+
+    const a = row.querySelector('[data-side="team"]').value.trim();
+    const b = row.querySelector('[data-side="opp"]').value.trim();
+
+    if (a === "" && b === "") return; // not played yet — fine
+    if (a === "" || b === "") {
+      problems.push(`${g.label} — only one score filled in.`);
+      return;
+    }
+
+    /* The same parser the CLI uses, so the tie rule and the
+       out-of-range rule are identical on both paths. */
+    const parsed = WeekCore.parseScore(`${a}-${b}`);
+    if (!parsed) {
+      problems.push(`${g.label} — "${a}-${b}" isn't a score.`);
+      return;
+    }
+    if (parsed.error) {
+      problems.push(`${g.label} — ${parsed.error}.`);
+      return;
+    }
+
+    entries.push({ team: g.perspective, score: `${parsed.team}-${parsed.opponent}` });
+  });
+
+  return { entries, problems };
+}
+
+function updateCount() {
+  const { entries, problems } = collect();
+  const bits = [];
+  if (entries.length) bits.push(`${entries.length} game${entries.length === 1 ? "" : "s"} ready`);
+  if (problems.length) bits.push(`${problems.length} needs attention`);
+  $("scores-count").textContent = bits.join(" · ");
+}
+
+/* ------------------------------------------------------------
+   SAVE SCORES
+   ------------------------------------------------------------ */
+$("save-scores").addEventListener("click", async () => {
+  const btn = $("save-scores");
+  const msg = $("scores-msg");
+  const week = Number($("week-select").value);
+  const { entries, problems } = collect();
+
+  if (problems.length) {
+    message(msg, "error", `Fix these first:\n${problems.join("\n")}`);
+    return;
+  }
+  if (!entries.length) {
+    message(msg, "warn", "Nothing typed in yet.");
+    return;
+  }
+
+  btn.disabled = true;
+  message(msg, "warn", "Saving…");
+
+  try {
+    await api("/submit", {
+      code: accessCode,
+      payload: {
+        action: "scores",
+        league: $("league-select").value,
+        week,
+        entries,
+        /* Only true when the user explicitly unlocked a finished
+           game. Sending it always would turn every save into an
+           overwrite and lose the guardrail entirely. */
+        force: unlocked.size > 0,
+      },
+    });
+
+    message(
+      msg,
+      "ok",
+      `Saved ${entries.length} game${entries.length === 1 ? "" : "s"}. ` +
+        `The site updates in about a minute — refresh this page after that to see it recorded.`
+    );
+  } catch (err) {
+    message(msg, "error", err.message);
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+/* ------------------------------------------------------------
+   ADVANCE — two steps, on purpose
+   ------------------------------------------------------------
+   Step one swaps the form for a plain-language description of what
+   is about to happen. Step two sends it. The confirmation replaces
+   the form rather than appearing beneath it, so the second click
+   can't land on the same spot as the first.
+   ------------------------------------------------------------ */
+$("advance-btn").addEventListener("click", () => {
+  const week = Number($("advance-week").value);
+  const next = $("advance-next").value.trim();
+  const msg = $("advance-msg");
+
+  if (!next) {
+    message(msg, "error", "Give a deadline — it's what coaches see on the site.");
+    return;
+  }
+
+  const current = Number(data.SEASON.currentWeek) || 0;
+  const wk = WeekCore.buildWeek(data, week);
+
+  let warn = "";
+  if (week <= current) {
+    warn = ` This moves the league BACKWARDS from ${weekOptionLabel(current)}.`;
+  } else if (week > current + 1) {
+    warn = ` This skips ${week - current - 1} week(s).`;
+  }
+
+  message(msg, "");
+  $("advance-confirm-text").innerHTML =
+    `${esc(leagueLabel($("league-select").value))} will move to ` +
+    `<span class="what">${esc(weekOptionLabel(week))}</span>, with ` +
+    `<span class="what">${wk.league.length} head-to-head</span> and ` +
+    `<span class="what">${wk.cpu.length} CPU</span> game(s).<br>` +
+    `Coaches will see the deadline <span class="what">${esc(next)}</span>.` +
+    (warn ? `<br><strong>${esc(warn.trim())}</strong>` : "");
+
+  $("advance-form").classList.add("hidden");
+  $("advance-confirm").classList.remove("hidden");
+});
+
+$("advance-no").addEventListener("click", () => {
+  $("advance-confirm").classList.add("hidden");
+  $("advance-form").classList.remove("hidden");
+});
+
+$("advance-yes").addEventListener("click", async () => {
+  const btn = $("advance-yes");
+  const msg = $("advance-msg");
+  const week = Number($("advance-week").value);
+  const next = $("advance-next").value.trim();
+
+  btn.disabled = true;
+  message(msg, "warn", "Advancing…");
+
+  try {
+    await api("/submit", {
+      code: accessCode,
+      payload: {
+        action: "advance",
+        league: $("league-select").value,
+        week,
+        next,
+        confirm: true,
+      },
+    });
+
+    $("advance-confirm").classList.add("hidden");
+    $("advance-form").classList.remove("hidden");
+    message(
+      msg,
+      "ok",
+      `Advanced to ${weekOptionLabel(week)}. The site updates in about a minute.`
+    );
+  } catch (err) {
+    message(msg, "error", err.message);
+  } finally {
+    btn.disabled = false;
+  }
+});

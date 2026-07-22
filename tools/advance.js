@@ -424,4 +424,21 @@ async function main() {
   );
 }
 
-main().catch((e) => die(e.stack || e.message));
+/* ------------------------------------------------------------
+   ENTRY POINT
+   ------------------------------------------------------------
+   Only runs the CLI when invoked directly. tools/apply.js requires
+   this file for updateSeason() so an advance triggered from the
+   admin page rewrites the SEASON block through the same
+   brace-matched, comment-preserving surgery as one run from the
+   command line — rather than a second writer that would drift.
+
+   Note that requiring this module does NOT post to Discord: the
+   webhook call lives inside main(), which no longer fires on
+   import.
+   ------------------------------------------------------------ */
+if (require.main === module) {
+  main().catch((e) => die(e.stack || e.message));
+}
+
+module.exports = { updateSeason, buildMessage, seasonBlock };

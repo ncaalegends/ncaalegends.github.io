@@ -1,0 +1,118 @@
+# ============================================================
+#  LEAGUE UPDATE — applies one submission from the admin page
+# ------------------------------------------------------------
+#  Triggered by a repository_dispatch from the Cloudflare Worker
+#  in worker/admin-api.js, which is the only thing holding a
+#  token that can fire it. The Worker has already checked the
+#  caller's access code; this workflow re-validates everything
+#  anyway, inside tools/apply.js.
+#
+#  This is the piece that actually does the work. The admin page
+#  and the Worker are both just ways of getting a payload here —
+#  if you ever want a second front door (an issue form, a Discord
+#  command), it dispatches to this same workflow and nothing
+#  below changes.
+#
+#  WHY THE PAYLOAD IS NESTED UNDER `payload`
+#  GitHub caps client_payload at 10 top-level properties (and
+#  65,535 characters). A scores submission already uses six and an
+#  advance seven, which is close enough to the ceiling that adding
+#  one field later would break it in a way that's miserable to
+#  diagnose. Wrapping everything in a single `payload` object
+#  means there is exactly one top-level property forever, hence
+#  `client_payload.payload` below.
+#
+#  SECURITY NOTE — why the payload never appears in a `run:` line
+#  The payload comes from the internet. GitHub expands ${{ }} by
+#  pasting text directly into the shell script before it runs, so
+#  a payload containing a quote and a semicolon would execute as
+#  commands on the runner. Passing it through `env:` instead hands
+#  it to the process as a variable, where it is data and stays
+#  data. That's the reason for the slightly awkward dance in
+#  "Write payload" below.
+# ============================================================
+
+name: League update
+
+on:
+  repository_dispatch:
+    types: [league-update]
+
+# Only what's needed to commit the data file. No packages, no
+# issues, no pull requests.
+permissions:
+  contents: write
+
+# Two submissions landing at once would race on the push and one
+# would be rejected. Queue them instead — they're seconds apart at
+# worst, and cancel-in-progress would silently drop somebody's
+# scores.
+concurrency:
+  group: league-update
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the site
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # Written to the runner's temp dir, not the working tree, so
+      # there's no chance of committing the payload alongside the
+      # data change.
+      - name: Write payload
+        env:
+          PAYLOAD: ${{ toJSON(github.event.client_payload.payload) }}
+        run: printf '%s' "$PAYLOAD" > "$RUNNER_TEMP/payload.json"
+
+      - name: Show what was submitted
+        env:
+          PAYLOAD: ${{ toJSON(github.event.client_payload.payload) }}
+        run: |
+          echo "### Submission" >> "$GITHUB_STEP_SUMMARY"
+          echo '```json' >> "$GITHUB_STEP_SUMMARY"
+          printf '%s' "$PAYLOAD" >> "$GITHUB_STEP_SUMMARY"
+          echo '' >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      # apply.js exits non-zero on anything it doesn't like, which
+      # fails the run and sends GitHub's normal failure email. That
+      # email is the alerting story for a rejected submission.
+      - name: Apply it
+        id: apply
+        run: node tools/apply.js "$RUNNER_TEMP/payload.json"
+
+      - name: Commit and push
+        if: steps.apply.outputs.changed == 'true'
+        env:
+          COMMIT_MESSAGE: ${{ steps.apply.outputs.commit_message }}
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          # -F - reads the message from stdin, so it is never parsed
+          # as shell. Same reasoning as the payload above.
+          printf '%s' "$COMMIT_MESSAGE" | git commit -F -
+          git push
+
+      - name: Report
+        env:
+          SUMMARY: ${{ steps.apply.outputs.summary }}
+          CHANGED: ${{ steps.apply.outputs.changed }}
+        run: |
+          if [ "$CHANGED" = "true" ]; then
+            echo "### Applied" >> "$GITHUB_STEP_SUMMARY"
+            printf '%s\n' "$SUMMARY" >> "$GITHUB_STEP_SUMMARY"
+            echo '' >> "$GITHUB_STEP_SUMMARY"
+            echo 'Pages usually reflects this within a minute.' >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "### No change" >> "$GITHUB_STEP_SUMMARY"
+            echo 'The data files already said this. Nothing was committed.' >> "$GITHUB_STEP_SUMMARY"
+          fi

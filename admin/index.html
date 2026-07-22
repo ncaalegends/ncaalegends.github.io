@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Commissioner Tools — NCAA Legends</title>
+
+<!-- Unlisted, not secret. There's nothing sensitive in the page
+     itself; every action it offers is checked by the Worker. But
+     there's also no reason for it to turn up in search results. -->
+<meta name="robots" content="noindex, nofollow">
+
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
+<meta name="theme-color" content="#060b16">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- Loaded for the design tokens and fonts only. Everything
+     admin-specific is in the block below, so none of it ships to
+     the pages coaches actually visit. -->
+<link rel="stylesheet" href="../style.css">
+
+<style>
+/* ============================================================
+   ADMIN — scoped styles
+   ------------------------------------------------------------
+   Reads the same tokens as the rest of the site (--navy-panel,
+   --gold, --chalk...). The accent swaps per league via the
+   data-league attribute on <body>, exactly as the league pages
+   do, so the 1-star tools look copper and the 3-star ones ice
+   blue without any extra rules here.
+
+   Controls are deliberately large. This gets used on a phone,
+   late, by someone who just finished playing.
+   ============================================================ */
+
+.admin-wrap {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 28px 18px 80px;
+}
+
+.admin-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.admin-title {
+  font-family: var(--font-display);
+  font-size: clamp(26px, 6vw, 38px);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--chalk);
+  margin: 0;
+  text-transform: uppercase;
+}
+.admin-title span { color: var(--gold); }
+
+.admin-sub {
+  color: var(--steel);
+  font-size: 14px;
+  margin: 0 0 26px;
+}
+
+.panel {
+  background: var(--navy-panel);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--gold);
+  padding: 20px 18px;
+  margin-bottom: 18px;
+}
+
+.panel h2 {
+  font-family: var(--font-display);
+  font-size: 17px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin: 0 0 4px;
+}
+
+.panel .hint {
+  color: var(--steel);
+  font-size: 13px;
+  margin: 0 0 16px;
+  line-height: 1.5;
+}
+
+label.field { display: block; margin-bottom: 14px; }
+
+label.field > span {
+  display: block;
+  font-size: 12px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--steel);
+  margin-bottom: 6px;
+}
+
+input[type="text"], input[type="password"], input[type="number"], select {
+  width: 100%;
+  background: var(--navy-deep);
+  border: 1px solid var(--steel-dim);
+  color: var(--chalk);
+  font-family: var(--font-body);
+  font-size: 16px; /* 16px stops iOS zooming the page on focus */
+  padding: 11px 12px;
+  border-radius: 2px;
+}
+input:focus, select:focus {
+  outline: 2px solid var(--gold);
+  outline-offset: 1px;
+  border-color: var(--gold);
+}
+
+.btn {
+  font-family: var(--font-display);
+  font-size: 15px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 12px 22px;
+  border: 0;
+  background: var(--gold);
+  color: var(--navy-deep);
+  cursor: pointer;
+  clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+}
+.btn:hover { background: var(--gold-bright); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.btn-quiet {
+  background: transparent;
+  color: var(--steel);
+  border: 1px solid var(--steel-dim);
+  clip-path: none;
+}
+.btn-quiet:hover { background: rgba(242,244,248,0.05); color: var(--chalk); }
+
+.btn-danger { background: var(--crimson); color: var(--chalk); }
+.btn-danger:hover { background: #f0344a; }
+
+.btn-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+/* ---- game rows ---- */
+
+.game {
+  border-top: 1px solid var(--line);
+  padding: 15px 0;
+}
+.game:last-child { border-bottom: 1px solid var(--line); }
+
+.game-label {
+  font-family: var(--font-display);
+  font-size: 16px;
+  color: var(--chalk);
+  letter-spacing: 0.02em;
+}
+.game-sub { color: var(--steel); font-size: 12.5px; margin-top: 2px; }
+
+.game-tag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  padding: 2px 6px;
+  margin-left: 8px;
+  border: 1px solid var(--steel-dim);
+  color: var(--steel);
+  vertical-align: 2px;
+}
+
+.score-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 11px;
+  flex-wrap: wrap;
+}
+.score-box {
+  width: 74px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 19px;
+  font-weight: 600;
+  padding: 9px 4px;
+}
+.score-side { font-size: 12.5px; color: var(--steel); flex: 1 1 90px; min-width: 0; }
+.score-dash { color: var(--steel-dim); font-family: var(--font-mono); }
+
+/* A game already recorded reads as settled, not as an empty form
+   waiting to be filled in again. */
+.game.is-final .final-line {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  color: var(--win);
+  margin-top: 9px;
+}
+.game.is-final .final-line .lock { color: var(--steel); font-size: 12px; margin-left: 8px; }
+
+.note-line { color: var(--steel); font-size: 13px; padding: 7px 0; }
+
+/* ---- messages ---- */
+
+/* pre-line so a list of problems, one per line, renders as one —
+   the collect() step reports several at once and running them
+   together into a paragraph makes them much harder to act on. */
+.msg { padding: 12px 14px; margin: 14px 0 0; font-size: 14px; line-height: 1.5; white-space: pre-line; }
+.msg-error { background: rgba(224,38,58,0.12); border-left: 3px solid var(--crimson); color: #ffb3bd; }
+.msg-ok    { background: rgba(62,207,126,0.10); border-left: 3px solid var(--win); color: #a8ecc6; }
+.msg-warn  { background: rgba(242,193,78,0.10); border-left: 3px solid var(--gold); color: #ffe6a8; }
+
+.hidden { display: none !important; }
+
+.who {
+  font-size: 13px;
+  color: var(--steel);
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.who strong { color: var(--chalk); font-weight: 600; }
+
+/* The confirmation state for an advance. Visually distinct from
+   the form it replaces so the second click never feels like a
+   repeat of the first. */
+.confirm-box {
+  background: rgba(224,38,58,0.09);
+  border: 1px solid rgba(224,38,58,0.4);
+  padding: 16px;
+  margin-top: 4px;
+}
+.confirm-box p { margin: 0 0 14px; color: var(--chalk); font-size: 15px; line-height: 1.55; }
+.confirm-box .what { font-family: var(--font-mono); color: var(--gold-bright); }
+
+.week-strip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+.week-strip select { width: auto; min-width: 190px; }
+
+.current-week {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--steel);
+  letter-spacing: 0.06em;
+}
+</style>
+</head>
+
+<body data-league="main">
+
+<div class="admin-wrap">
+
+  <div class="admin-head">
+    <h1 class="admin-title">Commissioner <span>Tools</span></h1>
+    <a href="../" style="color:var(--steel);font-size:13px;">&larr; Back to the site</a>
+  </div>
+  <p class="admin-sub">Record scores and advance the week. Changes go live on the site about a minute after you save.</p>
+
+  <!-- ============ SIGN IN ============ -->
+  <section class="panel" id="signin-panel">
+    <h2>Sign in</h2>
+    <p class="hint">Enter the access code Josh sent you. It's tied to you personally, so don't share it &mdash; if someone else needs access, they get their own.</p>
+
+    <form id="signin-form" autocomplete="off">
+      <label class="field">
+        <span>Access code</span>
+        <input type="password" id="code-input" autocomplete="current-password" spellcheck="false" required>
+      </label>
+      <button class="btn" type="submit" id="signin-btn">Sign in</button>
+    </form>
+    <div id="signin-msg"></div>
+  </section>
+
+  <!-- ============ WORKSPACE ============ -->
+  <div id="workspace" class="hidden">
+
+    <section class="panel">
+      <div class="who">
+        <span>Signed in as <strong id="who-name"></strong></span>
+        <button class="btn btn-quiet" type="button" id="signout-btn" style="padding:6px 12px;font-size:12px;">Sign out</button>
+      </div>
+
+      <div class="week-strip" style="margin-top:16px;">
+        <label class="field" style="margin:0;">
+          <span>League</span>
+          <select id="league-select"></select>
+        </label>
+        <label class="field" style="margin:0;">
+          <span>Week</span>
+          <select id="week-select"></select>
+        </label>
+      </div>
+      <p class="current-week" id="current-week"></p>
+    </section>
+
+    <!-- ============ SCORES ============ -->
+    <section class="panel" id="scores-panel">
+      <h2>Scores</h2>
+      <p class="hint">Fill in the games you've played. Leave the rest blank &mdash; blank means "not played yet", not "0&ndash;0". You can come back and add more later.</p>
+
+      <div id="games"></div>
+      <div id="scores-msg"></div>
+
+      <div class="btn-row" style="margin-top:18px;">
+        <button class="btn" type="button" id="save-scores">Save scores</button>
+        <span class="current-week" id="scores-count"></span>
+      </div>
+    </section>
+
+    <!-- ============ ADVANCE ============ -->
+    <section class="panel" id="advance-panel">
+      <h2>Advance the week</h2>
+      <p class="hint">Moves the league to a new week and updates the deadline coaches see. Do this after everyone's games are in.</p>
+
+      <div id="advance-form">
+        <label class="field">
+          <span>Advance to week</span>
+          <select id="advance-week"></select>
+        </label>
+        <label class="field">
+          <span>Next deadline (as it should read on the site)</span>
+          <input type="text" id="advance-next" placeholder="Friday, August 1" maxlength="120">
+        </label>
+        <button class="btn" type="button" id="advance-btn">Advance&hellip;</button>
+      </div>
+
+      <!-- Step two. Replaces the form rather than sitting under it,
+           so there is no way to click straight through. -->
+      <div id="advance-confirm" class="confirm-box hidden">
+        <p id="advance-confirm-text"></p>
+        <div class="btn-row">
+          <button class="btn btn-danger" type="button" id="advance-yes">Yes, advance</button>
+          <button class="btn btn-quiet" type="button" id="advance-no">Cancel</button>
+        </div>
+      </div>
+
+      <div id="advance-msg"></div>
+    </section>
+
+  </div>
+</div>
+
+<!-- people.js for SITE_LEAGUES (the league labels), week-core.js for
+     the matchup logic the CLI tools use. Neither is admin-specific. -->
+<script src="../people.js"></script>
+<script src="../week-core.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>

@@ -40,6 +40,9 @@ const fs = require("fs");
 const path = require("path");
 const readline = require("readline");
 
+/* parseScore, scoreableGames and editsFor now live in
+   /week-core.js so the admin page can use the identical rules.
+   They come through lib/league.js unchanged. */
 const {
   parseArgs,
   die,
@@ -49,24 +52,10 @@ const {
   buildWeek,
   weekLabel,
   parseWeek,
+  parseScore,
+  scoreableGames,
+  editsFor,
 } = require("./lib/league");
-
-/* ------------------------------------------------------------
-   SCORE PARSING
-   ------------------------------------------------------------ */
-function parseScore(input) {
-  const m = String(input ?? "")
-    .trim()
-    .match(/^(\d{1,3})\s*[-:\s]\s*(\d{1,3})$/);
-  if (!m) return null;
-  const a = Number(m[1]);
-  const b = Number(m[2]);
-  /* Ties don't exist in college football — overtime settles every
-     game — so an equal score is a typo every time, not a result. */
-  if (a === b) return { error: "that's a tie; college games can't end tied" };
-  if (a > 200 || b > 200) return { error: "score over 200 — check the digits" };
-  return { team: a, opponent: b };
-}
 
 /* ------------------------------------------------------------
    THE WRITER
@@ -170,65 +159,6 @@ function applyScores(scheduleFile, edits) {
   }
 
   return { applied, write: () => fs.writeFileSync(scheduleFile, lines.join("\n"), "utf8") };
-}
-
-/* ------------------------------------------------------------
-   GAME LIST FOR A WEEK
-   ------------------------------------------------------------
-   One flat list of everything scoreable, H2H and CPU alike, in the
-   order a commissioner reads a results screen.
-   ------------------------------------------------------------ */
-function scoreableGames(wk) {
-  const games = [];
-
-  wk.league.forEach((m) => {
-    games.push({
-      kind: "h2h",
-      label: `${m.away} at ${m.home}`,
-      subtitle: [m.awayCoach, m.homeCoach].filter(Boolean).join("  vs  "),
-      /* Prompt from the away team's perspective — that's the order
-         a scoreboard reads, "away at home". */
-      perspective: m.away,
-      other: m.home,
-      teams: m.teams,
-      scored: m.scored ? `${m.away} ${m.scored.away}-${m.scored.home} ${m.home}` : null,
-    });
-  });
-
-  wk.cpu.forEach((g) => {
-    games.push({
-      kind: "cpu",
-      label: `${g.team} ${g.location === "at" ? "at" : "vs"} ${g.opponent}`,
-      subtitle: g.coach ? `${g.coach} (CPU opponent)` : "CPU opponent",
-      perspective: g.team,
-      other: g.opponent,
-      teams: [g.team],
-      scored: g.scored ? `${g.team} ${g.scored.team}-${g.scored.opponent}` : null,
-    });
-  });
-
-  return games;
-}
-
-/* Turn one answered game into the one or two file edits it implies.
-   H2H games write both sides, mirrored — the entire point. */
-function editsFor(game, week, score, data) {
-  const R = makeResolver(data);
-  const out = [
-    { team: game.perspective, week, teamScore: score.team, opponentScore: score.opponent },
-  ];
-
-  if (game.kind === "h2h") {
-    const otherName = R.scheduleTeamFor(game.other, data.TEAM_SCHEDULES) || game.other;
-    out.push({
-      team: otherName,
-      week,
-      teamScore: score.opponent,
-      opponentScore: score.team,
-    });
-  }
-
-  return out;
 }
 
 /* ------------------------------------------------------------
@@ -487,4 +417,21 @@ async function main() {
   );
 }
 
-main().catch((e) => die(e.stack || e.message));
+/* ------------------------------------------------------------
+   ENTRY POINT
+   ------------------------------------------------------------
+   Only runs the CLI when invoked directly. Required as a module —
+   which is what tools/apply.js does to serve the admin page — it
+   just hands back the pieces below and prompts nobody.
+
+   apply.js reuses parseSet and applyScores specifically so a score
+   submitted from the web goes through the exact same name
+   resolution and the exact same guardrails as one typed at the
+   prompt. A second, more permissive path to the data file is the
+   thing worth not having.
+   ------------------------------------------------------------ */
+if (require.main === module) {
+  main().catch((e) => die(e.stack || e.message));
+}
+
+module.exports = { applyScores, parseSet, scoreableGames, parseScore, editsFor };

@@ -43,9 +43,17 @@ node tools/advance.js --league 3star --week 2 --no-post
 | `1star` | `/1star/` | no webhook — use `--no-post` |
 
 The 1-star and 3-star dynasties are run by other commissioners who
-haven't opted into the automation. Their webhooks are blank in
+haven't opted into the Discord automation. Their webhooks are blank in
 `config.json`, and the script refuses to post rather than silently
 doing nothing. `advance.cmd` passes `--no-post` for them automatically.
+
+Those two leagues also have a **web admin page** at
+`ncaalegends.github.io/admin/`, so their commissioners can record
+scores and advance weeks without installing anything. It runs these
+same scripts on a GitHub Actions runner — see `apply.js` below and
+`worker/ADMIN-SETUP.md`. Nothing about the local tools changes; both
+paths write the same files the same way, so you can keep using
+`advance.cmd` for any league whenever you prefer.
 
 Discord IDs in `config.json` are shared across all three leagues,
 keyed by coach name — a person has one Discord account regardless of
@@ -266,12 +274,106 @@ Missing git isn't fatal. The advance and scores scripts still write
 their files and still post to Discord; you just get told to publish
 from GitHub Desktop instead.
 
+## make-codes.js
+
+Generates the access codes for the web admin page. Double-click
+`make-codes.cmd`, or:
+
+```
+node tools/make-codes.js
+```
+
+Asks for a name and which leagues that person runs, one at a time,
+then prints the `ACCESS_CODES` JSON to paste into the Cloudflare
+Worker plus each person's own code to send them.
+
+Run it again later and paste your existing JSON when it asks to add
+someone — everyone's current codes carry over, so nobody gets locked
+out.
+
+**It never writes to disk.** The output is a secret: anyone holding a
+code can record scores as that person. Saving it into this repo would
+be one `git add -A` away from publishing it.
+
+Codes are 20 characters from an alphabet with no `0`/`O` or `1`/`I`/`L`.
+The admin page deliberately doesn't remember a code between refreshes,
+so they get typed by hand, often on a phone — legibility is worth more
+there than the handful of bits it costs.
+
+Full context in `worker/ADMIN-SETUP.md`.
+
+## apply.js
+
+Not something you run by hand, though you can. It takes a JSON file
+describing one submission and performs it:
+
+```
+node tools/apply.js payload.json
+```
+
+This is what the web admin page ends up calling. The page sends to a
+Cloudflare Worker, the Worker triggers the **League update** workflow,
+and the workflow runs this. Setup is in `worker/ADMIN-SETUP.md`.
+
+It reimplements nothing. Scores go through `scores.js`'s own
+`parseSet()` and `applyScores()`; an advance goes through
+`advance.js`'s `updateSeason()`. So a score entered on a phone hits
+the same tie check, the same ambiguous-name check and the same bye
+check as one typed at the prompt, and the file is edited by the same
+line-surgical writer.
+
+What it adds is validation, because its input arrives from the
+internet rather than from you:
+
+- **`main` is not reachable.** `ALLOWED_LEAGUES` is hardcoded to
+  `1star` and `3star`. No payload can touch the main dynasty however
+  it got here.
+- Week must be a whole number 0–15, at most 40 entries per
+  submission, team names capped in length.
+- Deadline and status text is checked against a character allowlist.
+  `updateSeason()` already runs it through `JSON.stringify()` and
+  `script.js` escapes it before rendering, so this is a third layer
+  rather than the only one.
+- An advance requires an explicit confirmation flag — the server-side
+  half of the admin page's two-step confirm.
+
+Handy for testing the web path without a browser:
+
+```
+echo '{"action":"scores","league":"1star","week":4,"actor":"you",
+       "entries":[{"team":"Baldwin Wallace","score":"27-24"}]}' > /tmp/p.json
+node tools/apply.js /tmp/p.json
+```
+
+Like the other tools, it edits files and never commits.
+
 ## lib/league.js
 
-Shared by `advance.js` and `scores.js`: loading the data files,
-resolving team names against the roster and alias table, and turning a
-week number into its list of matchups.
+Shared by `advance.js`, `scores.js` and `apply.js`: locating the data
+files, loading them off disk, argument parsing and config.
 
-It's one copy on purpose. The roster-matching logic here mirrors
-`script.js`, and when it lived in two places the risk was Discord and
-the site quietly describing the same game differently.
+It's one copy on purpose. When this logic lived in two places the risk
+was Discord and the site quietly describing the same game differently.
+
+### Where the matchup logic actually lives
+
+The roster matching, week building and score parsing are no longer
+written out in this file — they're in **`/week-core.js` at the repo
+root**, and re-exported here so `require("./lib/league")` still hands
+back everything it always did.
+
+They moved because the admin page needs to ask the identical question
+("what games are in week 4, and which are already final?") from a
+browser, and `lib/league.js` can't run there — it uses `fs`, `path`
+and `vm`. Reimplementing the matching in page JavaScript would have
+put it in a third place, which is the exact drift this file exists to
+prevent.
+
+So `week-core.js` is the pure half — no Node built-ins, works in both
+— and `lib/league.js` is the Node-only half. The rule for deciding
+where something goes: if it touches the disk or the process, it stays
+here; if it's a question about the data, it goes to `week-core.js`.
+
+The upshot is that the game list rendered on the admin page is
+produced by the same function that produces the Discord announcement
+and the interactive score prompts.
