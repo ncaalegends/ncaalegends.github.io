@@ -21,8 +21,8 @@
    line entirely rather than showing a stale deadline.
    ------------------------------------------------------------ */
 const SEASON = {
-  currentWeek: 0,
-  statusLine: "WEEK 0 — SEASON KICKOFF",
+  currentWeek: 1,
+  statusLine: "WEEK 1",
   nextAdvance: "",
 };
 
