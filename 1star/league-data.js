@@ -10,18 +10,20 @@
 /* ------------------------------------------------------------
    SEASON STATE — manually advanced, never date-driven.
 
-   This league hasn't kicked off. "PRESEASON" is a valid value for
-   currentWeek and renders a sign-up-phase home tab rather than an
-   empty week view.
+   Advanced off "PRESEASON" on 2026-07-22, when all eight team
+   schedules were transcribed into schedule-data.js. Week 0 games
+   haven't been played yet — only Patriot Tech, Wawa and Westeros
+   have a week 0 opponent at all; the other five are on a bye.
 
-   nextAdvance is blank: run by a different commissioner, not on
-   the automated advance tooling. Blank hides the countdown line
-   rather than showing a stale deadline.
+   nextAdvance is the only real-world date on the site — a
+   scheduling deadline for coaches, not part of season chronology.
+   Plain text, so write it however reads best; no time is given
+   for this league. Set it to "" to hide the badge entirely.
    ------------------------------------------------------------ */
 const SEASON = {
-  currentWeek: "PRESEASON",
-  statusLine: "PRESEASON — TEAMS BUILT, SCHEDULE PENDING",
-  nextAdvance: "",
+  currentWeek: 0,
+  statusLine: "WEEK 0",
+  nextAdvance: "Friday, July 24",
 };
 
 /* ------------------------------------------------------------
