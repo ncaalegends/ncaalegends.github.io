@@ -9,14 +9,9 @@ REM ============================================================
 setlocal
 cd /d "%~dp0.."
 
-REM Find Node. PATH first, then the two default install locations —
-REM a fresh install often doesn't reach Explorer's environment until
-REM you sign out, and that looks identical to "not installed".
-set "NODE="
-where node >nul 2>&1 && set "NODE=node"
-if not defined NODE if exist "%ProgramFiles%\nodejs\node.exe" set "NODE=%ProgramFiles%\nodejs\node.exe"
-if not defined NODE if exist "%ProgramFiles(x86)%\nodejs\node.exe" set "NODE=%ProgramFiles(x86)%\nodejs\node.exe"
-if not defined NODE if exist "%LOCALAPPDATA%\Programs\nodejs\node.exe" set "NODE=%LOCALAPPDATA%\Programs\nodejs\node.exe"
+REM Locate node.exe and git.exe. Sets NODE and GIT; see the comments
+REM in find-tools.cmd for why PATH alone isn't enough for either.
+call "%~dp0find-tools.cmd"
 
 if not defined NODE (
   echo.
@@ -46,19 +41,23 @@ echo.
 set "LEAGUE=main"
 set "POSTFLAG="
 set /p LCHOICE="  Which league? (1/2/3, blank = Main): "
-if "%LCHOICE%"=="2" set "LEAGUE=3star" & set "POSTFLAG=--no-post"
-if "%LCHOICE%"=="3" set "LEAGUE=1star" & set "POSTFLAG=--no-post"
+REM Parentheses matter here. Written as "if X set A & set B", cmd
+REM treats the & as a plain command separator and runs "set B"
+REM unconditionally — which silently forced --no-post onto the main
+REM league too, so its Discord post never went out.
+if "%LCHOICE%"=="2" (set "LEAGUE=3star" & set "POSTFLAG=--no-post")
+if "%LCHOICE%"=="3" (set "LEAGUE=1star" & set "POSTFLAG=--no-post")
 
 echo.
 set /p WEEK="  Week we're advancing TO (0-15): "
-if "%WEEK%"=="" echo   No week entered. & pause & exit /b 1
+if "%WEEK%"=="" (echo   No week entered. & pause & exit /b 1)
 
 echo.
 echo   Next advance deadline, as it should read on the site.
 echo   Example: Sunday, July 26 - 6:00 PM EDT
 echo.
 set /p NEXTADV="  Next deadline: "
-if "%NEXTADV%"=="" echo   No deadline entered. & pause & exit /b 1
+if "%NEXTADV%"=="" (echo   No deadline entered. & pause & exit /b 1)
 
 echo.
 echo   ---------- PREVIEW ----------
@@ -95,19 +94,26 @@ if errorlevel 1 (
 echo.
 set /p PUSH="  Commit and push so the site goes live? (y/n): "
 if /i "%PUSH%"=="y" (
-  where git >nul 2>&1
-  if errorlevel 1 (
+  if not defined GIT (
     echo.
-    echo   git isn't on your PATH, so I can't push from here.
+    echo   Couldn't find git anywhere - not on PATH, not in the usual
+    echo   install folders, and not bundled with GitHub Desktop.
     echo   Discord is already posted and league-data.js is already
     echo   updated - only publishing is left. Open GitHub Desktop,
     echo   commit the change, and hit Push.
   ) else (
-    git add -A
-    git commit -m "%LEAGUE%: advance to Week %WEEK%"
-    git push
-    echo.
-    echo   Pushed. GitHub Pages usually updates within a minute.
+    "%GIT%" add -A
+    "%GIT%" commit -m "%LEAGUE%: advance to Week %WEEK%"
+    "%GIT%" push
+    if errorlevel 1 (
+      echo.
+      echo   Push failed - see the message above. The files are saved
+      echo   and committed either way, so opening GitHub Desktop and
+      echo   hitting Push will finish the job.
+    ) else (
+      echo.
+      echo   Pushed. GitHub Pages usually updates within a minute.
+    )
   )
 ) else (
   echo.

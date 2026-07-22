@@ -13,14 +13,9 @@ REM ============================================================
 setlocal
 cd /d "%~dp0.."
 
-REM Find Node. PATH first, then the two default install locations —
-REM a fresh install often doesn't reach Explorer's environment until
-REM you sign out, and that looks identical to "not installed".
-set "NODE="
-where node >nul 2>&1 && set "NODE=node"
-if not defined NODE if exist "%ProgramFiles%\nodejs\node.exe" set "NODE=%ProgramFiles%\nodejs\node.exe"
-if not defined NODE if exist "%ProgramFiles(x86)%\nodejs\node.exe" set "NODE=%ProgramFiles(x86)%\nodejs\node.exe"
-if not defined NODE if exist "%LOCALAPPDATA%\Programs\nodejs\node.exe" set "NODE=%LOCALAPPDATA%\Programs\nodejs\node.exe"
+REM Locate node.exe and git.exe. Sets NODE and GIT; see the comments
+REM in find-tools.cmd for why PATH alone isn't enough for either.
+call "%~dp0find-tools.cmd"
 
 if not defined NODE (
   echo.
@@ -52,7 +47,10 @@ if "%LCHOICE%"=="3" set "LEAGUE=1star"
 
 echo.
 set /p WEEK="  Week whose games are final (0-15): "
-if "%WEEK%"=="" echo   No week entered. & pause & exit /b 1
+REM Parentheses matter: without them cmd reads the & as a plain
+REM command separator and runs pause + exit unconditionally, so the
+REM script quits right here every time regardless of what you typed.
+if "%WEEK%"=="" (echo   No week entered. & pause & exit /b 1)
 
 echo.
 echo   Include games that are ALREADY final?
@@ -75,19 +73,26 @@ if errorlevel 1 (
 echo.
 set /p PUSH="  Commit and push so the site goes live? (y/n): "
 if /i "%PUSH%"=="y" (
-  where git >nul 2>&1
-  if errorlevel 1 (
+  if not defined GIT (
     echo.
-    echo   git isn't on your PATH, so I can't push from here.
+    echo   Couldn't find git anywhere - not on PATH, not in the usual
+    echo   install folders, and not bundled with GitHub Desktop.
     echo   The scores are already saved to schedule-data.js - only
     echo   publishing is left. Open GitHub Desktop, commit the
     echo   change, and hit Push.
   ) else (
-    git add -A
-    git commit -m "%LEAGUE%: Week %WEEK% scores"
-    git push
-    echo.
-    echo   Pushed. GitHub Pages usually updates within a minute.
+    "%GIT%" add -A
+    "%GIT%" commit -m "%LEAGUE%: Week %WEEK% scores"
+    "%GIT%" push
+    if errorlevel 1 (
+      echo.
+      echo   Push failed - see the message above. The scores are saved
+      echo   and committed either way, so opening GitHub Desktop and
+      echo   hitting Push will finish the job.
+    ) else (
+      echo.
+      echo   Pushed. GitHub Pages usually updates within a minute.
+    )
   )
 ) else (
   echo.

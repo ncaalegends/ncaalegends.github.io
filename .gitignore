@@ -6,5 +6,10 @@ desktop.ini
 .vscode/
 .idea/
 
+# Python bytecode cache — regenerated automatically by
+# make-og-images.py, never worth versioning
+__pycache__/
+*.pyc
+
 # Discord webhook URL — secret, never commit
 tools/config.json

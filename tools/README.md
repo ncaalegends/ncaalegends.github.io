@@ -237,6 +237,35 @@ with `preview.cmd`, then:
 git add -A && git commit -m "Week 4 scores" && git push
 ```
 
+## find-tools.cmd
+
+Not something you run. `advance.cmd`, `scores.cmd` and `preview.cmd`
+all `call` it to locate `node.exe` and `git.exe` before doing anything
+else, so the search logic lives in one file instead of three.
+
+It exists because two situations look exactly like "not installed"
+but aren't:
+
+- **Node was just installed.** Windows doesn't hand the updated PATH
+  to Explorer until you sign out and back in, so `where node` fails
+  even though `node.exe` is sitting in Program Files.
+- **git came from GitHub Desktop.** Desktop bundles its own private
+  copy of git and never adds it to PATH. If that's the only git on
+  the machine, `where git` will never find it — restarting doesn't
+  help, because there's nothing to pick up.
+
+So it checks PATH first, then the standard install locations, then
+`%LOCALAPPDATA%\GitHubDesktop\app-*\resources\app\git` (newest
+version first, since upgrades leave the old folder behind). When git
+turns up somewhere off-PATH, its `mingw64\bin` goes on PATH for that
+window only — otherwise git can't find its credential helper and
+`git push` prompts for a password that a modern GitHub account
+doesn't have.
+
+Missing git isn't fatal. The advance and scores scripts still write
+their files and still post to Discord; you just get told to publish
+from GitHub Desktop instead.
+
 ## lib/league.js
 
 Shared by `advance.js` and `scores.js`: loading the data files,
