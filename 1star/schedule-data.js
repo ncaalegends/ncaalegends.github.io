@@ -193,7 +193,7 @@ const TEAM_SCHEDULES = [
     team: "Wawa University Hoagiemakers",
     conference: "CUSA",
     weeks: [
-      { week: 0, opponent: "Kennesaw State", location: "vs" },
+      { week: 0, opponent: "Kennesaw State", location: "vs", teamScore: 24, opponentScore: 6 },
       { week: 1, opponent: "USF", location: "at" },
       { week: 2, opponent: "Dillon Panthers", location: "vs" },
       { week: 3, opponent: "Florida Atlantic", location: "at" },
