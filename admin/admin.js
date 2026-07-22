@@ -239,6 +239,11 @@ function renderGames() {
 
   const host = $("games");
 
+  /* Before the early return below — a week where everyone is on a
+     bye is exactly when you most want to be told that week 4 is
+     still sitting there unscored. */
+  renderGaps();
+
   if (!games.length) {
     const why = wk.notes.length
       ? "Everyone is on a bye or off week."
@@ -277,6 +282,87 @@ function renderGames() {
 
   wireInputs(host);
   updateCount();
+}
+
+/* ------------------------------------------------------------
+   UNSCORED EARLIER WEEKS
+   ------------------------------------------------------------
+   Advancing doesn't require scores, and shouldn't — games get
+   simmed and the result isn't known until after the week has
+   moved on. But the week dropdown defaults to whatever week the
+   league is currently on, so a week left unscored is easy to
+   never look at again.
+
+   This scans the weeks the league has already moved PAST and
+   offers a jump to any that still have gaps. Weeks from
+   currentWeek onward are deliberately excluded: those are in
+   progress or haven't happened, so missing scores there are the
+   normal state, not something to chase.
+   ------------------------------------------------------------ */
+function findGaps() {
+  const current = Number(data.SEASON.currentWeek) || 0;
+  const viewing = Number($("week-select").value);
+  const out = [];
+
+  for (let w = 0; w < current; w++) {
+    /* Skip the week already on screen — its gaps are visible. */
+    if (w === viewing) continue;
+
+    /* A bye week produces no scoreable games at all, so it can
+       never register as a gap. That falls out of the same
+       buildWeek() the tools use rather than needing a special
+       case here. */
+    const list = WeekCore.scoreableGames(WeekCore.buildWeek(data, w));
+    const missing = list.filter((g) => !g.scored).length;
+    if (missing) out.push({ week: w, missing });
+  }
+
+  return out;
+}
+
+function renderGaps() {
+  const host = $("gaps");
+  const gaps = findGaps();
+
+  if (!gaps.length) {
+    host.innerHTML = "";
+    return;
+  }
+
+  const chips = gaps
+    .map(
+      (g) =>
+        `<button type="button" class="gap-jump" data-jump="${g.week}">` +
+        `${esc(weekOptionLabel(g.week))} &middot; ${g.missing} game${g.missing === 1 ? "" : "s"}` +
+        `</button>`
+    )
+    .join("");
+
+  host.innerHTML =
+    `<div class="gaps">` +
+    `<span class="gaps-label">Earlier weeks still missing scores &mdash; open one to fill it in:</span>` +
+    chips +
+    `</div>`;
+
+  host.querySelectorAll("[data-jump]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      $("week-select").value = btn.getAttribute("data-jump");
+      renderGames();
+      /* The games list is below the fold on a phone once a few
+         chips are stacked up. Guarded because this runs after the
+         re-render — anywhere scrollIntoView is missing or refuses
+         the options object, the jump has already worked and the
+         scroll is the only thing worth losing. */
+      const list = $("games");
+      if (typeof list.scrollIntoView === "function") {
+        try {
+          list.scrollIntoView({ behavior: "smooth", block: "start" });
+        } catch (e) {
+          list.scrollIntoView();
+        }
+      }
+    });
+  });
 }
 
 function gameHtml(g, i) {

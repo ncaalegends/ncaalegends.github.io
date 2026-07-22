@@ -217,6 +217,35 @@ input:focus, select:focus {
 .msg-ok    { background: rgba(62,207,126,0.10); border-left: 3px solid var(--win); color: #a8ecc6; }
 .msg-warn  { background: rgba(242,193,78,0.10); border-left: 3px solid var(--gold); color: #ffe6a8; }
 
+/* ---- unscored earlier weeks ---- */
+
+/* A nudge, not a warning. Leaving a week unscored is a normal thing
+   to do here — games get simmed and the result isn't known until
+   after the advance — so this is styled to be noticed and dismissed
+   at a glance rather than to look like something went wrong. */
+.gaps {
+  background: rgba(242, 193, 78, 0.08);
+  border-left: 3px solid var(--gold);
+  padding: 12px 14px;
+  margin-bottom: 18px;
+  font-size: 13.5px;
+  color: var(--chalk);
+}
+.gaps-label { color: var(--steel); display: block; margin-bottom: 9px; }
+
+.gap-jump {
+  font-family: var(--font-body);
+  font-size: 13px;
+  background: transparent;
+  border: 1px solid var(--line-gold);
+  color: var(--gold-bright);
+  padding: 6px 11px;
+  margin: 0 7px 7px 0;
+  cursor: pointer;
+  border-radius: 2px;
+}
+.gap-jump:hover { background: var(--gold-dim); border-color: var(--gold); }
+
 .hidden { display: none !important; }
 
 .who {
@@ -310,6 +339,11 @@ input:focus, select:focus {
     <section class="panel" id="scores-panel">
       <h2>Scores</h2>
       <p class="hint">Fill in the games you've played. Leave the rest blank &mdash; blank means "not played yet", not "0&ndash;0". You can come back and add more later.</p>
+
+      <!-- Filled by renderGaps() when a week the league has already
+           moved past still has games without scores. Empty and
+           invisible the rest of the time. -->
+      <div id="gaps"></div>
 
       <div id="games"></div>
       <div id="scores-msg"></div>
