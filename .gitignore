@@ -13,3 +13,6 @@ __pycache__/
 
 # Discord webhook URL — secret, never commit
 tools/config.json
+
+# Planning notes — working drafts, not part of the tooling docs
+tools/SCOPING-*.md
