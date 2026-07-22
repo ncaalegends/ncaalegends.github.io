@@ -54,6 +54,20 @@ function message(el, kind, text) {
   el.innerHTML = `<div class="msg msg-${kind}">${esc(text)}</div>`;
 }
 
+/* Bring a status message into view. The games list can be long
+   enough that a message above the Save button is off screen on a
+   phone, which is half of why a successful save felt like nothing
+   had happened. Guarded — losing the scroll is survivable, throwing
+   inside a click handler isn't. */
+function scrollToMessage(el) {
+  if (typeof el.scrollIntoView !== "function") return;
+  try {
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+  } catch (e) {
+    el.scrollIntoView();
+  }
+}
+
 /* Week 14 and 15 carry names on the site; matching them here means
    the dropdown reads the way the schedule does. */
 function weekOptionLabel(w) {
@@ -104,16 +118,22 @@ async function api(route, body) {
    each league its own scope. That's what makes it safe to switch
    leagues without the constants colliding.
    ------------------------------------------------------------ */
-async function fetchText(url) {
-  const res = await fetch(url, { cache: "no-cache" });
+async function fetchText(url, bust) {
+  /* When polling for a change we've just made, the browser cache and
+     the Pages CDN will both happily hand back the old file. A unique
+     query string makes it a URL neither has seen, which is the only
+     reliable way to know we're looking at what's actually published
+     rather than what was published a minute ago. */
+  const full = bust ? `${url}?_=${Date.now()}` : url;
+  const res = await fetch(full, { cache: bust ? "no-store" : "no-cache" });
   if (!res.ok) throw new Error(`Couldn't load ${url} (HTTP ${res.status})`);
   return res.text();
 }
 
-async function loadLeagueData(slug) {
+async function loadLeagueData(slug, bust) {
   const [leagueSrc, scheduleSrc] = await Promise.all([
-    fetchText(`../${slug}/league-data.js`),
-    fetchText(`../${slug}/schedule-data.js`),
+    fetchText(`../${slug}/league-data.js`, bust),
+    fetchText(`../${slug}/schedule-data.js`, bust),
   ]);
 
   /* Not every league defines an alias table, so each global is
@@ -204,6 +224,14 @@ async function switchLeague(slug) {
   }
   message($("scores-msg"), "");
 
+  refreshWeekControls();
+}
+
+/* Rebuild everything driven by SEASON: both week dropdowns, the
+   deadline field and the status line. Split out of switchLeague so a
+   confirmed advance can refresh the page from the published file
+   without re-fetching or resetting the league. */
+function refreshWeekControls() {
   const current = Number(data.SEASON.currentWeek) || 0;
 
   const opts = [];
@@ -461,6 +489,66 @@ function updateCount() {
 }
 
 /* ------------------------------------------------------------
+   CONFIRMING A SUBMISSION ACTUALLY PUBLISHED
+   ------------------------------------------------------------
+   The Worker replies as soon as GitHub accepts the dispatch, which
+   means "queued", not "done". Saying "Saved" at that point is a
+   claim we haven't earned — the workflow still has to run, commit,
+   and wait for Pages to redeploy, and any of that can fail.
+
+   Worse, nothing on the page changed when a save succeeded: the
+   games still showed as empty boxes, so a successful save looked
+   exactly like a save that did nothing. That's what the "no
+   feedback" report was about.
+
+   So instead of guessing, we watch the published file. It's the
+   same static data the public site reads, so if the scores are
+   visible there they're visible to everyone — no new endpoint, no
+   new state to trust, and the answer is definitive either way.
+   ------------------------------------------------------------ */
+const POLL_EVERY_MS = 5000;
+const POLL_LIMIT_MS = 180000; // 3 minutes; a normal round trip is ~60s
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/* verify(freshData) -> true once the change is visible. Returns the
+   fresh data on success, or null if it never showed up in time. */
+async function waitForPublish(slug, verify, onTick) {
+  const started = Date.now();
+
+  while (Date.now() - started < POLL_LIMIT_MS) {
+    await sleep(POLL_EVERY_MS);
+    onTick(Math.round((Date.now() - started) / 1000));
+
+    try {
+      const fresh = await loadLeagueData(slug, true);
+      if (verify(fresh)) return fresh;
+    } catch (e) {
+      /* A failed poll is almost always Pages mid-deploy serving a
+         partial or 404 response. Keep waiting rather than reporting
+         a failure we'd have to walk back a few seconds later. */
+    }
+  }
+
+  return null;
+}
+
+/* Did every score we submitted actually land, with the numbers we
+   sent? Checking the values and not just "is it scored now" means a
+   half-applied write can't read as success. */
+function scoresLanded(fresh, week, entries) {
+  const list = WeekCore.scoreableGames(WeekCore.buildWeek(fresh, week));
+
+  return entries.every((sent) => {
+    const game = list.find((g) => g.perspective === sent.team);
+    if (!game || !game.scoredPair) return false;
+
+    const [a, b] = sent.score.split("-").map(Number);
+    return game.scoredPair.team === a && game.scoredPair.opponent === b;
+  });
+}
+
+/* ------------------------------------------------------------
    SAVE SCORES
    ------------------------------------------------------------ */
 $("save-scores").addEventListener("click", async () => {
@@ -496,12 +584,35 @@ $("save-scores").addEventListener("click", async () => {
       },
     });
 
-    message(
-      msg,
-      "ok",
-      `Saved ${entries.length} game${entries.length === 1 ? "" : "s"}. ` +
-        `The site updates in about a minute — refresh this page after that to see it recorded.`
+    const n = `${entries.length} game${entries.length === 1 ? "" : "s"}`;
+
+    /* Submitted, not saved. Say exactly that until we know better. */
+    message(msg, "warn", `Sent ${n}. Waiting for the site to publish…`);
+    scrollToMessage(msg);
+
+    const fresh = await waitForPublish(
+      $("league-select").value,
+      (d) => scoresLanded(d, week, entries),
+      (secs) => message(msg, "warn", `Sent ${n}. Waiting for the site to publish… (${secs}s)`)
     );
+
+    if (fresh) {
+      /* Re-render from the published file, so the games the user just
+         entered now show as FINAL and the missing-scores banner
+         updates. The page agreeing with the site is the feedback
+         that actually matters — the message is just the caption. */
+      data = fresh;
+      renderGames();
+      message(msg, "ok", `Done — ${n} recorded and live on the site.`);
+    } else {
+      message(
+        msg,
+        "warn",
+        `Sent ${n}, but the site still hasn't updated after 3 minutes.\n` +
+          `This usually means it's just running slow — reload this page in a few minutes to check.\n` +
+          `If it still isn't there, tell RekenCrew rather than entering them again.`
+      );
+    }
   } catch (err) {
     message(msg, "error", err.message);
   } finally {
@@ -578,11 +689,31 @@ $("advance-yes").addEventListener("click", async () => {
 
     $("advance-confirm").classList.add("hidden");
     $("advance-form").classList.remove("hidden");
-    message(
-      msg,
-      "ok",
-      `Advanced to ${weekOptionLabel(week)}. The site updates in about a minute.`
+
+    message(msg, "warn", `Sent. Waiting for the site to publish…`);
+    scrollToMessage(msg);
+
+    const fresh = await waitForPublish(
+      $("league-select").value,
+      (d) => Number(d.SEASON.currentWeek) === week,
+      (secs) => message(msg, "warn", `Sent. Waiting for the site to publish… (${secs}s)`)
     );
+
+    if (fresh) {
+      /* Re-read the whole league so the "Currently on WEEK n" line,
+         the week dropdown and the missing-scores banner all reflect
+         the advance that just happened. */
+      data = fresh;
+      refreshWeekControls();
+      message(msg, "ok", `Done — the league is now on ${weekOptionLabel(week)}, live on the site.`);
+    } else {
+      message(
+        msg,
+        "warn",
+        `Sent, but the site still hasn't updated after 3 minutes.\n` +
+          `Reload this page in a few minutes to check before advancing again.`
+      );
+    }
   } catch (err) {
     message(msg, "error", err.message);
   } finally {
