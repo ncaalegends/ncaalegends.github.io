@@ -48,7 +48,7 @@ const TEAM_SCHEDULES = [
     conference: "ACC",
     weeks: [
       { week: 0, opponent: "Nevada", location: "vs", teamScore: 52, opponentScore: 24 },
-      { week: 1, opponent: "UCLA", location: "vs" },
+      { week: 1, opponent: "UCLA", location: "vs", teamScore: 23, opponentScore: 20 },
       { week: 2, opponent: "Syracuse", location: "at" },
       { week: 3, opponent: "FCS West", location: "vs" },
       { week: 4, opponent: "Clemson", location: "vs" },
@@ -138,7 +138,7 @@ const TEAM_SCHEDULES = [
     conference: "B1G",
     weeks: [
       { week: 0, opponent: "Marshall", location: "vs", teamScore: 38, opponentScore: 10 },
-      { week: 1, opponent: "FCS East", location: "vs" },
+      { week: 1, opponent: "FCS East", location: "vs", teamScore: 73, opponentScore: 3 },
       { week: 2, opponent: "Utah", location: "vs" },
       { week: 3, note: "BYE" },
       { week: 4, opponent: "UCLA", location: "vs" },
@@ -182,7 +182,7 @@ const TEAM_SCHEDULES = [
     conference: "B1G",
     weeks: [
       { week: 0, opponent: "UConn", location: "vs", teamScore: 49, opponentScore: 10 },
-      { week: 1, opponent: "Notre Dame", location: "at" },
+      { week: 1, opponent: "Notre Dame", location: "at", teamScore: 27, opponentScore: 24 },
       { week: 2, note: "BYE" },
       { week: 3, opponent: "Eastern Michigan", location: "vs" },
       { week: 4, opponent: "Penn State", location: "at" },
@@ -206,7 +206,7 @@ const TEAM_SCHEDULES = [
     conference: "XII",
     weeks: [
       { week: 0, opponent: "Troy", location: "vs", teamScore: 42, opponentScore: 7 },
-      { week: 1, opponent: "Auburn", location: "vs" },
+      { week: 1, opponent: "Auburn", location: "at", teamScore: 31, opponentScore: 7 },
       { week: 2, note: "BYE" },
       { week: 3, opponent: "Louisiana Tech", location: "vs" },
       { week: 4, opponent: "Colorado", location: "vs" },
@@ -272,7 +272,7 @@ const TEAM_SCHEDULES = [
     conference: "XII",
     weeks: [
       { week: 0, opponent: "USF", location: "vs", teamScore: 28, opponentScore: 21 },
-      { week: 1, opponent: "FCS Southeast", location: "vs" },
+      { week: 1, opponent: "FCS Southeast", location: "vs", teamScore: 38, opponentScore: 7 },
       { week: 2, note: "BYE" },
       { week: 3, opponent: "Georgia State", location: "vs" },
       { week: 4, opponent: "TCU", location: "vs" },
@@ -318,7 +318,7 @@ const TEAM_SCHEDULES = [
     conference: "SEC",
     weeks: [
       { week: 0, opponent: "Southern Mississippi", location: "at", teamScore: 42, opponentScore: 24 },
-      { week: 1, opponent: "Liberty", location: "vs" },
+      { week: 1, opponent: "Liberty", location: "vs", teamScore: 44, opponentScore: 14 },
       { week: 2, opponent: "LSU", location: "vs" },
       { week: 3, note: "BYE" },
       { week: 4, opponent: "Auburn", location: "vs" },
@@ -362,7 +362,7 @@ const TEAM_SCHEDULES = [
     conference: "SEC",
     weeks: [
       { week: 0, opponent: "Indiana", location: "at", teamScore: 37, opponentScore: 26 },
-      { week: 1, opponent: "Tennessee", location: "vs" },
+      { week: 1, opponent: "Tennessee", location: "vs", teamScore: 45, opponentScore: 28 },
       { week: 2, opponent: "Texas A&M", location: "at" },
       { week: 3, opponent: "Ole Miss", location: "at" },
       { week: 4, opponent: "North Dakota State", location: "vs" },
