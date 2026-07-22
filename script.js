@@ -985,10 +985,11 @@ function renderTeamSchedule() {
       const played = w.teamScore != null && w.opponentScore != null;
 
       let resultCls = "";
+      let resultLetter = "";
       if (played) {
-        if (w.teamScore > w.opponentScore) { resultCls = "win"; wins++; }
-        else if (w.teamScore < w.opponentScore) { resultCls = "loss"; losses++; }
-        else resultCls = "tie";
+        if (w.teamScore > w.opponentScore) { resultCls = "win"; resultLetter = "W"; wins++; }
+        else if (w.teamScore < w.opponentScore) { resultCls = "loss"; resultLetter = "L"; losses++; }
+        else { resultCls = "tie"; resultLetter = "T"; }
       }
 
       const isCurrent = !isPreseason() && w.week === SEASON.currentWeek;
@@ -1014,7 +1015,15 @@ function renderTeamSchedule() {
           <span class="tsr-stadium">${esc(w.stadium || "")}</span>
           ${
             played
-              ? `<span class="tsr-score ${resultCls}">${esc(w.teamScore)}&ndash;${esc(w.opponentScore)}</span>`
+              /* The W/L sits INSIDE .tsr-score rather than in its own
+                 grid cell — the row is a fixed 5-column grid, so a
+                 sixth child would wrap onto a new line. Nesting it
+                 also means it inherits the win/loss colour from the
+                 parent automatically, so the letter and the score can
+                 never end up different colours. */
+              ? `<span class="tsr-score ${resultCls}">` +
+                `<span class="tsr-wl">${resultLetter}</span>` +
+                `${esc(w.teamScore)}&ndash;${esc(w.opponentScore)}</span>`
               : `<span class="tsr-score pending">&mdash;</span>`
           }
         </div>`;
