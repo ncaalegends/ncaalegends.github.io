@@ -284,7 +284,7 @@ export default {
       /* A configuration problem, not a caller problem. Say so
          plainly in the log; say nothing useful to the caller. */
       console.error("[admin-api] config error:", e.message);
-      return json({ error: "Server is misconfigured. Tell Josh." }, 500, cors);
+      return json({ error: "Server is misconfigured. Tell RekenCrew." }, 500, cors);
     }
 
     if (!who) {

@@ -56,7 +56,12 @@
 
 <footer class="site-footer">
   <div class="footer-status">NCAA LEGENDS · THREE ONLINE DYNASTIES</div>
-  <div class="footer-links"></div>
+  <!-- Written out rather than built by script.js: this page has its
+       own inline script and never loads it. The league pages get the
+       same link from renderFooter(). -->
+  <div class="footer-links">
+    <a href="admin/">Commissioner tools</a>
+  </div>
 </footer>
 
 <script>

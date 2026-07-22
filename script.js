@@ -1220,12 +1220,20 @@ function renderFooter() {
     const items = [
       { label: "Discord", url: safeUrl(links.discord) },
       { label: "Rules", url: safeUrl(links.rules) },
+      /* Commissioner sign-in. Always shown, on every league — it's a
+         login wall, not a back door, so a coach clicking it just
+         finds a box they have no code for. Not run through safeUrl()
+         because that only accepts absolute http(s) URLs and this is
+         a relative path within the site, written here as a literal
+         rather than taken from data. */
+      { label: "Commissioner tools", url: "../admin/", internal: true },
     ].filter((l) => l.url);
 
     linksEl.innerHTML = items
-      .map(
-        (l) =>
-          `<a href="${esc(l.url)}" target="_blank" rel="noopener noreferrer">${esc(l.label)}</a>`
+      .map((l) =>
+        l.internal
+          ? `<a href="${esc(l.url)}">${esc(l.label)}</a>`
+          : `<a href="${esc(l.url)}" target="_blank" rel="noopener noreferrer">${esc(l.label)}</a>`
       )
       .join('<span class="fs-sep">&middot;</span>');
   }
