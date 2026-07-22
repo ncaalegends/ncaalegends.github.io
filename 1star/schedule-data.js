@@ -171,7 +171,7 @@ const TEAM_SCHEDULES = [
     team: "Patriot Tech Minutemen",
     conference: "CUSA",
     weeks: [
-      { week: 0, opponent: "Missouri State", location: "vs" },
+      { week: 0, opponent: "Missouri State", location: "vs", teamScore: 31, opponentScore: 28 },
       { week: 1, opponent: "James Madison", location: "at" },
       { week: 2, opponent: "FCS East", location: "vs" },
       { week: 3, opponent: "New Glarus Spotted Cows", location: "vs" },
