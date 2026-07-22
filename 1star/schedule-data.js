@@ -22,11 +22,13 @@
    The trailing in-game row 16 (a post-CCG bye for everyone) is
    not carried over — nothing renders it.
 
-   TEAM NAMES. The Team Schedule screen truncates to the short
-   in-game name ("BALDWINWALLACE", "North Shore", "Wawa Universit",
-   "Westeros", "Patriot Tech", "Minneapolis", "New Glarus",
-   "Dillon"). Those are expanded here to the full roster names in
-   league-data.js so validateData() resolves them without aliases.
+   TEAM NAMES. The roster names in league-data.js are the short
+   location-only names (no mascot) — "Baldwin Wallace", "North
+   Shore", "Wawa University", "Westeros", "Patriot Tech",
+   "Minneapolis", "New Glarus", "Dillon" — which is also close to
+   what the in-game Team Schedule screen shows. Spell them exactly
+   that way here so validateData() resolves them without aliases.
+   Mascots live in the logo art, not the name.
 
    STADIUMS. The Team Schedule screen doesn't display venue, so
    stadium is intentionally omitted. script.js treats it as
@@ -61,7 +63,7 @@ const TEAM_SCHEDULES = [
       { week: 1, opponent: "FCS Southeast", location: "vs" },
       { week: 2, opponent: "Tulane", location: "at" },
       { week: 3, opponent: "Ohio", location: "vs" },
-      { week: 4, opponent: "North Shore Fighting Moose", location: "at" },
+      { week: 4, opponent: "North Shore", location: "at" },
       { week: 5, opponent: "UL Monroe", location: "vs" },
       { week: 6, opponent: "Arkansas State", location: "at" },
       { week: 7, note: "BYE" },
@@ -76,12 +78,12 @@ const TEAM_SCHEDULES = [
     ],
   },
   {
-    team: "Dillon Panthers",
+    team: "Dillon",
     conference: "Sun Belt",
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "FCS Southeast", location: "vs" },
-      { week: 2, opponent: "Wawa University Hoagiemakers", location: "at" },
+      { week: 2, opponent: "Wawa University", location: "at" },
       { week: 3, opponent: "Jacksonville State", location: "at" },
       { week: 4, opponent: "Houston", location: "vs" },
       { week: 5, opponent: "Coastal Carolina", location: "at" },
@@ -100,18 +102,18 @@ const TEAM_SCHEDULES = [
 
   /* ---------------------------- MAC ---------------------------- */
   {
-    team: "Minneapolis Monsters",
+    team: "Minneapolis",
     conference: "MAC",
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "South Carolina", location: "at" },
       { week: 2, opponent: "FCS Midwest", location: "vs" },
       { week: 3, opponent: "Boise State", location: "at" },
-      { week: 4, opponent: "New Glarus Spotted Cows", location: "vs" },
+      { week: 4, opponent: "New Glarus", location: "vs" },
       { week: 5, opponent: "Ohio", location: "vs" },
       { week: 6, opponent: "Western Michigan", location: "at" },
       { week: 7, opponent: "USF", location: "at" },
-      { week: 8, opponent: "North Shore Fighting Moose", location: "vs" },
+      { week: 8, opponent: "North Shore", location: "vs" },
       { week: 9, opponent: "Sacramento State", location: "at" },
       { week: 10, note: "BYE" },
       { week: 11, opponent: "Bowling Green", location: "at" },
@@ -122,14 +124,14 @@ const TEAM_SCHEDULES = [
     ],
   },
   {
-    team: "New Glarus Spotted Cows",
+    team: "New Glarus",
     conference: "MAC",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "Westeros White Walkers", location: "vs" },
+      { week: 1, opponent: "Westeros", location: "vs" },
       { week: 2, opponent: "FCS Midwest", location: "vs" },
-      { week: 3, opponent: "Patriot Tech Minutemen", location: "at" },
-      { week: 4, opponent: "Minneapolis Monsters", location: "at" },
+      { week: 3, opponent: "Patriot Tech", location: "at" },
+      { week: 4, opponent: "Minneapolis", location: "at" },
       { week: 5, opponent: "Toledo", location: "vs" },
       { week: 6, opponent: "Rutgers", location: "at" },
       { week: 7, opponent: "Bowling Green", location: "at" },
@@ -144,7 +146,7 @@ const TEAM_SCHEDULES = [
     ],
   },
   {
-    team: "North Shore Fighting Moose",
+    team: "North Shore",
     conference: "MAC",
     weeks: [
       { week: 0, note: "BYE" },
@@ -155,7 +157,7 @@ const TEAM_SCHEDULES = [
       { week: 5, opponent: "Central Michigan", location: "at" },
       { week: 6, opponent: "Eastern Michigan", location: "vs" },
       { week: 7, opponent: "Miami University", location: "at" },
-      { week: 8, opponent: "Minneapolis Monsters", location: "at" },
+      { week: 8, opponent: "Minneapolis", location: "at" },
       { week: 9, note: "BYE" },
       { week: 10, opponent: "Ohio", location: "vs" },
       { week: 11, opponent: "Western Michigan", location: "vs" },
@@ -168,19 +170,19 @@ const TEAM_SCHEDULES = [
 
   /* ---------------------------- CUSA --------------------------- */
   {
-    team: "Patriot Tech Minutemen",
+    team: "Patriot Tech",
     conference: "CUSA",
     weeks: [
       { week: 0, opponent: "Missouri State", location: "vs", teamScore: 31, opponentScore: 28 },
       { week: 1, opponent: "James Madison", location: "at" },
       { week: 2, opponent: "FCS East", location: "vs" },
-      { week: 3, opponent: "New Glarus Spotted Cows", location: "vs" },
+      { week: 3, opponent: "New Glarus", location: "vs" },
       { week: 4, opponent: "Coastal Carolina", location: "at" },
       { week: 5, opponent: "Delaware", location: "at" },
       { week: 6, opponent: "Sam Houston", location: "vs" },
-      { week: 7, opponent: "Westeros White Walkers", location: "at" },
+      { week: 7, opponent: "Westeros", location: "at" },
       { week: 8, note: "BYE" },
-      { week: 9, opponent: "Wawa University Hoagiemakers", location: "vs" },
+      { week: 9, opponent: "Wawa University", location: "vs" },
       { week: 10, opponent: "New Mexico State", location: "at" },
       { week: 11, opponent: "Middle Tennessee", location: "vs" },
       { week: 12, note: "BYE" },
@@ -190,19 +192,19 @@ const TEAM_SCHEDULES = [
     ],
   },
   {
-    team: "Wawa University Hoagiemakers",
+    team: "Wawa University",
     conference: "CUSA",
     weeks: [
       { week: 0, opponent: "Kennesaw State", location: "vs" },
       { week: 1, opponent: "USF", location: "at" },
-      { week: 2, opponent: "Dillon Panthers", location: "vs" },
+      { week: 2, opponent: "Dillon", location: "vs" },
       { week: 3, opponent: "Florida Atlantic", location: "at" },
       { week: 4, opponent: "FCS Southeast", location: "vs" },
       { week: 5, opponent: "Jacksonville State", location: "at" },
       { week: 6, note: "BYE" },
       { week: 7, note: "BYE" },
       { week: 8, opponent: "Middle Tennessee", location: "vs" },
-      { week: 9, opponent: "Patriot Tech Minutemen", location: "at" },
+      { week: 9, opponent: "Patriot Tech", location: "at" },
       { week: 10, opponent: "Sam Houston", location: "vs" },
       { week: 11, opponent: "Delaware", location: "at" },
       { week: 12, opponent: "New Mexico State", location: "at" },
@@ -212,17 +214,17 @@ const TEAM_SCHEDULES = [
     ],
   },
   {
-    team: "Westeros White Walkers",
+    team: "Westeros",
     conference: "CUSA",
     weeks: [
       { week: 0, opponent: "Delaware", location: "vs" },
-      { week: 1, opponent: "New Glarus Spotted Cows", location: "at" },
+      { week: 1, opponent: "New Glarus", location: "at" },
       { week: 2, opponent: "Georgia Tech", location: "at" },
       { week: 3, opponent: "California", location: "at" },
       { week: 4, opponent: "FCS Southeast", location: "vs" },
       { week: 5, opponent: "Missouri State", location: "vs" },
       { week: 6, opponent: "New Mexico State", location: "at" },
-      { week: 7, opponent: "Patriot Tech Minutemen", location: "vs" },
+      { week: 7, opponent: "Patriot Tech", location: "vs" },
       { week: 8, note: "BYE" },
       { week: 9, opponent: "Sam Houston", location: "at" },
       { week: 10, opponent: "Kennesaw State", location: "at" },
