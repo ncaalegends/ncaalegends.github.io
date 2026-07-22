@@ -38,9 +38,10 @@ const LEAGUE_INFO = {
     rules: "",
   },
 
-  /* No ESPN logos in this league — every team is fictional. Left
-     true because the flag only gates the ESPN CDN path; local
-     `logo` files below are handled separately and always render. */
+  /* Every COACH team here is fictional and carries a local `logo`,
+     which teamLogoSrc() checks before the CDN. But the schedules
+     are full of real CPU opponents, so this must stay true or
+     those marks all collapse to monograms. */
   useEspnLogos: true,
 };
 
