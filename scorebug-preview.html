@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scorebug Preview — NCAA Legends</title>
+<meta name="robots" content="noindex">
+<style>
+  :root{
+    --navy-deep:#060b16; --navy-panel:#101d33; --line:rgba(242,244,248,.09);
+    --steel:#7f8ba3; --steel-dim:#4d5872; --chalk:#f2f4f8; --win:#3ecf7e;
+    --gold:#4ec3f2; /* 3-star dynasty accent (blue) */
+    --font-mono:'JetBrains Mono',ui-monospace,monospace;
+  }
+  body{margin:0;padding:32px;background:var(--navy-deep);color:var(--chalk);
+       font-family:system-ui,sans-serif;}
+  h1{font-size:1.4rem;margin:0 0 6px;}
+  p.sub{color:var(--steel);font-size:.9rem;margin:0 0 24px;max-width:72ch;line-height:1.5;}
+  code{background:var(--navy-panel);padding:1px 5px;font-size:.85em;}
+  .game-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;max-width:900px;}
+
+  /* ---- Mirrors the production .game-card rules in style.css ---- */
+  .game-card{background:var(--navy-panel);border:1px solid var(--line);
+             border-left:3px solid var(--steel-dim);transition:transform .15s;}
+  .game-card:hover{transform:translateY(-1px);}
+  .game-card.is-league{border-left-color:var(--gold);}
+
+  .game-card .gc-row{display:flex;align-items:center;gap:11px;padding:11px 14px;}
+  .game-card .gc-row+.gc-row{border-top:1px solid var(--line);}
+  .game-card .gc-row.is-win .gc-pts{color:var(--win);}
+  .game-card .gc-row.is-win .gc-arrow{color:var(--win);}
+  .game-card .gc-row.is-loss .gc-team{color:var(--steel);font-weight:400;}
+  .game-card .gc-row.is-loss .gc-pts{color:var(--steel);font-weight:400;}
+
+  .game-card .gc-logo{flex:0 0 auto;width:26px;height:26px;border-radius:50%;
+      background:rgba(242,244,248,.94);display:grid;place-items:center;
+      position:relative;overflow:hidden;}
+  .game-card .gc-logo img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:11%;}
+  .game-card .gc-mono{font-family:var(--font-mono);font-weight:800;font-size:.6rem;color:var(--navy-deep);}
+  .game-card .gc-logo:has(img) .gc-mono{visibility:hidden;}
+
+  .game-card .gc-who{flex:1 1 auto;min-width:0;}
+  .game-card .gc-team{display:block;font-family:var(--font-mono);font-weight:600;font-size:.92rem;
+      color:var(--chalk);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .game-card .gc-coach{display:inline-block;max-width:100%;margin-top:4px;padding:1px 6px;
+      font-family:var(--font-mono);font-size:.66rem;color:var(--steel);
+      background:rgba(242,244,248,.06);border-radius:3px;white-space:nowrap;
+      overflow:hidden;text-overflow:ellipsis;vertical-align:top;}
+  .game-card .gc-row.is-win .gc-coach{color:var(--chalk);background:rgba(242,244,248,.09);}
+  .game-card .gc-cpu{display:inline-block;margin-top:4px;font-size:.66rem;font-style:italic;color:var(--steel-dim);}
+
+  .game-card .gc-pts{flex:0 0 auto;min-width:1.5em;text-align:right;font-family:var(--font-mono);
+      font-weight:700;font-size:1.15rem;color:var(--chalk);font-variant-numeric:tabular-nums;}
+  .game-card .gc-pts.gc-dash{color:var(--steel-dim);font-weight:400;}
+  .game-card .gc-arrow{flex:0 0 auto;width:11px;text-align:center;font-size:.7rem;color:transparent;}
+
+  .game-card .gc-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;
+      padding:8px 14px;font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;
+      color:var(--steel);border-top:1px solid var(--line);}
+  .wg-league-tag{font-size:.65rem;font-weight:700;letter-spacing:.06em;color:var(--navy-deep);
+      background:var(--gold);padding:2px 8px;text-transform:uppercase;}
+</style>
+</head>
+<body>
+  <h1>Scorebug preview — final (Variant B)</h1>
+  <p class="sub">Real ESPN logos, hotlinked like the roster cards
+    (<code>a.espncdn.com/i/teamlogos/ncaa/500/{id}.png</code>). Coach gamertag in
+    a pill; winner row goes green with a &#9664; arrow; League badge in the footer;
+    unplayed games show just the week. Teams with no ESPN id (CPU opponents) fall
+    back to a monogram.</p>
+
+  <div class="game-grid">
+
+    <div class="game-card is-league is-final">
+      <div class="gc-row is-loss">
+        <span class="gc-logo"><span class="gc-mono">IS</span><img src="https://a.espncdn.com/i/teamlogos/ncaa/500/66.png" onerror="this.remove()" alt=""></span>
+        <span class="gc-who"><span class="gc-team">Iowa State</span><span class="gc-coach">Dway</span></span>
+        <span class="gc-pts">21</span><span class="gc-arrow"></span>
+      </div>
+      <div class="gc-row is-win">
+        <span class="gc-logo"><span class="gc-mono">BAY</span><img src="https://a.espncdn.com/i/teamlogos/ncaa/500/239.png" onerror="this.remove()" alt=""></span>
+        <span class="gc-who"><span class="gc-team">Baylor</span><span class="gc-coach">Brian52682</span></span>
+        <span class="gc-pts">42</span><span class="gc-arrow">&#9664;</span>
+      </div>
+      <div class="gc-foot"><span>Final</span><span class="wg-league-tag">League</span></div>
+    </div>
+
+    <div class="game-card is-final">
+      <div class="gc-row is-loss">
+        <span class="gc-logo"><span class="gc-mono">MAR</span><img src="https://a.espncdn.com/i/teamlogos/ncaa/500/276.png" onerror="this.remove()" alt=""></span>
+        <span class="gc-who"><span class="gc-team">Marshall</span><span class="gc-cpu">CPU</span></span>
+        <span class="gc-pts">10</span><span class="gc-arrow"></span>
+      </div>
+      <div class="gc-row is-win">
+        <span class="gc-logo"><span class="gc-mono">MD</span><img src="https://a.espncdn.com/i/teamlogos/ncaa/500/120.png" onerror="this.remove()" alt=""></span>
+        <span class="gc-who"><span class="gc-team">Maryland</span><span class="gc-coach">Trick whitey</span></span>
+        <span class="gc-pts">38</span><span class="gc-arrow">&#9664;</span>
+      </div>
+      <div class="gc-foot"><span>Final</span></div>
+    </div>
+
+    <div class="game-card is-league is-final">
+      <div class="gc-row is-win">
+        <span class="gc-logo"><span class="gc-mono">CAL</span><img src="https://a.espncdn.com/i/teamlogos/ncaa/500/25.png" onerror="this.remove()" alt=""></span>
+        <span class="gc-who"><span class="gc-team">California</span><span class="gc-coach">Bl00dVayN3</span></span>
+        <span class="gc-pts">52</span><span class="gc-arrow">&#9664;</span>
+      </div>
+      <div class="gc-row is-loss">
+        <span class="gc-logo"><span class="gc-mono">NDS</span><img src="https://a.espncdn.com/i/teamlogos/ncaa/500/2449.png" onerror="this.remove()" alt=""></span>
+        <span class="gc-who"><span class="gc-team">North Dakota State</span><span class="gc-coach">Texan_hog</span></span>
+        <span class="gc-pts">24</span><span class="gc-arrow"></span>
+      </div>
+      <div class="gc-foot"><span>Final</span><span class="wg-league-tag">League</span></div>
+    </div>
+
+    <div class="game-card is-upcoming">
+      <div class="gc-row">
+        <span class="gc-logo"><span class="gc-mono">JS</span><img src="https://a.espncdn.com/i/teamlogos/ncaa/500/55.png" onerror="this.remove()" alt=""></span>
+        <span class="gc-who"><span class="gc-team">Jacksonville State</span><span class="gc-cpu">CPU</span></span>
+        <span class="gc-pts gc-dash">&ndash;</span><span class="gc-arrow"></span>
+      </div>
+      <div class="gc-row">
+        <span class="gc-logo"><span class="gc-mono">NDS</span><img src="https://a.espncdn.com/i/teamlogos/ncaa/500/2449.png" onerror="this.remove()" alt=""></span>
+        <span class="gc-who"><span class="gc-team">North Dakota State</span><span class="gc-coach">Texan_hog</span></span>
+        <span class="gc-pts gc-dash">&ndash;</span><span class="gc-arrow"></span>
+      </div>
+      <div class="gc-foot"><span>Week 0</span></div>
+    </div>
+
+  </div>
+</body>
+</html>

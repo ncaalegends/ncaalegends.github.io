@@ -143,7 +143,9 @@ a { color: var(--gold); }
 /* Now that the ticker carries real content it runs quiet, with
    only the league name in gold — otherwise a full-width band of
    gold text competes with the hero directly beneath it. */
-.ticker-track span {
+/* Direct children only — a nested highlight span (.ts-win) should
+   inherit the typography but not get its own padding or divider dot. */
+.ticker-track > span {
   font-family: var(--font-mono);
   font-size: 0.68rem;
   letter-spacing: 0.14em;
@@ -158,7 +160,10 @@ a { color: var(--gold); }
    highlight jumps position every time the loop wraps. */
 .ticker-track .ts-lead { color: var(--gold); }
 
-.ticker-track span::after {
+/* Current-week winner, highlighted green inside its result segment. */
+.ticker-track .ts-win { color: var(--win); font-weight: 700; }
+
+.ticker-track > span::after {
   content: '';
   position: absolute;
   right: -24px;
@@ -685,9 +690,11 @@ main {
 /* ============================================================
    GAME CARDS
    ============================================================ */
+/* Three across on the desktop — steps down to two on tablets and
+   one on phones (see the responsive block). */
 .game-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 12px;
 }
 
@@ -695,14 +702,10 @@ main {
   background: var(--navy-panel);
   border: 1px solid var(--line);
   border-left: 3px solid var(--steel-dim);
-  padding: 16px;
-  transition: background 0.15s, border-left-color 0.15s, transform 0.15s;
+  transition: border-left-color 0.15s, transform 0.15s;
 }
 
-.game-card:hover {
-  background: #13233d;
-  transform: translateY(-1px);
-}
+.game-card:hover { transform: translateY(-1px); }
 
 /* Coach vs. coach — the games that actually matter to the league. */
 .game-card.is-league { border-left-color: var(--gold); }
@@ -712,53 +715,130 @@ main {
   box-shadow: inset 0 0 0 1px rgba(224, 38, 58, 0.35);
 }
 
-.game-card .matchup {
+/* One team per row: logo, team + coach pill, score, winner arrow.
+   Stacking the teams keeps each team glued to its own score and
+   gamertag — no cross-referencing a shared row, and long names just
+   ellipsis inside their own row. */
+.game-card .gc-row {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 11px 14px;
+}
+.game-card .gc-row + .gc-row { border-top: 1px solid var(--line); }
+
+/* Winner reads green, loser recedes to steel. Green is distinct
+   from every dynasty's accent, so "won" never reads as "league." */
+.game-card .gc-row.is-win .gc-pts { color: var(--win); }
+.game-card .gc-row.is-win .gc-arrow { color: var(--win); }
+.game-card .gc-row.is-loss .gc-team { color: var(--steel); font-weight: 400; }
+.game-card .gc-row.is-loss .gc-pts { color: var(--steel); font-weight: 400; }
+
+/* Light plate so black/navy college marks don't vanish; monogram
+   underneath shows through if the ESPN image 404s and removes
+   itself. */
+.game-card .gc-logo {
+  flex: 0 0 auto;
+  width: 39px;
+  height: 39px;
+  border-radius: 50%;
+  background: rgba(242, 244, 248, 0.94);
+  display: grid;
+  place-items: center;
+  position: relative;
+  overflow: hidden;
+}
+.game-card .gc-logo img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 11%;
+}
+.game-card .gc-mono {
+  font-family: var(--font-mono);
+  font-weight: 800;
+  font-size: 0.82rem;
+  color: var(--navy-deep);
+}
+.game-card .gc-logo:has(img) .gc-mono { visibility: hidden; }
+
+.game-card .gc-who { flex: 1 1 auto; min-width: 0; }
+
+.game-card .gc-team {
+  display: block;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 0.92rem;
+  color: var(--chalk);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Gamertag in a pill so it reads as a handle, not stray text. */
+.game-card .gc-coach {
+  display: inline-block;
+  max-width: 100%;
+  margin-top: 4px;
+  padding: 1px 6px;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  color: var(--steel);
+  background: rgba(242, 244, 248, 0.06);
+  border-radius: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: top;
+}
+.game-card .gc-row.is-win .gc-coach {
+  color: var(--chalk);
+  background: rgba(242, 244, 248, 0.09);
+}
+.game-card .gc-cpu {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 0.66rem;
+  font-style: italic;
+  color: var(--steel-dim);
+}
+
+.game-card .gc-pts {
+  flex: 0 0 auto;
+  min-width: 1.5em;
+  text-align: right;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: var(--chalk);
+  font-variant-numeric: tabular-nums;
+}
+.game-card .gc-pts.gc-dash { color: var(--steel-dim); font-weight: 400; }
+
+.game-card .gc-arrow {
+  flex: 0 0 auto;
+  width: 11px;
+  text-align: center;
+  font-size: 0.7rem;
+  color: transparent;
+}
+
+.game-card .gc-foot {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 6px;
-  font-family: var(--font-mono);
-  font-weight: 600;
-  font-size: 0.95rem;
-}
-
-.game-card .team { flex: 1; min-width: 0; }
-.game-card .team.home { text-align: right; }
-.game-card .at { color: var(--steel); font-size: 0.78rem; flex: 0 0 auto; }
-
-/* Winner reads bright, loser recedes — one glance per card. */
-.game-card .team.won { color: var(--chalk); }
-.game-card .team.lost { color: var(--steel); }
-
-.game-card .score {
-  display: flex;
-  align-items: baseline;
-  justify-content: center;
   gap: 8px;
-  font-family: var(--font-mono);
-  font-size: 1.3rem;
-  font-weight: 700;
-  margin-top: 10px;
-  font-variant-numeric: tabular-nums;
-}
-
-.game-card .score .s.won { color: var(--gold); }
-.game-card .score .s.lost { color: var(--steel); font-weight: 400; }
-.game-card .score .dash { color: var(--steel); font-weight: 400; }
-
-.game-card .status {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 10px;
-  font-size: 0.7rem;
+  padding: 8px 14px;
+  font-size: 0.68rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--steel);
+  border-top: 1px solid var(--line);
 }
 
-.game-card.is-live .status { color: var(--crimson); font-weight: 700; }
+.game-card.is-live .gc-foot { color: var(--crimson); font-weight: 700; }
 
 /* ============================================================
    RESULTS TICKER
@@ -1619,6 +1699,11 @@ main {
 
   .game-grid { grid-template-columns: 1fr; }
   .week-game-row { gap: 8px; }
+}
+
+/* Tablet: two game cards across before collapsing to one. */
+@media (min-width: 561px) and (max-width: 860px) {
+  .game-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 /* Reduced motion */

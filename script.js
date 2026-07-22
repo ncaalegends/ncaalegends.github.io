@@ -151,6 +151,162 @@ function logoSrcFor(entry) {
   return useEspn && /^\d+$/.test(id) ? `${ESPN_LOGO}${id}.png` : "";
 }
 
+/* ESPN ids for every team that appears as an opponent in any league.
+   A team coached in one league is a CPU opponent in another (e.g.
+   North Carolina is a coach's team in 3-star but a CPU opponent in
+   main), so this map has to include coach teams too — teamLogoSrc
+   checks the roster first, so a coach in their own league still uses
+   their roster id and this is only the fallback. Keys match the
+   schedule spelling exactly (both "Mississippi St" and "Mississippi
+   State" appear, so both are listed). Built from the full ESPN team
+   table; eyeball them all in logo-check.html. FCS placeholders
+   ("FCS West", etc.) are intentionally absent and fall back to a
+   monogram. */
+const OPPONENT_ESPN_IDS = {
+  "Akron": "2006",
+  "Alabama": "333",
+  "Arizona": "12",
+  "Arizona State": "9",
+  "Arkansas": "8",
+  "Arkansas State": "2032",
+  "Auburn": "2",
+  "Ball State": "2050",
+  "Baylor": "239",
+  "Boise State": "68",
+  "Boston College": "103",
+  "BYU": "252",
+  "C. Michigan": "2117",
+  "California": "25",
+  "Charlotte": "2429",
+  "Cincinnati": "2132",
+  "Clemson": "228",
+  "Coastal Carolina": "324",
+  "Colorado": "38",
+  "Duke": "150",
+  "East Carolina": "151",
+  "Eastern Michigan": "2199",
+  "FLA Atlantic": "2226",
+  "Florida": "57",
+  "Florida State": "52",
+  "Fresno State": "278",
+  "Ga Southern": "290",
+  "Georgia": "61",
+  "Georgia State": "2247",
+  "Georgia Tech": "59",
+  "Hawai'i": "62",
+  "Houston": "248",
+  "Illinois": "356",
+  "Indiana": "84",
+  "Iowa": "2294",
+  "Iowa State": "66",
+  "Jacksonville State": "55",
+  "James Madison": "256",
+  "Kansas": "2305",
+  "Kansas State": "2306",
+  "Kent State": "2309",
+  "Kentucky": "96",
+  "Liberty": "2335",
+  "Louisiana": "309",
+  "Louisiana Tech": "2348",
+  "Louisville": "97",
+  "LSU": "99",
+  "Marshall": "276",
+  "Maryland": "120",
+  "Miami": "2390",
+  "Miami University": "193",
+  "Michigan": "130",
+  "Michigan State": "127",
+  "Minnesota": "135",
+  "Mississippi St": "344",
+  "Mississippi State": "344",
+  "Missouri": "142",
+  "Missouri State": "2623",
+  "Navy": "2426",
+  "NC State": "152",
+  "Nebraska": "158",
+  "Nevada": "2440",
+  "New Mexico": "167",
+  "New Mexico St.": "166",
+  "North Carolina": "153",
+  "North Dakota State": "2449",
+  "North Texas": "249",
+  "Northwestern": "77",
+  "Notre Dame": "87",
+  "Ohio State": "194",
+  "Oklahoma": "201",
+  "Oklahoma State": "197",
+  "Old Dominion": "295",
+  "Ole Miss": "145",
+  "Oregon": "2483",
+  "Penn State": "213",
+  "Pittsburgh": "221",
+  "Purdue": "2509",
+  "Rice": "242",
+  "Rutgers": "164",
+  "San Diego St.": "21",
+  "San Jose State": "23",
+  "SMU": "2567",
+  "South Carolina": "2579",
+  "Southern Mississippi": "2572",
+  "Stanford": "24",
+  "Syracuse": "183",
+  "TCU": "2628",
+  "Tennessee": "2633",
+  "Texas": "251",
+  "Texas A&M": "245",
+  "Texas State": "326",
+  "Texas Tech": "2641",
+  "Toledo": "2649",
+  "Troy": "2653",
+  "Tulane": "2655",
+  "UAB": "5",
+  "UCF": "2116",
+  "UCLA": "26",
+  "UConn": "41",
+  "UMass": "113",
+  "UNLV": "2439",
+  "USC": "30",
+  "USF": "58",
+  "Utah": "254",
+  "Utah State": "328",
+  "UTEP": "2638",
+  "UTSA": "2636",
+  "Vanderbilt": "238",
+  "Virginia": "258",
+  "Virginia Tech": "259",
+  "W. Kentucky": "98",
+  "W. Michigan": "2711",
+  "Wake Forest": "154",
+  "Washington": "264",
+  "Washington St.": "265",
+  "West Virginia": "277",
+  "Western Michigan": "2711",
+  "Wisconsin": "275",
+};
+
+/* Normalized index so a minor spelling drift still resolves. */
+const OPPONENT_ID_INDEX = Object.fromEntries(
+  Object.entries(OPPONENT_ESPN_IDS).map(([name, id]) => [normalize(name), id])
+);
+
+/* Logo src for any team by its schedule name — roster logo/espnId
+   first (coach teams), then the CPU opponent map. Empty string when
+   nothing matches, so the monogram shows through. */
+function teamLogoSrc(scheduleName) {
+  const entry = rosterEntryFor(scheduleName);
+  const local = String(entry?.logo ?? "").trim();
+  if (local) return local;
+  if (INFO.useEspnLogos === false) return "";
+
+  const rosterId = String(entry?.espnId ?? "").trim();
+  const id = /^\d+$/.test(rosterId)
+    ? rosterId
+    : OPPONENT_ESPN_IDS[scheduleName] ||
+      OPPONENT_ID_INDEX[normalize(scheduleName)] ||
+      "";
+  return /^\d+$/.test(id) ? `${ESPN_LOGO}${id}.png` : "";
+}
+
 function teamMarkHtml(scheduleName, size = "md") {
   const entry = rosterEntryFor(scheduleName);
   const color = safeHex(entry?.color);
@@ -330,27 +486,55 @@ function renderJumbotron() {
         `${leagueRows.length} league, ${played} final, ${upcoming} upcoming`;
 }
 
+/* One team's row in the scorebug — logo, team, coach gamertag,
+   score, and a winner arrow. The winning row reads green (is-win),
+   the loser recedes to steel (is-loss). The gamertag sits in a pill
+   so it reads as a handle, not stray metadata; a team with no coach
+   is a CPU opponent. Team and coach both truncate with ellipsis, so
+   any long name (e.g. "North Dakota State") stays boxed. Logo comes
+   from ESPN's CDN with a monogram fallback — same as the roster. */
+function gameRowHtml(team, played, win, score) {
+  const entry = rosterEntryFor(team);
+  const coach = entry?.name || "";
+  const src = teamLogoSrc(team);
+  const mono = monogramFor(entry?.team || team);
+  const cls = win ? " is-win" : played ? " is-loss" : "";
+
+  return `<div class="gc-row${cls}">
+      <span class="gc-logo">
+        <span class="gc-mono">${esc(mono)}</span>
+        ${
+          src
+            ? `<img src="${esc(src)}" alt="" loading="lazy" onerror="this.remove()">`
+            : ""
+        }
+      </span>
+      <span class="gc-who">
+        <span class="gc-team" title="${esc(team)}">${esc(team)}</span>
+        ${
+          coach
+            ? `<span class="gc-coach">${esc(coach)}</span>`
+            : '<span class="gc-cpu">CPU</span>'
+        }
+      </span>
+      <span class="gc-pts${played ? "" : " gc-dash"}">${
+    played ? esc(score) : "&ndash;"
+  }</span>
+      <span class="gc-arrow">${win ? "&#9664;" : ""}</span>
+    </div>`;
+}
+
 function gameCardHtml(g, week) {
   const homeWon = g.played && g.homeScore > g.awayScore;
   const awayWon = g.played && g.awayScore > g.homeScore;
 
   return `
-    <article class="game-card${g.league ? " is-league" : ""}${g.played ? " is-final" : ""}">
-      <div class="matchup">
-        <span class="team away${awayWon ? " won" : g.played ? " lost" : ""}">${esc(g.away)}</span>
-        <span class="at">@</span>
-        <span class="team home${homeWon ? " won" : g.played ? " lost" : ""}">${esc(g.home)}</span>
-      </div>
-      ${
-        g.played
-          ? `<div class="score">
-               <span class="s${awayWon ? " won" : " lost"}">${esc(g.awayScore)}</span>
-               <span class="dash">&ndash;</span>
-               <span class="s${homeWon ? " won" : " lost"}">${esc(g.homeScore)}</span>
-             </div>`
-          : ""
-      }
-      <div class="status">
+    <article class="game-card${g.league ? " is-league" : ""}${
+    g.played ? " is-final" : " is-upcoming"
+  }">
+      ${gameRowHtml(g.away, g.played, awayWon, g.awayScore)}
+      ${gameRowHtml(g.home, g.played, homeWon, g.homeScore)}
+      <div class="gc-foot">
         <span>${g.played ? "Final" : esc(weekLabel(week))}</span>
         ${g.league ? '<span class="wg-league-tag">League</span>' : ""}
       </div>
@@ -388,11 +572,13 @@ function renderRecentResults() {
     return;
   }
 
-  // <= currentWeek, not <. Games finished during the week you're
-  // currently on are still results, and shouldn't stay hidden until
-  // you bump the week over.
+  // Previous weeks only — the current week's games live in "This
+  // Week" until the season advances, then drop into results. Capped
+  // at the two most recent completed weeks: at week 3 that's weeks
+  // 1-2, at week 1 just week 0, at week 0 nothing yet.
   const results = [];
-  for (let w = 0; w <= SEASON.currentWeek; w++) {
+  const firstWeek = Math.max(0, SEASON.currentWeek - 2);
+  for (let w = firstWeek; w < SEASON.currentWeek; w++) {
     buildWeekGames(w).rows.forEach((g) => {
       if (g.played) results.push({ ...g, week: w });
     });
@@ -401,9 +587,8 @@ function renderRecentResults() {
   // Most recent first, league games surfaced above CPU games.
   results.sort((a, b) => (b.week - a.week) || (b.league - a.league));
 
-  const top5 = results.slice(0, 5);
-  container.innerHTML = top5.length
-    ? top5
+  container.innerHTML = results.length
+    ? results
         .map((g) => {
           const awayWon = g.awayScore > g.homeScore;
           return `
@@ -884,27 +1069,35 @@ function initSchedule() {
    The list is emitted twice because the scroll animation
    translates by -50% for a seamless loop.
    ------------------------------------------------------------ */
+/* Each segment is { html } (already escaped) plus an optional `lead`
+   flag for the gold league name. Building html here — rather than
+   plain strings escaped in renderTicker — lets a current-week result
+   wrap its winning team in <span class="ts-win"> for the green
+   highlight. */
 function tickerSegments() {
-  const segs = [`${INFO.name} · ${INFO.tag}`.toUpperCase()];
+  const seg = (text) => ({ html: esc(String(text).toUpperCase()) });
+  const segs = [
+    { html: esc(`${INFO.name} · ${INFO.tag}`.toUpperCase()), lead: true },
+  ];
 
   if (isPreseason()) {
     const missing = ROSTER.filter(
       (c) => !SCHEDULES.some((t) => rosterKeyFor(t.team) === rosterKeyFor(c.team))
     );
 
-    segs.push(`${SCHEDULES.length} of ${ROSTER.length} schedules in`.toUpperCase());
+    segs.push(seg(`${SCHEDULES.length} of ${ROSTER.length} schedules in`));
 
     if (missing.length) {
-      segs.push(`Still needed: ${missing.map((c) => c.team).join(", ")}`.toUpperCase());
+      segs.push(seg(`Still needed: ${missing.map((c) => c.team).join(", ")}`));
     } else {
-      segs.push("ALL SCHEDULES IN — READY FOR WEEK 0");
+      segs.push(seg("ALL SCHEDULES IN — READY FOR WEEK 0"));
     }
-    segs.push(`${ROSTER.length} coaches signed up`.toUpperCase());
+    segs.push(seg(`${ROSTER.length} coaches signed up`));
     return segs;
   }
 
   const week = SEASON.currentWeek;
-  segs.push(weekLabel(week).toUpperCase());
+  segs.push(seg(weekLabel(week)));
 
   // Latest finals, league games first.
   const finals = [];
@@ -917,17 +1110,27 @@ function tickerSegments() {
     const [wT, wS, lT, lS] = awayWon
       ? [g.away, g.awayScore, g.home, g.homeScore]
       : [g.home, g.homeScore, g.away, g.awayScore];
-    segs.push(`${wT} ${wS}, ${lT} ${lS}`.toUpperCase());
+
+    // Highlight the winning team, but only for the current week.
+    if (g.week === week) {
+      segs.push({
+        html:
+          `<span class="ts-win">${esc(`${wT} ${wS}`.toUpperCase())}</span>` +
+          esc(`, ${lT} ${lS}`.toUpperCase()),
+      });
+    } else {
+      segs.push(seg(`${wT} ${wS}, ${lT} ${lS}`));
+    }
   });
 
   // Still to play this week, league games only.
   const upcoming = buildWeekGames(week).rows.filter((g) => !g.played && g.league);
   upcoming.slice(0, 3).forEach((g) => {
-    segs.push(`Up next: ${g.away} at ${g.home}`.toUpperCase());
+    segs.push(seg(`Up next: ${g.away} at ${g.home}`));
   });
 
   if (finals.length === 0 && upcoming.length === 0) {
-    segs.push("NO TRACKED GAMES THIS WEEK");
+    segs.push(seg("NO TRACKED GAMES THIS WEEK"));
   }
   return segs;
 }
@@ -947,8 +1150,9 @@ function renderTicker() {
   // The league name leads every repetition and is the only gold
   // segment. Keyed by class, not :first-child, or the gold would
   // appear once across the whole track and visibly jump on wrap.
+  // Each segment carries its own pre-escaped html (see tickerSegments).
   const oneCopy = segs
-    .map((s, i) => `<span${i === 0 ? ' class="ts-lead"' : ""}>${esc(s)}</span>`)
+    .map((s) => `<span${s.lead ? ' class="ts-lead"' : ""}>${s.html}</span>`)
     .join("");
 
   track.innerHTML = oneCopy;
@@ -982,18 +1186,16 @@ function renderFooter() {
   const linksEl = document.getElementById("footer-links");
 
   if (statusEl) {
-    const covered = SCHEDULES.length;
-    const total = ROSTER.length;
-    const coverage =
-      total > 0 && covered >= total
-        ? `ALL ${total} SCHEDULES IN`
-        : `${covered}/${total} SCHEDULES IN`;
-
+    // Just the dynasty you're in and the current week.
     const phase = isPreseason()
       ? "PRESEASON"
       : weekLabel(SEASON.currentWeek).toUpperCase();
 
-    statusEl.innerHTML = [INFO.name.toUpperCase(), coverage, phase]
+    const segs = [INFO.name.toUpperCase()];
+    if (INFO.tag) segs.push(INFO.tag.toUpperCase());
+    segs.push(phase);
+
+    statusEl.innerHTML = segs
       .map((seg) => `<span class="fs-seg">${esc(seg)}</span>`)
       .join('<span class="fs-sep">&middot;</span>');
   }

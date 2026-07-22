@@ -61,6 +61,15 @@
 <div class="grid" id="grid"></div>
 <div class="fail" id="fail"></div>
 
+<h1 style="margin-top:44px">CPU opponents</h1>
+<p>
+  Non-coach teams, from <code>OPPONENT_ESPN_IDS</code> in <code>script.js</code>
+  (shared across all leagues). Same deal — confirm each logo matches the name.
+  Shared spelling variants (e.g. "Mississippi St" and "Mississippi State") share
+  one ID and show once.
+</p>
+<div class="grid" id="cpu-grid"></div>
+
 <script>
   /* Which league to check, from ?league= in the URL. Defaults to
      main. The 1-star dynasty uses local logo files rather than ESPN
@@ -129,6 +138,39 @@
     el.innerHTML = "<strong>Logos that failed to load — bad or missing ID:</strong><br>"
                  + failed.join("<br>");
   };
+
+  /* CPU opponents come from the shared OPPONENT_ESPN_IDS object in
+     script.js. Running script.js whole would throw (it expects the
+     league data globals), so just lift the object literal out. */
+  async function loadOpponents() {
+    const res = await fetch("script.js", { cache: "no-cache" });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const m = (await res.text()).match(/const OPPONENT_ESPN_IDS = \{([\s\S]*?)\};/);
+    return m ? new Function(`return {${m[1]}};`)() : {};
+  }
+
+  loadOpponents().then(renderCpu).catch((e) => {
+    document.getElementById("cpu-grid").innerHTML =
+      `<p style="opacity:.7">Couldn't load script.js — ${e.message}</p>`;
+  });
+
+  function renderCpu(map) {
+    const seen = new Set();
+    document.getElementById("cpu-grid").innerHTML = Object.entries(map)
+      .filter(([, id]) => (seen.has(id) ? false : seen.add(id)))
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([team, id]) => `
+      <div class="card unverified" style="--team:#4d5872">
+        <div class="plate">
+          <span class="mono">${mono(team)}</span>
+          <img src="${BASE}${id}.png" alt=""
+               onerror="this.remove();window.__logoFail(${JSON.stringify(team)},'${id}')">
+        </div>
+        <div class="team">${team}</div>
+        <div class="id">espnId ${id}</div>
+        <span class="flag u">CHECK ME</span>
+      </div>`).join("");
+  }
 </script>
 </body>
 </html>
