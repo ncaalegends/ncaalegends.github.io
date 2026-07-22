@@ -90,8 +90,8 @@ const COACHES = [
   { name: "Temptiger",       team: "Clemson",                      conference: "ACC", color: "#F56600", twitch: "https://www.twitch.tv/temptiger", espnId: "228" },
   { name: "RekenCrew",       team: "Ohio State",                   conference: "B1G", color: "#CE2029", twitch: "https://www.twitch.tv/rekencrew", espnId: "194" },
   { name: "Turt17",          team: "Colorado",                     conference: "XII", color: "#CFB87C", twitch: "https://www.twitch.tv/turt17", espnId: "38" },
-  { name: "Davey88",         team: "Oregon",                       conference: "B1G", color: "#FEE123", twitch: "", espnId: "2483" },  // UNVERIFIED — confirm via logo-check.html
-  { name: "Pointdexter420",  team: "Oklahoma",                     conference: "SEC", color: "#C8102E", twitch: "", espnId: "201" },
+  { name: "Davey88",         team: "Oregon",                       conference: "B1G", color: "#FEE123", twitch: "https://www.twitch.tv/dbenjamin541", espnId: "2483" },  // UNVERIFIED — confirm via logo-check.html
+  { name: "Pointdexter420",  team: "Oklahoma",                     conference: "SEC", color: "#C8102E", twitch: "https://www.twitch.tv/smackintaint", espnId: "201" },
   { name: "Texan_hog",       team: "Washington",                   conference: "B1G", color: "#7A5BB5", twitch: "https://www.twitch.tv/texan_hog08", espnId: "264" },  // UNVERIFIED — confirm via logo-check.html
   { name: "Miles",           team: "Georgia",                      conference: "SEC", color: "#D6203A", twitch: "https://www.twitch.tv/kyrvach", espnId: "61" },
   { name: "BlueMiniMeaniee", team: "Cal",                          conference: "ACC", color: "#FDB515", twitch: "https://www.twitch.tv/blueminimeaniee", espnId: "25" },
