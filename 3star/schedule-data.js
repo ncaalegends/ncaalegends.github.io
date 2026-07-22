@@ -92,7 +92,7 @@ const TEAM_SCHEDULES = [
     conference: "ACC",
     weeks: [
       { week: 0, opponent: "West Virginia", location: "vs", teamScore: 37, opponentScore: 13 },
-      { week: 1, opponent: "Miami University", location: "vs" },
+      { week: 1, opponent: "Miami University", location: "vs", teamScore: 28, opponentScore: 0 },
       { week: 2, note: "BYE" },
       { week: 3, opponent: "Syracuse", location: "vs" },
       { week: 4, opponent: "FCS East", location: "vs" },
@@ -114,7 +114,7 @@ const TEAM_SCHEDULES = [
     conference: "ACC",
     weeks: [
       { week: 0, opponent: "Western Michigan", location: "vs", teamScore: 24, opponentScore: 34 },
-      { week: 1, opponent: "FCS East", location: "vs" },
+      { week: 1, opponent: "FCS East", location: "vs", teamScore: 49, opponentScore: 0 },
       { week: 2, opponent: "Old Dominion", location: "vs" },
       { week: 3, note: "BYE" },
       { week: 4, opponent: "Boston College", location: "at" },
@@ -250,7 +250,7 @@ const TEAM_SCHEDULES = [
     conference: "XII",
     weeks: [
       { week: 0, opponent: "Toledo", location: "vs", teamScore: 27, opponentScore: 6 },
-      { week: 1, opponent: "FCS Midwest", location: "vs" },
+      { week: 1, opponent: "FCS Midwest", location: "vs", teamScore: 38, opponentScore: 22 },
       { week: 2, opponent: "Iowa", location: "at" },
       { week: 3, note: "BYE" },
       { week: 4, opponent: "Utah", location: "vs" },
