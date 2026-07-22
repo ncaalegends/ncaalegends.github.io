@@ -30,10 +30,6 @@
    sync. Once a user-vs-user game goes final, add the score to BOTH
    teams' entries or it'll only show on one coach's schedule.
 
-   KNOWN GAP: Charlotte's week 0 is missing. Their screenshot starts
-   at week 1, but the header reads 1-0, so a game was played and won.
-   Add it when that screenshot comes in.
-
    NAME NOTE: Pittsburgh's week 1 opponent is "Miami University"
    (the Ohio RedHawks) — distinct from "Miami" (the ACC Hurricanes),
    who appear on the North Carolina, Pittsburgh and Virginia Tech
@@ -253,7 +249,7 @@ const TEAM_SCHEDULES = [
     team: "Iowa State",
     conference: "XII",
     weeks: [
-      { week: 0, opponent: "Toledo", location: "vs" },
+      { week: 0, opponent: "Toledo", location: "vs", teamScore: 27, opponentScore: 6 },
       { week: 1, opponent: "FCS Midwest", location: "vs" },
       { week: 2, opponent: "Iowa", location: "at" },
       { week: 3, note: "BYE" },
@@ -299,8 +295,7 @@ const TEAM_SCHEDULES = [
     team: "Charlotte",
     conference: "SEC",
     weeks: [
-      /* week 0 not yet captured — header shows 1-0, so a game was
-         played and won. Screenshot on hand starts at week 1. */
+      { week: 0, opponent: "Tulsa", location: "vs", teamScore: 33, opponentScore: 14 },
       { week: 1, opponent: "Georgia", location: "at" },
       { week: 2, opponent: "Ole Miss", location: "at" },
       { week: 3, opponent: "FCS Southeast", location: "vs" },
@@ -344,7 +339,7 @@ const TEAM_SCHEDULES = [
     team: "North Dakota State",
     conference: "SEC",
     weeks: [
-      { week: 0, opponent: "Jacksonville State", location: "vs" },
+      { week: 0, opponent: "Jacksonville State", location: "vs", teamScore: 40, opponentScore: 14 },
       { week: 1, opponent: "Oklahoma", location: "vs" },
       { week: 2, opponent: "Georgia", location: "vs" },
       { week: 3, opponent: "FCS Northwest", location: "vs" },
