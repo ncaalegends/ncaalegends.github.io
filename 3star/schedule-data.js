@@ -340,7 +340,7 @@ const TEAM_SCHEDULES = [
     conference: "SEC",
     weeks: [
       { week: 0, opponent: "Jacksonville State", location: "vs", teamScore: 40, opponentScore: 14 },
-      { week: 1, opponent: "Oklahoma", location: "vs" },
+      { week: 1, opponent: "Oklahoma", location: "vs", teamScore: 48, opponentScore: 17 },
       { week: 2, opponent: "Georgia", location: "vs" },
       { week: 3, opponent: "FCS Northwest", location: "vs" },
       { week: 4, opponent: "North Texas", location: "at" },
