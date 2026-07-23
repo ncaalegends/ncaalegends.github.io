@@ -966,6 +966,35 @@ main {
   border-bottom: none;
 }
 
+/* Full Power Rankings tab only: an L10 record + a right-aligned Score
+   column, plus a column header. The Home preview keeps the compact
+   4-column layout (no score). */
+#full-rankings li { grid-template-columns: 44px 1fr auto 48px 56px; }
+#full-rankings .p-score {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--chalk);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+/* Header row — suppress the rank counter so it doesn't take a number. */
+#full-rankings .poll-head {
+  counter-increment: none;
+  padding-top: 2px;
+  padding-bottom: 6px;
+}
+#full-rankings .poll-head:hover { background: none; }
+#full-rankings .poll-head::before { content: none; }
+#full-rankings .poll-head span {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--steel);
+}
+#full-rankings .poll-head .ph-score { text-align: right; }
+
 .rankings-note {
   margin: -6px 0 18px;
   color: var(--steel);
@@ -1865,6 +1894,10 @@ main {
   .tm-xl { width: 44px; height: 44px; }
   .tm-xl .tm-fallback { font-size: 0.9rem; }
   .poll-list .p-record { display: none; }
+  /* The full rankings tab keeps its Score column on mobile (record
+     drops, like the rows above). */
+  #full-rankings li { grid-template-columns: 28px 1fr 38px 50px; }
+  #full-rankings .poll-head .ph-l10 { display: none; }
 
   .tabs { width: 100%; }
   .tab-btn { flex: 1; padding: 9px 4px; text-align: center; }

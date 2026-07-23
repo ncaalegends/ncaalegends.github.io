@@ -733,7 +733,8 @@ function trendFrom(prevRankByKey, r) {
 /* The rank number is drawn by a CSS counter on the <li>, so this
    returns exactly 3 children to fill the remaining 3 grid columns.
    Adding an element here means adding a column in style.css. */
-function rankingRowHtml(r, trend) {
+function rankingRowHtml(r, trend, showScore) {
+  const score = r.powerScore != null ? r.powerScore.toFixed(1) : "";
   return `
     <li>
       <span class="p-main">
@@ -743,13 +744,23 @@ function rankingRowHtml(r, trend) {
           <span class="p-coach">${esc(r.coach || coachFor(r.team))}</span>
         </span>
       </span>
-      <span class="p-record">${esc(r.record || "")}</span>
+      <span class="p-record">${esc(r.l10 || r.record || "")}</span>
       <span class="p-trend ${trend.cls}" title="${esc(trend.label)}">${trend.symbol}</span>
+      ${showScore ? `<span class="p-score">${esc(score)}</span>` : ""}
     </li>`;
 }
 
 const RANKINGS_EMPTY_MSG =
   '<li class="poll-empty-msg">No power rankings yet — check back once there are enough league (coach vs. coach) games on the board.</li>';
+
+/* Column header for the full rankings tab. It's a non-counting row —
+   the CSS suppresses its rank counter — so it lines up with the data
+   rows below without taking a number. */
+const RANKINGS_HEAD_HTML =
+  '<li class="poll-head" aria-hidden="true">' +
+  "<span></span><span>Team</span>" +
+  '<span class="ph-l10">L10</span><span></span>' +
+  '<span class="ph-score">Score</span></li>';
 
 function renderRankings() {
   const fullList = document.getElementById("full-rankings");
@@ -784,13 +795,15 @@ function renderRankings() {
   if (label) label.textContent = `WEEK ${week} POLL`;
   if (fullList) {
     fullList.classList.remove("is-empty");
-    fullList.innerHTML = rows.map((r) => rankingRowHtml(r, trendFrom(prevRankByKey, r))).join("");
+    fullList.innerHTML =
+      RANKINGS_HEAD_HTML +
+      rows.map((r) => rankingRowHtml(r, trendFrom(prevRankByKey, r), true)).join("");
   }
   if (previewList) {
     previewList.classList.remove("is-empty");
     previewList.innerHTML = rows
       .slice(0, 5)
-      .map((r) => rankingRowHtml(r, trendFrom(prevRankByKey, r)))
+      .map((r) => rankingRowHtml(r, trendFrom(prevRankByKey, r), false))
       .join("");
   }
 }

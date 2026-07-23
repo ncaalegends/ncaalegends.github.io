@@ -514,9 +514,12 @@
         coach: t.coach,
         powerScore,
         playedGames: n, // coach-vs-coach games that fed the score (sims excluded)
-        h2hWins: t.recW, // head-to-head record (sims included) — what's shown
+        h2hWins: t.recW, // full head-to-head record (sims included)
         h2hLosses: t.recL,
         record: `${t.recW}-${t.recL}`,
+        // Record over the same rolling window that feeds the score — the
+        // "L10" shown on the Power Rankings tab.
+        l10: `${wins}-${n - wins}`,
       });
     });
 
