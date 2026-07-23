@@ -75,7 +75,7 @@ const COACHES = [
   { name: "EHDC12",          team: "North Carolina",     conference: "ACC", color: "#7BAFD4", twitch: "https://www.twitch.tv/DCGQManOfTheYear7", espnId: "153" },
   { name: "wacky9speedy",    team: "Charlotte",          conference: "SEC", color: "#4FAE84", twitch: "https://www.twitch.tv/wacky9speedy", espnId: "2429" },
   { name: "EYEDONTPULL19",   team: "UCF",                conference: "XII", color: "#E0C158", twitch: "", espnId: "2116" },
-  { name: "CoachLawless",    team: "Rutgers",            conference: "B1G", color: "#E03A57", twitch: "https://www.twitch.tv/coachlawless", espnId: "164" },
+  { name: "CoachLawless",    team: "Rutgers",            conference: "B1G", color: "#E03A57", twitch: "https://www.twitch.tv/coachlawless", espnId: "164", active: false },  // Inactive — Rutgers reverts to a CPU opponent. Remove this flag to reinstate.
 ];
 
 /* ------------------------------------------------------------
