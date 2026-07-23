@@ -278,7 +278,7 @@ const TEAM_SCHEDULES = [
     conference: "Big Ten",
     weeks: [
       { week: 0, opponent: "San Jose State", location: "vs", stadium: "Los Angeles Memorial Coliseum", teamScore: 38, opponentScore: 14 },
-      { week: 1, opponent: "Fresno State", location: "vs", stadium: "Los Angeles Memorial Coliseum" },
+      { week: 1, opponent: "Fresno State", location: "vs", stadium: "Los Angeles Memorial Coliseum", teamScore: 41, opponentScore: 23 },
       { week: 2, opponent: "Louisiana", location: "vs", stadium: "Los Angeles Memorial Coliseum" },
       { week: 3, opponent: "Rutgers", location: "at", stadium: "SHI Stadium" },
       { week: 4, opponent: "Oregon", location: "vs", stadium: "Los Angeles Memorial Coliseum" },
