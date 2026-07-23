@@ -303,7 +303,41 @@ function renderGames() {
     return;
   }
 
-  host.innerHTML = games.map((g, i) => gameHtml(g, i)).join("");
+  /* Split into what's left and what's done, and put what's left on
+     top. On a 10+ game week most of the list is finished, and the
+     old schedule-order interleaving meant hunting through finished
+     games to find the blanks. The original index travels with each
+     game in the data attributes, so collect() and the edit handlers
+     still address games by their real index no matter how the DOM is
+     ordered here. */
+  const todo = [];
+  const done = [];
+  games.forEach((g, i) => (g.scored ? done : todo).push({ g, i }));
+
+  let html = "";
+
+  if (todo.length) {
+    html +=
+      `<div class="group-head">To enter <span class="group-count">${todo.length}</span></div>` +
+      todo.map(({ g, i }) => gameHtml(g, i)).join("");
+  } else {
+    html += `<p class="all-done">All games this week are entered.</p>`;
+  }
+
+  /* Finished games go into a collapsed section, so a week that's
+     mostly done shows just the few blanks up top and a tidy count
+     below. Auto-opened only when there's nothing left to enter, so
+     the page isn't a dead end once you're caught up. */
+  if (done.length) {
+    html +=
+      `<details class="entered"${todo.length ? "" : " open"}>` +
+      `<summary>Entered <span class="group-count muted">${done.length}</span></summary>` +
+      `<div class="entered-body">` +
+      done.map(({ g, i }) => gameHtml(g, i)).join("") +
+      `</div></details>`;
+  }
+
+  host.innerHTML = html;
 
   /* Byes and notes are shown but not scoreable — seeing them
      confirms the week loaded correctly rather than leaving a coach
@@ -327,10 +361,13 @@ function renderGames() {
       row.querySelector(".final-line").remove();
       row.insertAdjacentHTML("beforeend", scoreInputsHtml(games[i], i, games[i].scoredPair));
       wireInputs(row);
+      wireKeyboard(host);
+      row.querySelector(".score-box").focus();
     });
   });
 
   wireInputs(host);
+  wireKeyboard(host);
   updateCount();
 }
 
@@ -464,7 +501,7 @@ function scoreInputsHtml(g, i, prefill) {
     `<span class="score-dash">&ndash;</span>` +
     `<input class="score-box" type="number" inputmode="numeric" min="0" max="200" ` +
     `data-side="opp" data-i="${i}" value="${esc(b)}" aria-label="${esc(g.other)} score">` +
-    `<span class="score-side" style="text-align:right;">${esc(g.other)}</span>` +
+    `<span class="score-side right">${esc(g.other)}</span>` +
     `</div>` +
     simRow
   );
@@ -473,6 +510,29 @@ function scoreInputsHtml(g, i, prefill) {
 function wireInputs(scope) {
   scope.querySelectorAll(".score-box").forEach((el) => {
     el.addEventListener("input", updateCount);
+  });
+}
+
+/* Enter advances to the next box, and to Save after the last one.
+   For a 10+ game week this turns entry into type-Enter-type-Enter
+   without ever reaching for the mouse — the single biggest thing
+   that made a full slate tedious. Rebound on every render because
+   the box set changes; listeners on replaced nodes go away with
+   them, so there's nothing to detach. */
+function wireKeyboard(host) {
+  const boxes = [...host.querySelectorAll(".score-box")];
+  boxes.forEach((el, idx) => {
+    el.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter") return;
+      e.preventDefault(); // no form here, but stops any implicit submit
+      const next = boxes[idx + 1];
+      if (next) {
+        next.focus();
+        next.select();
+      } else {
+        $("save-scores").focus();
+      }
+    });
   });
 }
 
