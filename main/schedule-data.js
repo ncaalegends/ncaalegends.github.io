@@ -80,7 +80,7 @@ const TEAM_SCHEDULES = [
     conference: "ACC",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "LSU", location: "at", stadium: "Tiger Stadium" },
+      { week: 1, opponent: "LSU", location: "at", stadium: "Tiger Stadium", teamScore: 21, opponentScore: 37 },
       { week: 2, opponent: "Ga Southern", location: "vs", stadium: "Clemson Memorial Stadium" },
       { week: 3, opponent: "North Carolina", location: "vs", stadium: "Clemson Memorial Stadium" },
       { week: 4, opponent: "California", location: "at", stadium: "California Memorial Stadium" },
@@ -124,7 +124,7 @@ const TEAM_SCHEDULES = [
     conference: "Big Ten",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "Boise State", location: "vs", stadium: "Autzen Stadium" },
+      { week: 1, opponent: "Boise State", location: "vs", stadium: "Autzen Stadium", teamScore: 42, opponentScore: 7 },
       { week: 2, opponent: "Oklahoma State", location: "at", stadium: "Boone Pickens Stadium" },
       { week: 3, opponent: "FCS Northwest", location: "vs", stadium: "Autzen Stadium" },
       { week: 4, opponent: "USC", location: "at", stadium: "Los Angeles Memorial Coliseum" },
@@ -146,7 +146,7 @@ const TEAM_SCHEDULES = [
     conference: "ACC",
     weeks: [
       { week: 0, opponent: "New Mexico St.", location: "vs", stadium: "Doak Campbell Stadium", teamScore: 49, opponentScore: 37 },
-      { week: 1, opponent: "SMU", location: "vs", stadium: "Doak Campbell Stadium" },
+      { week: 1, opponent: "SMU", location: "vs", stadium: "Doak Campbell Stadium", teamScore: 21, opponentScore: 28 },
       { week: 2, note: "BYE" },
       { week: 3, opponent: "Alabama", location: "at", stadium: "Saban Field at Bryant-Denny Stadium" },
       { week: 4, opponent: "FCS Southeast", location: "vs", stadium: "Doak Campbell Stadium" },
@@ -168,7 +168,7 @@ const TEAM_SCHEDULES = [
     conference: "ACC",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "Florida State", location: "at", stadium: "Doak Campbell Stadium" },
+      { week: 1, opponent: "Florida State", location: "at", stadium: "Doak Campbell Stadium", teamScore: 28, opponentScore: 21 },
       { week: 2, opponent: "FCS Midwest", location: "vs", stadium: "Gerald J. Ford Stadium" },
       { week: 3, opponent: "Louisville", location: "at", stadium: "L&N Stadium" },
       { week: 4, opponent: "Missouri State", location: "vs", stadium: "Gerald J. Ford Stadium" },
@@ -212,7 +212,7 @@ const TEAM_SCHEDULES = [
     conference: "SEC",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "Kent State", location: "vs", stadium: "Williams-Brice Stadium" },
+      { week: 1, opponent: "Kent State", location: "vs", stadium: "Williams-Brice Stadium", teamScore: 52, opponentScore: 15 },
       { week: 2, opponent: "FCS Southeast", location: "vs", stadium: "Williams-Brice Stadium" },
       { week: 3, opponent: "Mississippi St", location: "vs", stadium: "Williams-Brice Stadium" },
       { week: 4, opponent: "Alabama", location: "at", stadium: "Saban Field at Bryant-Denny Stadium" },
@@ -234,7 +234,7 @@ const TEAM_SCHEDULES = [
     conference: "Big Ten",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "Ball State", location: "vs", stadium: "Ohio Stadium" },
+      { week: 1, opponent: "Ball State", location: "vs", stadium: "Ohio Stadium", teamScore: 50, opponentScore: 10 },
       { week: 2, opponent: "Texas", location: "at", stadium: "Texas Memorial Stadium" },
       { week: 3, opponent: "Kent State", location: "vs", stadium: "Ohio Stadium" },
       { week: 4, opponent: "Illinois", location: "vs", stadium: "Ohio Stadium" },
@@ -322,7 +322,7 @@ const TEAM_SCHEDULES = [
     conference: "Big Ten",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "W. Michigan", location: "vs", stadium: "Michigan Stadium" },
+      { week: 1, opponent: "W. Michigan", location: "vs", stadium: "Michigan Stadium", teamScore: 42, opponentScore: 17 },
       { week: 2, opponent: "Oklahoma", location: "vs", stadium: "Michigan Stadium" },
       { week: 3, opponent: "UTEP", location: "vs", stadium: "Michigan Stadium" },
       { week: 4, opponent: "Iowa", location: "vs", stadium: "Michigan Stadium" },
@@ -454,7 +454,7 @@ const TEAM_SCHEDULES = [
     conference: "Independent",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "Wisconsin", location: "vs", stadium: "Notre Dame Stadium" },
+      { week: 1, opponent: "Wisconsin", location: "vs", stadium: "Notre Dame Stadium", teamScore: 44, opponentScore: 14 },
       { week: 2, opponent: "Rice", location: "vs", stadium: "Notre Dame Stadium" },
       { week: 3, opponent: "Michigan State", location: "vs", stadium: "Notre Dame Stadium" },
       { week: 4, opponent: "Purdue", location: "at", stadium: "Ross-Ade Stadium" },
@@ -527,7 +527,7 @@ const TEAM_SCHEDULES = [
     conference: "SEC",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "East Carolina", location: "vs", stadium: "Saban Field at Bryant-Denny Stadium" },
+      { week: 1, opponent: "East Carolina", location: "vs", stadium: "Saban Field at Bryant-Denny Stadium", teamScore: 70, opponentScore: 10 },
       { week: 2, opponent: "Kentucky", location: "at", stadium: "Kroger Field" },
       { week: 3, opponent: "Florida State", location: "vs", stadium: "Saban Field at Bryant-Denny Stadium" },
       { week: 4, opponent: "South Carolina", location: "vs", stadium: "Saban Field at Bryant-Denny Stadium" },
