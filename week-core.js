@@ -333,10 +333,15 @@
      ------------------------------------------------------------
      Ranks coaches by the quality of their COACH-VS-COACH games.
      CPU games never count (the site has always said the poll is
-     league games only), and force-sims / forfeits are excluded too
-     — they still show up in a team's win-loss record, but a game
-     nobody actually played can't say anything about how good a
-     coach is, so it's kept out of the score.
+     league games only). Force-sims / forfeits are kept out of the
+     SCORE — a game nobody actually played says nothing about how
+     good a coach is — but they still count in the win-loss RECORD.
+
+     The record shown next to each team is that head-to-head record
+     within this dynasty: wins and losses against other coaches only.
+     CPU results never appear in it, so a coach who beats their one
+     league opponent reads 1-0 here even if they've also piled up
+     wins against the computer.
 
      Ported from the original Google-Form power-ranking math. Two
      inputs from that version don't exist on this site and are
@@ -379,15 +384,21 @@
     return Math.max(-cap, Math.min(cap, margin));
   }
 
-  /* The latest week that has at least one played (non-sim) H2H
-     result. This is the week the live poll represents; the previous
-     week's poll (for the up/down arrows) is this minus one. Returns
-     null when no coach-vs-coach game has been played yet. */
+  /* The latest week that has any scored coach-vs-coach result —
+     simmed ones included, because they still move the win-loss
+     record and so belong inside the poll's range. This is the week
+     the live poll represents; the previous week's poll (for the
+     up/down arrows) is this minus one. Returns null when no
+     coach-vs-coach game has been recorded yet.
+
+     Note this can be non-null while the poll itself is still empty:
+     if every H2H game so far was a sim, there's a record to show but
+     nothing scoreable yet, and computeRankings returns no rows. */
   function latestH2HWeek(data) {
     let latest = null;
     for (let week = 0; week <= 15; week++) {
       const wk = buildWeek(data, week);
-      if (wk.league.some((m) => m.scored && !m.sim)) latest = week;
+      if (wk.league.some((m) => m.scored)) latest = week;
     }
     return latest;
   }
@@ -415,9 +426,9 @@
           key,
           team: (entry && entry.team) || name,
           coach: R.coachFor(name),
-          h2h: [], // played (non-sim) coach-vs-coach games
-          overallW: 0, // record shown to users — includes sims AND cpu
-          overallL: 0,
+          h2h: [], // played (non-sim) coach-vs-coach games -> the score
+          recW: 0, // displayed record: coach-vs-coach only, sims included
+          recL: 0,
         });
       }
       return teams.get(key);
@@ -433,13 +444,14 @@
         const home = ensure(m.home);
         const away = ensure(m.away);
 
-        // Record counts every finished game, simmed or not.
+        // Head-to-head record: every coach-vs-coach result counts,
+        // simmed or not. CPU games are deliberately not touched here.
         if (hs > as) {
-          home.overallW++;
-          away.overallL++;
+          home.recW++;
+          away.recL++;
         } else {
-          away.overallW++;
-          home.overallL++;
+          away.recW++;
+          home.recL++;
         }
 
         // Scoring log skips sims.
@@ -448,13 +460,9 @@
         away.h2h.push({ pf: as, pa: hs, win: as > hs, oppKey: home.key, roadWin: as > hs, week });
       });
 
-      // CPU results only touch the visible record, never the poll.
-      wk.cpu.forEach((g) => {
-        if (!g.scored) return;
-        const t = ensure(g.team);
-        if (g.scored.team > g.scored.opponent) t.overallW++;
-        else t.overallL++;
-      });
+      /* CPU results are intentionally ignored: they belong to a
+         team's overall season record, not to the head-to-head record
+         this poll shows. */
     }
 
     // Each team's league win% over ALL its played H2H games — this is
@@ -495,12 +503,10 @@
         team: t.team,
         coach: t.coach,
         powerScore,
-        playedGames: n,
-        h2hWins: t.h2hW,
-        h2hLosses: t.h2hL,
-        overallWins: t.overallW,
-        overallLosses: t.overallL,
-        record: `${t.overallW}-${t.overallL}`,
+        playedGames: n, // coach-vs-coach games that fed the score (sims excluded)
+        h2hWins: t.recW, // head-to-head record (sims included) — what's shown
+        h2hLosses: t.recL,
+        record: `${t.recW}-${t.recL}`,
       });
     });
 
