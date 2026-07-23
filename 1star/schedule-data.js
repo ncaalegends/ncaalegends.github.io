@@ -217,7 +217,7 @@ const TEAM_SCHEDULES = [
     team: "Westeros",
     conference: "CUSA",
     weeks: [
-      { week: 0, opponent: "Delaware", location: "vs" },
+      { week: 0, opponent: "Delaware", location: "vs", teamScore: 9, opponentScore: 37 },
       { week: 1, opponent: "New Glarus", location: "at" },
       { week: 2, opponent: "Georgia Tech", location: "at" },
       { week: 3, opponent: "California", location: "at" },
