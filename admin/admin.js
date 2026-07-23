@@ -211,6 +211,14 @@ $("signout-btn").addEventListener("click", () => {
 /* ------------------------------------------------------------
    LEAGUE + WEEK SELECTION
    ------------------------------------------------------------ */
+/* Leagues that can be advanced from the web. Main is scoreable but
+   not advanceable here — advancing it locally also posts the Discord
+   week announcement, which this path can't do. Mirrors ADVANCE_LEAGUES
+   in the Worker and tools/apply.js; a submission would be refused
+   there regardless, but hiding the panel means nobody's offered a
+   button that can only fail. */
+const ADVANCE_LEAGUES = ["1star", "3star"];
+
 async function switchLeague(slug) {
   /* Drives the accent colour, exactly as on the league pages. */
   document.body.setAttribute("data-league", slug);
@@ -223,6 +231,20 @@ async function switchLeague(slug) {
     return;
   }
   message($("scores-msg"), "");
+
+  /* Show or hide the whole Advance panel for this league. Done here
+     rather than in refreshWeekControls so it only re-evaluates on an
+     actual league change, not on every re-render. */
+  const canAdvance = ADVANCE_LEAGUES.includes(slug);
+  $("advance-panel").classList.toggle("hidden", !canAdvance);
+  /* Clear any lingering confirm state when moving to a league that
+     can't advance, so switching back doesn't reveal a half-open
+     confirmation. */
+  if (!canAdvance) {
+    $("advance-confirm").classList.add("hidden");
+    $("advance-form").classList.remove("hidden");
+    message($("advance-msg"), "");
+  }
 
   refreshWeekControls();
 }

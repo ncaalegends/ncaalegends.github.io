@@ -325,9 +325,12 @@ line-surgical writer.
 What it adds is validation, because its input arrives from the
 internet rather than from you:
 
-- **`main` is not reachable.** `ALLOWED_LEAGUES` is hardcoded to
-  `1star` and `3star`. No payload can touch the main dynasty however
-  it got here.
+- **Per-action league allow-lists, hardcoded.** `SCORE_LEAGUES`
+  (`1star`, `3star`, `main`) and `ADVANCE_LEAGUES` (`1star`, `3star`)
+  are checked against the action. So main scores go through, but a
+  main *advance* is refused however the payload got here — advancing
+  main locally posts the Discord announcement the web path can't, so
+  it stays a local-only action.
 - Week must be a whole number 0–15, at most 40 entries per
   submission, team names capped in length.
 - Deadline and status text is checked against a character allowlist.

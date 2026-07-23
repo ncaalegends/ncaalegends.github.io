@@ -54,16 +54,30 @@ function makeCode() {
   return out.match(new RegExp(`.{1,${GROUP}}`, "g")).join("-");
 }
 
-const LEAGUE_CHOICES = {
-  1: { slugs: ["1star"], label: "1-Star only" },
-  2: { slugs: ["3star"], label: "3-Star only" },
-  3: { slugs: ["1star", "3star"], label: "both leagues" },
+/* One digit per league. A person can be granted any combination, so
+   rather than enumerate every pairing, the prompt reads whichever
+   digits the user types (see parseLeagues). */
+const LEAGUE_BY_DIGIT = {
+  1: { slug: "1star", label: "1-Star" },
+  2: { slug: "3star", label: "3-Star" },
+  3: { slug: "main", label: "Main" },
 };
 
-/* main is intentionally absent. tools/apply.js hardcodes the
-   leagues it will act on, so a code listing main would be
-   rejected anyway — better not to offer it than to hand out
-   something that silently fails. */
+/* Main grants scores only. Advancing main from the web is withheld
+   because it would skip the Discord announcement — see the header of
+   tools/apply.js. The code doesn't encode that; the restriction is
+   global and enforced by apply.js and the Worker. Granting main here
+   just means "can record main scores from the web". */
+function parseLeagues(input) {
+  const digits = String(input).match(/[123]/g);
+  if (!digits) return null;
+  /* Dedupe and keep league order stable (1star, 3star, main). */
+  const slugs = [];
+  for (const d of ["1", "2", "3"]) {
+    if (digits.includes(d)) slugs.push(LEAGUE_BY_DIGIT[d]);
+  }
+  return slugs.length ? slugs : null;
+}
 
 /* ------------------------------------------------------------
    PROMPTS
@@ -146,17 +160,25 @@ async function main() {
       continue;
     }
 
-    let choice = "";
-    while (!LEAGUE_CHOICES[choice]) {
-      choice = await ask(`  Which leagues?  [1] 1-Star  [2] 3-Star  [3] Both : `);
-      if (!LEAGUE_CHOICES[choice]) console.log(`  Enter 1, 2 or 3.`);
+    let chosen = null;
+    while (!chosen) {
+      const raw = await ask(
+        `  Which leagues?  [1] 1-Star  [2] 3-Star  [3] Main\n` +
+          `  (type one or more, e.g. 1  or  13  or  123): `
+      );
+      chosen = parseLeagues(raw);
+      if (!chosen) console.log(`  Enter at least one of 1, 2 or 3.`);
     }
 
+    const label = chosen.map((c) => c.label).join(" + ");
     const code = makeCode();
-    codes[code] = { name, leagues: LEAGUE_CHOICES[choice].slugs };
-    fresh.push({ name, code, label: LEAGUE_CHOICES[choice].label });
+    codes[code] = { name, leagues: chosen.map((c) => c.slug) };
+    fresh.push({ name, code, label });
 
-    console.log(`  Added ${name} — ${LEAGUE_CHOICES[choice].label}.`);
+    /* Main is scores-only on the web; flag it so nobody's surprised
+       the advance panel is missing when they sign in with it. */
+    const mainNote = chosen.some((c) => c.slug === "main") ? "  (Main = scores only)" : "";
+    console.log(`  Added ${name} — ${label}.${mainNote}`);
   }
 
   rl.close();

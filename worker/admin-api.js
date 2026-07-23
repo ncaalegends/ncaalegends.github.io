@@ -29,7 +29,17 @@
    ============================================================ */
 
 const DISPATCH_EVENT = "league-update";
-const ALLOWED_LEAGUES = ["1star", "3star"];
+
+/* Mirrors tools/apply.js, which is the authoritative copy. Main can
+   take scores from the web but not an advance: advancing main locally
+   also posts the Discord week announcement, and the web path has no
+   webhook, so it would silently skip it. Two lists keep that split.
+   The union is what a code may be granted; the per-action list is
+   what a given submission is checked against. */
+const SCORE_LEAGUES = ["1star", "3star", "main"];
+const ADVANCE_LEAGUES = ["1star", "3star"];
+const ALLOWED_LEAGUES = [...new Set([...SCORE_LEAGUES, ...ADVANCE_LEAGUES])];
+
 const MIN_CODE_LENGTH = 16;
 
 /* Belt and braces with tools/apply.js, which enforces the same
@@ -191,6 +201,15 @@ function checkPayload(payload, who) {
 
   if (action !== "scores" && action !== "advance") return "unknown action";
   if (!ALLOWED_LEAGUES.includes(league)) return "unknown league";
+
+  /* Which leagues this action may touch. Main is scoreable but not
+     advanceable from the web — the same split apply.js enforces. */
+  const permitted = action === "advance" ? ADVANCE_LEAGUES : SCORE_LEAGUES;
+  if (!permitted.includes(league)) {
+    return action === "advance"
+      ? `${league} can't be advanced from the web — do it with advance.cmd so Discord still posts`
+      : `${league} can't be updated this way`;
+  }
 
   /* The authorisation decision. Everything else here is a format
      check; this is the line that stops a 1-star commissioner

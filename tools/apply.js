@@ -25,9 +25,17 @@
    Everything below re-validates from scratch. The Worker already
    checked the caller's access code and which leagues they may
    touch, but this script assumes the payload could be arbitrary
-   and enforces its own limits anyway. In particular ALLOWED_LEAGUES
-   is hardcoded, so no payload — however it got here — can write to
-   the main dynasty.
+   and enforces its own limits anyway. In particular the league
+   allow-lists are hardcoded, so no payload — however it got here —
+   can perform an action against a league it isn't cleared for.
+
+   MAIN IS SCORES-ONLY ON THE WEB
+   The main dynasty can have scores recorded from the web, but NOT
+   advanced. Advancing main locally (advance.cmd) also posts the
+   week announcement to Discord; the web path has no webhook and
+   would silently skip it, so main's coaches would get no notice a
+   week had turned over. Rather than half-do it, advancing main
+   stays local. That's why there are two lists below, not one.
    ============================================================ */
 
 const fs = require("fs");
@@ -43,7 +51,21 @@ const { updateSeason } = require("./advance");
    Deliberately hardcoded rather than configurable. Each one is a
    ceiling no legitimate submission comes close to.
    ------------------------------------------------------------ */
-const ALLOWED_LEAGUES = ["1star", "3star"];
+/* Which leagues each action may touch, per the note above. Scores
+   are safe for any league; advancing is withheld from main because
+   of its Discord announcement. A single union list would have let a
+   main advance through — the split is the point. */
+const SCORE_LEAGUES = ["1star", "3star", "main"];
+const ADVANCE_LEAGUES = ["1star", "3star"];
+
+/* Everything the web path can reach at all — the union, used only
+   for the "is this even a web league" check and error text. */
+const ALLOWED_LEAGUES = [...new Set([...SCORE_LEAGUES, ...ADVANCE_LEAGUES])];
+
+function leaguesForAction(action) {
+  return action === "advance" ? ADVANCE_LEAGUES : SCORE_LEAGUES;
+}
+
 const MAX_ENTRIES = 40; // a 16-team league has at most ~16 games/week
 const MAX_TEAM_LEN = 120;
 const MAX_TEXT_LEN = 120;
@@ -92,14 +114,20 @@ function validate(payload) {
   }
 
   const league = payload.league;
-  if (!ALLOWED_LEAGUES.includes(league)) {
-    /* The main dynasty is intentionally not reachable from the web
-       path. It has a Discord announcement step and a commissioner
-       who already has the local tools; there's no reason to expose
-       it, so it can't be reached even by a valid access code. */
+  const permitted = leaguesForAction(action);
+  if (!permitted.includes(league)) {
+    /* Two distinct failures with two distinct messages: a league the
+       web path can't touch at all, versus main specifically, which
+       can take scores but not an advance (see the header note). */
+    if (action === "advance" && SCORE_LEAGUES.includes(league)) {
+      bad(
+        `"${league}" can't be advanced from the web — advance it with advance.cmd ` +
+          `so the Discord announcement still posts. (Scores are fine here.)`
+      );
+    }
     bad(
-      `league "${league}" cannot be updated this way. ` +
-        `Allowed: ${ALLOWED_LEAGUES.join(", ")}`
+      `league "${league}" cannot be ${action === "advance" ? "advanced" : "scored"} ` +
+        `this way. Allowed: ${permitted.join(", ")}`
     );
   }
 

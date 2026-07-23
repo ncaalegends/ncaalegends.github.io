@@ -55,15 +55,20 @@ JSON to paste into Cloudflare and each person's individual code.
 
 ```
   Name (blank when you're done): Dave
-  Which leagues?  [1] 1-Star  [2] 3-Star  [3] Both : 1
-  Added Dave — 1-Star only.
+  Which leagues?  [1] 1-Star  [2] 3-Star  [3] Main
+  (type one or more, e.g. 1  or  13  or  123): 1
+  Added Dave — 1-Star.
 
-  Name (blank when you're done): Marcus
-  Which leagues?  [1] 1-Star  [2] 3-Star  [3] Both : 2
-  Added Marcus — 3-Star only.
+  Name (blank when you're done): RekenCrew
+  Which leagues?  [1] 1-Star  [2] 3-Star  [3] Main
+  (type one or more, e.g. 1  or  13  or  123): 123
+  Added RekenCrew — 1-Star + 3-Star + Main.  (Main = scores only)
 
   Name (blank when you're done):
 ```
+
+Type one digit per league — `13` grants 1-Star and Main, `123` all
+three. Order doesn't matter.
 
 Press Enter on a blank name to finish, and it prints:
 
@@ -91,16 +96,23 @@ whatever you'd recognise at a glance.
 
 `leagues` is the authorisation. A code listing only `1star` cannot
 touch 3-star, and the Worker re-checks this on every request rather
-than trusting what the page sends.
+than trusting what the page sends. Valid values are `1star`, `3star`
+and `main`.
 
 **One code per person, not per league** — that's what makes the audit
 trail meaningful and what lets you revoke one person without
-disrupting anyone else. Someone who runs both leagues gets one code
-covering both.
+disrupting anyone else. Someone who runs several leagues gets one code
+covering all of them.
 
-`main` isn't offered. Even a code listing it would be refused —
-`tools/apply.js` hardcodes the allowed leagues, so the main dynasty
-isn't reachable from the web path at all.
+**Main is scores-only.** A code can list `main`, and it lets that
+person record main scores from the web — but the admin page hides the
+Advance panel for main, and a main advance is refused even if someone
+crafts the request by hand. The reason is Discord: advancing main
+locally (`advance.cmd`) also posts the week announcement to the main
+channel, and the web path has no webhook, so it would silently skip
+it. Advancing main stays local; everything else about main works on
+the web. 1-Star and 3-Star can be both scored and advanced, since
+neither has a webhook to miss.
 
 ### If you'd rather do it by hand
 
