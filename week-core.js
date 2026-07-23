@@ -343,15 +343,14 @@
      league opponent reads 1-0 here even if they've also piled up
      wins against the computer.
 
-     Ported from the original Google-Form power-ranking math. Two
-     inputs from that version don't exist on this site and are
-     adapted here:
+     Ported from the original Google-Form power-ranking math:
 
-       - Strength of schedule. The form asked the submitter for each
-         opponent's AP rank at kickoff; nothing here records that. So
-         SoS is derived instead from how each opponent has actually
-         done in league play (their H2H win %). Beating teams that
-         win a lot is worth more than beating teams that don't.
+       - Strength of schedule. Reward beating higher-ranked teams,
+         using each opponent's in-game AP Top 25 rank in the week the
+         game was played (data.TOP25, transcribed per week). Unranked
+         opponents count as rank 26. If no poll has been entered for a
+         game's week yet, that opponent is treated as unranked, so SoS
+         simply contributes nothing until the poll is filled in.
 
        - Road/neutral wins. The schedule only knows home vs away, so
          a road win is simply the away coach winning. There's no
@@ -366,12 +365,14 @@
     weights: {
       winPct: 50, // full weight of a perfect record
       avgMargin: 1.5, // per point of (capped) average margin
-      strengthOfSchedule: 30, // scales the opponent-quality swing
+      strengthOfSchedule: 1.5, // per rank of average opponent quality
       roadWinBonus: 3, // per away win
     },
-    // Neutral opponent quality: a team whose opponents are exactly
-    // .500 gets no SoS adjustment either way.
-    sosBaseline: 0.5,
+    // Rank assigned to an opponent outside the Top 25 (or one whose
+    // week has no poll yet). Matches the original .gs sheet: the SoS
+    // bonus is (unrankedRank - avgOppRank) * weight, so beating
+    // ranked teams pays and losing SoS credit for cupcakes is zero.
+    unrankedRank: 26,
     // Blowouts past this many points stop adding scoring value, so a
     // 70-0 isn't worth three times a 21-0.
     maxMarginPerGame: 21,
@@ -415,6 +416,26 @@
     const window = cfg.gamesWindow;
     const cap = cfg.maxMarginPerGame;
     const throughWeek = opts.throughWeek == null ? 15 : opts.throughWeek;
+
+    /* In-game AP Top 25 by week, for strength of schedule: week
+       number -> Map(rosterKey -> rank). Keyed the same way team names
+       resolve everywhere else, so an opponent's rank in the week they
+       were played is one lookup. Absent (no poll for that week, or no
+       TOP25 data at all) -> the opponent counts as unranked. */
+    const pollByWeek = new Map();
+    (data.TOP25 || []).forEach((p) => {
+      const m = new Map();
+      (p.teams || []).forEach((t) => {
+        const k = R.rosterKeyFor(t.team);
+        if (k) m.set(k, Number(t.rank));
+      });
+      pollByWeek.set(Number(p.week), m);
+    });
+    const oppRankIn = (week, oppKey) => {
+      const m = pollByWeek.get(Number(week));
+      const r = m && m.get(oppKey);
+      return r ? r : cfg.unrankedRank;
+    };
 
     // rosterKey -> aggregate for one coach's team.
     const teams = new Map();
@@ -465,16 +486,6 @@
          this poll shows. */
     }
 
-    // Each team's league win% over ALL its played H2H games — this is
-    // the opponent-quality figure SoS reads, so it's computed before
-    // any windowing.
-    teams.forEach((t) => {
-      const w = t.h2h.filter((g) => g.win).length;
-      t.h2hW = w;
-      t.h2hL = t.h2h.length - w;
-      t.leagueWinPct = t.h2h.length ? w / t.h2h.length : cfg.sosBaseline;
-    });
-
     const ranked = [];
     teams.forEach((t) => {
       let games = t.h2h.slice().sort((a, b) => b.week - a.week);
@@ -487,14 +498,13 @@
       const winPct = wins / n;
       const avgMargin =
         games.reduce((s, g) => s + clampMargin(g.pf - g.pa, cap), 0) / n;
-      const avgOppWinPct =
-        games.reduce(
-          (s, g) => s + (teams.has(g.oppKey) ? teams.get(g.oppKey).leagueWinPct : cfg.sosBaseline),
-          0
-        ) / n;
+      // Average opponent AP rank in the week each game was played;
+      // unranked (or not-yet-polled) opponents count as unrankedRank.
+      const avgOppRank =
+        games.reduce((s, g) => s + oppRankIn(g.week, g.oppKey), 0) / n;
       const roadWins = games.filter((g) => g.roadWin).length;
 
-      const sosBonus = (avgOppWinPct - cfg.sosBaseline) * W.strengthOfSchedule;
+      const sosBonus = (cfg.unrankedRank - avgOppRank) * W.strengthOfSchedule;
       const powerScore =
         winPct * W.winPct + avgMargin * W.avgMargin + sosBonus + roadWins * W.roadWinBonus;
 

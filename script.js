@@ -132,6 +132,61 @@ function colorFor(scheduleName) {
 }
 
 /* ------------------------------------------------------------
+   TOP 25 (in-game AP poll)
+   ------------------------------------------------------------
+   The transcribed in-game poll, one frozen entry per week (see
+   top25-data.js). Two things read it: the Top 25 tab, and the "#N"
+   badges on schedules. A game in week N always shows a team's rank
+   from THAT week's poll, so a schedule reflects what a team was
+   ranked when the game was actually played — never a later poll.
+   Team names resolve through the same alias table as everything
+   else, so "Cal"/"California" and friends line up.
+   ------------------------------------------------------------ */
+const TOP25_DATA = typeof TOP25 !== "undefined" ? TOP25 : [];
+
+// week number -> Map(rosterKey -> { rank, record })
+const POLL_BY_WEEK = new Map();
+TOP25_DATA.forEach((p) => {
+  const m = new Map();
+  (p.teams || []).forEach((t) => {
+    const k = rosterKeyFor(t.team);
+    if (k) m.set(k, { rank: Number(t.rank), record: String(t.record ?? "") });
+  });
+  POLL_BY_WEEK.set(Number(p.week), m);
+});
+
+const pollWeeksAvailable = () => [...POLL_BY_WEEK.keys()].sort((a, b) => a - b);
+const latestPollWeek = () => {
+  const ws = pollWeeksAvailable();
+  return ws.length ? ws[ws.length - 1] : null;
+};
+
+/* A team's rank in a given week's poll, or null when it's unranked
+   (or no poll exists for that week yet). */
+function rankForWeek(teamName, week) {
+  const m = POLL_BY_WEEK.get(Number(week));
+  if (!m) return null;
+  const e = m.get(rosterKeyFor(teamName));
+  return e ? e.rank : null;
+}
+
+/* "#7" badge for a team ranked that week, empty string otherwise —
+   unranked teams just show their name with no prefix. */
+function rankBadgeHtml(teamName, week) {
+  const r = rankForWeek(teamName, week);
+  return r ? `<span class="rank-badge">#${r}</span>` : "";
+}
+
+/* Which poll a schedule row should read for its opponent badge. A
+   game that's been played is frozen: it shows the rank the opponent
+   held in the week it was actually played. An unplayed (future) game
+   can't know that yet, so it tracks the opponent's CURRENT rank —
+   the latest poll — and keeps updating until the game happens. */
+function badgeWeekFor(played, gameWeek) {
+  return played ? gameWeek : latestPollWeek();
+}
+
+/* ------------------------------------------------------------
    TEAM MARKS (logo, with monogram fallback)
    ------------------------------------------------------------
    Logos are hotlinked from ESPN's CDN by numeric team id. Two
@@ -531,7 +586,7 @@ function renderJumbotron() {
    is a CPU opponent. Team and coach both truncate with ellipsis, so
    any long name (e.g. "North Dakota State") stays boxed. Logo comes
    from ESPN's CDN with a monogram fallback — same as the roster. */
-function gameRowHtml(team, played, win, score) {
+function gameRowHtml(team, played, win, score, week) {
   const entry = rosterEntryFor(team);
   const coach = entry?.name || "";
   const src = teamLogoSrc(team);
@@ -548,7 +603,7 @@ function gameRowHtml(team, played, win, score) {
         }
       </span>
       <span class="gc-who">
-        <span class="gc-team" title="${esc(team)}">${esc(team)}</span>
+        <span class="gc-team" title="${esc(team)}">${rankBadgeHtml(team, badgeWeekFor(played, week))}${esc(team)}</span>
         ${
           coach
             ? `<span class="gc-coach">${esc(coach)}</span>`
@@ -570,8 +625,8 @@ function gameCardHtml(g, week) {
     <article class="game-card${g.league ? " is-league" : ""}${
     g.played ? " is-final" : " is-upcoming"
   }">
-      ${gameRowHtml(g.away, g.played, awayWon, g.awayScore)}
-      ${gameRowHtml(g.home, g.played, homeWon, g.homeScore)}
+      ${gameRowHtml(g.away, g.played, awayWon, g.awayScore, week)}
+      ${gameRowHtml(g.home, g.played, homeWon, g.homeScore, week)}
       <div class="gc-foot">
         <span>${g.played ? "Final" : esc(weekLabel(week))}</span>
         ${g.league ? '<span class="wg-league-tag">League</span>' : ""}
@@ -633,10 +688,10 @@ function renderRecentResults() {
       <li>
         <span class="week-chip">WK ${esc(g.week)}</span>
         <span class="r-line">
-          <span class="r-team${awayWon ? " won" : ""}">${esc(g.away)}</span>
+          <span class="r-team${awayWon ? " won" : ""}">${rankBadgeHtml(g.away, g.week)}${esc(g.away)}</span>
           <span class="r-score${awayWon ? " won" : ""}">${esc(g.awayScore)}</span>
           <span class="r-at">&#64;</span>
-          <span class="r-team${!awayWon ? " won" : ""}">${esc(g.home)}</span>
+          <span class="r-team${!awayWon ? " won" : ""}">${rankBadgeHtml(g.home, g.week)}${esc(g.home)}</span>
           <span class="r-score${!awayWon ? " won" : ""}">${esc(g.homeScore)}</span>
           ${g.league ? '<span class="wg-league-tag">League</span>' : ""}
         </span>
@@ -661,7 +716,7 @@ function renderRecentResults() {
    position between the two. RANKING_CONFIG (optional, in
    league-data.js) can retune the weights without touching this.
    ------------------------------------------------------------ */
-const RANKING_DATA = { COACHES: ROSTER, ALIASES, TEAM_SCHEDULES: SCHEDULES };
+const RANKING_DATA = { COACHES: ROSTER, ALIASES, TEAM_SCHEDULES: SCHEDULES, TOP25: TOP25_DATA };
 const RANKING_OPTS = typeof RANKING_CONFIG !== "undefined" ? { config: RANKING_CONFIG } : {};
 
 /* Movement of one team against a map of last week's ranks. A team
@@ -738,6 +793,107 @@ function renderRankings() {
       .map((r) => rankingRowHtml(r, trendFrom(prevRankByKey, r)))
       .join("");
   }
+}
+
+/* ------------------------------------------------------------
+   TOP 25 TAB
+   ------------------------------------------------------------
+   Renders one week's transcribed in-game poll, styled like the
+   game's own screen: rank, logo, team (with coach handle if it's
+   one of ours), and the poll record. A week picker appears once
+   more than one week has been entered.
+   ------------------------------------------------------------ */
+/* Week-over-week movement for one team, versus the most recent
+   EARLIER week that has a poll (so a skipped week doesn't blank every
+   arrow). Green ▲N for climbing N spots, red ▼N for falling, a dash
+   for no change, and a plain green ▲ (no number) for a team new to
+   the poll. Empty string when there's no earlier poll at all — the
+   first week has nothing to move against. */
+function top25TrendHtml(teamName, week) {
+  const priorWeeks = pollWeeksAvailable().filter((w) => w < Number(week));
+  if (!priorWeeks.length) return "";
+
+  const prevMap = POLL_BY_WEEK.get(priorWeeks[priorWeeks.length - 1]);
+  const prev = prevMap && prevMap.get(rosterKeyFor(teamName));
+  if (!prev) {
+    return `<span class="t25-move up" title="New to the poll">&#9650;</span>`;
+  }
+
+  const diff = prev.rank - rankForWeek(teamName, week);
+  if (diff > 0) return `<span class="t25-move up" title="Up ${diff}">&#9650;${diff}</span>`;
+  if (diff < 0)
+    return `<span class="t25-move down" title="Down ${Math.abs(diff)}">&#9660;${Math.abs(diff)}</span>`;
+  return `<span class="t25-move same" title="No change">&ndash;</span>`;
+}
+
+function top25RowHtml(t, week) {
+  const name = t.team;
+  const src = teamLogoSrc(name);
+  const mono = monogramFor(rosterEntryFor(name)?.team || name);
+  const coach = coachFor(name); // non-empty only when an active coach owns this team
+  const color = coach ? colorFor(name) : "";
+
+  /* League teams get a coloured accent bar + tint so a coach's team
+     jumps out of a poll that's mostly CPU schools — the same --team
+     accent used on roster cards and schedule headers. */
+  return `
+    <li class="t25-row${coach ? " is-coach" : ""}"${color ? ` style="--team:${color}"` : ""}>
+      <span class="t25-rank">${esc(t.rank)}</span>
+      <span class="t25-logo">
+        <span class="t25-mono">${esc(mono)}</span>
+        ${src ? `<img src="${esc(src)}" alt="" loading="lazy" onerror="this.remove()">` : ""}
+      </span>
+      <span class="t25-who">
+        <span class="t25-team" title="${esc(name)}">${esc(name)}</span>
+        ${coach ? `<span class="t25-coach">${esc(coach)}</span>` : ""}
+      </span>
+      <span class="t25-record">${esc(t.record || "")}</span>
+      <span class="t25-trend">${top25TrendHtml(name, week)}</span>
+    </li>`;
+}
+
+function renderTop25() {
+  const host = document.getElementById("top25-list");
+  const label = document.getElementById("top25-week-label");
+  const controls = document.getElementById("top25-controls");
+  if (!host) return;
+
+  const weeks = pollWeeksAvailable();
+  if (!weeks.length) {
+    if (label) label.textContent = "NOT PUBLISHED YET";
+    if (controls) controls.hidden = true;
+    host.classList.add("is-empty");
+    host.innerHTML =
+      '<li class="poll-empty-msg">No Top 25 has been posted yet — check back after the first poll drops.</li>';
+    return;
+  }
+
+  const sel = document.getElementById("top25-week");
+  const week = sel && sel.value !== "" ? Number(sel.value) : latestPollWeek();
+  const poll = TOP25_DATA.find((p) => Number(p.week) === week);
+  const teams = poll ? [...poll.teams].sort((a, b) => Number(a.rank) - Number(b.rank)) : [];
+
+  if (label) label.textContent = `WEEK ${week}`;
+  host.classList.remove("is-empty");
+  host.innerHTML = teams.map((t) => top25RowHtml(t, week)).join("");
+}
+
+function populateTop25Week() {
+  const sel = document.getElementById("top25-week");
+  const controls = document.getElementById("top25-controls");
+  if (!sel) return;
+
+  const weeks = pollWeeksAvailable();
+  sel.innerHTML = weeks
+    .map((w) => `<option value="${w}">${esc(weekLabel(w))}</option>`)
+    .join("");
+
+  const latest = latestPollWeek();
+  if (latest != null) sel.value = String(latest);
+  // Only worth showing the picker once there's more than one week.
+  if (controls) controls.hidden = weeks.length <= 1;
+
+  sel.addEventListener("change", renderTop25);
 }
 
 /* ------------------------------------------------------------
@@ -968,10 +1124,10 @@ function renderWeeklyGames() {
         return `
     <div class="week-game-row ${g.league ? "is-league" : ""}">
       <div class="wg-teams">
-        <span class="wg-team${awayWon ? " won" : g.played ? " lost" : ""}">${esc(g.away)}</span>
+        <span class="wg-team${awayWon ? " won" : g.played ? " lost" : ""}">${rankBadgeHtml(g.away, badgeWeekFor(g.played, week))}${esc(g.away)}</span>
         ${g.played ? `<span class="wg-score${awayWon ? " won" : " lost"}">${esc(g.awayScore)}</span>` : ""}
         <span class="wg-at">&#64;</span>
-        <span class="wg-team${homeWon ? " won" : g.played ? " lost" : ""}">${esc(g.home)}</span>
+        <span class="wg-team${homeWon ? " won" : g.played ? " lost" : ""}">${rankBadgeHtml(g.home, badgeWeekFor(g.played, week))}${esc(g.home)}</span>
         ${g.played ? `<span class="wg-score${homeWon ? " won" : " lost"}">${esc(g.homeScore)}</span>` : ""}
       </div>
       <div class="wg-meta">
@@ -1042,7 +1198,7 @@ function renderTeamSchedule() {
           <span class="tsr-week">${esc(weekNum(w.week))}</span>
           <span class="tsr-loc">${w.location === "vs" ? "VS" : "AT"}</span>
           <span class="tsr-opp">
-            <span class="tsr-opp-name">${esc(w.opponent)}</span>
+            <span class="tsr-opp-name">${rankBadgeHtml(w.opponent, badgeWeekFor(played, w.week))}${esc(w.opponent)}</span>
             ${
               isLeague
                 ? `<span class="wg-league-tag">League${
@@ -1086,7 +1242,7 @@ function renderTeamSchedule() {
     <div class="team-sched-head"${teamColor ? ` style="--team:${teamColor}"` : ""}>
       ${teamMarkHtml(team.team, "xl")}
       <div class="tsh-text">
-        <span class="team-sched-name">${esc(team.team)}</span>
+        <span class="team-sched-name">${rankBadgeHtml(team.team, latestPollWeek())}${esc(team.team)}</span>
         <span class="tsh-meta">
           <span class="team-sched-conf">${esc(team.conference)}</span>
           ${coach ? `<span class="team-sched-coach">${esc(coach)}</span>` : ""}
@@ -1296,7 +1452,7 @@ function renderFooter() {
    Tab state lives in the URL hash, so a refresh keeps your place
    and you can drop someone straight into #rankings in Discord.
    ------------------------------------------------------------ */
-const TABS = ["home", "schedule", "rankings", "roster"];
+const TABS = ["home", "schedule", "rankings", "top25", "roster"];
 
 function showTab(name, { scroll = true } = {}) {
   const target = TABS.includes(name) ? name : "home";
@@ -1411,6 +1567,8 @@ function init() {
   renderThisWeekGames();
   renderRecentResults();
   renderRankings();
+  populateTop25Week();
+  renderTop25();
   renderRoster();
   renderLiveNow();
   initLiveStatus();

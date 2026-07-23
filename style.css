@@ -974,6 +974,161 @@ main {
 }
 
 /* ============================================================
+   TOP 25 (in-game AP poll) — game-style rows in responsive
+   columns: one column on phones, two on tablets, three on wide
+   screens (mirroring the game's own three-up layout).
+   ============================================================ */
+.top25-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2px 24px;
+}
+/* Fill each column top-to-bottom like the in-game screen, rather than
+   left-to-right across rows: 1-13 / 14-25 at two columns, and
+   1-9 / 10-18 / 19-25 at three. The row counts are what force the
+   column breaks to land on those ranks. */
+@media (min-width: 620px) {
+  .top25-list {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: repeat(13, auto);
+    grid-auto-flow: column;
+  }
+}
+@media (min-width: 960px) {
+  .top25-list {
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: repeat(9, auto);
+    grid-auto-flow: column;
+  }
+}
+
+.t25-row {
+  display: grid;
+  grid-template-columns: 30px 34px 1fr auto 40px;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  /* Transparent bar on every row so coach rows can colour theirs in
+     without nudging the layout out of alignment. */
+  border-left: 3px solid transparent;
+  border-bottom: 1px solid var(--line);
+}
+
+/* League teams stand out of the mostly-CPU poll: a bar in the team's
+   colour, a faint tint, and a brighter name — the same --team accent
+   used on roster cards. */
+.t25-row.is-coach {
+  border-left-color: var(--team);
+  background: rgba(242, 244, 248, 0.05);
+}
+.t25-row.is-coach .t25-team { color: var(--chalk); font-weight: 700; }
+.t25-rank {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--steel);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+/* Match the poll: gold for #1, chalk for the rest of the top 3. */
+.t25-row:nth-child(-n + 3) .t25-rank { color: var(--chalk); }
+.t25-row:first-child .t25-rank { color: var(--gold); }
+
+.t25-logo {
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(242, 244, 248, 0.94);
+  display: grid;
+  place-items: center;
+  position: relative;
+  overflow: hidden;
+}
+.t25-logo img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 11%;
+}
+.t25-mono {
+  font-family: var(--font-mono);
+  font-weight: 800;
+  font-size: 0.72rem;
+  color: var(--navy-deep);
+}
+.t25-logo:has(img) .t25-mono { visibility: hidden; }
+
+.t25-who { min-width: 0; }
+.t25-team {
+  font-weight: 600;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Coach handle as a pill in the league accent colour (gold on main,
+   each other league's accent via its own --gold override). Only ever
+   rendered on coach rows, so this doubles as the "this is one of ours"
+   marker. */
+.t25-coach {
+  display: inline-block;
+  margin-top: 3px;
+  max-width: 100%;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--gold-dim);
+  border: 1px solid var(--line-gold);
+  color: var(--gold-bright);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1.5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: top;
+}
+.t25-record {
+  font-family: var(--font-mono);
+  color: var(--steel);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Week-over-week movement, right-aligned. Same colour language as the
+   Power Rankings arrows: green up, red (crimson) down, steel dash. */
+.t25-trend {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.t25-move {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.t25-move.up { color: var(--win); }
+.t25-move.down { color: var(--crimson); }
+.t25-move.same { color: var(--steel); }
+
+/* "#7" badge shown before a ranked opponent on schedules and before
+   a team's own name on its schedule header. */
+.rank-badge {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.85em;
+  color: var(--gold);
+  margin-right: 5px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================================================
    TEAM MARKS — logo with monogram underneath
    The monogram sits in normal flow and the logo is layered on
    top of it. If the image 404s it removes itself and the

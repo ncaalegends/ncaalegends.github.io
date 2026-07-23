@@ -92,6 +92,9 @@ function resolveLeague(slug = "main") {
     paths: {
       league: path.join(ROOT, meta.dir, "league-data.js"),
       schedule: path.join(ROOT, meta.dir, "schedule-data.js"),
+      // Optional: the in-game Top 25 poll, present only for leagues
+      // that have started transcribing it (main first).
+      top25: path.join(ROOT, meta.dir, "top25-data.js"),
     },
   };
 }
@@ -108,8 +111,8 @@ function resolveLeague(slug = "main") {
 function loadData(paths) {
   const ctx = {};
   vm.createContext(ctx);
-  for (const file of [paths.league, paths.schedule]) {
-    if (!fs.existsSync(file)) die(`missing data file: ${file}`);
+
+  const run = (file) => {
     // `var` so the declarations land on the context object.
     const src = fs.readFileSync(file, "utf8").replace(/^const /gm, "var ");
     try {
@@ -117,13 +120,23 @@ function loadData(paths) {
     } catch (e) {
       die(`could not parse ${path.basename(file)} — ${e.message}`);
     }
+  };
+
+  for (const file of [paths.league, paths.schedule]) {
+    if (!fs.existsSync(file)) die(`missing data file: ${file}`);
+    run(file);
   }
+
+  // top25-data.js is optional — only some leagues have a poll yet.
+  if (paths.top25 && fs.existsSync(paths.top25)) run(paths.top25);
+
   return {
     SEASON: ctx.SEASON || {},
     COACHES: ctx.COACHES || [],
     TEAM_SCHEDULES: ctx.TEAM_SCHEDULES || [],
     ALIASES: ctx.SCHEDULE_TEAM_ALIASES || {},
     LEAGUE_INFO: ctx.LEAGUE_INFO || { name: "League" },
+    TOP25: ctx.TOP25 || [],
   };
 }
 
