@@ -195,6 +195,32 @@ input:focus, select:focus {
 .score-side { font-size: 12.5px; color: var(--steel); flex: 1 1 90px; min-width: 0; }
 .score-dash { color: var(--steel-dim); font-family: var(--font-mono); }
 
+/* Force-sim toggle sits under the score boxes on its own line so it
+   never crowds the numbers on a phone. */
+.sim-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 9px;
+  font-size: 12.5px;
+  color: var(--steel);
+  cursor: pointer;
+}
+.sim-toggle input { cursor: pointer; }
+
+/* Tag on a finished game that was force-simmed, mirroring .game-tag. */
+.sim-tag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  padding: 1px 6px;
+  margin-left: 4px;
+  border: 1px solid var(--steel-dim);
+  color: var(--steel);
+  vertical-align: 2px;
+}
+
 /* A game already recorded reads as settled, not as an empty form
    waiting to be filled in again. */
 .game.is-final .final-line {

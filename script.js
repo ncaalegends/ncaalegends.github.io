@@ -43,7 +43,6 @@ function safeHex(v) {
 const SCHEDULES = typeof TEAM_SCHEDULES !== "undefined" ? TEAM_SCHEDULES : [];
 const ALIASES = typeof SCHEDULE_TEAM_ALIASES !== "undefined" ? SCHEDULE_TEAM_ALIASES : {};
 const ROSTER = typeof COACHES !== "undefined" ? COACHES : [];
-const POLL = typeof RANKINGS !== "undefined" ? RANKINGS : [];
 const INFO = typeof LEAGUE_INFO !== "undefined" ? LEAGUE_INFO : { name: "League", tag: "" };
 
 /* ------------------------------------------------------------
@@ -623,23 +622,29 @@ function renderRecentResults() {
 }
 
 /* ------------------------------------------------------------
-   RANKINGS
+   RANKINGS  (live-computed)
+   ------------------------------------------------------------
+   The poll is no longer hand-entered in league-data.js. It's
+   computed straight from the scores in schedule-data.js by
+   WeekCore.computeRankings — coach-vs-coach games only, force-sims
+   and forfeits excluded — so it updates itself the instant a
+   result is recorded.
+
+   The up/down arrows need no stored history: the poll as it stood
+   a week earlier is just the same computation run with
+   throughWeek - 1, and each team's movement is the difference in
+   position between the two. RANKING_CONFIG (optional, in
+   league-data.js) can retune the weights without touching this.
    ------------------------------------------------------------ */
-const pollWeeks = () =>
-  [...new Set(POLL.map((r) => Number(r.week)))].sort((a, b) => a - b);
+const RANKING_DATA = { COACHES: ROSTER, ALIASES, TEAM_SCHEDULES: SCHEDULES };
+const RANKING_OPTS = typeof RANKING_CONFIG !== "undefined" ? { config: RANKING_CONFIG } : {};
 
-const latestPollWeek = () => pollWeeks()[pollWeeks().length - 1] ?? null;
-
-function trendFor(team, week) {
-  const weeks = pollWeeks();
-  const idx = weeks.indexOf(Number(week));
-  if (idx <= 0) return { symbol: "&ndash;", cls: "same", label: "no change" };
-
-  const prev = POLL.find((r) => r.team === team && Number(r.week) === weeks[idx - 1]);
-  const curr = POLL.find((r) => r.team === team && Number(r.week) === Number(week));
-  if (!prev || !curr) return { symbol: "&#9733;", cls: "same", label: "new to poll" };
-
-  const diff = Number(prev.rank) - Number(curr.rank);
+/* Movement of one team against a map of last week's ranks. A team
+   that wasn't in last week's poll is new (star), not "up from
+   nowhere", so its first appearance doesn't read as a giant climb. */
+function trendFrom(prevRankByKey, r) {
+  if (!prevRankByKey.has(r.key)) return { symbol: "&#9733;", cls: "same", label: "new to poll" };
+  const diff = prevRankByKey.get(r.key) - r.rank;
   if (diff > 0) return { symbol: `&#9650;${diff}`, cls: "up", label: `up ${diff}` };
   if (diff < 0) return { symbol: `&#9660;${Math.abs(diff)}`, cls: "down", label: `down ${Math.abs(diff)}` };
   return { symbol: "&ndash;", cls: "same", label: "no change" };
@@ -648,15 +653,14 @@ function trendFor(team, week) {
 /* The rank number is drawn by a CSS counter on the <li>, so this
    returns exactly 3 children to fill the remaining 3 grid columns.
    Adding an element here means adding a column in style.css. */
-function rankingRowHtml(r, week) {
-  const trend = trendFor(r.team, week);
+function rankingRowHtml(r, trend) {
   return `
     <li>
       <span class="p-main">
         ${teamMarkHtml(r.team, "sm")}
         <span class="p-text">
           <span class="p-team">${esc(r.team)}</span>
-          <span class="p-coach">${esc(coachFor(r.team))}</span>
+          <span class="p-coach">${esc(r.coach || coachFor(r.team))}</span>
         </span>
       </span>
       <span class="p-record">${esc(r.record || "")}</span>
@@ -672,7 +676,16 @@ function renderRankings() {
   const previewList = document.getElementById("rankings-preview");
   const label = document.getElementById("rankings-week-label");
 
-  if (!POLL.length) {
+  /* WeekCore carries the shared ranking math. If the script failed
+     to load, degrade to the empty state rather than throwing. */
+  const engineReady = typeof WeekCore !== "undefined" && WeekCore.computeRankings;
+  const week = engineReady ? WeekCore.latestH2HWeek(RANKING_DATA) : null;
+  const rows =
+    engineReady && week != null
+      ? WeekCore.computeRankings(RANKING_DATA, { ...RANKING_OPTS, throughWeek: week })
+      : [];
+
+  if (!rows.length) {
     if (label) label.textContent = "NOT ENOUGH GAMES YET";
     [fullList, previewList].forEach((el) => {
       if (!el) return;
@@ -682,18 +695,23 @@ function renderRankings() {
     return;
   }
 
-  const week = latestPollWeek();
-  const rows = POLL.filter((r) => Number(r.week) === week)
-    .sort((a, b) => Number(a.rank) - Number(b.rank));
+  const prev =
+    week > 0
+      ? WeekCore.computeRankings(RANKING_DATA, { ...RANKING_OPTS, throughWeek: week - 1 })
+      : [];
+  const prevRankByKey = new Map(prev.map((r) => [r.key, r.rank]));
 
   if (label) label.textContent = `WEEK ${week} POLL`;
   if (fullList) {
     fullList.classList.remove("is-empty");
-    fullList.innerHTML = rows.map((r) => rankingRowHtml(r, week)).join("");
+    fullList.innerHTML = rows.map((r) => rankingRowHtml(r, trendFrom(prevRankByKey, r))).join("");
   }
   if (previewList) {
     previewList.classList.remove("is-empty");
-    previewList.innerHTML = rows.slice(0, 5).map((r) => rankingRowHtml(r, week)).join("");
+    previewList.innerHTML = rows
+      .slice(0, 5)
+      .map((r) => rankingRowHtml(r, trendFrom(prevRankByKey, r)))
+      .join("");
   }
 }
 

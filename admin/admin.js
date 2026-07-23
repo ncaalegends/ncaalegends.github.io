@@ -400,9 +400,10 @@ function gameHtml(g, i) {
     (g.subtitle ? `<div class="game-sub">${esc(g.subtitle)}</div>` : "");
 
   if (g.scored) {
+    const simTag = g.sim ? ` <span class="sim-tag">SIM</span>` : "";
     return (
       `<div class="game is-final" data-game="${i}">${head}` +
-      `<div class="final-line">FINAL &nbsp;${esc(g.scored)}` +
+      `<div class="final-line">FINAL &nbsp;${esc(g.scored)}${simTag}` +
       `<button type="button" class="lock btn-quiet" data-edit="${i}" ` +
       `style="background:none;border:0;color:var(--steel);text-decoration:underline;cursor:pointer;">Edit</button>` +
       `</div></div>`
@@ -419,6 +420,20 @@ function gameHtml(g, i) {
 function scoreInputsHtml(g, i, prefill) {
   const a = prefill ? prefill.team : "";
   const b = prefill ? prefill.opponent : "";
+
+  /* Force-sim / forfeit toggle, H2H games only — a CPU game can't
+     be a coach-vs-coach sim and never enters the poll anyway. Off by
+     default: the common case is a game both coaches actually played.
+     Checking it keeps the result in the records but drops it from the
+     power rankings. Pre-checked when re-opening a game already marked
+     that way. */
+  const simRow =
+    g.kind === "h2h"
+      ? `<label class="sim-toggle"><input type="checkbox" data-sim="${i}"${
+          g.sim ? " checked" : ""
+        }> Force sim / forfeit &mdash; counts in the record, excluded from power rankings</label>`
+      : "";
+
   return (
     `<div class="score-row" data-inputs="${i}">` +
     `<span class="score-side">${esc(g.perspective)}</span>` +
@@ -428,7 +443,8 @@ function scoreInputsHtml(g, i, prefill) {
     `<input class="score-box" type="number" inputmode="numeric" min="0" max="200" ` +
     `data-side="opp" data-i="${i}" value="${esc(b)}" aria-label="${esc(g.other)} score">` +
     `<span class="score-side" style="text-align:right;">${esc(g.other)}</span>` +
-    `</div>`
+    `</div>` +
+    simRow
   );
 }
 
@@ -474,7 +490,18 @@ function collect() {
       return;
     }
 
-    entries.push({ team: g.perspective, score: `${parsed.team}-${parsed.opponent}` });
+    const entry = { team: g.perspective, score: `${parsed.team}-${parsed.opponent}` };
+
+    /* Send the sim state explicitly for every H2H game — true when
+       checked, false when not — so re-scoring a game that used to be
+       a sim clears the flag, and marking one sets it. CPU rows have
+       no toggle and send nothing. */
+    if (g.kind === "h2h") {
+      const simEl = document.querySelector(`[data-sim="${i}"]`);
+      entry.sim = !!(simEl && simEl.checked);
+    }
+
+    entries.push(entry);
   });
 
   return { entries, problems };
@@ -544,7 +571,13 @@ function scoresLanded(fresh, week, entries) {
     if (!game || !game.scoredPair) return false;
 
     const [a, b] = sent.score.split("-").map(Number);
-    return game.scoredPair.team === a && game.scoredPair.opponent === b;
+    if (game.scoredPair.team !== a || game.scoredPair.opponent !== b) return false;
+
+    /* If the submission set a sim state, the published file has to
+       agree — otherwise a flag that didn't land would read as a
+       clean save. */
+    if (sent.sim !== undefined && !!game.sim !== !!sent.sim) return false;
+    return true;
   });
 }
 

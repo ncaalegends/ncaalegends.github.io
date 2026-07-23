@@ -79,7 +79,7 @@ function applyScores(scheduleFile, edits) {
   const wanted = new Map();
   for (const e of edits) {
     if (!wanted.has(e.team)) wanted.set(e.team, new Map());
-    wanted.get(e.team).set(e.week, { team: e.teamScore, opponent: e.opponentScore });
+    wanted.get(e.team).set(e.week, { team: e.teamScore, opponent: e.opponentScore, sim: e.sim });
   }
 
   const applied = [];
@@ -123,13 +123,25 @@ function applyScores(scheduleFile, edits) {
       );
     }
 
+    /* Whether this game is currently marked as a force-sim. Read
+       before stripping, so we can preserve it when the edit itself
+       has no opinion (target.sim === undefined, the CLI path). */
+    const hadSim = /\bsim:\s*true\b/.test(body);
+
     const stripped = body
       .replace(/,?\s*teamScore:\s*\d+/g, "")
-      .replace(/,?\s*opponentScore:\s*\d+/g, "");
+      .replace(/,?\s*opponentScore:\s*\d+/g, "")
+      .replace(/,?\s*sim:\s*(?:true|false)/g, "");
+
+    /* undefined -> keep what's there; true/false -> set it explicitly.
+       The flag is written last so a scored line always reads
+       teamScore, opponentScore, then sim. */
+    const simState = target.sim === undefined ? hadSim : target.sim === true;
+    const simPart = simState ? ", sim: true" : "";
 
     const nextLine =
       `${indent}{ ${stripped}, teamScore: ${target.team}, ` +
-      `opponentScore: ${target.opponent} },`;
+      `opponentScore: ${target.opponent}${simPart} },`;
 
     if (nextLine !== line) {
       applied.push({
@@ -255,7 +267,7 @@ async function collectInteractively(games, week, data, opts) {
    perspective. Team names contain spaces, so the score is taken
    from the end and everything before it is the name.
    ------------------------------------------------------------ */
-function parseSet(raw, games, week, data) {
+function parseSet(raw, games, week, data, sim) {
   const m = String(raw).trim().match(/^(.*?)\s+(\d{1,3}\s*[-:\s]\s*\d{1,3})$/);
   if (!m) {
     die(`couldn't read --set "${raw}". Expected: --set "California 27-24"`);
@@ -313,7 +325,7 @@ function parseSet(raw, games, week, data) {
 
   return {
     game,
-    edits: editsFor(game, week, oriented, data),
+    edits: editsFor(game, week, oriented, data, sim),
     summary: `${game.perspective} ${oriented.team}-${oriented.opponent} ${game.other}`,
   };
 }

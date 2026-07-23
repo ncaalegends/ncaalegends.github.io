@@ -209,6 +209,11 @@ function checkPayload(payload, who) {
       if (!/^\d{1,3}\s*[-:\s]\s*\d{1,3}$/.test(e.score)) {
         return `"${e.score}" isn't a score like 27-24`;
       }
+      /* Optional force-sim / forfeit marker. Shape only — apply.js
+         re-validates it against the real schedule. */
+      if (e.sim !== undefined && typeof e.sim !== "boolean") {
+        return "a score entry's sim flag must be true or false";
+      }
     }
   }
 

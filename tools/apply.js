@@ -129,7 +129,15 @@ function validate(payload) {
       if (!/^\d{1,3}\s*[-:\s]\s*\d{1,3}$/.test(score)) {
         bad(`entry ${i + 1} score "${score}" isn't in the form 27-24`);
       }
-      return { team, score };
+      const rec = { team, score };
+      /* Optional: marks a game as a force-sim / forfeit. Passed
+         through to the writer, which records it but keeps the result
+         out of the power rankings. Only H2H rows send it. */
+      if (e.sim !== undefined) {
+        if (typeof e.sim !== "boolean") bad(`entry ${i + 1} sim must be true or false`);
+        rec.sim = e.sim;
+      }
+      return rec;
     });
     out.force = payload.force === true;
   }
@@ -173,7 +181,7 @@ function doScores(p, L) {
        ambiguous name, naming a CPU opponent instead of the
        coach's team, and flipping the score when the caller named
        the other side of the matchup. */
-    const r = parseSet(`${entry.team} ${entry.score}`, games, p.week, data);
+    const r = parseSet(`${entry.team} ${entry.score}`, games, p.week, data, entry.sim);
 
     if (r.game.scored && !p.force) {
       die(
