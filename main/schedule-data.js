@@ -36,7 +36,7 @@ const TEAM_SCHEDULES = [
     conference: "ACC",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "UCLA", location: "vs", stadium: "California Memorial Stadium" },
+      { week: 1, opponent: "UCLA", location: "vs", stadium: "California Memorial Stadium", teamScore: 22, opponentScore: 9 },
       { week: 2, opponent: "Syracuse", location: "at", stadium: "JMA Wireless Dome" },
       { week: 3, opponent: "FCS West", location: "vs", stadium: "California Memorial Stadium" },
       { week: 4, opponent: "Clemson", location: "vs", stadium: "California Memorial Stadium" },
@@ -410,7 +410,7 @@ const TEAM_SCHEDULES = [
     conference: "Big Ten",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "California", location: "at", stadium: "California Memorial Stadium" },
+      { week: 1, opponent: "California", location: "at", stadium: "California Memorial Stadium", teamScore: 9, opponentScore: 22 },
       { week: 2, opponent: "San Diego St.", location: "vs", stadium: "Rose Bowl Stadium" },
       { week: 3, opponent: "Purdue", location: "vs", stadium: "Rose Bowl Stadium" },
       { week: 4, opponent: "Maryland", location: "at", stadium: "SECU Stadium" },
