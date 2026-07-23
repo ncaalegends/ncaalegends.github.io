@@ -296,7 +296,7 @@ const TEAM_SCHEDULES = [
     conference: "SEC",
     weeks: [
       { week: 0, opponent: "Tulsa", location: "vs", teamScore: 33, opponentScore: 14 },
-      { week: 1, opponent: "Georgia", location: "at", teamScore: 52, opponentScore: 7 },
+      { week: 1, opponent: "Georgia", location: "at", teamScore: 7, opponentScore: 52 },
       { week: 2, opponent: "Ole Miss", location: "at" },
       { week: 3, opponent: "FCS Southeast", location: "vs" },
       { week: 4, note: "BYE" },
