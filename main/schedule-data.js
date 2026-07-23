@@ -432,7 +432,7 @@ const TEAM_SCHEDULES = [
     conference: "ACC",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "Stanford", location: "at", stadium: "Stanford Stadium" },
+      { week: 1, opponent: "Stanford", location: "at", stadium: "Stanford Stadium", teamScore: 30, opponentScore: 23 },
       { week: 2, opponent: "FCS Southeast", location: "vs", stadium: "Hard Rock Stadium" },
       { week: 3, opponent: "Wake Forest", location: "at", stadium: "Allegacy Federal Credit Union Stadium" },
       { week: 4, opponent: "C. Michigan", location: "vs", stadium: "Hard Rock Stadium" },
