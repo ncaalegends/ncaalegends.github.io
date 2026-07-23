@@ -852,48 +852,29 @@ function top25RowHtml(t, week) {
     </li>`;
 }
 
+/* Always shows the current (latest) poll with movement against the
+   previous week. Earlier weeks stay in top25-data.js — they're needed
+   to compute the arrows — but aren't browsable on the site. */
 function renderTop25() {
   const host = document.getElementById("top25-list");
   const label = document.getElementById("top25-week-label");
-  const controls = document.getElementById("top25-controls");
   if (!host) return;
 
-  const weeks = pollWeeksAvailable();
-  if (!weeks.length) {
+  const week = latestPollWeek();
+  if (week == null) {
     if (label) label.textContent = "NOT PUBLISHED YET";
-    if (controls) controls.hidden = true;
     host.classList.add("is-empty");
     host.innerHTML =
       '<li class="poll-empty-msg">No Top 25 has been posted yet — check back after the first poll drops.</li>';
     return;
   }
 
-  const sel = document.getElementById("top25-week");
-  const week = sel && sel.value !== "" ? Number(sel.value) : latestPollWeek();
   const poll = TOP25_DATA.find((p) => Number(p.week) === week);
   const teams = poll ? [...poll.teams].sort((a, b) => Number(a.rank) - Number(b.rank)) : [];
 
   if (label) label.textContent = `WEEK ${week}`;
   host.classList.remove("is-empty");
   host.innerHTML = teams.map((t) => top25RowHtml(t, week)).join("");
-}
-
-function populateTop25Week() {
-  const sel = document.getElementById("top25-week");
-  const controls = document.getElementById("top25-controls");
-  if (!sel) return;
-
-  const weeks = pollWeeksAvailable();
-  sel.innerHTML = weeks
-    .map((w) => `<option value="${w}">${esc(weekLabel(w))}</option>`)
-    .join("");
-
-  const latest = latestPollWeek();
-  if (latest != null) sel.value = String(latest);
-  // Only worth showing the picker once there's more than one week.
-  if (controls) controls.hidden = weeks.length <= 1;
-
-  sel.addEventListener("change", renderTop25);
 }
 
 /* ------------------------------------------------------------
@@ -1567,7 +1548,6 @@ function init() {
   renderThisWeekGames();
   renderRecentResults();
   renderRankings();
-  populateTop25Week();
   renderTop25();
   renderRoster();
   renderLiveNow();

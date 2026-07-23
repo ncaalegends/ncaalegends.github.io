@@ -140,6 +140,35 @@ function loadData(paths) {
   };
 }
 
+/* ------------------------------------------------------------
+   TOP 25 GATE
+   ------------------------------------------------------------
+   A league running the in-game Top 25 shouldn't advance into a week
+   until that week's poll has been transcribed — otherwise the site
+   would show the new week with stale (or missing) rankings on every
+   schedule. Returns an error string to block on, or null to allow.
+
+   Deliberately lenient about WHEN it applies: leagues with no
+   top25-data.js at all (TOP25 empty) are never gated, and the
+   preseason / week 0 is skipped since there's no poll before week 1.
+   ------------------------------------------------------------ */
+function top25GateError(data, week) {
+  const polls = (data && data.TOP25) || [];
+  if (!polls.length) return null; // league doesn't run a Top 25
+  if (Number(week) < 1) return null; // no preseason poll to require
+
+  const entry = polls.find((p) => Number(p.week) === Number(week));
+  if (!entry || !Array.isArray(entry.teams) || entry.teams.length === 0) {
+    return (
+      `the Week ${week} Top 25 hasn't been entered yet, so the site can't show ` +
+      `current rankings for that week.\n` +
+      `  Screenshot the in-game Top 25 for Week ${week}, add a ` +
+      `{ week: ${week}, teams: [...] } block to top25-data.js, then advance again.`
+    );
+  }
+  return null;
+}
+
 function parseWeek(value, example = "--week 4") {
   if (value === undefined) die(`missing --week. Example: ${example}`);
   const week = Number(value);
@@ -171,6 +200,7 @@ module.exports = {
   loadData,
   parseWeek,
   loadConfig,
+  top25GateError,
 
   /* Re-exported from /week-core.js so the existing `require` lines in
      advance.js and scores.js keep working untouched. Importing from

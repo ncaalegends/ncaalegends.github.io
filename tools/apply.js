@@ -41,7 +41,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const { die, resolveLeague, loadData, buildWeek, weekLabel } = require("./lib/league");
+const { die, resolveLeague, loadData, buildWeek, weekLabel, top25GateError } = require("./lib/league");
 const { applyScores, parseSet, scoreableGames } = require("./scores");
 const { updateSeason } = require("./advance");
 
@@ -244,6 +244,12 @@ function doScores(p, L) {
 
 function doAdvance(p, L) {
   const data = loadData(L.paths);
+
+  /* Block advancing into a week whose Top 25 isn't transcribed yet.
+     A no-op for leagues that don't run a poll (TOP25 empty). */
+  const gate = top25GateError(data, p.week);
+  if (gate) die(gate);
+
   const status = p.status || `WEEK ${p.week}`;
 
   /* Carry the existing deadline over when none was given, matching

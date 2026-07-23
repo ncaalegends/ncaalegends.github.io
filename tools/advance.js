@@ -52,6 +52,7 @@ const {
   weekLabel,
   parseWeek,
   loadConfig,
+  top25GateError,
 } = require("./lib/league");
 
 /* ------------------------------------------------------------
@@ -351,6 +352,14 @@ async function main() {
   const week = parseWeek(args.week, '--week 5 --next "Sunday 6PM EDT"');
 
   const data = loadData(paths);
+
+  /* Don't advance into a week whose Top 25 isn't in yet — a dry run is
+     just a preview, so it's allowed through to show the message. */
+  if (!dryRun) {
+    const gate = top25GateError(data, week);
+    if (gate) die(gate);
+  }
+
   const wk = buildWeek(data, week);
   const label = weekLabel(week);
   const statusLine = args.status || label.toUpperCase();
