@@ -46,10 +46,19 @@
      the same key or a game shows up as CPU when it's really H2H.
      ------------------------------------------------------------ */
   function makeResolver(data) {
-    const COACHES = data.COACHES || [];
+    const ALL_COACHES = data.COACHES || [];
     const ALIASES = data.ALIASES || {};
 
     const normalize = (s) => String(s ?? "").trim().toLowerCase();
+
+    /* A coach carrying `active: false` is on the books but not
+       currently playing (e.g. left for another dynasty, may return).
+       They're treated as absent from the league everywhere something
+       is derived: their team stops being a coach-vs-coach team, so
+       their games fall back to CPU, and their own schedule block is
+       skipped in buildWeek. All their data stays in the file — remove
+       the flag to bring them back exactly as they were. */
+    const COACHES = ALL_COACHES.filter((c) => c.active !== false);
 
     const rosterKeys = new Set();
     COACHES.forEach((c) => {
@@ -61,12 +70,25 @@
         });
     });
 
+    // Teams belonging to an inactive coach, so buildWeek can leave
+    // their (now stale) schedule block out entirely.
+    const inactiveKeys = new Set();
+    ALL_COACHES.filter((c) => c.active === false).forEach((c) => {
+      String(c.team)
+        .split("/")
+        .forEach((part) => {
+          const k = normalize(part);
+          if (k) inactiveKeys.add(k);
+        });
+    });
+
     const rosterKeyFor = (scheduleName) => {
       const aliased = ALIASES[scheduleName];
       return aliased ? normalize(aliased) : normalize(scheduleName);
     };
 
     const isLeagueTeam = (n) => rosterKeys.has(rosterKeyFor(n));
+    const isInactiveTeam = (n) => inactiveKeys.has(rosterKeyFor(n));
 
     const entryFor = (n) => {
       const key = rosterKeyFor(n);
@@ -90,7 +112,15 @@
       return viaRoster ? viaRoster.team : null;
     };
 
-    return { normalize, rosterKeyFor, isLeagueTeam, entryFor, coachFor, scheduleTeamFor };
+    return {
+      normalize,
+      rosterKeyFor,
+      isLeagueTeam,
+      isInactiveTeam,
+      entryFor,
+      coachFor,
+      scheduleTeamFor,
+    };
   }
 
   /* ------------------------------------------------------------
@@ -108,6 +138,12 @@
     const missing = []; // coaches with no entry for this week at all
 
     (data.TEAM_SCHEDULES || []).forEach((t) => {
+      /* Skip an inactive coach's own schedule block outright — their
+         games still appear (as CPU) on the schedules of whoever they
+         played, so leaving their block in would double-list those
+         matchups and resurrect a By-Team page they no longer have. */
+      if (R.isInactiveTeam(t.team)) return;
+
       const entry = (t.weeks || []).find((w) => Number(w.week) === week);
 
       if (!entry) {

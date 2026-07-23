@@ -40,10 +40,35 @@ function safeHex(v) {
    Guarded so a missing/typo'd data file degrades to an empty
    site instead of a blank white page.
    ------------------------------------------------------------ */
-const SCHEDULES = typeof TEAM_SCHEDULES !== "undefined" ? TEAM_SCHEDULES : [];
+const SCHEDULES_RAW = typeof TEAM_SCHEDULES !== "undefined" ? TEAM_SCHEDULES : [];
 const ALIASES = typeof SCHEDULE_TEAM_ALIASES !== "undefined" ? SCHEDULE_TEAM_ALIASES : {};
-const ROSTER = typeof COACHES !== "undefined" ? COACHES : [];
+const ROSTER_RAW = typeof COACHES !== "undefined" ? COACHES : [];
 const INFO = typeof LEAGUE_INFO !== "undefined" ? LEAGUE_INFO : { name: "League", tag: "" };
+
+/* ------------------------------------------------------------
+   INACTIVE COACHES
+   A coach marked `active: false` in league-data.js is on the books
+   but not currently playing — they've stepped away and may return.
+   Filtering them (and their now-stale schedule block) out here, at
+   the data handles, is all it takes: everything below reads ROSTER
+   and SCHEDULES, so the coach drops off the roster, their team stops
+   counting as a league (coach-vs-coach) team and reverts to CPU, and
+   they leave the By Team dropdown — with every byte of their data
+   still in the file. Delete the flag to bring them back untouched.
+   ------------------------------------------------------------ */
+const isActiveCoach = (c) => c.active !== false;
+const _inactiveNorm = (s) => String(s ?? "").trim().toLowerCase();
+const _inactiveKey = (name) => {
+  const aliased = ALIASES[name];
+  return aliased ? _inactiveNorm(aliased) : _inactiveNorm(name);
+};
+const INACTIVE_TEAM_KEYS = new Set(
+  ROSTER_RAW.filter((c) => !isActiveCoach(c)).flatMap((c) =>
+    String(c.team).split("/").map((part) => _inactiveNorm(part))
+  )
+);
+const ROSTER = ROSTER_RAW.filter(isActiveCoach);
+const SCHEDULES = SCHEDULES_RAW.filter((t) => !INACTIVE_TEAM_KEYS.has(_inactiveKey(t.team)));
 
 /* ------------------------------------------------------------
    TEAM NAME RESOLUTION

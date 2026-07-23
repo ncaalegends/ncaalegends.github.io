@@ -84,6 +84,13 @@ const LEAGUE_INFO = {
                dark to read against the navy at their true value, so
                they're lifted. Adjust any of them freely; they're
                only ever used as a graphic accent, never as text.
+   active:     optional. Leave it off for anyone currently playing.
+               Set `active: false` for a coach who has stepped away
+               but whose spot you're holding — they drop off the
+               roster, their team reverts to a CPU opponent in every
+               schedule, and they leave the By Team dropdown, while
+               all their data stays right here. Delete the flag to
+               reinstate them exactly as they were.
    ------------------------------------------------------------ */
 const COACHES = [
   { name: "Bl00dVayN3",      team: "South Carolina",               conference: "SEC", color: "#A6192E", twitch: "https://www.twitch.tv/bl00dvayn3", espnId: "2579" },
@@ -98,7 +105,7 @@ const COACHES = [
   { name: "Woogity",         team: "Alabama",                      conference: "SEC", color: "#C7304A", twitch: "", espnId: "333" },
   { name: "Alex",            team: "Florida",                      conference: "SEC", color: "#FA4616", twitch: "https://www.twitch.tv/alexgators1", espnId: "57" },
   { name: "brewma",          team: "Wake Forest",                  conference: "ACC", color: "#C9A227", twitch: "https://www.twitch.tv/brewma2020", espnId: "154" },  // UNVERIFIED — confirm via logo-check.html
-  { name: "Jake",            team: "Louisville",                   conference: "ACC", color: "#CB3B47", twitch: "", espnId: "97" },
+  { name: "Jake",            team: "Louisville",                   conference: "ACC", color: "#CB3B47", twitch: "", espnId: "97", active: false },  // Stepped away (playing in another dynasty) — may return. See `active` note above. Remove this flag to reinstate.
   { name: "Projekt",         team: "Michigan",                     conference: "B1G", color: "#FFCB05", twitch: "https://www.twitch.tv/projekt6868", espnId: "130" },
   { name: "Dway",            team: "UCLA",                         conference: "B1G", color: "#4B92DB", twitch: "https://www.twitch.tv/dwayinspired", espnId: "26" },  // UNVERIFIED — confirm via logo-check.html
   { name: "DiabeticSnail22", team: "West Virginia",                conference: "XII", color: "#EAAA00", twitch: "https://www.twitch.tv/diabeticsnail22", espnId: "277" },  // UNVERIFIED — confirm via logo-check.html
