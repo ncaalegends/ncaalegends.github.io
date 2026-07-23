@@ -228,7 +228,7 @@ const TEAM_SCHEDULES = [
     conference: "XII",
     weeks: [
       { week: 0, opponent: "Utah State", location: "vs", teamScore: 45, opponentScore: 16 },
-      { week: 1, opponent: "Georgia Tech", location: "at" },
+      { week: 1, opponent: "Georgia Tech", location: "at", teamScore: 42, opponentScore: 24 },
       { week: 2, note: "BYE" },
       { week: 3, opponent: "Northwestern", location: "at" },
       { week: 4, opponent: "Baylor", location: "at" },
@@ -296,7 +296,7 @@ const TEAM_SCHEDULES = [
     conference: "SEC",
     weeks: [
       { week: 0, opponent: "Tulsa", location: "vs", teamScore: 33, opponentScore: 14 },
-      { week: 1, opponent: "Georgia", location: "at" },
+      { week: 1, opponent: "Georgia", location: "at", teamScore: 52, opponentScore: 7 },
       { week: 2, opponent: "Ole Miss", location: "at" },
       { week: 3, opponent: "FCS Southeast", location: "vs" },
       { week: 4, note: "BYE" },
