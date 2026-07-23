@@ -331,7 +331,8 @@ function renderGames() {
   if (done.length) {
     html +=
       `<details class="entered"${todo.length ? "" : " open"}>` +
-      `<summary>Entered <span class="group-count muted">${done.length}</span></summary>` +
+      `<summary>Entered <span class="group-count muted">${done.length}</span>` +
+      `<span class="ent-hint"></span></summary>` +
       `<div class="entered-body">` +
       done.map(({ g, i }) => gameHtml(g, i)).join("") +
       `</div></details>`;
@@ -453,7 +454,17 @@ function renderGaps() {
 }
 
 function gameHtml(g, i) {
-  const tag = g.kind === "cpu" ? `<span class="game-tag">CPU</span>` : "";
+  /* A league (coach-vs-coach) game is the one that actually matters
+     for standings — a CPU game is a formality. So H2H gets the
+     accent LEAGUE tag and the row a left accent bar + tint; CPU
+     gets a plain muted tag. This is the visual weighting the flat
+     old list was missing. */
+  const league = g.kind === "h2h";
+  const tag = league
+    ? `<span class="game-tag league">LEAGUE</span>`
+    : `<span class="game-tag">CPU</span>`;
+  const cls = league ? "game is-league" : "game";
+
   const head =
     `<div class="game-label">${esc(g.label)}${tag}</div>` +
     (g.subtitle ? `<div class="game-sub">${esc(g.subtitle)}</div>` : "");
@@ -461,7 +472,7 @@ function gameHtml(g, i) {
   if (g.scored) {
     const simTag = g.sim ? ` <span class="sim-tag">SIM</span>` : "";
     return (
-      `<div class="game is-final" data-game="${i}">${head}` +
+      `<div class="${cls} is-final" data-game="${i}">${head}` +
       `<div class="final-line">FINAL &nbsp;${esc(g.scored)}${simTag}` +
       `<button type="button" class="lock btn-quiet" data-edit="${i}" ` +
       `style="background:none;border:0;color:var(--steel);text-decoration:underline;cursor:pointer;">Edit</button>` +
@@ -469,7 +480,7 @@ function gameHtml(g, i) {
     );
   }
 
-  return `<div class="game" data-game="${i}">${head}${scoreInputsHtml(g, i, null)}</div>`;
+  return `<div class="${cls}" data-game="${i}">${head}${scoreInputsHtml(g, i, null)}</div>`;
 }
 
 /* Two labelled boxes rather than one "27-24" field. The text form
@@ -493,13 +504,19 @@ function scoreInputsHtml(g, i, prefill) {
         }> Force sim / forfeit &mdash; counts in the record, excluded from power rankings</label>`
       : "";
 
+  /* type="text" + inputmode="numeric", NOT type="number". A number
+     input adds spinner arrows and hijacks the mouse wheel to nudge
+     the value — easy to bump a recorded score by scrolling past it.
+     Text with a numeric inputmode still pops the phone number pad,
+     and wireInputs() strips anything non-digit on the way in, so the
+     field only ever holds 0-3 digits. maxlength backs that up. */
   return (
     `<div class="score-row" data-inputs="${i}">` +
     `<span class="score-side">${esc(g.perspective)}</span>` +
-    `<input class="score-box" type="number" inputmode="numeric" min="0" max="200" ` +
+    `<input class="score-box" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="3" ` +
     `data-side="team" data-i="${i}" value="${esc(a)}" aria-label="${esc(g.perspective)} score">` +
     `<span class="score-dash">&ndash;</span>` +
-    `<input class="score-box" type="number" inputmode="numeric" min="0" max="200" ` +
+    `<input class="score-box" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="3" ` +
     `data-side="opp" data-i="${i}" value="${esc(b)}" aria-label="${esc(g.other)} score">` +
     `<span class="score-side right">${esc(g.other)}</span>` +
     `</div>` +
@@ -509,7 +526,16 @@ function scoreInputsHtml(g, i, prefill) {
 
 function wireInputs(scope) {
   scope.querySelectorAll(".score-box").forEach((el) => {
-    el.addEventListener("input", updateCount);
+    el.addEventListener("input", () => {
+      /* Strip to digits on every input, which also covers paste and
+         autofill — the field can never end up holding a letter, a
+         minus, or a decimal point that parseScore would then have to
+         reject. Only rewrite when it actually changed, so the caret
+         doesn't jump on a normal keystroke. */
+      const clean = el.value.replace(/[^0-9]/g, "").slice(0, 3);
+      if (clean !== el.value) el.value = clean;
+      updateCount();
+    });
   });
 }
 

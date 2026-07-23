@@ -157,6 +157,20 @@ input:focus, select:focus {
 }
 .game:last-child { border-bottom: 1px solid var(--line); }
 
+/* League (coach-vs-coach) games carry the weight — they decide the
+   standings. Accent bar + faint wash + the LEAGUE tag pull the eye
+   straight to them past the CPU filler. The negative margins let the
+   tint and bar bleed into the panel's own padding while the label
+   text stays aligned with the CPU rows above and below. */
+.game.is-league {
+  padding-left: 12px;
+  padding-right: 10px;
+  margin-left: -12px;
+  margin-right: -10px;
+  background: rgba(242, 193, 78, 0.05);
+  box-shadow: inset 3px 0 0 var(--gold);
+}
+
 .game-label {
   font-family: var(--font-display);
   font-size: 16px;
@@ -175,6 +189,11 @@ input:focus, select:focus {
   border: 1px solid var(--steel-dim);
   color: var(--steel);
   vertical-align: 2px;
+}
+.game-tag.league {
+  border-color: var(--gold);
+  color: var(--gold-bright);
+  background: var(--gold-dim);
 }
 
 /* nowrap is deliberate. With flex-wrap the two boxes and the two
@@ -241,27 +260,49 @@ input:focus, select:focus {
 
 /* Finished games, collapsed by default. summary carries its own
    caret so the row reads as a control, not a bullet. */
-details.entered { margin-top: 18px; border-top: 1px solid var(--line); }
+/* The Entered header is a real control, not a whisper. Earlier it
+   was bare text with a tiny triangle and got missed entirely. Now
+   it's a full-width bar with a border, a caret, and a Show/Hide
+   hint on the right that flips with the open state — so it reads as
+   something you can click. */
+details.entered { margin-top: 18px; }
 details.entered > summary {
   list-style: none;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 13px 0 3px;
+  gap: 10px;
+  padding: 12px 14px;
+  background: rgba(242, 244, 248, 0.04);
+  border: 1px solid var(--line);
+  border-radius: 2px;
   font-family: var(--font-display);
-  font-size: 12px;
-  letter-spacing: 0.09em;
+  font-size: 13px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--steel);
+  transition: border-color 0.12s ease, background 0.12s ease, color 0.12s ease;
+}
+details.entered > summary:hover {
+  border-color: var(--line-gold);
+  background: rgba(242, 193, 78, 0.06);
+  color: var(--chalk);
 }
 details.entered > summary::-webkit-details-marker { display: none; }
 details.entered > summary::before {
   content: "\25B8"; /* ▸ */
-  color: var(--steel-dim);
+  color: var(--gold);
+  font-size: 11px;
   transition: transform 0.12s ease;
 }
 details.entered[open] > summary::before { transform: rotate(90deg); }
+
+/* Right-aligned Show / Hide affordance, driven purely by [open]. */
+.ent-hint { margin-left: auto; color: var(--steel); font-size: 11px; letter-spacing: 0.06em; }
+.ent-hint::after { content: "Show"; }
+details.entered[open] > summary .ent-hint::after { content: "Hide"; }
+
+details.entered .entered-body { margin-top: 4px; }
 details.entered .entered-body .game:first-child { border-top: 1px solid var(--line); }
 
 /* Force-sim toggle sits under the score boxes on its own line so it
