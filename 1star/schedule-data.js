@@ -128,7 +128,7 @@ const TEAM_SCHEDULES = [
     conference: "MAC",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "Westeros", location: "vs" },
+      { week: 1, opponent: "Westeros", location: "vs", teamScore: 34, opponentScore: 29 },
       { week: 2, opponent: "FCS Midwest", location: "vs" },
       { week: 3, opponent: "Patriot Tech", location: "at" },
       { week: 4, opponent: "Minneapolis", location: "at" },
@@ -218,7 +218,7 @@ const TEAM_SCHEDULES = [
     conference: "CUSA",
     weeks: [
       { week: 0, opponent: "Delaware", location: "vs", teamScore: 9, opponentScore: 37 },
-      { week: 1, opponent: "New Glarus", location: "at" },
+      { week: 1, opponent: "New Glarus", location: "at", teamScore: 29, opponentScore: 34 },
       { week: 2, opponent: "Georgia Tech", location: "at" },
       { week: 3, opponent: "California", location: "at" },
       { week: 4, opponent: "FCS Southeast", location: "vs" },
