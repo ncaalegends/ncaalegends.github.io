@@ -150,7 +150,7 @@ const TEAM_SCHEDULES = [
     conference: "MAC",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "Wake Forest", location: "at" },
+      { week: 1, opponent: "Wake Forest", location: "at", teamScore: 13, opponentScore: 37 },
       { week: 2, opponent: "FCS Midwest", location: "vs" },
       { week: 3, opponent: "Minnesota", location: "at" },
       { week: 4, opponent: "Baldwin Wallace", location: "vs" },
