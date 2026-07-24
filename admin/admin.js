@@ -211,13 +211,12 @@ $("signout-btn").addEventListener("click", () => {
 /* ------------------------------------------------------------
    LEAGUE + WEEK SELECTION
    ------------------------------------------------------------ */
-/* Leagues that can be advanced from the web. Main is scoreable but
-   not advanceable here — advancing it locally also posts the Discord
-   week announcement, which this path can't do. Mirrors ADVANCE_LEAGUES
-   in the Worker and tools/apply.js; a submission would be refused
-   there regardless, but hiding the panel means nobody's offered a
-   button that can only fail. */
-const ADVANCE_LEAGUES = ["1star", "3star"];
+/* Leagues that can be advanced from the web. All three now qualify —
+   the web advance posts the Discord announcement itself, so main is no
+   longer held back. Mirrors ADVANCE_LEAGUES in the Worker and
+   tools/apply.js; kept as its own list so a league can be made
+   scores-only again by dropping it here (and there). */
+const ADVANCE_LEAGUES = ["1star", "3star", "main"];
 
 async function switchLeague(slug) {
   /* Drives the accent colour, exactly as on the league pages. */

@@ -29,21 +29,32 @@
    allow-lists are hardcoded, so no payload — however it got here —
    can perform an action against a league it isn't cleared for.
 
-   MAIN IS SCORES-ONLY ON THE WEB
-   The main dynasty can have scores recorded from the web, but NOT
-   advanced. Advancing main locally (advance.cmd) also posts the
-   week announcement to Discord; the web path has no webhook and
-   would silently skip it, so main's coaches would get no notice a
-   week had turned over. Rather than half-do it, advancing main
-   stays local. That's why there are two lists below, not one.
+   ALL THREE LEAGUES ADVANCE — AND POST — FROM THE WEB
+   Every league (main included) can now be both scored and advanced
+   from the admin page. An advance rewrites SEASON and then posts the
+   week announcement to that league's Discord channel, exactly as a
+   local advance.cmd run would. The webhooks and coach mention IDs
+   reach this runner through the DISCORD_CONFIG repo secret, which the
+   workflow writes to tools/config.json before this script runs (see
+   worker/ADMIN-SETUP.md). The two league lists below are kept
+   separate so a future league can be scores-only again without
+   reworking the checks — today they hold the same three leagues.
    ============================================================ */
 
 const fs = require("fs");
 const path = require("path");
 
-const { die, resolveLeague, loadData, buildWeek, weekLabel, top25GateError } = require("./lib/league");
+const {
+  die,
+  resolveLeague,
+  loadData,
+  buildWeek,
+  weekLabel,
+  top25GateError,
+  loadConfig,
+} = require("./lib/league");
 const { applyScores, parseSet, scoreableGames } = require("./scores");
-const { updateSeason } = require("./advance");
+const { updateSeason, buildMessage, post, webhookUrl } = require("./advance");
 
 /* ------------------------------------------------------------
    LIMITS
@@ -51,12 +62,13 @@ const { updateSeason } = require("./advance");
    Deliberately hardcoded rather than configurable. Each one is a
    ceiling no legitimate submission comes close to.
    ------------------------------------------------------------ */
-/* Which leagues each action may touch, per the note above. Scores
-   are safe for any league; advancing is withheld from main because
-   of its Discord announcement. A single union list would have let a
-   main advance through — the split is the point. */
+/* Which leagues each action may touch. Both actions now cover all
+   three leagues: the web advance posts to Discord just like the local
+   tool, so main no longer has to stay behind. The lists are kept
+   separate (rather than collapsed to one) so a league can be made
+   scores-only again later by dropping it from ADVANCE_LEAGUES alone. */
 const SCORE_LEAGUES = ["1star", "3star", "main"];
-const ADVANCE_LEAGUES = ["1star", "3star"];
+const ADVANCE_LEAGUES = ["1star", "3star", "main"];
 
 /* Everything the web path can reach at all — the union, used only
    for the "is this even a web league" check and error text. */
@@ -116,15 +128,6 @@ function validate(payload) {
   const league = payload.league;
   const permitted = leaguesForAction(action);
   if (!permitted.includes(league)) {
-    /* Two distinct failures with two distinct messages: a league the
-       web path can't touch at all, versus main specifically, which
-       can take scores but not an advance (see the header note). */
-    if (action === "advance" && SCORE_LEAGUES.includes(league)) {
-      bad(
-        `"${league}" can't be advanced from the web — advance it with advance.cmd ` +
-          `so the Discord announcement still posts. (Scores are fine here.)`
-      );
-    }
     bad(
       `league "${league}" cannot be ${action === "advance" ? "advanced" : "scored"} ` +
         `this way. Allowed: ${permitted.join(", ")}`
@@ -242,11 +245,13 @@ function doScores(p, L) {
   };
 }
 
-function doAdvance(p, L) {
+async function doAdvance(p, L) {
   const data = loadData(L.paths);
 
   /* Block advancing into a week whose Top 25 isn't transcribed yet.
-     A no-op for leagues that don't run a poll (TOP25 empty). */
+     A no-op for leagues that don't run a poll (TOP25 empty). This gate
+     stays exactly as it was — an advance still can't jump ahead of the
+     new week's poll, main included. */
   const gate = top25GateError(data, p.week);
   if (gate) die(gate);
 
@@ -268,24 +273,86 @@ function doAdvance(p, L) {
   }
 
   if (!changed) {
-    console.log(`\n  ${L.dir}/league-data.js already said that. Nothing to write.\n`);
+    /* The file already said this — a re-run. Don't re-post: the commit
+       step is skipped on no-change, and a spurious second announcement
+       is worse than silence. */
+    console.log(`\n  ${L.dir}/league-data.js already said that. Nothing to write, nothing posted.\n`);
     return { changed: false };
   }
 
   console.log(`\n  ${L.dir}/league-data.js updated — week ${p.week}, next "${next}".\n`);
 
-  /* No Discord post from the web path, by design. Both leagues DO
-     have webhooks now (tools/config.json), but that file is gitignored
-     and never reaches the Actions runner, so the announcement is a
-     local-only thing: advance these leagues with advance.cmd to post.
-     To make the web path post too, add the webhooks as repo secrets,
-     pass them via the workflow's env, and put the post() call here —
-     see the note in worker/ADMIN-SETUP.md. */
+  /* Announce it in Discord — the same message a local advance.cmd run
+     posts, through advance.js's buildMessage/post. The webhooks and
+     coach IDs arrive on the runner via the DISCORD_CONFIG repo secret
+     (written to tools/config.json before this runs). A failure here is
+     logged loudly but does NOT fail the run: the site advance has been
+     written and must not be lost to a Discord outage. */
+  const announced = await announce(p, L, data, wk, next);
+
   return {
     changed: true,
     commit: `${L.label}: advance to ${weekLabel(p.week)} (via ${p.actor})`,
-    summary: `Advanced to ${weekLabel(p.week)}, next deadline "${next}"`,
+    summary: `Advanced to ${weekLabel(p.week)}, next deadline "${next}"${announced.note}`,
   };
+}
+
+/* ------------------------------------------------------------
+   DISCORD ANNOUNCEMENT (web path)
+   ------------------------------------------------------------
+   Builds and posts the week announcement using advance.js's exact
+   buildMessage + post, so the web advance and a local advance produce
+   the identical message with the identical mentions. Never throws:
+   returns a short note appended to the workflow summary so the outcome
+   is visible in the Actions run, whatever happened.
+   ------------------------------------------------------------ */
+async function announce(p, L, data, wk, next) {
+  const cfg = loadConfig();
+  const url = webhookUrl(cfg, L.slug);
+
+  if (!url) {
+    /* No webhook on the runner — usually the DISCORD_CONFIG secret
+       isn't set yet. The advance itself is fine; only the ping is
+       missing, so say so and move on rather than failing. */
+    console.log(
+      `  no Discord webhook for "${L.slug}" on the runner — advanced without announcing. ` +
+        `Set the DISCORD_CONFIG repo secret to enable it (see worker/ADMIN-SETUP.md).`
+    );
+    return { note: " — NOT announced (no webhook on runner)" };
+  }
+
+  const built = buildMessage(data, p.week, wk, next, cfg, L.siteUrl);
+
+  /* Same health warnings the CLI prints. A missing ID pings nobody and
+     is silent in Discord, so it has to surface in the run log. */
+  if (built.missingMentions.length) {
+    console.log(
+      `  WARNING: no Discord ID for ${built.missingMentions.length} coach(es), ` +
+        `they will NOT be pinged: ${built.missingMentions.join(", ")}`
+    );
+  }
+  if (built.overflowed) {
+    console.log(
+      "  WARNING: message body over 2000 chars — CPU games moved to the embed, " +
+        "so those coaches will NOT be pinged this week."
+    );
+  }
+
+  try {
+    await post(url, built.payload);
+    console.log("  posted the advance announcement to Discord.");
+    return { note: " · announced in Discord" };
+  } catch (e) {
+    /* Deliberately non-fatal: the season file is already written and
+       will be committed. Surface the failure so it can be re-posted by
+       hand (advance.js --no-write), but keep the advance. */
+    console.error(`  WARNING: Discord announcement FAILED — ${e.message}`);
+    console.error(
+      "  The site advance still stands. Re-post with:\n" +
+        `    node tools/advance.js --league ${L.slug} --week ${p.week} --no-write`
+    );
+    return { note: " · Discord announcement FAILED (see Actions log)" };
+  }
 }
 
 /* ------------------------------------------------------------
@@ -312,7 +379,7 @@ function emit(result) {
 /* ------------------------------------------------------------
    MAIN
    ------------------------------------------------------------ */
-function main() {
+async function main() {
   const file = process.argv[2];
   if (!file) die("usage: node tools/apply.js <payload.json>");
 
@@ -329,12 +396,12 @@ function main() {
   const p = validate(raw);
   const L = resolveLeague(p.league);
 
-  const result = p.action === "scores" ? doScores(p, L) : doAdvance(p, L);
+  const result = p.action === "scores" ? doScores(p, L) : await doAdvance(p, L);
   emit(result);
 }
 
 if (require.main === module) {
-  main();
+  main().catch((e) => die(e.stack || e.message));
 }
 
 module.exports = { validate, ALLOWED_LEAGUES };

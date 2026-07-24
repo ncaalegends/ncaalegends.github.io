@@ -30,14 +30,16 @@
 
 const DISPATCH_EVENT = "league-update";
 
-/* Mirrors tools/apply.js, which is the authoritative copy. Main can
-   take scores from the web but not an advance: advancing main locally
-   also posts the Discord week announcement, and the web path has no
-   webhook, so it would silently skip it. Two lists keep that split.
-   The union is what a code may be granted; the per-action list is
-   what a given submission is checked against. */
+/* Mirrors tools/apply.js, which is the authoritative copy. All three
+   leagues can now be both scored and advanced from the web — the web
+   advance posts the Discord announcement itself (webhooks reach the
+   runner via the DISCORD_CONFIG repo secret), so main no longer has to
+   stay local. Two lists are kept so a league can be made scores-only
+   again by dropping it from ADVANCE_LEAGUES alone. The union is what a
+   code may be granted; the per-action list is what a submission is
+   checked against. */
 const SCORE_LEAGUES = ["1star", "3star", "main"];
-const ADVANCE_LEAGUES = ["1star", "3star"];
+const ADVANCE_LEAGUES = ["1star", "3star", "main"];
 const ALLOWED_LEAGUES = [...new Set([...SCORE_LEAGUES, ...ADVANCE_LEAGUES])];
 
 const MIN_CODE_LENGTH = 16;
@@ -202,12 +204,13 @@ function checkPayload(payload, who) {
   if (action !== "scores" && action !== "advance") return "unknown action";
   if (!ALLOWED_LEAGUES.includes(league)) return "unknown league";
 
-  /* Which leagues this action may touch. Main is scoreable but not
-     advanceable from the web — the same split apply.js enforces. */
+  /* Which leagues this action may touch — the same split apply.js
+     enforces. Today all three appear in both lists; the guard stays
+     general so a future scores-only league is still rejected here. */
   const permitted = action === "advance" ? ADVANCE_LEAGUES : SCORE_LEAGUES;
   if (!permitted.includes(league)) {
     return action === "advance"
-      ? `${league} can't be advanced from the web — do it with advance.cmd so Discord still posts`
+      ? `${league} can't be advanced from the web`
       : `${league} can't be updated this way`;
   }
 

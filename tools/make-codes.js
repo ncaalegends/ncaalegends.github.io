@@ -63,11 +63,11 @@ const LEAGUE_BY_DIGIT = {
   3: { slug: "main", label: "Main" },
 };
 
-/* Main grants scores only. Advancing main from the web is withheld
-   because it would skip the Discord announcement — see the header of
-   tools/apply.js. The code doesn't encode that; the restriction is
-   global and enforced by apply.js and the Worker. Granting main here
-   just means "can record main scores from the web". */
+/* Every league grants both scores and advance from the web now (the
+   web advance posts the Discord announcement itself — see the header of
+   tools/apply.js). The code just lists which leagues a person may
+   touch; the per-action rules are global and enforced by apply.js and
+   the Worker. */
 function parseLeagues(input) {
   const digits = String(input).match(/[123]/g);
   if (!digits) return null;
@@ -175,10 +175,7 @@ async function main() {
     codes[code] = { name, leagues: chosen.map((c) => c.slug) };
     fresh.push({ name, code, label });
 
-    /* Main is scores-only on the web; flag it so nobody's surprised
-       the advance panel is missing when they sign in with it. */
-    const mainNote = chosen.some((c) => c.slug === "main") ? "  (Main = scores only)" : "";
-    console.log(`  Added ${name} — ${label}.${mainNote}`);
+    console.log(`  Added ${name} — ${label}.`);
   }
 
   rl.close();

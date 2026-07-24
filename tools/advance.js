@@ -26,11 +26,12 @@
    WEBHOOK — per league
      Read from env DISCORD_WEBHOOK_URL, or from tools/config.json:
        { "leagues": { "main": { "webhookUrl": "https://discord.com/..." } } }
-     Only main has one today. The 1-star and 3-star dynasties are run
-     by other commissioners who haven't opted into the automation, so
-     those leagues are file-only — use --no-post.
+     All three leagues have one now, so a local advance posts by
+     default; pass --no-post to skip it for a given run.
      config.json is gitignored — the URL is a secret. Anyone holding
-     it can post to the channel as the bot.
+     it can post to the channel as the bot. The web advance path gets
+     the same config on its runner via the DISCORD_CONFIG repo secret
+     (see worker/ADMIN-SETUP.md), so it posts too.
 
    This script has no dependencies and never touches the network
    except for the single webhook POST.
@@ -338,7 +339,11 @@ async function post(url, payload) {
   });
   if (!res.ok) {
     const body = await res.text().catch(() => "");
-    die(`Discord rejected the post (HTTP ${res.status}) ${body.slice(0, 300)}`);
+    /* Throw rather than die() so callers can decide what a failed post
+       means. main() below catches it and dies exactly as before; the
+       web path (tools/apply.js) catches it and keeps the site advance
+       instead of losing it to a Discord outage. */
+    throw new Error(`Discord rejected the post (HTTP ${res.status}) ${body.slice(0, 300)}`);
   }
 }
 
@@ -458,4 +463,7 @@ if (require.main === module) {
   main().catch((e) => die(e.stack || e.message));
 }
 
-module.exports = { updateSeason, buildMessage, seasonBlock };
+/* post and webhookUrl are exported so tools/apply.js (the web path)
+   posts through the exact same webhook resolution and HTTP call as a
+   local advance — one implementation, no drift between the two paths. */
+module.exports = { updateSeason, buildMessage, seasonBlock, post, webhookUrl };

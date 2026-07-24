@@ -329,12 +329,14 @@ line-surgical writer.
 What it adds is validation, because its input arrives from the
 internet rather than from you:
 
-- **Per-action league allow-lists, hardcoded.** `SCORE_LEAGUES`
-  (`1star`, `3star`, `main`) and `ADVANCE_LEAGUES` (`1star`, `3star`)
-  are checked against the action. So main scores go through, but a
-  main *advance* is refused however the payload got here — advancing
-  main locally posts the Discord announcement the web path can't, so
-  it stays a local-only action.
+- **Per-action league allow-lists, hardcoded.** `SCORE_LEAGUES` and
+  `ADVANCE_LEAGUES` (both `1star`, `3star`, `main`) are checked against
+  the action. All three leagues can be scored and advanced from the
+  web; a web advance posts the Discord announcement itself, through the
+  same `buildMessage`/`post` the local tool uses, with the webhooks and
+  coach IDs supplied to the runner by the `DISCORD_CONFIG` repo secret.
+  The two lists are kept separate so a league can be made scores-only
+  again by dropping it from `ADVANCE_LEAGUES` alone.
 - Week must be a whole number 0–15, at most 40 entries per
   submission, team names capped in length.
 - Deadline and status text is checked against a character allowlist.

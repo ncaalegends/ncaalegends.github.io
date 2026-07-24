@@ -82,6 +82,31 @@ jobs:
           echo '' >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
 
+      # Recreate tools/config.json on the runner from a secret so an
+      # advance can post to Discord. That file is gitignored (the
+      # webhooks and coach IDs in it are secrets), so a checkout never
+      # includes it — this step is the only way it reaches the runner.
+      #
+      # Same env-not-run: discipline as the payload above: the JSON is
+      # handed to the process as a variable and written with printf, so
+      # its contents are never pasted into a shell line. GitHub also
+      # masks registered secrets in logs.
+      #
+      # Because the path is gitignored, the "git add -A" in the commit
+      # step below can never stage it — the secret can't be published by
+      # accident. When the secret is unset (not configured yet), this is
+      # a no-op and apply.js simply advances without announcing.
+      - name: Provide Discord config
+        env:
+          DISCORD_CONFIG: ${{ secrets.DISCORD_CONFIG }}
+        run: |
+          if [ -n "$DISCORD_CONFIG" ]; then
+            printf '%s' "$DISCORD_CONFIG" > tools/config.json
+            echo "Discord config provided to the runner."
+          else
+            echo "DISCORD_CONFIG secret not set — an advance will not post to Discord."
+          fi
+
       # apply.js exits non-zero on anything it doesn't like, which
       # fails the run and sends GitHub's normal failure email. That
       # email is the alerting story for a rejected submission.

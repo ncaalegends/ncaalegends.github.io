@@ -62,7 +62,7 @@ JSON to paste into Cloudflare and each person's individual code.
   Name (blank when you're done): RekenCrew
   Which leagues?  [1] 1-Star  [2] 3-Star  [3] Main
   (type one or more, e.g. 1  or  13  or  123): 123
-  Added RekenCrew — 1-Star + 3-Star + Main.  (Main = scores only)
+  Added RekenCrew — 1-Star + 3-Star + Main.
 
   Name (blank when you're done):
 ```
@@ -104,15 +104,13 @@ trail meaningful and what lets you revoke one person without
 disrupting anyone else. Someone who runs several leagues gets one code
 covering all of them.
 
-**Main is scores-only.** A code can list `main`, and it lets that
-person record main scores from the web — but the admin page hides the
-Advance panel for main, and a main advance is refused even if someone
-crafts the request by hand. The reason is Discord: advancing main
-locally (`advance.cmd`) also posts the week announcement to the main
-channel, and the web path has no webhook, so it would silently skip
-it. Advancing main stays local; everything else about main works on
-the web. 1-Star and 3-Star can be both scored and advanced, since
-neither has a webhook to miss.
+**All three leagues can be scored and advanced from the web.** A code
+listing `main`, `1star` or `3star` can do both for that league. An
+advance from the web posts the Discord week announcement itself — the
+same message `advance.cmd` posts locally — so main is no longer held
+back. This depends on the `DISCORD_CONFIG` secret being set (step 4a
+below); without it an advance still updates the site but posts
+nothing.
 
 ### If you'd rather do it by hand
 
@@ -224,23 +222,48 @@ from the value in Cloudflare.) If you think the
 **token** leaked rather than a code, delete it on GitHub and issue a
 new one — that's the credential that actually matters.
 
-## Adding Discord announcements later
+## Discord announcements (the `DISCORD_CONFIG` secret)
 
-Neither of these leagues has a webhook configured, so an advance
-through the admin page updates the site and posts nothing. When one
-wants announcements:
+An advance through the admin page posts the week announcement to that
+league's Discord channel — the same message `advance.cmd` posts
+locally, with the same per-coach pings. This is already wired into the
+code (`doAdvance()` in `tools/apply.js` calls `advance.js`'s
+`buildMessage()` and `post()`); the one thing it needs is the webhooks
+and coach IDs, which live in `tools/config.json`. That file is
+gitignored — the workflow runner never sees it from a checkout — so it
+is handed to the runner through a **GitHub repository secret** instead.
 
-1. Add the webhook URL as a Worker secret (not to `tools/config.json`
-   — that file is gitignored and the workflow runner never sees it)
-2. Pass it into the workflow as a repository secret instead, and have
-   `doAdvance()` in `tools/apply.js` call `advance.js`'s
-   `buildMessage()` and post it
+**One-time setup (~2 minutes):**
 
-`advance.js` already exports `buildMessage` for this. The mention
-logic, the 2000-character ceiling and the allowlist all come along
-with it — see the mentions section of `tools/README.md`, which is
-still the authoritative explanation of why pings live in the message
-body rather than the embed.
+1. GitHub → the repo → **Settings** → **Secrets and variables** →
+   **Actions** → **New repository secret**
+2. Name: `DISCORD_CONFIG`
+3. Value: paste the **entire contents of `tools/config.json`** — the
+   whole file, exactly as it is on your machine (webhooks, coach IDs
+   and all). One secret carries everything.
+4. **Add secret.**
+
+That's it. The **League update** workflow writes this secret back to
+`tools/config.json` on the runner before `apply.js` runs, so the web
+advance resolves webhooks and pings identically to a local one.
+
+**When you change `tools/config.json`** — a new webhook, a coach ID,
+a new member — update the `DISCORD_CONFIG` secret with the new file
+contents too, or the web path keeps using the old config. (Local
+advances read the file directly and are always current.)
+
+**If the secret is unset,** an advance still updates the site; it just
+posts nothing and says so in the Actions run. No error, no lost
+advance.
+
+**Taking one league off posting** without touching the others: blank
+that league's `webhookUrl` in the config (and re-save the secret).
+`apply.js` then advances the site for it and skips only its post.
+
+The mention logic, the 2000-character ceiling and the allowlist all
+come from `advance.js`'s `buildMessage`, shared with the local tool —
+see the mentions section of `tools/README.md` for why pings live in
+the message body rather than the embed.
 
 ## Turning it off
 
