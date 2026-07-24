@@ -35,18 +35,15 @@ echo   ============================================
 echo.
 
 echo   League:  [1] Main   [2] 3-Star   [3] 1-Star
-echo   (3-Star and 1-Star update the site only - no Discord post,
-echo    since those commissioners aren't on the automation.)
+echo   (All three post to their own Discord now. To skip the post on
+echo    a given run - say the webhook's down - answer n at the push
+echo    prompt, or run advance.js by hand with --no-post.)
 echo.
 set "LEAGUE=main"
 set "POSTFLAG="
 set /p LCHOICE="  Which league? (1/2/3, blank = Main): "
-REM Parentheses matter here. Written as "if X set A & set B", cmd
-REM treats the & as a plain command separator and runs "set B"
-REM unconditionally — which silently forced --no-post onto the main
-REM league too, so its Discord post never went out.
-if "%LCHOICE%"=="2" (set "LEAGUE=3star" & set "POSTFLAG=--no-post")
-if "%LCHOICE%"=="3" (set "LEAGUE=1star" & set "POSTFLAG=--no-post")
+if "%LCHOICE%"=="2" set "LEAGUE=3star"
+if "%LCHOICE%"=="3" set "LEAGUE=1star"
 
 echo.
 set /p WEEK="  Week we're advancing TO (0-15): "

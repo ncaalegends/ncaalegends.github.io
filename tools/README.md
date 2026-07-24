@@ -29,7 +29,8 @@ season state and announces the new week in Discord.
 
 ```
 node tools/advance.js --week 5 --next "Sunday, July 26 · 6:00 PM EDT"
-node tools/advance.js --league 3star --week 2 --no-post
+node tools/advance.js --league 3star --week 2 --next "Fri 8PM EDT"
+node tools/advance.js --league 1star --week 2 --no-post   # site only, skip Discord
 ```
 
 ### Leagues
@@ -39,13 +40,14 @@ node tools/advance.js --league 3star --week 2 --no-post
 | Slug | Folder | Discord |
 |---|---|---|
 | `main` | `/main/` | posts to the main channel |
-| `3star` | `/3star/` | no webhook — use `--no-post` |
-| `1star` | `/1star/` | no webhook — use `--no-post` |
+| `3star` | `/3star/` | posts to the 3-star channel |
+| `1star` | `/1star/` | posts to the 1-star channel |
 
-The 1-star and 3-star dynasties are run by other commissioners who
-haven't opted into the Discord automation. Their webhooks are blank in
-`config.json`, and the script refuses to post rather than silently
-doing nothing. `advance.cmd` passes `--no-post` for them automatically.
+All three leagues are on the Discord automation — each has its own
+webhook in `config.json`, pointing at its own server's channel. If a
+webhook is ever blank, the script refuses to post for that league
+rather than silently doing nothing; pass `--no-post` to skip the post
+deliberately on a given run.
 
 Those two leagues also have a **web admin page** at
 `ncaalegends.github.io/admin/`, so their commissioners can record
@@ -57,9 +59,11 @@ paths write the same files the same way, so you can keep using
 
 Discord IDs in `config.json` are shared across all three leagues,
 keyed by coach name — a person has one Discord account regardless of
-how many dynasties they're in. Coaches who only play 1-star or 3-star
-have no ID yet and will show as bold text instead of a ping, which the
-script warns about on every run.
+how many dynasties they're in. Name matching is case-insensitive, so a
+coach spelled `ronricofsu` in one league's roster and `RonRicoFSU` in
+another's still resolves to the same entry. Any coach with no ID on
+file shows as bold text instead of a ping, which the script warns
+about by name on every run.
 
 What it does:
 

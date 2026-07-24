@@ -274,8 +274,12 @@ function doAdvance(p, L) {
 
   console.log(`\n  ${L.dir}/league-data.js updated — week ${p.week}, next "${next}".\n`);
 
-  /* No Discord post. Neither of these leagues has a webhook
-     configured yet; when one does, this is where the call goes —
+  /* No Discord post from the web path, by design. Both leagues DO
+     have webhooks now (tools/config.json), but that file is gitignored
+     and never reaches the Actions runner, so the announcement is a
+     local-only thing: advance these leagues with advance.cmd to post.
+     To make the web path post too, add the webhooks as repo secrets,
+     pass them via the workflow's env, and put the post() call here —
      see the note in worker/ADMIN-SETUP.md. */
   return {
     changed: true,

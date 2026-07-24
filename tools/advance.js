@@ -79,10 +79,18 @@ function makeMentioner(cfg) {
   const ids = cfg.coaches || {};
   const missing = new Set();
 
+  /* Case-insensitive index. The three leagues spell some names with
+     different capitalization (config's "ronricofsu" vs 3star's
+     "RonRicoFSU"), and an exact-match lookup would silently drop the
+     ping and just bold the name. Lowercasing both sides fixes that
+     whole class of bug. No two distinct coaches collide when lowered. */
+  const byLower = {};
+  for (const k of Object.keys(ids)) byLower[k.toLowerCase()] = ids[k];
+
   // Coach name -> "<@id>", or bold plain text when no ID is on file.
   const forCoach = (name) => {
     if (!name) return "";
-    const rec = ids[name];
+    const rec = byLower[String(name).toLowerCase()];
     const id = typeof rec === "string" ? rec : rec?.id;
     if (isSnowflake(id)) return `<@${String(id).trim()}>`;
     missing.add(name);
