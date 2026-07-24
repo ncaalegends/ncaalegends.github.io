@@ -102,7 +102,7 @@ const TEAM_SCHEDULES = [
     conference: "SEC",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "FLA Atlantic", location: "vs", stadium: "Ben Hill Griffin Stadium" },
+      { week: 1, opponent: "FLA Atlantic", location: "vs", stadium: "Ben Hill Griffin Stadium", teamScore: 41, opponentScore: 10 },
       { week: 2, opponent: "FCS Southeast", location: "vs", stadium: "Ben Hill Griffin Stadium" },
       { week: 3, opponent: "Auburn", location: "at", stadium: "Jordan-Hare Stadium" },
       { week: 4, opponent: "Ole Miss", location: "vs", stadium: "Ben Hill Griffin Stadium" },
@@ -256,7 +256,7 @@ const TEAM_SCHEDULES = [
     conference: "SEC",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "Texas State", location: "vs", stadium: "Texas Memorial Stadium" },
+      { week: 1, opponent: "Texas State", location: "vs", stadium: "Texas Memorial Stadium", teamScore: 51, opponentScore: 7 },
       { week: 2, opponent: "Ohio State", location: "vs", stadium: "Texas Memorial Stadium" },
       { week: 3, opponent: "UTSA", location: "vs", stadium: "Texas Memorial Stadium" },
       { week: 4, opponent: "Tennessee", location: "at", stadium: "Neyland Stadium" },
@@ -300,7 +300,7 @@ const TEAM_SCHEDULES = [
     conference: "SEC",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "FCS Southeast", location: "vs", stadium: "Sanford Stadium" },
+      { week: 1, opponent: "FCS Southeast", location: "vs", stadium: "Sanford Stadium", teamScore: 37, opponentScore: 19 },
       { week: 2, opponent: "W. Kentucky", location: "vs", stadium: "Sanford Stadium" },
       { week: 3, opponent: "Arkansas", location: "at", stadium: "DW Reynolds Razorback Stadium" },
       { week: 4, opponent: "Oklahoma", location: "vs", stadium: "Sanford Stadium" },
