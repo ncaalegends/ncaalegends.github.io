@@ -21,9 +21,9 @@
    for this league. Set it to "" to hide the badge entirely.
    ------------------------------------------------------------ */
 const SEASON = {
-  currentWeek: 0,
-  statusLine: "WEEK 0",
-  nextAdvance: "Friday, July 24",
+  currentWeek: 1,
+  statusLine: "WEEK 1",
+  nextAdvance: "Sunday, July 26",
 };
 
 /* ------------------------------------------------------------
