@@ -319,7 +319,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, opponent: "Southern Mississippi", location: "at", teamScore: 42, opponentScore: 24 },
       { week: 1, opponent: "Liberty", location: "vs", teamScore: 44, opponentScore: 14 },
-      { week: 2, opponent: "LSU", location: "vs" },
+      { week: 2, opponent: "LSU", location: "vs", teamScore: 20, opponentScore: 27 },
       { week: 3, note: "BYE" },
       { week: 4, opponent: "Auburn", location: "vs" },
       { week: 5, opponent: "Charlotte", location: "at" },
