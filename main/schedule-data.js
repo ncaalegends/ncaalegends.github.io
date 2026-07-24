@@ -481,7 +481,7 @@ const TEAM_SCHEDULES = [
       { week: 0, note: "BYE" },
       // Neutral site - listed "vs" in-game but played at Nissan Stadium
       // in Nashville, not Vaught-Hemingway.
-      { week: 1, opponent: "Louisville", location: "vs", stadium: "Nissan Stadium" },
+      { week: 1, opponent: "Louisville", location: "vs", stadium: "Nissan Stadium", teamScore: 47, opponentScore: 17 },
       { week: 2, opponent: "Charlotte", location: "vs", stadium: "Vaught-Hemingway Stadium" },
       { week: 3, opponent: "LSU", location: "vs", stadium: "Vaught-Hemingway Stadium" },
       { week: 4, opponent: "Florida", location: "at", stadium: "Ben Hill Griffin Stadium" },
