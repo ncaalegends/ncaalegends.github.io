@@ -161,6 +161,24 @@ const latestPollWeek = () => {
   return ws.length ? ws[ws.length - 1] : null;
 };
 
+/* The poll the site should actually SHOW. Not necessarily the newest
+   one in the file — the newest poll whose week the season has actually
+   reached (currentWeek). A poll can be committed for a week we haven't
+   advanced to yet: the advance gate (tools/lib/league.js) requires
+   week N's poll to be in the repo BEFORE an advance to week N is
+   allowed, so the poll always lands first. Capping the display at
+   currentWeek is what keeps that early-committed poll invisible until
+   the advance flips the week — the poll and the new week reveal
+   together, never before. Falls back to the latest poll at or before
+   the current week, and to null (nothing published) if none qualifies. */
+const currentSeasonWeek = () =>
+  SEASON.currentWeek === "PRESEASON" ? 0 : Number(SEASON.currentWeek) || 0;
+const currentPollWeek = () => {
+  const cap = currentSeasonWeek();
+  const reached = pollWeeksAvailable().filter((w) => w <= cap);
+  return reached.length ? reached[reached.length - 1] : null;
+};
+
 /* A team's rank in a given week's poll, or null when it's unranked
    (or no poll exists for that week yet). */
 function rankForWeek(teamName, week) {
@@ -180,10 +198,13 @@ function rankBadgeHtml(teamName, week) {
 /* Which poll a schedule row should read for its opponent badge. A
    game that's been played is frozen: it shows the rank the opponent
    held in the week it was actually played. An unplayed (future) game
-   can't know that yet, so it tracks the opponent's CURRENT rank —
-   the latest poll — and keeps updating until the game happens. */
+   can't know that yet, so it tracks the opponent's CURRENT rank — the
+   current week's poll — and keeps updating until the game happens.
+   "Current" is the shown poll (currentPollWeek), so a poll uploaded
+   for a week the site hasn't advanced to yet never leaks into a badge
+   early. */
 function badgeWeekFor(played, gameWeek) {
-  return played ? gameWeek : latestPollWeek();
+  return played ? gameWeek : currentPollWeek();
 }
 
 /* ------------------------------------------------------------
@@ -865,15 +886,18 @@ function top25RowHtml(t, week) {
     </li>`;
 }
 
-/* Always shows the current (latest) poll with movement against the
-   previous week. Earlier weeks stay in top25-data.js — they're needed
-   to compute the arrows — but aren't browsable on the site. */
+/* Shows the current week's poll with movement against the previous
+   week. "Current" is the newest poll the season has advanced to
+   (currentPollWeek), NOT simply the newest poll in the file — a poll
+   uploaded for a week we haven't advanced to yet stays hidden until
+   the advance flips currentWeek. Earlier weeks stay in top25-data.js —
+   they're needed to compute the arrows — but aren't browsable. */
 function renderTop25() {
   const host = document.getElementById("top25-list");
   const label = document.getElementById("top25-week-label");
   if (!host) return;
 
-  const week = latestPollWeek();
+  const week = currentPollWeek();
   if (week == null) {
     if (label) label.textContent = "NOT PUBLISHED YET";
     host.classList.add("is-empty");
@@ -1236,7 +1260,7 @@ function renderTeamSchedule() {
     <div class="team-sched-head"${teamColor ? ` style="--team:${teamColor}"` : ""}>
       ${teamMarkHtml(team.team, "xl")}
       <div class="tsh-text">
-        <span class="team-sched-name">${rankBadgeHtml(team.team, latestPollWeek())}${esc(team.team)}</span>
+        <span class="team-sched-name">${rankBadgeHtml(team.team, currentPollWeek())}${esc(team.team)}</span>
         <span class="tsh-meta">
           <span class="team-sched-conf">${esc(team.conference)}</span>
           ${coach ? `<span class="team-sched-coach">${esc(coach)}</span>` : ""}

@@ -15,8 +15,21 @@
 
    Because of (2), each week's poll is frozen history: once a week is
    entered, never edit it to reflect a later poll — add a new week
-   instead. The site shows the newest week by default and lets you
-   browse earlier weeks.
+   instead.
+
+   WHAT THE SITE SHOWS, AND WHEN (the reveal rule)
+   The site shows the poll for SEASON.currentWeek — the week the season
+   has actually advanced to — NOT simply the newest block in this file.
+   So a poll added here for a week the site hasn't advanced to yet sits
+   in the repo INVISIBLE. It reveals the moment someone advances to that
+   week (on the website or via advance.cmd), which flips currentWeek and
+   surfaces the poll and the "#N" badges together, never before.
+
+   This dovetails with the advance gate (tools/lib/league.js): an
+   advance to week N is REFUSED until week N's poll is in this file. So
+   the order is always: (1) add week N's block here and push — nothing
+   changes on the site; (2) advance to week N — the poll appears in the
+   same motion as the new week and the Discord announcement.
 
    HOW TO ADD A WEEK
    Screenshot the in-game Top 25 for the week, then append a new
