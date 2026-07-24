@@ -1,0 +1,658 @@
+Combined changes: web-advance Discord posting + Main advance + Top 25 reveal cap
+Baseline: fe57c17   HEAD: fcdb61c
+Generated: 2026-07-24 05:37 UTC
+============================================================================
+
+############################################################
+## tools/apply.js
+############################################################
+--- a/tools/apply.js
++++ b/tools/apply.js
+@@ -29,21 +29,32 @@
+    allow-lists are hardcoded, so no payload — however it got here —
+    can perform an action against a league it isn't cleared for.
+ 
+-   MAIN IS SCORES-ONLY ON THE WEB
+-   The main dynasty can have scores recorded from the web, but NOT
+-   advanced. Advancing main locally (advance.cmd) also posts the
+-   week announcement to Discord; the web path has no webhook and
+-   would silently skip it, so main's coaches would get no notice a
+-   week had turned over. Rather than half-do it, advancing main
+-   stays local. That's why there are two lists below, not one.
++   ALL THREE LEAGUES ADVANCE — AND POST — FROM THE WEB
++   Every league (main included) can now be both scored and advanced
++   from the admin page. An advance rewrites SEASON and then posts the
++   week announcement to that league's Discord channel, exactly as a
++   local advance.cmd run would. The webhooks and coach mention IDs
++   reach this runner through the DISCORD_CONFIG repo secret, which the
++   workflow writes to tools/config.json before this script runs (see
++   worker/ADMIN-SETUP.md). The two league lists below are kept
++   separate so a future league can be scores-only again without
++   reworking the checks — today they hold the same three leagues.
+    ============================================================ */
+ 
+ const fs = require("fs");
+ const path = require("path");
+ 
+-const { die, resolveLeague, loadData, buildWeek, weekLabel, top25GateError } = require("./lib/league");
++const {
++  die,
++  resolveLeague,
++  loadData,
++  buildWeek,
++  weekLabel,
++  top25GateError,
++  loadConfig,
++} = require("./lib/league");
+ const { applyScores, parseSet, scoreableGames } = require("./scores");
+-const { updateSeason } = require("./advance");
++const { updateSeason, buildMessage, post, webhookUrl } = require("./advance");
+ 
+ /* ------------------------------------------------------------
+    LIMITS
+@@ -51,12 +62,13 @@
+    Deliberately hardcoded rather than configurable. Each one is a
+    ceiling no legitimate submission comes close to.
+    ------------------------------------------------------------ */
+-/* Which leagues each action may touch, per the note above. Scores
+-   are safe for any league; advancing is withheld from main because
+-   of its Discord announcement. A single union list would have let a
+-   main advance through — the split is the point. */
++/* Which leagues each action may touch. Both actions now cover all
++   three leagues: the web advance posts to Discord just like the local
++   tool, so main no longer has to stay behind. The lists are kept
++   separate (rather than collapsed to one) so a league can be made
++   scores-only again later by dropping it from ADVANCE_LEAGUES alone. */
+ const SCORE_LEAGUES = ["1star", "3star", "main"];
+-const ADVANCE_LEAGUES = ["1star", "3star"];
++const ADVANCE_LEAGUES = ["1star", "3star", "main"];
+ 
+ /* Everything the web path can reach at all — the union, used only
+    for the "is this even a web league" check and error text. */
+@@ -116,15 +128,6 @@
+   const league = payload.league;
+   const permitted = leaguesForAction(action);
+   if (!permitted.includes(league)) {
+-    /* Two distinct failures with two distinct messages: a league the
+-       web path can't touch at all, versus main specifically, which
+-       can take scores but not an advance (see the header note). */
+-    if (action === "advance" && SCORE_LEAGUES.includes(league)) {
+-      bad(
+-        `"${league}" can't be advanced from the web — advance it with advance.cmd ` +
+-          `so the Discord announcement still posts. (Scores are fine here.)`
+-      );
+-    }
+     bad(
+       `league "${league}" cannot be ${action === "advance" ? "advanced" : "scored"} ` +
+         `this way. Allowed: ${permitted.join(", ")}`
+@@ -242,11 +245,13 @@
+   };
+ }
+ 
+-function doAdvance(p, L) {
++async function doAdvance(p, L) {
+   const data = loadData(L.paths);
+ 
+   /* Block advancing into a week whose Top 25 isn't transcribed yet.
+-     A no-op for leagues that don't run a poll (TOP25 empty). */
++     A no-op for leagues that don't run a poll (TOP25 empty). This gate
++     stays exactly as it was — an advance still can't jump ahead of the
++     new week's poll, main included. */
+   const gate = top25GateError(data, p.week);
+   if (gate) die(gate);
+ 
+@@ -268,27 +273,89 @@
+   }
+ 
+   if (!changed) {
+-    console.log(`\n  ${L.dir}/league-data.js already said that. Nothing to write.\n`);
++    /* The file already said this — a re-run. Don't re-post: the commit
++       step is skipped on no-change, and a spurious second announcement
++       is worse than silence. */
++    console.log(`\n  ${L.dir}/league-data.js already said that. Nothing to write, nothing posted.\n`);
+     return { changed: false };
+   }
+ 
+   console.log(`\n  ${L.dir}/league-data.js updated — week ${p.week}, next "${next}".\n`);
+ 
+-  /* No Discord post from the web path, by design. Both leagues DO
+-     have webhooks now (tools/config.json), but that file is gitignored
+-     and never reaches the Actions runner, so the announcement is a
+-     local-only thing: advance these leagues with advance.cmd to post.
+-     To make the web path post too, add the webhooks as repo secrets,
+-     pass them via the workflow's env, and put the post() call here —
+-     see the note in worker/ADMIN-SETUP.md. */
++  /* Announce it in Discord — the same message a local advance.cmd run
++     posts, through advance.js's buildMessage/post. The webhooks and
++     coach IDs arrive on the runner via the DISCORD_CONFIG repo secret
++     (written to tools/config.json before this runs). A failure here is
++     logged loudly but does NOT fail the run: the site advance has been
++     written and must not be lost to a Discord outage. */
++  const announced = await announce(p, L, data, wk, next);
++
+   return {
+     changed: true,
+     commit: `${L.label}: advance to ${weekLabel(p.week)} (via ${p.actor})`,
+-    summary: `Advanced to ${weekLabel(p.week)}, next deadline "${next}"`,
++    summary: `Advanced to ${weekLabel(p.week)}, next deadline "${next}"${announced.note}`,
+   };
+ }
+ 
+ /* ------------------------------------------------------------
++   DISCORD ANNOUNCEMENT (web path)
++   ------------------------------------------------------------
++   Builds and posts the week announcement using advance.js's exact
++   buildMessage + post, so the web advance and a local advance produce
++   the identical message with the identical mentions. Never throws:
++   returns a short note appended to the workflow summary so the outcome
++   is visible in the Actions run, whatever happened.
++   ------------------------------------------------------------ */
++async function announce(p, L, data, wk, next) {
++  const cfg = loadConfig();
++  const url = webhookUrl(cfg, L.slug);
++
++  if (!url) {
++    /* No webhook on the runner — usually the DISCORD_CONFIG secret
++       isn't set yet. The advance itself is fine; only the ping is
++       missing, so say so and move on rather than failing. */
++    console.log(
++      `  no Discord webhook for "${L.slug}" on the runner — advanced without announcing. ` +
++        `Set the DISCORD_CONFIG repo secret to enable it (see worker/ADMIN-SETUP.md).`
++    );
++    return { note: " — NOT announced (no webhook on runner)" };
++  }
++
++  const built = buildMessage(data, p.week, wk, next, cfg, L.siteUrl);
++
++  /* Same health warnings the CLI prints. A missing ID pings nobody and
++     is silent in Discord, so it has to surface in the run log. */
++  if (built.missingMentions.length) {
++    console.log(
++      `  WARNING: no Discord ID for ${built.missingMentions.length} coach(es), ` +
++        `they will NOT be pinged: ${built.missingMentions.join(", ")}`
++    );
++  }
++  if (built.overflowed) {
++    console.log(
++      "  WARNING: message body over 2000 chars — CPU games moved to the embed, " +
++        "so those coaches will NOT be pinged this week."
++    );
++  }
++
++  try {
++    await post(url, built.payload);
++    console.log("  posted the advance announcement to Discord.");
++    return { note: " · announced in Discord" };
++  } catch (e) {
++    /* Deliberately non-fatal: the season file is already written and
++       will be committed. Surface the failure so it can be re-posted by
++       hand (advance.js --no-write), but keep the advance. */
++    console.error(`  WARNING: Discord announcement FAILED — ${e.message}`);
++    console.error(
++      "  The site advance still stands. Re-post with:\n" +
++        `    node tools/advance.js --league ${L.slug} --week ${p.week} --no-write`
++    );
++    return { note: " · Discord announcement FAILED (see Actions log)" };
++  }
++}
++
++/* ------------------------------------------------------------
+    OUTPUT FOR THE WORKFLOW
+    ------------------------------------------------------------
+    The workflow needs to know whether to commit and what to say in
+@@ -312,7 +379,7 @@
+ /* ------------------------------------------------------------
+    MAIN
+    ------------------------------------------------------------ */
+-function main() {
++async function main() {
+   const file = process.argv[2];
+   if (!file) die("usage: node tools/apply.js <payload.json>");
+ 
+@@ -329,12 +396,12 @@
+   const p = validate(raw);
+   const L = resolveLeague(p.league);
+ 
+-  const result = p.action === "scores" ? doScores(p, L) : doAdvance(p, L);
++  const result = p.action === "scores" ? doScores(p, L) : await doAdvance(p, L);
+   emit(result);
+ }
+ 
+ if (require.main === module) {
+-  main();
++  main().catch((e) => die(e.stack || e.message));
+ }
+ 
+ module.exports = { validate, ALLOWED_LEAGUES };
+
+############################################################
+## tools/advance.js
+############################################################
+--- a/tools/advance.js
++++ b/tools/advance.js
+@@ -26,11 +26,12 @@
+    WEBHOOK — per league
+      Read from env DISCORD_WEBHOOK_URL, or from tools/config.json:
+        { "leagues": { "main": { "webhookUrl": "https://discord.com/..." } } }
+-     Only main has one today. The 1-star and 3-star dynasties are run
+-     by other commissioners who haven't opted into the automation, so
+-     those leagues are file-only — use --no-post.
++     All three leagues have one now, so a local advance posts by
++     default; pass --no-post to skip it for a given run.
+      config.json is gitignored — the URL is a secret. Anyone holding
+-     it can post to the channel as the bot.
++     it can post to the channel as the bot. The web advance path gets
++     the same config on its runner via the DISCORD_CONFIG repo secret
++     (see worker/ADMIN-SETUP.md), so it posts too.
+ 
+    This script has no dependencies and never touches the network
+    except for the single webhook POST.
+@@ -338,7 +339,11 @@
+   });
+   if (!res.ok) {
+     const body = await res.text().catch(() => "");
+-    die(`Discord rejected the post (HTTP ${res.status}) ${body.slice(0, 300)}`);
++    /* Throw rather than die() so callers can decide what a failed post
++       means. main() below catches it and dies exactly as before; the
++       web path (tools/apply.js) catches it and keeps the site advance
++       instead of losing it to a Discord outage. */
++    throw new Error(`Discord rejected the post (HTTP ${res.status}) ${body.slice(0, 300)}`);
+   }
+ }
+ 
+@@ -458,4 +463,7 @@
+   main().catch((e) => die(e.stack || e.message));
+ }
+ 
+-module.exports = { updateSeason, buildMessage, seasonBlock };
++/* post and webhookUrl are exported so tools/apply.js (the web path)
++   posts through the exact same webhook resolution and HTTP call as a
++   local advance — one implementation, no drift between the two paths. */
++module.exports = { updateSeason, buildMessage, seasonBlock, post, webhookUrl };
+
+############################################################
+## worker/admin-api.js
+############################################################
+--- a/worker/admin-api.js
++++ b/worker/admin-api.js
+@@ -30,14 +30,16 @@
+ 
+ const DISPATCH_EVENT = "league-update";
+ 
+-/* Mirrors tools/apply.js, which is the authoritative copy. Main can
+-   take scores from the web but not an advance: advancing main locally
+-   also posts the Discord week announcement, and the web path has no
+-   webhook, so it would silently skip it. Two lists keep that split.
+-   The union is what a code may be granted; the per-action list is
+-   what a given submission is checked against. */
++/* Mirrors tools/apply.js, which is the authoritative copy. All three
++   leagues can now be both scored and advanced from the web — the web
++   advance posts the Discord announcement itself (webhooks reach the
++   runner via the DISCORD_CONFIG repo secret), so main no longer has to
++   stay local. Two lists are kept so a league can be made scores-only
++   again by dropping it from ADVANCE_LEAGUES alone. The union is what a
++   code may be granted; the per-action list is what a submission is
++   checked against. */
+ const SCORE_LEAGUES = ["1star", "3star", "main"];
+-const ADVANCE_LEAGUES = ["1star", "3star"];
++const ADVANCE_LEAGUES = ["1star", "3star", "main"];
+ const ALLOWED_LEAGUES = [...new Set([...SCORE_LEAGUES, ...ADVANCE_LEAGUES])];
+ 
+ const MIN_CODE_LENGTH = 16;
+@@ -202,12 +204,13 @@
+   if (action !== "scores" && action !== "advance") return "unknown action";
+   if (!ALLOWED_LEAGUES.includes(league)) return "unknown league";
+ 
+-  /* Which leagues this action may touch. Main is scoreable but not
+-     advanceable from the web — the same split apply.js enforces. */
++  /* Which leagues this action may touch — the same split apply.js
++     enforces. Today all three appear in both lists; the guard stays
++     general so a future scores-only league is still rejected here. */
+   const permitted = action === "advance" ? ADVANCE_LEAGUES : SCORE_LEAGUES;
+   if (!permitted.includes(league)) {
+     return action === "advance"
+-      ? `${league} can't be advanced from the web — do it with advance.cmd so Discord still posts`
++      ? `${league} can't be advanced from the web`
+       : `${league} can't be updated this way`;
+   }
+ 
+
+############################################################
+## admin/admin.js
+############################################################
+--- a/admin/admin.js
++++ b/admin/admin.js
+@@ -211,13 +211,12 @@
+ /* ------------------------------------------------------------
+    LEAGUE + WEEK SELECTION
+    ------------------------------------------------------------ */
+-/* Leagues that can be advanced from the web. Main is scoreable but
+-   not advanceable here — advancing it locally also posts the Discord
+-   week announcement, which this path can't do. Mirrors ADVANCE_LEAGUES
+-   in the Worker and tools/apply.js; a submission would be refused
+-   there regardless, but hiding the panel means nobody's offered a
+-   button that can only fail. */
+-const ADVANCE_LEAGUES = ["1star", "3star"];
++/* Leagues that can be advanced from the web. All three now qualify —
++   the web advance posts the Discord announcement itself, so main is no
++   longer held back. Mirrors ADVANCE_LEAGUES in the Worker and
++   tools/apply.js; kept as its own list so a league can be made
++   scores-only again by dropping it here (and there). */
++const ADVANCE_LEAGUES = ["1star", "3star", "main"];
+ 
+ async function switchLeague(slug) {
+   /* Drives the accent colour, exactly as on the league pages. */
+
+############################################################
+## .github/workflows/league-update.yml
+############################################################
+--- a/.github/workflows/league-update.yml
++++ b/.github/workflows/league-update.yml
+@@ -82,6 +82,31 @@
+           echo '' >> "$GITHUB_STEP_SUMMARY"
+           echo '```' >> "$GITHUB_STEP_SUMMARY"
+ 
++      # Recreate tools/config.json on the runner from a secret so an
++      # advance can post to Discord. That file is gitignored (the
++      # webhooks and coach IDs in it are secrets), so a checkout never
++      # includes it — this step is the only way it reaches the runner.
++      #
++      # Same env-not-run: discipline as the payload above: the JSON is
++      # handed to the process as a variable and written with printf, so
++      # its contents are never pasted into a shell line. GitHub also
++      # masks registered secrets in logs.
++      #
++      # Because the path is gitignored, the "git add -A" in the commit
++      # step below can never stage it — the secret can't be published by
++      # accident. When the secret is unset (not configured yet), this is
++      # a no-op and apply.js simply advances without announcing.
++      - name: Provide Discord config
++        env:
++          DISCORD_CONFIG: ${{ secrets.DISCORD_CONFIG }}
++        run: |
++          if [ -n "$DISCORD_CONFIG" ]; then
++            printf '%s' "$DISCORD_CONFIG" > tools/config.json
++            echo "Discord config provided to the runner."
++          else
++            echo "DISCORD_CONFIG secret not set — an advance will not post to Discord."
++          fi
++
+       # apply.js exits non-zero on anything it doesn't like, which
+       # fails the run and sends GitHub's normal failure email. That
+       # email is the alerting story for a rejected submission.
+
+############################################################
+## script.js
+############################################################
+--- a/script.js
++++ b/script.js
+@@ -161,6 +161,24 @@
+   return ws.length ? ws[ws.length - 1] : null;
+ };
+ 
++/* The poll the site should actually SHOW. Not necessarily the newest
++   one in the file — the newest poll whose week the season has actually
++   reached (currentWeek). A poll can be committed for a week we haven't
++   advanced to yet: the advance gate (tools/lib/league.js) requires
++   week N's poll to be in the repo BEFORE an advance to week N is
++   allowed, so the poll always lands first. Capping the display at
++   currentWeek is what keeps that early-committed poll invisible until
++   the advance flips the week — the poll and the new week reveal
++   together, never before. Falls back to the latest poll at or before
++   the current week, and to null (nothing published) if none qualifies. */
++const currentSeasonWeek = () =>
++  SEASON.currentWeek === "PRESEASON" ? 0 : Number(SEASON.currentWeek) || 0;
++const currentPollWeek = () => {
++  const cap = currentSeasonWeek();
++  const reached = pollWeeksAvailable().filter((w) => w <= cap);
++  return reached.length ? reached[reached.length - 1] : null;
++};
++
+ /* A team's rank in a given week's poll, or null when it's unranked
+    (or no poll exists for that week yet). */
+ function rankForWeek(teamName, week) {
+@@ -180,10 +198,13 @@
+ /* Which poll a schedule row should read for its opponent badge. A
+    game that's been played is frozen: it shows the rank the opponent
+    held in the week it was actually played. An unplayed (future) game
+-   can't know that yet, so it tracks the opponent's CURRENT rank —
+-   the latest poll — and keeps updating until the game happens. */
++   can't know that yet, so it tracks the opponent's CURRENT rank — the
++   current week's poll — and keeps updating until the game happens.
++   "Current" is the shown poll (currentPollWeek), so a poll uploaded
++   for a week the site hasn't advanced to yet never leaks into a badge
++   early. */
+ function badgeWeekFor(played, gameWeek) {
+-  return played ? gameWeek : latestPollWeek();
++  return played ? gameWeek : currentPollWeek();
+ }
+ 
+ /* ------------------------------------------------------------
+@@ -865,15 +886,18 @@
+     </li>`;
+ }
+ 
+-/* Always shows the current (latest) poll with movement against the
+-   previous week. Earlier weeks stay in top25-data.js — they're needed
+-   to compute the arrows — but aren't browsable on the site. */
++/* Shows the current week's poll with movement against the previous
++   week. "Current" is the newest poll the season has advanced to
++   (currentPollWeek), NOT simply the newest poll in the file — a poll
++   uploaded for a week we haven't advanced to yet stays hidden until
++   the advance flips currentWeek. Earlier weeks stay in top25-data.js —
++   they're needed to compute the arrows — but aren't browsable. */
+ function renderTop25() {
+   const host = document.getElementById("top25-list");
+   const label = document.getElementById("top25-week-label");
+   if (!host) return;
+ 
+-  const week = latestPollWeek();
++  const week = currentPollWeek();
+   if (week == null) {
+     if (label) label.textContent = "NOT PUBLISHED YET";
+     host.classList.add("is-empty");
+@@ -1236,7 +1260,7 @@
+     <div class="team-sched-head"${teamColor ? ` style="--team:${teamColor}"` : ""}>
+       ${teamMarkHtml(team.team, "xl")}
+       <div class="tsh-text">
+-        <span class="team-sched-name">${rankBadgeHtml(team.team, latestPollWeek())}${esc(team.team)}</span>
++        <span class="team-sched-name">${rankBadgeHtml(team.team, currentPollWeek())}${esc(team.team)}</span>
+         <span class="tsh-meta">
+           <span class="team-sched-conf">${esc(team.conference)}</span>
+           ${coach ? `<span class="team-sched-coach">${esc(coach)}</span>` : ""}
+
+############################################################
+## main/top25-data.js
+############################################################
+--- a/main/top25-data.js
++++ b/main/top25-data.js
+@@ -15,8 +15,21 @@
+ 
+    Because of (2), each week's poll is frozen history: once a week is
+    entered, never edit it to reflect a later poll — add a new week
+-   instead. The site shows the newest week by default and lets you
+-   browse earlier weeks.
++   instead.
++
++   WHAT THE SITE SHOWS, AND WHEN (the reveal rule)
++   The site shows the poll for SEASON.currentWeek — the week the season
++   has actually advanced to — NOT simply the newest block in this file.
++   So a poll added here for a week the site hasn't advanced to yet sits
++   in the repo INVISIBLE. It reveals the moment someone advances to that
++   week (on the website or via advance.cmd), which flips currentWeek and
++   surfaces the poll and the "#N" badges together, never before.
++
++   This dovetails with the advance gate (tools/lib/league.js): an
++   advance to week N is REFUSED until week N's poll is in this file. So
++   the order is always: (1) add week N's block here and push — nothing
++   changes on the site; (2) advance to week N — the poll appears in the
++   same motion as the new week and the Discord announcement.
+ 
+    HOW TO ADD A WEEK
+    Screenshot the in-game Top 25 for the week, then append a new
+
+############################################################
+## tools/make-codes.js
+############################################################
+--- a/tools/make-codes.js
++++ b/tools/make-codes.js
+@@ -63,11 +63,11 @@
+   3: { slug: "main", label: "Main" },
+ };
+ 
+-/* Main grants scores only. Advancing main from the web is withheld
+-   because it would skip the Discord announcement — see the header of
+-   tools/apply.js. The code doesn't encode that; the restriction is
+-   global and enforced by apply.js and the Worker. Granting main here
+-   just means "can record main scores from the web". */
++/* Every league grants both scores and advance from the web now (the
++   web advance posts the Discord announcement itself — see the header of
++   tools/apply.js). The code just lists which leagues a person may
++   touch; the per-action rules are global and enforced by apply.js and
++   the Worker. */
+ function parseLeagues(input) {
+   const digits = String(input).match(/[123]/g);
+   if (!digits) return null;
+@@ -175,10 +175,7 @@
+     codes[code] = { name, leagues: chosen.map((c) => c.slug) };
+     fresh.push({ name, code, label });
+ 
+-    /* Main is scores-only on the web; flag it so nobody's surprised
+-       the advance panel is missing when they sign in with it. */
+-    const mainNote = chosen.some((c) => c.slug === "main") ? "  (Main = scores only)" : "";
+-    console.log(`  Added ${name} — ${label}.${mainNote}`);
++    console.log(`  Added ${name} — ${label}.`);
+   }
+ 
+   rl.close();
+
+############################################################
+## worker/ADMIN-SETUP.md
+############################################################
+--- a/worker/ADMIN-SETUP.md
++++ b/worker/ADMIN-SETUP.md
+@@ -62,7 +62,7 @@
+   Name (blank when you're done): RekenCrew
+   Which leagues?  [1] 1-Star  [2] 3-Star  [3] Main
+   (type one or more, e.g. 1  or  13  or  123): 123
+-  Added RekenCrew — 1-Star + 3-Star + Main.  (Main = scores only)
++  Added RekenCrew — 1-Star + 3-Star + Main.
+ 
+   Name (blank when you're done):
+ ```
+@@ -104,15 +104,13 @@
+ disrupting anyone else. Someone who runs several leagues gets one code
+ covering all of them.
+ 
+-**Main is scores-only.** A code can list `main`, and it lets that
+-person record main scores from the web — but the admin page hides the
+-Advance panel for main, and a main advance is refused even if someone
+-crafts the request by hand. The reason is Discord: advancing main
+-locally (`advance.cmd`) also posts the week announcement to the main
+-channel, and the web path has no webhook, so it would silently skip
+-it. Advancing main stays local; everything else about main works on
+-the web. 1-Star and 3-Star can be both scored and advanced, since
+-neither has a webhook to miss.
++**All three leagues can be scored and advanced from the web.** A code
++listing `main`, `1star` or `3star` can do both for that league. An
++advance from the web posts the Discord week announcement itself — the
++same message `advance.cmd` posts locally — so main is no longer held
++back. This depends on the `DISCORD_CONFIG` secret being set (step 4a
++below); without it an advance still updates the site but posts
++nothing.
+ 
+ ### If you'd rather do it by hand
+ 
+@@ -224,23 +222,48 @@
+ **token** leaked rather than a code, delete it on GitHub and issue a
+ new one — that's the credential that actually matters.
+ 
+-## Adding Discord announcements later
++## Discord announcements (the `DISCORD_CONFIG` secret)
+ 
+-Neither of these leagues has a webhook configured, so an advance
+-through the admin page updates the site and posts nothing. When one
+-wants announcements:
+-
+-1. Add the webhook URL as a Worker secret (not to `tools/config.json`
+-   — that file is gitignored and the workflow runner never sees it)
+-2. Pass it into the workflow as a repository secret instead, and have
+-   `doAdvance()` in `tools/apply.js` call `advance.js`'s
+-   `buildMessage()` and post it
+-
+-`advance.js` already exports `buildMessage` for this. The mention
+-logic, the 2000-character ceiling and the allowlist all come along
+-with it — see the mentions section of `tools/README.md`, which is
+-still the authoritative explanation of why pings live in the message
+-body rather than the embed.
++An advance through the admin page posts the week announcement to that
++league's Discord channel — the same message `advance.cmd` posts
++locally, with the same per-coach pings. This is already wired into the
++code (`doAdvance()` in `tools/apply.js` calls `advance.js`'s
++`buildMessage()` and `post()`); the one thing it needs is the webhooks
++and coach IDs, which live in `tools/config.json`. That file is
++gitignored — the workflow runner never sees it from a checkout — so it
++is handed to the runner through a **GitHub repository secret** instead.
++
++**One-time setup (~2 minutes):**
++
++1. GitHub → the repo → **Settings** → **Secrets and variables** →
++   **Actions** → **New repository secret**
++2. Name: `DISCORD_CONFIG`
++3. Value: paste the **entire contents of `tools/config.json`** — the
++   whole file, exactly as it is on your machine (webhooks, coach IDs
++   and all). One secret carries everything.
++4. **Add secret.**
++
++That's it. The **League update** workflow writes this secret back to
++`tools/config.json` on the runner before `apply.js` runs, so the web
++advance resolves webhooks and pings identically to a local one.
++
++**When you change `tools/config.json`** — a new webhook, a coach ID,
++a new member — update the `DISCORD_CONFIG` secret with the new file
++contents too, or the web path keeps using the old config. (Local
++advances read the file directly and are always current.)
++
++**If the secret is unset,** an advance still updates the site; it just
++posts nothing and says so in the Actions run. No error, no lost
++advance.
++
++**Taking one league off posting** without touching the others: blank
++that league's `webhookUrl` in the config (and re-save the secret).
++`apply.js` then advances the site for it and skips only its post.
++
++The mention logic, the 2000-character ceiling and the allowlist all
++come from `advance.js`'s `buildMessage`, shared with the local tool —
++see the mentions section of `tools/README.md` for why pings live in
++the message body rather than the embed.
+ 
+ ## Turning it off
+ 
+
+############################################################
+## tools/README.md
+############################################################
+--- a/tools/README.md
++++ b/tools/README.md
+@@ -329,12 +329,14 @@
+ What it adds is validation, because its input arrives from the
+ internet rather than from you:
+ 
+-- **Per-action league allow-lists, hardcoded.** `SCORE_LEAGUES`
+-  (`1star`, `3star`, `main`) and `ADVANCE_LEAGUES` (`1star`, `3star`)
+-  are checked against the action. So main scores go through, but a
+-  main *advance* is refused however the payload got here — advancing
+-  main locally posts the Discord announcement the web path can't, so
+-  it stays a local-only action.
++- **Per-action league allow-lists, hardcoded.** `SCORE_LEAGUES` and
++  `ADVANCE_LEAGUES` (both `1star`, `3star`, `main`) are checked against
++  the action. All three leagues can be scored and advanced from the
++  web; a web advance posts the Discord announcement itself, through the
++  same `buildMessage`/`post` the local tool uses, with the webhooks and
++  coach IDs supplied to the runner by the `DISCORD_CONFIG` repo secret.
++  The two lists are kept separate so a league can be made scores-only
++  again by dropping it from `ADVANCE_LEAGUES` alone.
+ - Week must be a whole number 0–15, at most 40 entries per
+   submission, team names capped in length.
+ - Deadline and status text is checked against a character allowlist.
+

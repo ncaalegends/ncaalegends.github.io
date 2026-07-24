@@ -51,10 +51,28 @@ const {
   buildWeek,
   weekLabel,
   top25GateError,
-  loadConfig,
 } = require("./lib/league");
 const { applyScores, parseSet, scoreableGames } = require("./scores");
 const { updateSeason, buildMessage, post, webhookUrl } = require("./advance");
+
+/* Read tools/config.json (which on the Actions runner IS the
+   DISCORD_CONFIG secret, written there by the workflow) WITHOUT the
+   hard-exit that lib/league's loadConfig() does on bad JSON. Returns
+   null on a missing or unparseable file so the caller can degrade to
+   "advanced, didn't announce" instead of failing the whole advance.
+   The local advance.js path keeps using loadConfig() and its clean
+   error, since a broken config there is worth stopping for. */
+function loadDiscordConfig() {
+  const file = path.join(__dirname, "config.json");
+  if (!fs.existsSync(file)) return null;
+  try {
+    return JSON.parse(fs.readFileSync(file, "utf8"));
+  } catch (e) {
+    console.error(`  WARNING: tools/config.json is not valid JSON — ${e.message}`);
+    console.error("  Check the DISCORD_CONFIG repo secret. Advancing without announcing.");
+    return null;
+  }
+}
 
 /* ------------------------------------------------------------
    LIMITS
@@ -307,16 +325,21 @@ async function doAdvance(p, L) {
    is visible in the Actions run, whatever happened.
    ------------------------------------------------------------ */
 async function announce(p, L, data, wk, next) {
-  const cfg = loadConfig();
-  const url = webhookUrl(cfg, L.slug);
+  /* Read the config defensively rather than through loadConfig(), which
+     hard-exits on bad JSON. On the runner this file IS the DISCORD_CONFIG
+     secret, and a typo in that secret must not fail the advance — same
+     rule as a failed post below. A missing or unparseable config just
+     means "don't announce", never "lose the advance". */
+  const cfg = loadDiscordConfig();
+  const url = cfg ? webhookUrl(cfg, L.slug) : "";
 
   if (!url) {
-    /* No webhook on the runner — usually the DISCORD_CONFIG secret
-       isn't set yet. The advance itself is fine; only the ping is
-       missing, so say so and move on rather than failing. */
+    /* No usable webhook on the runner — the DISCORD_CONFIG secret isn't
+       set, is unreadable, or has no URL for this league. The advance
+       itself is fine; only the ping is missing, so say so and move on. */
     console.log(
       `  no Discord webhook for "${L.slug}" on the runner — advanced without announcing. ` +
-        `Set the DISCORD_CONFIG repo secret to enable it (see worker/ADMIN-SETUP.md).`
+        `Check the DISCORD_CONFIG repo secret (see worker/ADMIN-SETUP.md).`
     );
     return { note: " — NOT announced (no webhook on runner)" };
   }
