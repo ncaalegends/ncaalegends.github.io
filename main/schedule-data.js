@@ -366,7 +366,7 @@ const TEAM_SCHEDULES = [
     conference: "Big 12",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "Georgia Tech", location: "at", stadium: "Bobby Dodd Stadium" },
+      { week: 1, opponent: "Georgia Tech", location: "at", stadium: "Bobby Dodd Stadium", teamScore: 40, opponentScore: 28 },
       { week: 2, opponent: "FCS Midwest", location: "vs", stadium: "Folsom Field" },
       { week: 3, opponent: "Northwestern", location: "at", stadium: "Ryan Field" },
       { week: 4, opponent: "Baylor", location: "at", stadium: "McLane Stadium" },
