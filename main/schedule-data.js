@@ -503,7 +503,7 @@ const TEAM_SCHEDULES = [
     conference: "SEC",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "UTEP", location: "vs", stadium: "Gaylord Family Oklahoma Memorial Stadium" },
+      { week: 1, opponent: "UTEP", location: "vs", stadium: "Gaylord Family Oklahoma Memorial Stadium", teamScore: 27, opponentScore: 7 },
       { week: 2, opponent: "Michigan", location: "at", stadium: "Michigan Stadium" },
       { week: 3, opponent: "New Mexico", location: "vs", stadium: "Gaylord Family Oklahoma Memorial Stadium" },
       { week: 4, opponent: "Georgia", location: "at", stadium: "Sanford Stadium" },
