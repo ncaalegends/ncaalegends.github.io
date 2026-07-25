@@ -175,7 +175,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, opponent: "Missouri State", location: "vs", teamScore: 31, opponentScore: 28 },
       { week: 1, opponent: "James Madison", location: "at", teamScore: 7, opponentScore: 28 },
-      { week: 2, opponent: "FCS East", location: "vs" },
+      { week: 2, opponent: "FCS East", location: "vs", teamScore: 7, opponentScore: 27 },
       { week: 3, opponent: "New Glarus", location: "vs" },
       { week: 4, opponent: "Coastal Carolina", location: "at" },
       { week: 5, opponent: "Delaware", location: "at" },
