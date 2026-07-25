@@ -60,7 +60,7 @@ const TEAM_SCHEDULES = [
     conference: "Sun Belt",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "FCS Southeast", location: "vs" },
+      { week: 1, opponent: "FCS Southeast", location: "vs", teamScore: 38, opponentScore: 10 },
       { week: 2, opponent: "Tulane", location: "at" },
       { week: 3, opponent: "Ohio", location: "vs" },
       { week: 4, opponent: "North Shore", location: "at" },
@@ -196,7 +196,7 @@ const TEAM_SCHEDULES = [
     conference: "CUSA",
     weeks: [
       { week: 0, opponent: "Kennesaw State", location: "vs", teamScore: 24, opponentScore: 6 },
-      { week: 1, opponent: "USF", location: "at" },
+      { week: 1, opponent: "USF", location: "at", teamScore: 26, opponentScore: 21 },
       { week: 2, opponent: "Dillon", location: "vs" },
       { week: 3, opponent: "Florida Atlantic", location: "at" },
       { week: 4, opponent: "FCS Southeast", location: "vs" },
