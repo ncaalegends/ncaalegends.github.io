@@ -388,7 +388,7 @@ const TEAM_SCHEDULES = [
     conference: "ACC",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "Akron", location: "vs", stadium: "Allegacy Federal Credit Union Stadium" },
+      { week: 1, opponent: "Akron", location: "vs", stadium: "Allegacy Federal Credit Union Stadium", teamScore: 38, opponentScore: 24 },
       { week: 2, opponent: "Purdue", location: "at", stadium: "Ross-Ade Stadium" },
       { week: 3, opponent: "Miami", location: "vs", stadium: "Allegacy Federal Credit Union Stadium" },
       { week: 4, opponent: "Louisville", location: "at", stadium: "L&N Stadium" },
