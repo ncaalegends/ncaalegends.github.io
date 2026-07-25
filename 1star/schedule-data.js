@@ -106,7 +106,7 @@ const TEAM_SCHEDULES = [
     conference: "MAC",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "South Carolina", location: "at" },
+      { week: 1, opponent: "South Carolina", location: "at", teamScore: 13, opponentScore: 10 },
       { week: 2, opponent: "FCS Midwest", location: "vs" },
       { week: 3, opponent: "Boise State", location: "at" },
       { week: 4, opponent: "New Glarus", location: "vs" },
