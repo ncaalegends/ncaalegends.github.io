@@ -25,17 +25,17 @@
    scheduling deadline for coaches, not part of season chronology.
    ------------------------------------------------------------ */
 const SEASON = {
-  currentWeek: 1,
+  currentWeek: 2,
 
   // Shown in the hero. Update as the league moves through phases.
-  statusLine: "WEEK 1",
+  statusLine: "WEEK 2",
 
   /* ADVANCE DEADLINE — the one place real-world time appears.
      League rule: the next advance happens no later than 6:00 PM EDT
      three days after the last advance. Update this every time you
      advance; it's plain text, so write it however reads best.
      Set it to "" to hide the countdown line entirely. */
-  nextAdvance: "Saturday, July 25 - 6:00 PM EDT",
+  nextAdvance: "Tuesday, July 28 - 6:00 PM EDT",
 };
 
 /* ------------------------------------------------------------
