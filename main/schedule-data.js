@@ -37,7 +37,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "UCLA", location: "vs", stadium: "California Memorial Stadium", teamScore: 22, opponentScore: 9 },
-      { week: 2, opponent: "Syracuse", location: "at", stadium: "JMA Wireless Dome" },
+      { week: 2, opponent: "Syracuse", location: "at", stadium: "JMA Wireless Dome", teamScore: 38, opponentScore: 17 },
       { week: 3, opponent: "FCS West", location: "vs", stadium: "California Memorial Stadium" },
       { week: 4, opponent: "Clemson", location: "vs", stadium: "California Memorial Stadium" },
       { week: 5, opponent: "UNLV", location: "at", stadium: "Allegiant Stadium" },
@@ -81,7 +81,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "LSU", location: "at", stadium: "Tiger Stadium", teamScore: 21, opponentScore: 37 },
-      { week: 2, opponent: "Ga Southern", location: "vs", stadium: "Clemson Memorial Stadium" },
+      { week: 2, opponent: "Ga Southern", location: "vs", stadium: "Clemson Memorial Stadium", teamScore: 37, opponentScore: 17 },
       { week: 3, opponent: "North Carolina", location: "vs", stadium: "Clemson Memorial Stadium" },
       { week: 4, opponent: "California", location: "at", stadium: "California Memorial Stadium" },
       { week: 5, opponent: "Miami", location: "vs", stadium: "Clemson Memorial Stadium" },
@@ -482,7 +482,7 @@ const TEAM_SCHEDULES = [
       // Neutral site - listed "vs" in-game but played at Nissan Stadium
       // in Nashville, not Vaught-Hemingway.
       { week: 1, opponent: "Louisville", location: "vs", stadium: "Nissan Stadium", teamScore: 47, opponentScore: 17 },
-      { week: 2, opponent: "Charlotte", location: "vs", stadium: "Vaught-Hemingway Stadium" },
+      { week: 2, opponent: "Charlotte", location: "vs", stadium: "Vaught-Hemingway Stadium", teamScore: 80, opponentScore: 0 },
       { week: 3, opponent: "LSU", location: "vs", stadium: "Vaught-Hemingway Stadium" },
       { week: 4, opponent: "Florida", location: "at", stadium: "Ben Hill Griffin Stadium" },
       { week: 5, note: "BYE" },
