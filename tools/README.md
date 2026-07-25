@@ -249,6 +249,115 @@ with `preview.cmd`, then:
 git add -A && git commit -m "Week 4 scores" && git push
 ```
 
+## top25.js
+
+Writes a week's in-game Top 25 into `top25-data.js`.
+
+```
+node tools/top25.js --week 5 --file poll.txt
+node tools/top25.js --week 5 --stdin < poll.txt
+node tools/top25.js --week 5 --file poll.txt --dry-run
+```
+
+**Why this exists:** the poll arrives as a screenshot, so somebody has
+to read 25 rows off an image — that part can't be automated. Everything
+after it can. Counting to 25, catching a doubled rank, spotting
+`Ole Mis` where `Ole Miss` was meant, and appending a block to a
+documented data file without disturbing the comments around it are all
+mechanical, and all easy to get wrong by hand at 11pm.
+
+So the split is deliberate: whoever reads the screenshot produces plain
+lines and hands them over. Nothing that reads an image edits the file.
+
+### Input format
+
+One team per line, best to worst:
+
+```
+1 Ohio State 2-0
+2 Oregon 2-0
+3. Notre Dame 1-1
+```
+
+Rank, team, record. A leading `1.` or `1)` is fine, extra whitespace is
+fine, blank lines and a `Rank Team Record` header row are ignored. The
+record is the trailing W-L and the rank is the leading number, so the
+team is whatever's in between — which is why `Texas A&M` and
+`Miami (OH)` need no escaping.
+
+### Flags
+
+| Flag | Meaning |
+|---|---|
+| `--league SLUG` | `main` \| `3star` \| `1star`. Defaults to main. |
+| `--week N` | Week this poll is for, 1–15. Required. |
+| `--file PATH` | Read the lines from a file. |
+| `--stdin` | Read the lines from standard input. |
+| `--dry-run` | Print the block and every check. Write nothing. |
+| `--allow-new` | Accept a team the league has never referenced. |
+| `--force` | Overwrite a week that already exists. See below. |
+
+### Guardrails
+
+Everything here fails loudly rather than writing something wrong:
+
+- fewer or more than 25 rows, naming exactly which ranks are missing or
+  doubled
+- the same school twice
+- a line that doesn't parse, quoted by line number
+- a record that isn't `W-L`
+- a week outside 1–15, or one that already exists
+
+The name check is the one worth explaining, because two situations look
+identical in the input and must not be treated the same. `Ole Mis` is a
+misread — one edit away from a name that's all over the league data, so
+it **blocks** and suggests the correction. `Cincinnati`, a school that
+genuinely wasn't in the poll before and isn't on anyone's schedule, is
+**legitimate** and will happen most weeks; it warns and asks for
+`--allow-new`. Edit distance is what tells them apart. Blocking on the
+first and waving through the second is the difference between a check
+that gets read and one that gets reflexively `--force`d.
+
+It also prints week-over-week movement, and flags any team that moved
+12 or more spots as worth a second look at the screenshot. That's
+advisory — the site computes the same arrows itself — but a
+transcription error usually shows up there first.
+
+### Never re-enter a week
+
+Each week's poll is frozen history. The `#N` badges on every week-5
+game read from week 5's block, so editing it in October silently
+rewrites what those games say they were at the time. The script refuses
+a week that already exists; `--force` is there for fixing a
+transcription the same night, before anyone's seen it, and nothing else.
+
+### Order of operations
+
+The site shows the poll for `SEASON.currentWeek`, so a block written
+here for a week you haven't advanced to sits in the repo invisible. It
+appears the moment you advance — and the advance gate in
+`lib/league.js` refuses to advance to week N until week N's poll is in
+the file.
+
+That's a deliberate loop, not two separate chores:
+
+```
+node tools/top25.js --week 5 --file poll.txt     # silent
+git add -A && git commit -m "Week 5 Top 25" && git push
+node tools/advance.js --week 5 --next "..."      # poll + week + Discord together
+```
+
+Like the other tools, it edits one file and never commits.
+
+### From a screenshot, without typing
+
+There's a Cowork skill — **top25-upload** — that does the reading step:
+hand it the screenshot and a week number, it transcribes to the line
+format above and runs this script. It's written to be followable by a
+cheap model, because transcription is the only thing it does; every
+judgement stays here. It won't commit, won't advance, and won't pass
+`--force` on its own.
+
 ## find-tools.cmd
 
 Not something you run. `advance.cmd`, `scores.cmd` and `preview.cmd`

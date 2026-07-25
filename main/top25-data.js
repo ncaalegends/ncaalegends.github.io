@@ -32,11 +32,16 @@
    same motion as the new week and the Discord announcement.
 
    HOW TO ADD A WEEK
-   Screenshot the in-game Top 25 for the week, then append a new
-   block below following the same shape. Team names should match the
-   roster / schedule spelling (the site resolves them the same way,
-   through SCHEDULE_TEAM_ALIASES, so "Cal" vs "California" etc. still
-   line up). `record` is whatever the poll shows next to the team.
+   Screenshot the in-game Top 25 for the week, then either run
+   `node tools/top25.js --week N --file poll.txt` (see tools/README.md)
+   or append a new block below by hand, following the same shape. The
+   tool is preferred — it counts to 25, catches a doubled rank, and
+   won't let you quietly overwrite a week that's already history.
+
+   Team names should match the roster / schedule spelling (the site
+   resolves them the same way, through SCHEDULE_TEAM_ALIASES, so "Cal"
+   vs "California" etc. still line up). `record` is whatever the poll
+   shows next to the team.
 
      { rank, team, record }
        rank    1 = best, 1..25
