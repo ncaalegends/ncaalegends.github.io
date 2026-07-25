@@ -190,7 +190,7 @@ const TEAM_SCHEDULES = [
     conference: "Big Ten",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "Washington St.", location: "vs", stadium: "Husky Stadium" },
+      { week: 1, opponent: "Washington St.", location: "vs", stadium: "Husky Stadium", teamScore: 38, opponentScore: 28 },
       { week: 2, opponent: "Utah State", location: "vs", stadium: "Husky Stadium" },
       { week: 3, opponent: "FCS Northwest", location: "vs", stadium: "Husky Stadium" },
       { week: 4, opponent: "Minnesota", location: "vs", stadium: "Husky Stadium" },
