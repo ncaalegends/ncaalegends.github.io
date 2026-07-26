@@ -1184,11 +1184,16 @@ function renderRoster() {
    why their 63-0 win over an FCS team isn't in the total.
    ============================================================ */
 
-/* Two games is the floor for a rate stat. One game producing "avg
-   margin +10.0" is true and worthless, and it makes the card look
-   like it's padding. Records and totals have no floor — 1-0 is a
-   real fact. */
-const MIN_GAMES_FOR_RATE_STATS = 2;
+/* Two games is the floor for an AVERAGE. "Avg margin +13.0" off a
+   single result states a typical performance inferred from a sample
+   of one — true arithmetic, misleading claim.
+
+   Counts get no floor, because they make no such claim. A record of
+   1-0, a points total of 22, and a streak of W1 are each just a fact
+   about what happened. Streak in particular was gated here at first
+   and shouldn't have been: "W1" means "won their last game", which is
+   exactly as sound after one game as after ten. */
+const MIN_GAMES_FOR_AVERAGES = 2;
 
 /* Computed on first open and kept. The whole career is derived from
    files already in memory, so this is fast, but it runs once per
@@ -1232,7 +1237,7 @@ function coachCareerFor(name) {
 
   const pf = played.reduce((s, m) => s + m.pf, 0);
   const pa = played.reduce((s, m) => s + m.pa, 0);
-  const enough = played.length >= MIN_GAMES_FOR_RATE_STATS;
+  const enoughForAverages = played.length >= MIN_GAMES_FOR_AVERAGES;
 
   /* Streak walks the timeline newest-first and stops at the first
      result that breaks it. Meetings inside an opponent are already
@@ -1262,8 +1267,8 @@ function coachCareerFor(name) {
     playedGames: played.length,
     pf,
     pa,
-    avgMargin: enough ? (pf - pa) / played.length : null,
-    streak: enough ? streak : null,
+    avgMargin: enoughForAverages ? (pf - pa) / played.length : null,
+    streak, // a count, shown from the first game — see the note above
     seasons: seasons.size || (CAREER.length ? 1 : 0),
     opponents: h2h ? h2h.opponents : [],
     rank,
