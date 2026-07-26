@@ -1428,7 +1428,13 @@ function coachModalHtml(coach) {
       }</span>
       ${
         url
-          ? `<a class="cm-twitch" href="${esc(url)}" target="_blank" rel="noopener noreferrer">Watch on Twitch &rarr;</a>`
+          ? /* Same .twitch-link the roster cards use — one button, one
+               rule. It briefly had its own .cm-twitch style here, which
+               was a quieter text link; two treatments of the same
+               action is exactly the drift worth avoiding. The card-only
+               layout bits live under `.roster-card .twitch-link`, so
+               nothing leaks in the other direction. */
+            `<a class="twitch-link" href="${esc(url)}" target="_blank" rel="noopener noreferrer">Watch on Twitch &rarr;</a>`
           : ""
       }
     </div>`;

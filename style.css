@@ -1679,13 +1679,11 @@ main {
   padding-top: 12px;
 }
 .cm-next { font-family: var(--font-mono); font-size: 0.72rem; color: var(--steel); }
-.cm-twitch {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  color: var(--twitch);
-  text-decoration: none;
-}
-.cm-twitch:hover { color: var(--twitch-bright); }
+
+/* The Watch button in the footer is the roster card's .twitch-link,
+   unchanged — see the note where it's rendered in script.js. No
+   modal-specific rule for it on purpose: the moment there are two,
+   they start drifting. */
 
 /* Full-screen sheet on phones. The notch is dropped with it — a
    diagonal cut on a full-bleed sheet just looks like a rendering
