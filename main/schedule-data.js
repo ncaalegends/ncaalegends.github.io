@@ -323,7 +323,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "W. Michigan", location: "vs", stadium: "Michigan Stadium", teamScore: 42, opponentScore: 17 },
-      { week: 2, opponent: "Oklahoma", location: "vs", stadium: "Michigan Stadium" },
+      { week: 2, opponent: "Oklahoma", location: "vs", stadium: "Michigan Stadium", teamScore: 24, opponentScore: 14 },
       { week: 3, opponent: "UTEP", location: "vs", stadium: "Michigan Stadium" },
       { week: 4, opponent: "Iowa", location: "vs", stadium: "Michigan Stadium" },
       { week: 5, opponent: "Minnesota", location: "at", stadium: "Huntington Bank Stadium" },
@@ -504,7 +504,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "UTEP", location: "vs", stadium: "Gaylord Family Oklahoma Memorial Stadium", teamScore: 27, opponentScore: 7 },
-      { week: 2, opponent: "Michigan", location: "at", stadium: "Michigan Stadium" },
+      { week: 2, opponent: "Michigan", location: "at", stadium: "Michigan Stadium", teamScore: 14, opponentScore: 24 },
       { week: 3, opponent: "New Mexico", location: "vs", stadium: "Gaylord Family Oklahoma Memorial Stadium" },
       { week: 4, opponent: "Georgia", location: "at", stadium: "Sanford Stadium" },
       { week: 5, note: "BYE" },
