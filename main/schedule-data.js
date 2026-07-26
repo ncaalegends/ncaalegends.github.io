@@ -345,7 +345,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "Coastal Carolina", location: "vs", stadium: "Milan Puskar Stadium", teamScore: 55, opponentScore: 14 },
-      { week: 2, opponent: "FCS East", location: "vs", stadium: "Milan Puskar Stadium" },
+      { week: 2, opponent: "FCS East", location: "vs", stadium: "Milan Puskar Stadium", teamScore: 62, opponentScore: 21 },
       { week: 3, opponent: "Virginia", location: "vs", stadium: "Bank of America Stadium" },
       { week: 4, opponent: "Oklahoma State", location: "vs", stadium: "Milan Puskar Stadium" },
       { week: 5, opponent: "Iowa State", location: "at", stadium: "Jack Trice Stadium" },
