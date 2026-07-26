@@ -83,7 +83,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "FCS Southeast", location: "vs", teamScore: 31, opponentScore: 7 },
-      { week: 2, opponent: "Wawa University", location: "at" },
+      { week: 2, opponent: "Wawa University", location: "at", teamScore: 30, opponentScore: 15 },
       { week: 3, opponent: "Jacksonville State", location: "at" },
       { week: 4, opponent: "Houston", location: "vs" },
       { week: 5, opponent: "Coastal Carolina", location: "at" },
@@ -129,7 +129,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "Westeros", location: "vs", teamScore: 34, opponentScore: 29 },
-      { week: 2, opponent: "FCS Midwest", location: "vs" },
+      { week: 2, opponent: "FCS Midwest", location: "vs", teamScore: 49, opponentScore: 20 },
       { week: 3, opponent: "Patriot Tech", location: "at" },
       { week: 4, opponent: "Minneapolis", location: "at" },
       { week: 5, opponent: "Toledo", location: "vs" },
@@ -197,7 +197,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, opponent: "Kennesaw State", location: "vs", teamScore: 24, opponentScore: 6 },
       { week: 1, opponent: "USF", location: "at", teamScore: 26, opponentScore: 21 },
-      { week: 2, opponent: "Dillon", location: "vs" },
+      { week: 2, opponent: "Dillon", location: "vs", teamScore: 15, opponentScore: 30 },
       { week: 3, opponent: "Florida Atlantic", location: "at" },
       { week: 4, opponent: "FCS Southeast", location: "vs" },
       { week: 5, opponent: "Jacksonville State", location: "at" },
