@@ -341,7 +341,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, opponent: "Jacksonville State", location: "vs", teamScore: 40, opponentScore: 14 },
       { week: 1, opponent: "Oklahoma", location: "vs", teamScore: 48, opponentScore: 17 },
-      { week: 2, opponent: "Georgia", location: "vs" },
+      { week: 2, opponent: "Georgia", location: "vs", teamScore: 31, opponentScore: 51 },
       { week: 3, opponent: "FCS Northwest", location: "vs" },
       { week: 4, opponent: "North Texas", location: "at" },
       { week: 5, opponent: "Texas", location: "vs" },
