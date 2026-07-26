@@ -455,7 +455,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "Wisconsin", location: "vs", stadium: "Notre Dame Stadium", teamScore: 44, opponentScore: 14 },
-      { week: 2, opponent: "Rice", location: "vs", stadium: "Notre Dame Stadium" },
+      { week: 2, opponent: "Rice", location: "vs", stadium: "Notre Dame Stadium", teamScore: 69, opponentScore: 17 },
       { week: 3, opponent: "Michigan State", location: "vs", stadium: "Notre Dame Stadium" },
       { week: 4, opponent: "Purdue", location: "at", stadium: "Ross-Ade Stadium" },
       { week: 5, opponent: "North Carolina", location: "at", stadium: "Kenan Stadium" },
