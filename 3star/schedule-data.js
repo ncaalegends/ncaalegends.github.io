@@ -139,7 +139,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, opponent: "Marshall", location: "vs", teamScore: 38, opponentScore: 10 },
       { week: 1, opponent: "FCS East", location: "vs", teamScore: 73, opponentScore: 3 },
-      { week: 2, opponent: "Utah", location: "vs" },
+      { week: 2, opponent: "Utah", location: "vs", teamScore: 45, opponentScore: 28 },
       { week: 3, note: "BYE" },
       { week: 4, opponent: "UCLA", location: "vs" },
       { week: 5, opponent: "Nebraska", location: "at" },
