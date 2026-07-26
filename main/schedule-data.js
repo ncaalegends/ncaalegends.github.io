@@ -191,7 +191,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "Washington St.", location: "vs", stadium: "Husky Stadium", teamScore: 38, opponentScore: 28 },
-      { week: 2, opponent: "Utah State", location: "vs", stadium: "Husky Stadium" },
+      { week: 2, opponent: "Utah State", location: "vs", stadium: "Husky Stadium", teamScore: 48, opponentScore: 20 },
       { week: 3, opponent: "FCS Northwest", location: "vs", stadium: "Husky Stadium" },
       { week: 4, opponent: "Minnesota", location: "vs", stadium: "Husky Stadium" },
       { week: 5, opponent: "USC", location: "at", stadium: "Los Angeles Memorial Coliseum" },
@@ -433,7 +433,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "Stanford", location: "at", stadium: "Stanford Stadium", teamScore: 30, opponentScore: 23 },
-      { week: 2, opponent: "FCS Southeast", location: "vs", stadium: "Hard Rock Stadium" },
+      { week: 2, opponent: "FCS Southeast", location: "vs", stadium: "Hard Rock Stadium", teamScore: 37, opponentScore: 3 },
       { week: 3, opponent: "Wake Forest", location: "at", stadium: "Allegacy Federal Credit Union Stadium" },
       { week: 4, opponent: "C. Michigan", location: "vs", stadium: "Hard Rock Stadium" },
       { week: 5, opponent: "Clemson", location: "at", stadium: "Clemson Memorial Stadium" },
