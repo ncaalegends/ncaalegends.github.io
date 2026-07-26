@@ -1260,7 +1260,14 @@ main {
   margin-top: 10px;
 }
 
-.roster-card .r-conf {
+/* The conference chip. Deliberately NOT scoped to .roster-card: the
+   coach modal shows the same chip in its header, and scoping it here
+   is what made it render as bare text there. One rule, both places —
+   the alternative is two chips that drift apart.
+
+   Sits next to .live-badge, which is already unscoped for the same
+   reason. Matching that is why the two line up. */
+.r-conf {
   font-family: var(--font-mono);
   font-size: 0.62rem;
   font-weight: 700;
@@ -1454,6 +1461,248 @@ main {
 .roster-card.is-live:hover {
   box-shadow: inset 0 0 0 2px rgba(224, 43, 60, 0.75),
               0 6px 20px rgba(0, 0, 0, 0.35);
+}
+
+/* ============================================================
+   COACH CARD MODAL
+   ------------------------------------------------------------
+   Opened by clicking a roster card. Built on native <dialog>, so
+   focus trapping, background inertness and Escape all come from the
+   browser rather than from JS.
+   ============================================================ */
+
+/* THE WHOLE CARD IS A CLICK TARGET, without the card being a button.
+   A roster card contains the Twitch anchor, and an <a> inside a
+   <button> is invalid HTML. So the button is stretched behind the
+   card's contents instead, and the Twitch link is lifted above it. */
+.roster-card { position: relative; }
+
+.r-open {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  appearance: none;
+  border: 0;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+  /* No visible box of its own — the card is the affordance. */
+  font: inherit;
+  color: inherit;
+}
+
+/* Above the full-bleed button so "Watch on Twitch" still goes to
+   Twitch. Everything else on the card falls through to the button. */
+.roster-card .twitch-link { position: relative; z-index: 2; }
+
+/* The focus ring belongs on the CARD, not on the invisible button —
+   a ring drawn around a zero-content button would sit in the wrong
+   place and be clipped by the card's notched corner. */
+.r-open:focus { outline: none; }
+.r-open:focus-visible { outline: none; }
+.roster-card:has(.r-open:focus-visible) {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.coach-modal {
+  width: min(600px, calc(100vw - 32px));
+  max-height: min(88vh, 900px);
+  padding: 0;
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--team, var(--gold));
+  background: var(--navy-panel);
+  color: var(--chalk);
+  overflow: auto;
+  /* Same notched geometry as every other panel on the site. */
+  clip-path: polygon(var(--cut) 0, 100% 0, 100% calc(100% - var(--cut)),
+                     calc(100% - var(--cut)) 100%, 0 100%, 0 var(--cut));
+}
+
+.coach-modal::backdrop {
+  background: rgba(6, 11, 22, 0.82);
+  backdrop-filter: blur(3px);
+}
+
+.cm-body { padding: 20px 22px 22px; }
+
+/* --- header --- */
+.cm-head { display: flex; align-items: flex-start; gap: 14px; }
+.cm-head .team-mark {
+  box-shadow: 0 0 0 3px var(--team), 0 0 0 4px rgba(6, 11, 22, 0.55);
+  flex: none;
+}
+.cm-id { flex: 1; min-width: 0; }
+.cm-team {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  margin: 0;
+  line-height: 1.2;
+}
+.cm-coach { font-size: 0.85rem; color: var(--steel); margin: 2px 0 0; }
+.cm-head-meta { display: flex; align-items: center; gap: 8px; flex: none; }
+
+.cm-close {
+  appearance: none;
+  background: none;
+  border: 0;
+  color: var(--steel);
+  font-size: 1.5rem;
+  line-height: 1;
+  padding: 0 2px;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+.cm-close:hover { color: var(--chalk); }
+
+/* --- achievements ---
+   Rendered only when a coach has at least one. An empty trophy row
+   reads as a failure state, so there isn't one. */
+.cm-achievements { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+.cm-ach {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  padding: 4px 9px;
+}
+/* Dark text on the light chip, per the site's contrast rule — these
+   are the only light-background elements on the page. */
+.cm-ach-nat  { background: #fac775; color: #412402; }
+.cm-ach-conf { background: #9fe1cb; color: #04342c; }
+.cm-ach-cfp  { background: #b5d4f4; color: #042c53; }
+
+/* --- stat grid ---
+   1px gap over a lined background draws the hairlines, so no
+   per-tile borders to keep aligned. */
+.cm-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--line);
+  margin-top: 16px;
+}
+.cm-stat { background: var(--navy); padding: 11px 10px; }
+.cm-stat-label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.63rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--steel);
+}
+.cm-stat-value {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 1.3rem;
+  margin-top: 3px;
+}
+.cm-stat-value.gold { color: var(--gold); }
+.cm-stat-value.win  { color: var(--win); }
+.cm-stat-value.loss { color: var(--crimson); }
+/* Muted, not hidden: the tile keeps its slot so the grid never
+   reflows between one coach and the next. steel, never steel-dim —
+   that token is for borders only. */
+.cm-stat-value.is-empty { color: var(--steel); }
+
+/* --- head-to-head list --- */
+.cm-section {
+  font-family: var(--font-mono);
+  font-size: 0.63rem;
+  font-weight: 400;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--steel);
+  margin: 18px 0 0;
+}
+.cm-list { list-style: none; margin: 7px 0 0; padding: 0; }
+.cm-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+  border-top: 1px solid var(--line);
+}
+.cm-row .team-mark { flex: none; }
+.cm-row-text { flex: 1; min-width: 0; }
+.cm-row-team {
+  display: block;
+  font-size: 0.85rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cm-row-coach { display: block; font-size: 0.72rem; color: var(--steel); }
+.cm-rec {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  flex: none;
+  min-width: 40px;
+  text-align: right;
+}
+.cm-rec.is-empty { color: var(--steel); }
+.cm-row-right {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--steel);
+  flex: none;
+  text-align: right;
+  min-width: 118px;
+}
+/* The W/L letter carries the result on its own — colour is a second
+   signal, never the only one. */
+.cm-res.win  { color: var(--win); }
+.cm-res.loss { color: var(--crimson); }
+.cm-sim {
+  border: 1px solid var(--line);
+  padding: 1px 4px;
+  font-size: 0.62rem;
+  color: var(--steel);
+}
+.cm-empty {
+  padding: 14px 0;
+  border-top: 1px solid var(--line);
+  font-size: 0.85rem;
+  color: var(--steel);
+}
+
+/* --- footer --- */
+.cm-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--line);
+  margin-top: 6px;
+  padding-top: 12px;
+}
+.cm-next { font-family: var(--font-mono); font-size: 0.72rem; color: var(--steel); }
+.cm-twitch {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--twitch);
+  text-decoration: none;
+}
+.cm-twitch:hover { color: var(--twitch-bright); }
+
+/* Full-screen sheet on phones. The notch is dropped with it — a
+   diagonal cut on a full-bleed sheet just looks like a rendering
+   fault. */
+@media (max-width: 640px) {
+  .coach-modal {
+    width: 100vw;
+    max-width: 100vw;
+    max-height: 100vh;
+    height: 100vh;
+    margin: 0;
+    clip-path: none;
+    border-left: 0;
+    border-right: 0;
+  }
+  .cm-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cm-row-right { min-width: 0; }
 }
 
 /* ============================================================
@@ -1919,6 +2168,7 @@ main {
   .live-dot { animation: none; }
   .live-now-dot { animation: none; }
   .game-card:hover, .roster-card:hover { transform: none; }
+  .coach-modal::backdrop { backdrop-filter: none; }
 }
 
 /* Focus visibility */

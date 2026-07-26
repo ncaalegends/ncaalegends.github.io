@@ -21,6 +21,10 @@
    line entirely rather than showing a stale deadline.
    ------------------------------------------------------------ */
 const SEASON = {
+  // In-game year for this season's data. See the long note in
+  // main/league-data.js — it governs the seasons/<year>/ archive.
+  year: 2026,
+
   currentWeek: 2,
   statusLine: "WEEK 2",
   nextAdvance: "Sunday, 26th",

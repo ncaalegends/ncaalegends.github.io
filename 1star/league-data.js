@@ -21,6 +21,10 @@
    for this league. Set it to "" to hide the badge entirely.
    ------------------------------------------------------------ */
 const SEASON = {
+  // In-game year for this season's data. See the long note in
+  // main/league-data.js — it governs the seasons/<year>/ archive.
+  year: 2026,
+
   currentWeek: 2,
   statusLine: "WEEK 2",
   nextAdvance: "Tuesday, July 28",

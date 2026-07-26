@@ -95,8 +95,81 @@ function resolveLeague(slug = "main") {
       // Optional: the in-game Top 25 poll, present only for leagues
       // that have started transcribing it (main first).
       top25: path.join(ROOT, meta.dir, "top25-data.js"),
+      // Optional: conference championships, CFP and bowls. Shape is
+      // documented at buildPostseason() in week-core.js.
+      postseason: path.join(ROOT, meta.dir, "postseason-data.js"),
     },
+    // Completed seasons live here, one folder per in-game year.
+    seasonsDir: path.join(ROOT, meta.dir, "seasons"),
   };
+}
+
+/* ------------------------------------------------------------
+   SEASON ARCHIVE
+   ------------------------------------------------------------
+   The folder a league sits in always holds the CURRENT season. When
+   a season finishes it moves wholesale into seasons/<year>/, keeping
+   the same filenames:
+
+     main/                     <- the season being played now
+       league-data.js
+       schedule-data.js
+       top25-data.js
+       postseason-data.js
+       seasons/
+         2026/
+           league-data.js      <- exactly the files above, frozen
+           schedule-data.js
+           top25-data.js
+           postseason-data.js
+
+   WHY WHOLE FILES AND NOT A DIFF. A season's roster is part of its
+   history: who coached which school in 2026 is the only way to render
+   a 2026 meeting correctly once someone has changed teams. Archiving
+   the schedule without the roster beside it would leave games whose
+   participants can't be resolved. The files are small and the
+   redundancy is the point — an archived season is readable on its own
+   forever, with no dependency on what the league looks like later.
+
+   THE ARCHIVE IS READ-ONLY. Nothing writes into seasons/ except the
+   rollover, and nothing in the live site edits it. A past season is
+   history in the same sense a Top 25 week is history: adding is fine,
+   editing is not.
+
+   Returns [{ year, data }] oldest first, with the current season
+   last — the order computeH2H expects, so its `throughWeek` option
+   applies to the season actually being played.
+   ------------------------------------------------------------ */
+function listArchivedYears(league) {
+  if (!fs.existsSync(league.seasonsDir)) return [];
+  return fs
+    .readdirSync(league.seasonsDir, { withFileTypes: true })
+    .filter((d) => d.isDirectory() && /^\d{4}$/.test(d.name))
+    .map((d) => Number(d.name))
+    .sort((a, b) => a - b);
+}
+
+function loadCareer(league) {
+  const out = [];
+
+  for (const year of listArchivedYears(league)) {
+    const dir = path.join(league.seasonsDir, String(year));
+    const data = loadData({
+      league: path.join(dir, "league-data.js"),
+      schedule: path.join(dir, "schedule-data.js"),
+      top25: path.join(dir, "top25-data.js"),
+      postseason: path.join(dir, "postseason-data.js"),
+    });
+    /* The folder name wins over the file's own SEASON.year. They
+       should agree; if they don't, the location on disk is the thing
+       a human can see and sort, so it's the tiebreak. */
+    data.SEASON = Object.assign({}, data.SEASON, { year });
+    out.push({ year, data });
+  }
+
+  const current = loadData(league.paths);
+  out.push({ year: (current.SEASON || {}).year ?? null, data: current });
+  return out;
 }
 
 /* ------------------------------------------------------------
@@ -130,6 +203,12 @@ function loadData(paths) {
   // top25-data.js is optional — only some leagues have a poll yet.
   if (paths.top25 && fs.existsSync(paths.top25)) run(paths.top25);
 
+  /* postseason-data.js is optional too, and absent everywhere today.
+     A season with no postseason block is a legitimate state (one
+     still being played, or one that ended before the file format
+     existed), not an error. */
+  if (paths.postseason && fs.existsSync(paths.postseason)) run(paths.postseason);
+
   return {
     SEASON: ctx.SEASON || {},
     COACHES: ctx.COACHES || [],
@@ -137,6 +216,7 @@ function loadData(paths) {
     ALIASES: ctx.SCHEDULE_TEAM_ALIASES || {},
     LEAGUE_INFO: ctx.LEAGUE_INFO || { name: "League" },
     TOP25: ctx.TOP25 || [],
+    POSTSEASON: ctx.POSTSEASON || null,
   };
 }
 
@@ -198,6 +278,8 @@ module.exports = {
   die,
   resolveLeague,
   loadData,
+  listArchivedYears,
+  loadCareer,
   parseWeek,
   loadConfig,
   top25GateError,
@@ -207,6 +289,12 @@ module.exports = {
      here or from week-core directly gets the same functions. */
   makeResolver: core.makeResolver,
   buildWeek: core.buildWeek,
+  buildPostseason: core.buildPostseason,
+  computeAchievements: core.computeAchievements,
+  seasonMeetings: core.seasonMeetings,
+  computeH2H: core.computeH2H,
+  auditScheduleSides: core.auditScheduleSides,
+  computeRankings: core.computeRankings,
   weekLabel: core.weekLabel,
   parseScore: core.parseScore,
   scoreableGames: core.scoreableGames,

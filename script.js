@@ -737,7 +737,61 @@ function renderRecentResults() {
    position between the two. RANKING_CONFIG (optional, in
    league-data.js) can retune the weights without touching this.
    ------------------------------------------------------------ */
-const RANKING_DATA = { COACHES: ROSTER, ALIASES, TEAM_SCHEDULES: SCHEDULES, TOP25: TOP25_DATA };
+/* RAW, deliberately — this hands week-core.js the unfiltered arrays and
+   lets it apply its own `active: false` rules, which is what it was built
+   to do (see the inactive-coach note in makeResolver).
+
+   It used to pass the already-filtered ROSTER and SCHEDULES. That looked
+   safer and was in fact weaker. makeResolver derives its inactiveKeys from
+   COACHES.filter(c => c.active === false) — hand it a list with the
+   inactive coaches already removed and that set is always empty, so
+   isInactiveTeam() never fires and buildWeek's skip is dead code. The only
+   thing still keeping Jake/Louisville's stale schedule block out was the
+   SCHEDULES filter on line 71, i.e. the redundant guard was carrying the
+   load while the real one was switched off.
+
+   Proof it mattered: filtered COACHES + UNFILTERED TEAM_SCHEDULES puts
+   Louisville back as a league opponent in weeks 1, 3, 4 and 6, generating
+   four matchups with an empty coach name. Nothing on the site does that
+   combination today, but the next caller would have had to know not to.
+
+   Verified byte-identical across all three leagues before and after this
+   change: every buildWeek result (league/cpu/notes/missing) for weeks
+   0-15, latestH2HWeek, and the full computeRankings output.
+
+   ROSTER and SCHEDULES are still the right handles for everything else in
+   this file — this is the one place that needs the raw arrays, because
+   it's the one place handing data to another module. */
+const RANKING_DATA = {
+  SEASON,
+  COACHES: ROSTER_RAW,
+  ALIASES,
+  TEAM_SCHEDULES: SCHEDULES_RAW,
+  TOP25: TOP25_DATA,
+  POSTSEASON: typeof POSTSEASON !== "undefined" ? POSTSEASON : null,
+  CFP_POLL: typeof CFP_POLL !== "undefined" ? CFP_POLL : null,
+};
+
+/* THE CAREER — every season the page has loaded, oldest first.
+
+   The power poll is a rolling window over a coach's last N head-to-head
+   games REGARDLESS OF SEASON, so it needs the archive, not just the
+   season being played. A per-season poll would reset every year and
+   spend the first month of each one ranking nobody.
+
+   Today this is a one-element list: no season has been archived yet,
+   and index.html loads only the current season's data files. When
+   seasons/<year>/ folders exist, each archived season gets a <script>
+   tag ahead of the current one and pushes an entry here — see
+   docs/seasons-and-postseason.md.
+
+   Order matters: oldest first, current season LAST. computeRankings
+   and computeH2H both apply `throughWeek` to the final entry only, so
+   getting this backwards would cap the wrong season. */
+const CAREER =
+  typeof ARCHIVED_SEASONS !== "undefined" && Array.isArray(ARCHIVED_SEASONS)
+    ? [...ARCHIVED_SEASONS, RANKING_DATA]
+    : [RANKING_DATA];
 const RANKING_OPTS = typeof RANKING_CONFIG !== "undefined" ? { config: RANKING_CONFIG } : {};
 
 /* Movement of one team against a map of last week's ranks. A team
@@ -791,10 +845,13 @@ function renderRankings() {
   /* WeekCore carries the shared ranking math. If the script failed
      to load, degrade to the empty state rather than throwing. */
   const engineReady = typeof WeekCore !== "undefined" && WeekCore.computeRankings;
+  /* The week label still comes from the CURRENT season — it's a "where
+     are we now" caption. The poll itself is computed over CAREER, so a
+     coach's window can reach back into archived seasons. */
   const week = engineReady ? WeekCore.latestH2HWeek(RANKING_DATA) : null;
   const rows =
     engineReady && week != null
-      ? WeekCore.computeRankings(RANKING_DATA, { ...RANKING_OPTS, throughWeek: week })
+      ? WeekCore.computeRankings(CAREER, { ...RANKING_OPTS, throughWeek: week })
       : [];
 
   if (!rows.length) {
@@ -807,9 +864,16 @@ function renderRankings() {
     return;
   }
 
+  /* The up/down arrows compare against the poll as it stood one week
+     earlier. Stepping back within the current season is enough even
+     once the archive exists: at week 0 the previous state is every
+     archived season complete, which `throughWeek: -1` produces (no
+     regular-season games from the current season, all earlier seasons
+     whole). Before there was an archive, week 0 had no previous poll
+     at all, which is why this used to bail out at week > 0. */
   const prev =
-    week > 0
-      ? WeekCore.computeRankings(RANKING_DATA, { ...RANKING_OPTS, throughWeek: week - 1 })
+    week > 0 || CAREER.length > 1
+      ? WeekCore.computeRankings(CAREER, { ...RANKING_OPTS, throughWeek: week - 1 })
       : [];
   const prevRankByKey = new Map(prev.map((r) => [r.key, r.rank]));
 
@@ -1061,6 +1125,20 @@ function renderRoster() {
       const live = isLive(c);
       return `
       <article class="roster-card${live ? " is-live" : ""}"${color ? ` style="--team:${color}"` : ""}>
+        ${/* THE WHOLE CARD OPENS THE MODAL, but the card can't BE a
+             button: it contains the Twitch anchor, and a link inside a
+             button is invalid HTML that browsers resolve
+             unpredictably. So the card stays an <article> and gets a
+             full-bleed button stretched behind its contents. The
+             Twitch link is raised above it in style.css, so clicking
+             "Watch" still goes to Twitch and clicking anywhere else
+             opens the card.
+
+             A real <button> rather than a click handler on the
+             <article>: it is focusable, it is announced, and Enter and
+             Space work, all without a keydown handler. */ ""}
+        <button type="button" class="r-open" data-coach="${esc(personKey(c.name))}"
+                aria-label="View ${esc(c.name)} career details"></button>
         ${teamMarkHtml(c.team, "lg")}
         <div class="r-team">${esc(c.team)}</div>
         <div class="r-coach">${esc(c.name)}</div>
@@ -1085,6 +1163,339 @@ function renderRoster() {
       </article>`;
     })
     .join("");
+}
+
+/* ============================================================
+   COACH MODAL — the career card
+   ------------------------------------------------------------
+   Clicking a roster card opens a popup showing that coach's career
+   against every other coach in the league: total record, points for
+   and against, average margin, streak, trophies, and a row per
+   opponent.
+
+   CAREER, NOT SEASON. Every figure here spans every season the page
+   has loaded (see CAREER above). That is the point of the card — a
+   season card would be thin forever, and the dynasty is expected to
+   run 8-10 years.
+
+   ONLY H2H COUNTS. Points for/against, records, margins: all
+   coach-vs-coach. CPU games never appear, which is consistent with
+   the rest of the site but IS worth knowing before someone wonders
+   why their 63-0 win over an FCS team isn't in the total.
+   ============================================================ */
+
+/* Two games is the floor for a rate stat. One game producing "avg
+   margin +10.0" is true and worthless, and it makes the card look
+   like it's padding. Records and totals have no floor — 1-0 is a
+   real fact. */
+const MIN_GAMES_FOR_RATE_STATS = 2;
+
+/* Computed on first open and kept. The whole career is derived from
+   files already in memory, so this is fast, but it runs once per
+   coach rather than once per render. */
+let CAREER_CACHE = null;
+
+function careerData() {
+  if (CAREER_CACHE) return CAREER_CACHE;
+  const ready = typeof WeekCore !== "undefined" && WeekCore.computeH2H;
+  CAREER_CACHE = {
+    h2h: ready ? WeekCore.computeH2H(CAREER, { coachAliases: PEOPLE_ALIASES }) : new Map(),
+    achievements: ready
+      ? WeekCore.computeAchievements(CAREER, { coachAliases: PEOPLE_ALIASES })
+      : new Map(),
+    ranks: new Map(),
+  };
+  if (ready) {
+    const week = WeekCore.latestH2HWeek(RANKING_DATA);
+    const rows =
+      week != null
+        ? WeekCore.computeRankings(CAREER, { ...RANKING_OPTS, throughWeek: week })
+        : [];
+    rows.forEach((r) => CAREER_CACHE.ranks.set(r.key, r));
+  }
+  return CAREER_CACHE;
+}
+
+/* Everything the card needs for one coach, or null if the handle
+   doesn't resolve. */
+function coachCareerFor(name) {
+  const data = careerData();
+  const key = personKey(name);
+  const h2h = data.h2h.get(key);
+  const rank = data.ranks.get(key) || null;
+  const ach = data.achievements.get(key) || null;
+
+  const meetings = h2h
+    ? h2h.opponents.reduce((all, o) => all.concat(o.meetings), [])
+    : [];
+  const played = meetings.filter((m) => m.played);
+
+  const pf = played.reduce((s, m) => s + m.pf, 0);
+  const pa = played.reduce((s, m) => s + m.pa, 0);
+  const enough = played.length >= MIN_GAMES_FOR_RATE_STATS;
+
+  /* Streak walks the timeline newest-first and stops at the first
+     result that breaks it. Meetings inside an opponent are already
+     sorted newest-first, but ACROSS opponents they are not, so this
+     re-sorts the flat list rather than trusting the grouping. */
+  const chron = played
+    .slice()
+    .sort((a, b) => b.year - a.year || b.sortKey - a.sortKey);
+  let streak = null;
+  if (chron.length) {
+    const win = chron[0].win;
+    let n = 0;
+    for (const m of chron) {
+      if (m.win !== win) break;
+      n++;
+    }
+    streak = { win, n, label: `${win ? "W" : "L"}${n}` };
+  }
+
+  const seasons = new Set(meetings.map((m) => m.year).filter((y) => y != null));
+
+  return {
+    key,
+    name: h2h ? h2h.name : String(name),
+    wins: h2h ? h2h.wins : 0,
+    losses: h2h ? h2h.losses : 0,
+    playedGames: played.length,
+    pf,
+    pa,
+    avgMargin: enough ? (pf - pa) / played.length : null,
+    streak: enough ? streak : null,
+    seasons: seasons.size || (CAREER.length ? 1 : 0),
+    opponents: h2h ? h2h.opponents : [],
+    rank,
+    achievements: ach && ach.any ? ach : null,
+  };
+}
+
+/* Next fixture for a coach — league or CPU, whichever comes first.
+   Reads the schedule directly rather than the H2H data, because the
+   next game is very often against a CPU team and H2H can't see
+   those. */
+function nextGameFor(coach) {
+  const team = SCHEDULES.find((t) => rosterKeyFor(t.team) === rosterKeyFor(coach.team));
+  if (!team) return null;
+  const from = SEASON.currentWeek === "PRESEASON" ? 0 : Number(SEASON.currentWeek) || 0;
+  const upcoming = (team.weeks || [])
+    .filter((w) => Number(w.week) >= from && w.opponent && w.teamScore == null)
+    .sort((a, b) => Number(a.week) - Number(b.week))[0];
+  if (!upcoming) return null;
+  return {
+    week: Number(upcoming.week),
+    opponent: upcoming.opponent,
+    at: upcoming.location === "at",
+    coach: coachFor(upcoming.opponent),
+  };
+}
+
+function achievementsHtml(a) {
+  if (!a) return ""; // no trophies -> no row at all, not an empty one
+  const chips = [];
+  if (a.natTitles)
+    chips.push(
+      `<span class="cm-ach cm-ach-nat">${"&#9733;".repeat(Math.min(a.natTitles, 5))} ${
+        a.natTitles
+      } NATIONAL</span>`
+    );
+  if (a.confTitles)
+    chips.push(
+      `<span class="cm-ach cm-ach-conf">${"&#9733;".repeat(Math.min(a.confTitles, 5))} ${
+        a.confTitles
+      } CONFERENCE</span>`
+    );
+  if (a.cfpAppearances)
+    chips.push(`<span class="cm-ach cm-ach-cfp">${a.cfpAppearances} CFP APPS</span>`);
+  return `<div class="cm-achievements">${chips.join("")}</div>`;
+}
+
+/* A stat tile. `tone` colours the figure; null values render an em
+   dash in muted text and the tile keeps its slot, so the grid never
+   reflows between one coach and the next. */
+function statTile(label, value, tone) {
+  const empty = value == null || value === "";
+  return `
+    <div class="cm-stat">
+      <span class="cm-stat-label">${esc(label)}</span>
+      <span class="cm-stat-value${empty ? " is-empty" : tone ? " " + tone : ""}">${
+        empty ? "&ndash;" : esc(value)
+      }</span>
+    </div>`;
+}
+
+function h2hRowHtml(o) {
+  const last = o.meetings.find((m) => m.played);
+  const next = o.meetings.filter((m) => !m.played).sort((a, b) => a.sortKey - b.sortKey)[0];
+
+  /* A year is shown on anything that ISN'T from the season being
+     played. "Wk 5" on its own reads as this season, so an old result
+     without a year is actively misleading — and on a career card most
+     rows eventually are old. Tying it to the current season rather
+     than to "does this pairing have more than one meeting" keeps a
+     single historic meeting labelled correctly too. */
+  const thisYear = SEASON.year ?? null;
+  const stamp = (m) =>
+    m.year != null && thisYear != null && m.year !== thisYear
+      ? ` &rsquo;${String(m.year).slice(-2)}`
+      : "";
+
+  let right = "";
+  if (last) {
+    const cls = last.win ? "win" : "loss";
+    const when =
+      last.phase === "postseason"
+        ? `${esc(last.label)}${stamp(last)}`
+        : `Wk ${last.week}${stamp(last)}`;
+    right = `<span class="cm-res ${cls}">${last.win ? "W" : "L"} ${last.pf}&ndash;${
+      last.pa
+    }</span> <span class="cm-when">${when}</span>${
+      last.sim ? ' <span class="cm-sim">SIM</span>' : ""
+    }`;
+  } else if (next) {
+    right = `<span class="cm-when">Wk ${next.week}${stamp(next)} &middot; ${
+      next.home ? "vs" : "at"
+    }</span>`;
+  }
+
+  return `
+    <li class="cm-row">
+      ${teamMarkHtml(o.meetings[0] ? o.meetings[0].oppTeam : o.name, "sm")}
+      <span class="cm-row-text">
+        <span class="cm-row-team">${esc(o.meetings[0] ? o.meetings[0].oppTeam : "")}</span>
+        <span class="cm-row-coach">${esc(o.name)}</span>
+      </span>
+      <span class="cm-rec${o.played ? "" : " is-empty"}">${o.wins}&ndash;${o.losses}</span>
+      <span class="cm-row-right">${right}</span>
+    </li>`;
+}
+
+function coachModalHtml(coach) {
+  const c = coachCareerFor(coach.name);
+  const url = safeUrl(coach.twitch);
+  const live = isLive(coach);
+  const next = nextGameFor(coach);
+  const margin =
+    c.avgMargin == null
+      ? null
+      : `${c.avgMargin > 0 ? "+" : ""}${c.avgMargin.toFixed(1)}`;
+
+  const rows = c.opponents.length
+    ? c.opponents.map(h2hRowHtml).join("")
+    : `<li class="cm-empty">No head-to-head matchups, played or scheduled &mdash; ${esc(
+        coach.team
+      )} plays a full CPU slate.</li>`;
+
+  return `
+    <div class="cm-head">
+      ${teamMarkHtml(coach.team, "lg")}
+      <div class="cm-id">
+        <h2 class="cm-team" id="cm-title">${esc(coach.team)}</h2>
+        <p class="cm-coach">${esc(coach.name)}</p>
+      </div>
+      <div class="cm-head-meta">
+        ${coach.conference ? `<span class="r-conf">${esc(coach.conference)}</span>` : ""}
+        ${live ? `<span class="live-badge"><span class="live-dot"></span>LIVE</span>` : ""}
+        <button type="button" class="cm-close" aria-label="Close">&times;</button>
+      </div>
+    </div>
+    ${achievementsHtml(c.achievements)}
+    <div class="cm-stats">
+      ${statTile("Career H2H", `${c.wins}-${c.losses}`)}
+      ${statTile("Power rank", c.rank ? `#${c.rank.rank}` : null, "gold")}
+      ${statTile("Avg margin", margin, c.avgMargin > 0 ? "win" : c.avgMargin < 0 ? "loss" : "")}
+      ${statTile("Streak", c.streak ? c.streak.label : null, c.streak && c.streak.win ? "win" : "loss")}
+      ${statTile("Total PF", c.playedGames ? c.pf.toLocaleString() : null)}
+      ${statTile("Total PA", c.playedGames ? c.pa.toLocaleString() : null)}
+      ${statTile("L10", c.rank ? c.rank.l10 : null)}
+      ${statTile("Seasons", c.seasons || null)}
+    </div>
+    <h3 class="cm-section">Head-to-head</h3>
+    <ul class="cm-list">${rows}</ul>
+    <div class="cm-foot">
+      <span class="cm-next">${
+        next
+          ? `Next: ${next.at ? "at" : "vs"} ${esc(next.opponent)}${
+              next.coach ? ` (${esc(next.coach)})` : " (CPU)"
+            } &mdash; Week ${next.week}`
+          : "No games remaining"
+      }</span>
+      ${
+        url
+          ? `<a class="cm-twitch" href="${esc(url)}" target="_blank" rel="noopener noreferrer">Watch on Twitch &rarr;</a>`
+          : ""
+      }
+    </div>`;
+}
+
+/* The element that had focus when the modal opened, so it can be
+   given back on close. <dialog> restores focus itself, but the roster
+   re-renders on every live-status refresh, so the original node may
+   no longer be in the document by then — this re-finds it by key. */
+let MODAL_OPENER_KEY = null;
+
+function openCoachModal(key, { updateHash = true } = {}) {
+  const dlg = document.getElementById("coach-modal");
+  const body = document.getElementById("coach-modal-body");
+  if (!dlg || !body) return;
+
+  const coach = ROSTER.find((c) => personKey(c.name) === key);
+  if (!coach) return;
+
+  const color = safeHex(coach.color);
+  dlg.style.setProperty("--team", color || "var(--gold)");
+  body.innerHTML = coachModalHtml(coach);
+  MODAL_OPENER_KEY = key;
+
+  if (!dlg.open) dlg.showModal();
+  if (updateHash) history.replaceState(null, "", `#roster/coach/${key}`);
+}
+
+function closeCoachModal() {
+  const dlg = document.getElementById("coach-modal");
+  if (dlg && dlg.open) dlg.close();
+}
+
+function setupCoachModal() {
+  const dlg = document.getElementById("coach-modal");
+  if (!dlg) return;
+
+  /* Delegated, because renderRoster() replaces every card whenever
+     live status refreshes — a listener bound to a card would be
+     thrown away with it. */
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest && e.target.closest(".r-open");
+    if (btn) openCoachModal(btn.dataset.coach);
+  });
+
+  dlg.addEventListener("click", (e) => {
+    /* A click on the backdrop registers as a click on the dialog
+       itself, never on its contents — which is why the body sits in a
+       wrapper div. Without the wrapper every click would close it. */
+    if (e.target === dlg) closeCoachModal();
+    if (e.target.closest && e.target.closest(".cm-close")) closeCoachModal();
+  });
+
+  dlg.addEventListener("close", () => {
+    if (location.hash.indexOf("#roster/coach/") === 0) {
+      history.replaceState(null, "", "#roster");
+    }
+    /* Found by scanning rather than by building a selector: a coach
+       handle is arbitrary text, and interpolating it into a selector
+       would need CSS.escape — which throws if the key contains a
+       quote and doesn't exist at all in some environments. A failure
+       here would abort the rest of this handler and strand the hash,
+       so it uses no selector parsing. */
+    let back = null;
+    if (MODAL_OPENER_KEY) {
+      document.querySelectorAll(".r-open").forEach((b) => {
+        if (b.dataset.coach === MODAL_OPENER_KEY) back = b;
+      });
+    }
+    if (back) back.focus();
+    MODAL_OPENER_KEY = null;
+  });
 }
 
 /* ------------------------------------------------------------
@@ -1496,8 +1907,23 @@ function setupTabs() {
     });
   });
 
-  window.addEventListener("hashchange", () => showTab(location.hash.slice(1)));
-  showTab(location.hash.slice(1), { scroll: false });
+  /* The hash carries two things now: the tab, and optionally a coach
+     to open the modal on — "#roster/coach/projekt". showTab only ever
+     sees the first segment, so a deep link still selects the right tab
+     and an ordinary "#roster" is unaffected.
+
+     Splitting here rather than teaching showTab about coaches keeps
+     the tab system ignorant of the modal, which is the only reason
+     both can be read at a glance. */
+  const routeFromHash = (opts) => {
+    const [tab, kind, key] = location.hash.slice(1).split("/");
+    showTab(tab, opts);
+    if (kind === "coach" && key) openCoachModal(decodeURIComponent(key), { updateHash: false });
+    else closeCoachModal();
+  };
+
+  window.addEventListener("hashchange", () => routeFromHash());
+  routeFromHash({ scroll: false });
 }
 
 /* ------------------------------------------------------------
@@ -1592,6 +2018,9 @@ function init() {
   initSchedule();
   renderTicker();
   renderFooter();
+  /* Before setupTabs — it reads the hash on load and may need to open
+     the modal, which requires the listeners to already be attached. */
+  setupCoachModal();
   setupTabs();
 }
 

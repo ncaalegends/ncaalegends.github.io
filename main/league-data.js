@@ -25,6 +25,21 @@
    scheduling deadline for coaches, not part of season chronology.
    ------------------------------------------------------------ */
 const SEASON = {
+  /* IN-GAME YEAR — the dynasty's season identity.
+
+     This is the season the files in THIS folder describe. When the
+     dynasty rolls over, the completed season's data files move to
+     seasons/<year>/ and this number goes up; see the SEASON ARCHIVE
+     note below. Everything historical (career H2H, records against a
+     given coach, peak rankings) is keyed on this, so it has to be set
+     before the first archive happens — a season archived without a
+     year can't be placed on the timeline afterwards.
+
+     In-game year, not real-world year: the roster is EA College
+     Football 27's 2026 season, and in-game years drift away from real
+     life as the dynasty runs. 2026 -> 2027 -> 2028 and so on. */
+  year: 2026,
+
   currentWeek: 2,
 
   // Shown in the hero. Update as the league moves through phases.

@@ -11,6 +11,15 @@ desktop.ini
 __pycache__/
 *.pyc
 
+# Node packages. The site itself has no build step and no runtime
+# dependencies — everything under tools/ is Node built-ins only, by
+# design. This entry exists because test tooling (jsdom, for running
+# the pages headlessly) is a local-only concern and must never end up
+# in the repo that GitHub Pages serves.
+node_modules/
+package.json
+package-lock.json
+
 # Discord webhook URL — secret, never commit
 tools/config.json
 

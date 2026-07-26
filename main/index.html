@@ -185,6 +185,16 @@
 
 </main>
 
+<!-- COACH CARD MODAL
+     Native <dialog>: focus trapping, background inertness, Escape to
+     close and the ::backdrop layer all come from the browser. The
+     inner wrapper is load-bearing, not decoration — a backdrop click
+     registers on the <dialog> itself and never on its contents, which
+     is how script.js tells the two apart. Filled by openCoachModal(). -->
+<dialog id="coach-modal" class="coach-modal" aria-labelledby="cm-title">
+  <div class="cm-body" id="coach-modal-body"></div>
+</dialog>
+
 <footer class="site-footer">
   <div class="footer-status" id="footer-status"></div>
   <div class="footer-links" id="footer-links"></div>
