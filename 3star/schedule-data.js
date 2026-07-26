@@ -115,7 +115,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, opponent: "Western Michigan", location: "vs", teamScore: 24, opponentScore: 34 },
       { week: 1, opponent: "FCS East", location: "vs", teamScore: 49, opponentScore: 0 },
-      { week: 2, opponent: "Old Dominion", location: "vs" },
+      { week: 2, opponent: "Old Dominion", location: "vs", teamScore: 35, opponentScore: 10 },
       { week: 3, note: "BYE" },
       { week: 4, opponent: "Boston College", location: "at" },
       { week: 5, opponent: "Pittsburgh", location: "vs" },
