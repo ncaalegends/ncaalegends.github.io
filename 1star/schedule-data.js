@@ -61,7 +61,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "FCS Southeast", location: "vs", teamScore: 38, opponentScore: 10 },
-      { week: 2, opponent: "Tulane", location: "at" },
+      { week: 2, opponent: "Tulane", location: "at", teamScore: 21, opponentScore: 31 },
       { week: 3, opponent: "Ohio", location: "vs" },
       { week: 4, opponent: "North Shore", location: "at" },
       { week: 5, opponent: "UL Monroe", location: "vs" },
@@ -107,7 +107,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "South Carolina", location: "at", teamScore: 13, opponentScore: 10 },
-      { week: 2, opponent: "FCS Midwest", location: "vs" },
+      { week: 2, opponent: "FCS Midwest", location: "vs", teamScore: 38, opponentScore: 0 },
       { week: 3, opponent: "Boise State", location: "at" },
       { week: 4, opponent: "New Glarus", location: "vs" },
       { week: 5, opponent: "Ohio", location: "vs" },
@@ -219,7 +219,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, opponent: "Delaware", location: "vs", teamScore: 9, opponentScore: 37 },
       { week: 1, opponent: "New Glarus", location: "at", teamScore: 29, opponentScore: 34 },
-      { week: 2, opponent: "Georgia Tech", location: "at" },
+      { week: 2, opponent: "Georgia Tech", location: "at", teamScore: 24, opponentScore: 27 },
       { week: 3, opponent: "California", location: "at" },
       { week: 4, opponent: "FCS Southeast", location: "vs" },
       { week: 5, opponent: "Missouri State", location: "vs" },
