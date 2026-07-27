@@ -59,7 +59,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, opponent: "North Carolina", location: "vs", stadium: "Dublin Stadium", teamScore: 27, opponentScore: 17 },
       { week: 1, note: "BYE" },
-      { week: 2, opponent: "FCS Midwest", location: "vs", stadium: "Amon G. Carter Stadium" },
+      { week: 2, opponent: "FCS Midwest", location: "vs", stadium: "Amon G. Carter Stadium", teamScore: 63, opponentScore: 9 },
       { week: 3, opponent: "Arkansas State", location: "vs", stadium: "Amon G. Carter Stadium" },
       { week: 4, opponent: "UCF", location: "at", stadium: "Acrisure Bounce House" },
       { week: 5, opponent: "BYU", location: "vs", stadium: "Amon G. Carter Stadium" },
@@ -125,7 +125,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "Boise State", location: "vs", stadium: "Autzen Stadium", teamScore: 42, opponentScore: 7 },
-      { week: 2, opponent: "Oklahoma State", location: "at", stadium: "Boone Pickens Stadium" },
+      { week: 2, opponent: "Oklahoma State", location: "at", stadium: "Boone Pickens Stadium", teamScore: 42, opponentScore: 17 },
       { week: 3, opponent: "FCS Northwest", location: "vs", stadium: "Autzen Stadium" },
       { week: 4, opponent: "USC", location: "at", stadium: "Los Angeles Memorial Coliseum" },
       { week: 5, note: "BYE" },
@@ -169,7 +169,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "Florida State", location: "at", stadium: "Doak Campbell Stadium", teamScore: 28, opponentScore: 21 },
-      { week: 2, opponent: "FCS Midwest", location: "vs", stadium: "Gerald J. Ford Stadium" },
+      { week: 2, opponent: "FCS Midwest", location: "vs", stadium: "Gerald J. Ford Stadium", teamScore: 30, opponentScore: 3 },
       { week: 3, opponent: "Louisville", location: "at", stadium: "L&N Stadium" },
       { week: 4, opponent: "Missouri State", location: "vs", stadium: "Gerald J. Ford Stadium" },
       { week: 5, opponent: "Boston College", location: "vs", stadium: "Gerald J. Ford Stadium" },
@@ -213,7 +213,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "Kent State", location: "vs", stadium: "Williams-Brice Stadium", teamScore: 52, opponentScore: 15 },
-      { week: 2, opponent: "FCS Southeast", location: "vs", stadium: "Williams-Brice Stadium" },
+      { week: 2, opponent: "FCS Southeast", location: "vs", stadium: "Williams-Brice Stadium", teamScore: 62, opponentScore: 10 },
       { week: 3, opponent: "Mississippi St", location: "vs", stadium: "Williams-Brice Stadium" },
       { week: 4, opponent: "Alabama", location: "at", stadium: "Saban Field at Bryant-Denny Stadium" },
       { week: 5, opponent: "Kentucky", location: "vs", stadium: "Williams-Brice Stadium" },
@@ -279,7 +279,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, opponent: "San Jose State", location: "vs", stadium: "Los Angeles Memorial Coliseum", teamScore: 38, opponentScore: 14 },
       { week: 1, opponent: "Fresno State", location: "vs", stadium: "Los Angeles Memorial Coliseum", teamScore: 41, opponentScore: 23 },
-      { week: 2, opponent: "Louisiana", location: "vs", stadium: "Los Angeles Memorial Coliseum" },
+      { week: 2, opponent: "Louisiana", location: "vs", stadium: "Los Angeles Memorial Coliseum", teamScore: 54, opponentScore: 0 },
       { week: 3, opponent: "Rutgers", location: "at", stadium: "SHI Stadium" },
       { week: 4, opponent: "Oregon", location: "vs", stadium: "Los Angeles Memorial Coliseum" },
       { week: 5, opponent: "Washington", location: "vs", stadium: "Los Angeles Memorial Coliseum" },
@@ -389,7 +389,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "Akron", location: "vs", stadium: "Allegacy Federal Credit Union Stadium", teamScore: 38, opponentScore: 24 },
-      { week: 2, opponent: "Purdue", location: "at", stadium: "Ross-Ade Stadium" },
+      { week: 2, opponent: "Purdue", location: "at", stadium: "Ross-Ade Stadium", teamScore: 35, opponentScore: 13 },
       { week: 3, opponent: "Miami", location: "vs", stadium: "Allegacy Federal Credit Union Stadium" },
       { week: 4, opponent: "Louisville", location: "at", stadium: "L&N Stadium" },
       { week: 5, opponent: "Stanford", location: "vs", stadium: "Allegacy Federal Credit Union Stadium" },
