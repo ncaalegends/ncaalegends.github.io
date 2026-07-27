@@ -367,7 +367,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "Georgia Tech", location: "at", stadium: "Bobby Dodd Stadium", teamScore: 40, opponentScore: 28 },
-      { week: 2, opponent: "FCS Midwest", location: "vs", stadium: "Folsom Field" },
+      { week: 2, opponent: "FCS Midwest", location: "vs", stadium: "Folsom Field", teamScore: 49, opponentScore: 3 },
       { week: 3, opponent: "Northwestern", location: "at", stadium: "Ryan Field" },
       { week: 4, opponent: "Baylor", location: "at", stadium: "McLane Stadium" },
       { week: 5, opponent: "Texas Tech", location: "vs", stadium: "Folsom Field" },
@@ -528,7 +528,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "East Carolina", location: "vs", stadium: "Saban Field at Bryant-Denny Stadium", teamScore: 70, opponentScore: 10 },
-      { week: 2, opponent: "Kentucky", location: "at", stadium: "Kroger Field" },
+      { week: 2, opponent: "Kentucky", location: "at", stadium: "Kroger Field", teamScore: 31, opponentScore: 27 },
       { week: 3, opponent: "Florida State", location: "vs", stadium: "Saban Field at Bryant-Denny Stadium" },
       { week: 4, opponent: "South Carolina", location: "vs", stadium: "Saban Field at Bryant-Denny Stadium" },
       { week: 5, opponent: "Mississippi State", location: "at", stadium: "Davis Wade Stadium" },
