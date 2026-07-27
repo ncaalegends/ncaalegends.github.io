@@ -103,7 +103,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "FLA Atlantic", location: "vs", stadium: "Ben Hill Griffin Stadium", teamScore: 41, opponentScore: 10 },
-      { week: 2, opponent: "FCS Southeast", location: "vs", stadium: "Ben Hill Griffin Stadium" },
+      { week: 2, opponent: "FCS Southeast", location: "vs", stadium: "Ben Hill Griffin Stadium", teamScore: 63, opponentScore: 3 },
       { week: 3, opponent: "Auburn", location: "at", stadium: "Jordan-Hare Stadium" },
       { week: 4, opponent: "Ole Miss", location: "vs", stadium: "Ben Hill Griffin Stadium" },
       { week: 5, opponent: "Missouri", location: "at", stadium: "Faurot Field at Memorial Stadium" },
