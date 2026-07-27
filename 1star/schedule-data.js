@@ -3,11 +3,13 @@
    ------------------------------------------------------------
    Transcribed from in-game "Team Schedule" screenshots, 2 per
    team (weeks 0-8 and weeks 8-16), overlap deduped by hand.
-   Snapshot taken 2026-07-22, preseason — no games played yet.
+   Snapshot taken 2026-07-22, preseason. Appalachian State was
+   added 2026-07-27 from a week 2 snapshot, so its first two rows
+   already carry results while the other eight teams' do not.
 
-   All 8 coaches are represented. Every user-vs-user matchup was
+   All 9 coaches are represented. Every user-vs-user matchup was
    cross-checked against BOTH coaches' screenshots and the
-   home/away sides agree in all cases (8 league games total).
+   home/away sides agree in all cases (10 league games total).
 
    WEEK MAPPING. The in-game table lists rows 0-14, then
    "Conf Champ", then 16. This file follows the convention the
@@ -73,6 +75,35 @@ const TEAM_SCHEDULES = [
       { week: 11, opponent: "Troy", location: "vs" },
       { week: 12, opponent: "Southern Mississippi", location: "at" },
       { week: 13, opponent: "Appalachian State", location: "vs" },
+      { week: 14, note: "Army-Navy Week" },
+      { week: 15, note: "Sun Belt Championship" },
+    ],
+  },
+  {
+    /* Added 2026-07-27 from Scuba's two Team Schedule screenshots
+       (weeks 0-8, weeks 8-16). Both league games check out against
+       the other coach's transcription: Baldwin Wallace already had
+       week 13 "vs Appalachian State" and Dillon week 9 "vs", and
+       this schedule reads "at" for both. The in-game screen renders
+       Baldwin Wallace as "BaldwinWallace" with no space; expanded
+       here to the roster spelling per the TEAM NAMES note above. */
+    team: "Appalachian State",
+    conference: "Sun Belt",
+    weeks: [
+      { week: 0, note: "BYE" },
+      { week: 1, opponent: "FCS Southeast", location: "vs", teamScore: 28, opponentScore: 7 },
+      { week: 2, opponent: "East Carolina", location: "at", teamScore: 28, opponentScore: 24 },
+      { week: 3, opponent: "Charlotte", location: "vs" },
+      { week: 4, opponent: "NC State", location: "at" },
+      { week: 5, note: "BYE" },
+      { week: 6, opponent: "Old Dominion", location: "vs" },
+      { week: 7, opponent: "Coastal Carolina", location: "at" },
+      { week: 8, opponent: "James Madison", location: "vs" },
+      { week: 9, opponent: "Dillon", location: "at" },
+      { week: 10, opponent: "Georgia State", location: "vs" },
+      { week: 11, opponent: "Marshall", location: "at" },
+      { week: 12, opponent: "UL Monroe", location: "vs" },
+      { week: 13, opponent: "Baldwin Wallace", location: "at" },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, note: "Sun Belt Championship" },
     ],

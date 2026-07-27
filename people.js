@@ -1,7 +1,7 @@
 /* ============================================================
    PEOPLE — cross-league identity resolution
    ------------------------------------------------------------
-   31 distinct people play across the three dynasties, and 13 of
+   32 distinct people play across the three dynasties, and 13 of
    them play in more than one. This file answers exactly one
    question: "are these two roster entries the same human?"
 
@@ -10,6 +10,10 @@
    = 3 people in all three leagues, 10 in two, 18 in one. Said 32
    before this; the overlap count was right, so it was one
    single-league coach who left without the comment being updated.
+
+   Updated 2026-07-27: Scuba joined the 1-star with Appalachian
+   State. New to all three leagues, so 48 entries and 32 people —
+   the overlap breakdown above is unchanged.
 
    WHAT'S DELIBERATELY NOT HERE
    ----------------------------

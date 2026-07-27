@@ -50,18 +50,20 @@ const LEAGUE_INFO = {
 };
 
 /* ------------------------------------------------------------
-   COACHES — from the 1-star sign-up sheet, snapshot 2026-07-21.
+   COACHES — from the 1-star sign-up sheet, snapshot 2026-07-21,
+   plus Scuba (Appalachian State), added 2026-07-27.
 
-   Only the 8 coaches with a built team are listed. The sheet's
-   "SIM Sign Up" section is still TBD and would render as empty
-   cards, so it's deliberately excluded until it firms up.
+   The sheet's "SIM Sign Up" section is still TBD and would render
+   as empty cards, so it's deliberately excluded until it firms up.
 
    LOGOS
-     These are Team Builder originals, so there's no ESPN id to
-     hotlink. Each entry carries `logo`, a path relative to this
-     folder, pointing at an optimised PNG in 1star/logos/.
+     The eight original teams are Team Builder builds, so there's
+     no ESPN id to hotlink. Each carries `logo`, a path relative to
+     this folder, pointing at an optimised PNG in 1star/logos/.
      script.js prefers `logo` over `espnId` when both exist, and
-     falls back to the monogram chip if the file 404s.
+     falls back to the monogram chip if the file 404s. Scuba's
+     Appalachian State is a stock team and uses `espnId` instead —
+     which works because useEspnLogos is true above.
 
      Source art was 9.6 MB across 8 files; these are resampled to
      400px max edge (0.74 MB total). Originals are NOT in the repo
@@ -96,6 +98,14 @@ const COACHES = [
   { name: "Woody",      team: "Baldwin Wallace",         conference: "Sun Belt", color: "#F3CD49", twitch: "https://www.twitch.tv/mldwoody", logo: "logos/baldwin-wallace.png",            location: "Berea, OH",       replacing: "South Alabama" },
   { name: "Brian52682", team: "Patriot Tech",            conference: "CUSA",     color: "#DE4B5C", twitch: "https://www.twitch.tv/brian52682", logo: "logos/patriot-tech-minutemen.png",     location: "",                replacing: "Liberty" },
   { name: "Bayside",    team: "Wawa University",         conference: "CUSA",    color: "#EE4B3C", twitch: "https://www.twitch.tv/baysideblitz", logo: "logos/wawa-university.png",            location: "Media, PA",       replacing: "FIU" },
+
+  /* Joined 2026-07-27, mid-season. The only stock team on this
+     roster — Scuba took Appalachian State as-is rather than
+     building an original, so there's no `logo` and no `replacing`;
+     the ESPN id carries the mark like it does in the other two
+     leagues. Color is the official App State gold, which reads
+     cleanly on --navy-panel without lifting. */
+  { name: "Scuba",      team: "Appalachian State",       conference: "Sun Belt", color: "#FFCC00", twitch: "https://www.twitch.tv/scuba2122", espnId: "2026",                               location: "Boone, NC" },
 ];
 
 /* ------------------------------------------------------------
