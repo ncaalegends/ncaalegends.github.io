@@ -182,7 +182,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "Wake Forest", location: "at", teamScore: 13, opponentScore: 37 },
-      { week: 2, opponent: "FCS Midwest", location: "vs" },
+      { week: 2, opponent: "FCS Midwest", location: "vs", teamScore: 42, opponentScore: 7 },
       { week: 3, opponent: "Minnesota", location: "at" },
       { week: 4, opponent: "Baldwin Wallace", location: "vs" },
       { week: 5, opponent: "Central Michigan", location: "at" },
