@@ -301,7 +301,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "FCS Southeast", location: "vs", stadium: "Sanford Stadium", teamScore: 37, opponentScore: 19 },
-      { week: 2, opponent: "W. Kentucky", location: "vs", stadium: "Sanford Stadium" },
+      { week: 2, opponent: "W. Kentucky", location: "vs", stadium: "Sanford Stadium", teamScore: 56, opponentScore: 17 },
       { week: 3, opponent: "Arkansas", location: "at", stadium: "DW Reynolds Razorback Stadium" },
       { week: 4, opponent: "Oklahoma", location: "vs", stadium: "Sanford Stadium" },
       { week: 5, opponent: "Vanderbilt", location: "vs", stadium: "Sanford Stadium" },
