@@ -411,7 +411,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "California", location: "at", stadium: "California Memorial Stadium", teamScore: 9, opponentScore: 22 },
-      { week: 2, opponent: "San Diego St.", location: "vs", stadium: "Rose Bowl Stadium" },
+      { week: 2, opponent: "San Diego St.", location: "vs", stadium: "Rose Bowl Stadium", teamScore: 45, opponentScore: 7 },
       { week: 3, opponent: "Purdue", location: "vs", stadium: "Rose Bowl Stadium" },
       { week: 4, opponent: "Maryland", location: "at", stadium: "SECU Stadium" },
       { week: 5, note: "BYE" },
