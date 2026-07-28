@@ -72,7 +72,7 @@ const TEAM_SCHEDULES = [
       { week: 0, opponent: "TCU", location: "vs", teamScore: 38, opponentScore: 28 },
       { week: 1, note: "BYE" },
       { week: 2, opponent: "FCS Southeast", location: "vs", teamScore: 35, opponentScore: 3 },
-      { week: 3, opponent: "Clemson", location: "at" },
+      { week: 3, opponent: "Clemson", location: "at", teamScore: 17, opponentScore: 14 },
       { week: 4, note: "BYE" },
       { week: 5, opponent: "Notre Dame", location: "vs" },
       { week: 6, opponent: "Pittsburgh", location: "at" },
