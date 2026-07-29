@@ -676,52 +676,6 @@ function renderThisWeekGames() {
     : '<p class="sched-empty">No tracked matchups this week.</p>';
 }
 
-function renderRecentResults() {
-  const container = document.getElementById("recent-results");
-  if (!container) return;
-
-  if (isPreseason()) {
-    container.innerHTML =
-      '<li class="sched-empty">No results yet — season hasn\'t started.</li>';
-    return;
-  }
-
-  // Previous weeks only — the current week's games live in "This
-  // Week" until the season advances, then drop into results. Capped
-  // at the two most recent completed weeks: at week 3 that's weeks
-  // 1-2, at week 1 just week 0, at week 0 nothing yet.
-  const results = [];
-  const firstWeek = Math.max(0, SEASON.currentWeek - 2);
-  for (let w = firstWeek; w < SEASON.currentWeek; w++) {
-    buildWeekGames(w).rows.forEach((g) => {
-      if (g.played) results.push({ ...g, week: w });
-    });
-  }
-
-  // Most recent first, league games surfaced above CPU games.
-  results.sort((a, b) => (b.week - a.week) || (b.league - a.league));
-
-  container.innerHTML = results.length
-    ? results
-        .map((g) => {
-          const awayWon = g.awayScore > g.homeScore;
-          return `
-      <li>
-        <span class="week-chip">WK ${esc(g.week)}</span>
-        <span class="r-line">
-          <span class="r-team${awayWon ? " won" : ""}">${rankBadgeHtml(g.away, g.week)}${esc(g.away)}</span>
-          <span class="r-score${awayWon ? " won" : ""}">${esc(g.awayScore)}</span>
-          <span class="r-at">&#64;</span>
-          <span class="r-team${!awayWon ? " won" : ""}">${rankBadgeHtml(g.home, g.week)}${esc(g.home)}</span>
-          <span class="r-score${!awayWon ? " won" : ""}">${esc(g.homeScore)}</span>
-          ${g.league ? '<span class="wg-league-tag">League</span>' : ""}
-        </span>
-      </li>`;
-        })
-        .join("")
-    : '<li class="sched-empty">No results yet.</li>';
-}
-
 /* ------------------------------------------------------------
    RANKINGS  (live-computed)
    ------------------------------------------------------------
@@ -2056,7 +2010,6 @@ function init() {
   renderJumbotron();
   renderNextAdvance();
   renderThisWeekGames();
-  renderRecentResults();
   renderRankings();
   renderTop25();
   renderRoster();

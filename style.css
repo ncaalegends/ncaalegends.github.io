@@ -841,54 +841,6 @@ main {
 .game-card.is-live .gc-foot { color: var(--crimson); font-weight: 700; }
 
 /* ============================================================
-   RESULTS TICKER
-   ============================================================ */
-.results-ticker {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  border-top: 1px solid var(--line);
-}
-
-.results-ticker li {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 4px;
-  border-bottom: 1px solid var(--line);
-  font-family: var(--font-mono);
-  font-size: 0.9rem;
-}
-
-.results-ticker .week-chip {
-  flex: 0 0 auto;
-  font-size: 0.7rem;
-  color: var(--steel);
-  background: transparent;
-  border: 1px solid var(--line-gold);
-  padding: 2px 8px;
-  font-weight: 700;
-}
-
-.results-ticker .r-line {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.results-ticker .r-team { color: var(--steel); }
-.results-ticker .r-team.won { color: var(--chalk); font-weight: 600; }
-.results-ticker .r-at { color: var(--steel); font-size: 0.75rem; }
-
-.results-ticker .r-score {
-  color: var(--steel);
-  font-weight: 400;
-  font-variant-numeric: tabular-nums;
-}
-.results-ticker .r-score.won { color: var(--gold); font-weight: 700; }
-
-/* ============================================================
    POLL / RANKINGS
    ============================================================ */
 .poll-list {
