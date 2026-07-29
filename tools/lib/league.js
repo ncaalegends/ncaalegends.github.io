@@ -37,10 +37,14 @@ const SITE_ROOT = "https://ncaalegends.github.io";
 /* Every league is a folder at the repo root holding its own pair of
    data files. Adding a fourth league means adding a folder and one
    line here — nothing else in either tool is league-specific. */
+/*
+   `gateOnTop25` decides whether an advance is allowed to proceed
+   before that week's poll has been transcribed. Only main blocks. See
+   top25GateError() below for why the other two deliberately don't. */
 const LEAGUES = {
-  main: { label: "Main Dynasty", dir: "main" },
-  "3star": { label: "3-Star Dynasty", dir: "3star" },
-  "1star": { label: "1-Star Dynasty", dir: "1star" },
+  main: { label: "Main Dynasty", dir: "main", gateOnTop25: true },
+  "3star": { label: "3-Star Dynasty", dir: "3star", gateOnTop25: false },
+  "1star": { label: "1-Star Dynasty", dir: "1star", gateOnTop25: false },
 };
 
 /* ------------------------------------------------------------
@@ -223,18 +227,39 @@ function loadData(paths) {
 /* ------------------------------------------------------------
    TOP 25 GATE
    ------------------------------------------------------------
-   A league running the in-game Top 25 shouldn't advance into a week
-   until that week's poll has been transcribed — otherwise the site
-   would show the new week with stale (or missing) rankings on every
-   schedule. Returns an error string to block on, or null to allow.
+   The main dynasty shouldn't advance into a week until that week's
+   poll has been transcribed — otherwise the site would show the new
+   week with stale (or missing) rankings on every schedule. Returns an
+   error string to block on, or null to allow.
 
-   Deliberately lenient about WHEN it applies: leagues with no
-   top25-data.js at all (TOP25 empty) are never gated, and the
-   preseason / week 0 is skipped since there's no poll before week 1.
+   WHY ONLY MAIN IS GATED
+   Gating couples two people's evenings together: nobody can advance
+   until somebody has taken and uploaded a screenshot. In main that
+   coupling is worth it — the poll IS part of how the week is
+   presented, and the announcement, the badges and the Top 25 tab all
+   land in one motion.
+
+   In 3-star and 1-star the poll is a bonus, and the same coupling
+   would only ever show up as an advance blocked on a screenshot
+   nobody took. So those leagues are `gateOnTop25: false`: uploads are
+   welcome any week, in any order, before or after the advance, and a
+   week with no poll simply renders unranked. The cost is that their
+   Top 25 tab can trail the schedule by a week, which is the right way
+   round — a slightly stale tab beats a stalled season.
+
+   Also lenient about WHEN it applies even in main: a league whose
+   TOP25 is empty is never gated (that's a league that hasn't started
+   the poll, not one that's behind on it), and the preseason / week 0
+   is skipped since there's no poll before week 1.
    ------------------------------------------------------------ */
-function top25GateError(data, week) {
+function top25GateError(data, week, league) {
+  /* Unknown / omitted league is treated as gated, so a caller that
+     forgets to pass it fails safe in the direction of main. */
+  const slug = typeof league === "string" ? league : league && league.slug;
+  if (slug && LEAGUES[slug] && !LEAGUES[slug].gateOnTop25) return null;
+
   const polls = (data && data.TOP25) || [];
-  if (!polls.length) return null; // league doesn't run a Top 25
+  if (!polls.length) return null; // league hasn't started running a Top 25
   if (Number(week) < 1) return null; // no preseason poll to require
 
   const entry = polls.find((p) => Number(p.week) === Number(week));

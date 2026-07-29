@@ -267,10 +267,12 @@ async function doAdvance(p, L) {
   const data = loadData(L.paths);
 
   /* Block advancing into a week whose Top 25 isn't transcribed yet.
-     A no-op for leagues that don't run a poll (TOP25 empty). This gate
-     stays exactly as it was — an advance still can't jump ahead of the
-     new week's poll, main included. */
-  const gate = top25GateError(data, p.week);
+     Main only, and a no-op for a league that hasn't started a poll —
+     the gate decides that per league, so this behaves identically to
+     the local advance.js path. Passing L is what makes 3-star and
+     1-star advance from the admin page without waiting on a
+     screenshot. */
+  const gate = top25GateError(data, p.week, L);
   if (gate) die(gate);
 
   const status = p.status || `WEEK ${p.week}`;

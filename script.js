@@ -1897,6 +1897,35 @@ function renderFooter() {
    ------------------------------------------------------------ */
 const TABS = ["home", "schedule", "rankings", "top25", "roster"];
 
+/* ------------------------------------------------------------
+   TABS THAT ONLY EXIST FOR SOME LEAGUES
+   ------------------------------------------------------------
+   All three leagues share this file and ship the same index.html
+   skeleton, so the Top 25 tab is present in the markup everywhere —
+   including in leagues that have never transcribed a poll. Rather
+   than maintain a fourth variant of the page, the tab removes itself
+   when there's nothing behind it.
+
+   Removed, not disabled or emptied. A visible tab that says "nothing
+   here yet" reads as a broken feature; an absent one reads as a
+   feature this league doesn't run, which is the truth. The moment a
+   first week is added to that league's top25-data.js the tab comes
+   back on its own, with no markup change.
+
+   Pruning TABS as well as the DOM matters: it's what makes a stale
+   "#top25" link fall back to Home instead of selecting a tab that
+   isn't there.
+   ------------------------------------------------------------ */
+function pruneEmptyTabs() {
+  if (TOP25_DATA.length) return;
+
+  document.querySelector('.tab-btn[data-tab="top25"]')?.remove();
+  document.getElementById("top25")?.remove();
+
+  const i = TABS.indexOf("top25");
+  if (i !== -1) TABS.splice(i, 1);
+}
+
 function showTab(name, { scroll = true } = {}) {
   const target = TABS.includes(name) ? name : "home";
 
@@ -1913,6 +1942,10 @@ function showTab(name, { scroll = true } = {}) {
 }
 
 function setupTabs() {
+  /* Before anything binds a listener or reads the hash — otherwise a
+     "#top25" arrival would select a tab we're about to delete. */
+  pruneEmptyTabs();
+
   document.querySelectorAll("[data-tab]").forEach((btn) => {
     btn.addEventListener("click", () => {
       const target = btn.dataset.tab;

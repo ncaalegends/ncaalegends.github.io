@@ -294,7 +294,7 @@ team is whatever's in between — which is why `Texas A&M` and
 | `--file PATH` | Read the lines from a file. |
 | `--stdin` | Read the lines from standard input. |
 | `--dry-run` | Print the block and every check. Write nothing. |
-| `--allow-new` | Accept a team the league has never referenced. |
+| `--allow-new` | Accept a team the league has never referenced, or one that looks like a misread but isn't. |
 | `--force` | Overwrite a week that already exists. See below. |
 
 ### Guardrails
@@ -318,6 +318,14 @@ genuinely wasn't in the poll before and isn't on anyone's schedule, is
 first and waving through the second is the difference between a check
 that gets read and one that gets reflexively `--force`d.
 
+Edit distance can't do it perfectly, though, because some pairs of real
+schools are one character apart: `South Carolina` / `North Carolina`,
+`Miami` / `Miami (OH)`. So `--allow-new` clears the misread check as
+well as the unknown-name one — it already means "I checked these against
+the screenshot", which is exactly the claim being made. The suggestion is
+still printed after the write so it can be eyeballed. `--force` is not
+the flag for this and never was.
+
 It also prints week-over-week movement, and flags any team that moved
 12 or more spots as worth a second look at the screenshot. That's
 advisory — the site computes the same arrows itself — but a
@@ -331,7 +339,7 @@ rewrites what those games say they were at the time. The script refuses
 a week that already exists; `--force` is there for fixing a
 transcription the same night, before anyone's seen it, and nothing else.
 
-### Order of operations
+### Order of operations (main)
 
 The site shows the poll for `SEASON.currentWeek`, so a block written
 here for a week you haven't advanced to sits in the repo invisible. It
@@ -346,6 +354,29 @@ node tools/top25.js --week 5 --file poll.txt     # silent
 git add -A && git commit -m "Week 5 Top 25" && git push
 node tools/advance.js --week 5 --next "..."      # poll + week + Discord together
 ```
+
+### Order of operations (3-star and 1-star)
+
+There isn't one. Those leagues run the poll but are **not** gated on it
+(`gateOnTop25: false` in `lib/league.js`), so the advance never waits on
+a screenshot nobody took:
+
+```
+node tools/top25.js --league 3star --week 5 --file poll.txt
+git add -A && git commit -m "3-star Week 5 Top 25" && git push
+```
+
+Upload before the advance, after it, or three weeks late — it surfaces
+as soon as it's pushed, and a week that never gets uploaded just renders
+its games unranked. The trade is that their Top 25 tab can trail the
+schedule by a week, which is the right way round: a stale tab beats a
+stalled season. `--league` is the easy thing to forget, and forgetting
+it writes to main.
+
+Neither league starts at week 1 — each begins at whatever week it was
+first transcribed, and earlier weeks are not backfilled. 1-star's file
+exists but is empty, and until it isn't, script.js hides the Top 25 tab
+on that site entirely rather than showing an empty one.
 
 Like the other tools, it edits one file and never commits.
 

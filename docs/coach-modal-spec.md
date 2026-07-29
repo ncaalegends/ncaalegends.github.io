@@ -43,7 +43,7 @@ These numbers were measured against `main/` on 2026-07-26 by running
 | Coaches appearing in the Power Rankings | **6 of 23** | **0 of 14** | 2 of 8 |
 | Coaches with ≥1 H2H matchup all season | 22 of 23 | 14 of 14 | 8 of 8 |
 | H2H opponents per coach — avg / min / max | **3.8 / 1 / 6** | 2.0 / 1 / 3 | 2.0 / 1 / 3 |
-| Weeks of AP poll on file | 2 | **0** | **0** |
+| Weeks of AP poll on file | 3 (W1–3) | 1 (W4 only) | **0** |
 
 The three games played in `main` are Cal 22–9 UCLA and SMU 28–21 FSU (W1), and
 Michigan 24–14 Oklahoma (W2). `Turt17` (Colorado) is the one coach in any league
@@ -129,7 +129,7 @@ it's presentation-shaped, and `week-core.js` is deliberately logic-only.
 | `pf` / `pa` | `computeH2H` played games | per-game averages |
 | `streak` | `computeH2H`, most recent played games | `"W3"` / `"L2"` / `null` |
 | `bestWin` | played wins, min `oppRankIn(week, oppKey)` | uses that week's frozen poll; falls back to biggest margin where there is no poll (§6b) |
-| `pollRank` / `peakPollRank` | `TOP25_DATA` | in-game AP, distinct from power rank. **`main` only** — see §6b |
+| `pollRank` / `peakPollRank` | `TOP25_DATA` | in-game AP, distinct from power rank. Present in `main` (W1–) and `3star` (W4–), absent in `1star` — see §6b |
 | `nextGame` | first unplayed entry in that coach's schedule | opponent, week, home/away, CPU-or-coach |
 
 **Caching:** compute once on first modal open, memoise in a module-level `Map`.
@@ -295,27 +295,50 @@ shows both. Label them `POWER RANK` and `AP POLL` — never bare "Rank".
 
 ---
 
-## 6b. The other two leagues have no AP poll
+## 6b. The AP poll is per-league, and partial
 
-`main/` has `top25-data.js`. **`3star/` and `1star/` do not** — no file, not
-referenced in their `index.html`, `TOP25` is undefined and `TOP25_DATA` falls
-back to `[]`. This is easy to miss because all three leagues share `script.js`.
+All three leagues now have a `top25-data.js` loaded by their `index.html`, but
+they are in three different states and the modal has to survive all of them:
+
+| | `main` | `3star` | `1star` |
+|---|---|---|---|
+| Weeks on file | W1, W2, W3 | W4 only | none — file exists, array empty |
+| Starts at | week 1 | week 4 | n/a |
+| Advance gated on the poll | yes | no | no |
+
+Two things follow that are easy to get wrong because all three leagues share
+`script.js`:
+
+**Empty is still a real state.** `1star` has `TOP25_DATA.length === 0`, exactly
+as all three used to. Everything written below about a pollless league still
+applies there verbatim — it just applies to one league instead of two.
+
+**Partial is the new state, and it's the harder one.** `3star` has a poll, but
+not for weeks 1–3, and those weeks are never being backfilled. So
+`TOP25_DATA.length > 0` does **not** mean "every played game has a rank
+available". A week-2 3-star game has no poll behind it and never will.
 
 Consequences for the modal:
 
-- The `AP POLL` and `PEAK AP` values are permanently `—` in two of three
-  leagues. **Don't ship a tile that is structurally always empty there** — build
-  the stat strip from a list filtered on `TOP25_DATA.length > 0`, so those
-  leagues get a 5-tile strip rather than a dead one. The "never reflow between
-  coaches" rule in §5.2 still holds; the strip is fixed *per league*.
+- The `AP POLL` and `PEAK AP` values are permanently `—` in `1star`. **Don't
+  ship a tile that is structurally always empty there** — build the stat strip
+  from a list filtered on `TOP25_DATA.length > 0`, so that league gets a 5-tile
+  strip rather than a dead one. The "never reflow between coaches" rule in §5.2
+  still holds; the strip is fixed *per league*.
+- In `3star` the same tiles are live but sparse: a coach can legitimately show
+  `—` for `AP POLL` because the poll didn't exist yet in the weeks they were
+  ranked, not because they were unranked. Don't render a missing week as
+  "unranked" in prose. `PEAK AP` should be computed over the weeks on file only.
 - `bestWin` is defined as "highest-ranked opponent beaten" via `oppRankIn()`,
-  which returns `unrankedRank: 26` for everyone when there's no poll. In those
-  leagues it must fall back to **biggest win by margin**, with the label
-  changing to match (`BEST WIN` → `BIGGEST WIN`). Silently ranking six opponents
-  all tied at 26 and picking the alphabetical first is the failure mode here.
+  which returns `unrankedRank: 26` for everyone when there's no poll. Where a
+  coach's whole slate falls in weeks with no poll it must fall back to **biggest
+  win by margin**, with the label changing to match (`BEST WIN` → `BIGGEST
+  WIN`). Silently ranking six opponents all tied at 26 and picking the
+  alphabetical first is the failure mode here — and in `3star` it can now bite
+  on a per-coach basis rather than per-league.
 - Not a modal problem, but worth knowing: with no poll, `sosBonus` is always
-  zero in those leagues, so their power rankings are win% + margin + road wins
-  only.
+  zero, so `1star` power rankings are win% + margin + road wins only, and
+  `3star`'s are that for every week before 4.
 
 Also: **no schedule entry in any league currently carries `sim: true`.** The SIM
 chip in §5.3 is untested against real data — it is correct per `buildWeek`, but

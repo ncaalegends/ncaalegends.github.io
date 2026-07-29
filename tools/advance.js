@@ -367,9 +367,10 @@ async function main() {
   const data = loadData(paths);
 
   /* Don't advance into a week whose Top 25 isn't in yet — a dry run is
-     just a preview, so it's allowed through to show the message. */
+     just a preview, so it's allowed through to show the message.
+     Applies to main only; the gate itself decides that, per league. */
   if (!dryRun) {
-    const gate = top25GateError(data, week);
+    const gate = top25GateError(data, week, L);
     if (gate) die(gate);
   }
 

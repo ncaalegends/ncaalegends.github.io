@@ -70,6 +70,7 @@
       <button class="tab-btn active" data-tab="home" role="tab" aria-selected="true" aria-controls="home">Home</button>
       <button class="tab-btn" data-tab="schedule" role="tab" aria-selected="false" aria-controls="schedule">Schedule</button>
       <button class="tab-btn" data-tab="rankings" role="tab" aria-selected="false" aria-controls="rankings">Rankings</button>
+      <button class="tab-btn" data-tab="top25" role="tab" aria-selected="false" aria-controls="top25">Top 25</button>
       <button class="tab-btn" data-tab="roster" role="tab" aria-selected="false" aria-controls="roster">Roster</button>
     </nav>
   </div>
@@ -165,6 +166,17 @@
     <ol class="poll-list" id="full-rankings"></ol>
   </section>
 
+  <!-- TOP 25 (in-game AP poll)
+       Hidden entirely by script.js until this league has transcribed
+       at least one week — see setupTabs(). -->
+  <section id="top25" class="tab-panel" role="tabpanel" tabindex="-1">
+    <div class="section-head">
+      <h2 class="section-title">Top 25</h2>
+      <span class="section-tag" id="top25-week-label"></span>
+    </div>
+    <ol class="top25-list" id="top25-list"></ol>
+  </section>
+
   <!-- ROSTER -->
   <section id="roster" class="tab-panel" role="tabpanel" tabindex="-1">
     <div class="section-head">
@@ -193,9 +205,10 @@
 <!-- Data files load before the logic. defer keeps them in order
      and waits for the DOM, so no DOMContentLoaded wrapper needed.
      script.js and style.css are shared by all three leagues — only
-     the two data files below are league-specific. -->
+     the data files below are league-specific. -->
 <script src="league-data.js" defer></script>
 <script src="schedule-data.js" defer></script>
+<script src="top25-data.js" defer></script>
 <script src="../people.js" defer></script>
 <script src="../week-core.js" defer></script>
 <script src="../script.js" defer></script>

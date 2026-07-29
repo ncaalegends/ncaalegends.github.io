@@ -482,7 +482,18 @@ function main() {
   /* --- names --- */
   const { typos, novel } = checkNames(rows, knownTeamNames(data));
 
-  if (typos.length) {
+  /* Edit distance can't tell a misread from two schools that really do
+     have near-identical names — "South Carolina" is one edit from
+     "North Carolina" and both are real. So the check blocks by
+     default, and --allow-new (the flag that already means "these names
+     are new, I checked them against the screenshot") downgrades it to
+     a warning rather than forcing anyone to reach for --force, which
+     means something else entirely and would be the wrong habit to
+     teach. The suggestion is still printed, loudly, because on most
+     weeks it IS the answer. */
+  const allowNew = args.flags.has("allow-new");
+
+  if (typos.length && !allowNew) {
     console.error(`\n  Week ${week} poll has team names that look misread — nothing written.\n`);
     typos.forEach((t) =>
       console.error(`    - rank ${t.rank}: "${t.team}" — did you mean "${t.suggestion}"?`)
@@ -490,12 +501,13 @@ function main() {
     console.error(
       `\n  These are each within a couple of characters of a name already in the league data,\n` +
         `  which is what a misread looks like. Fix the spelling and run again. If one really is\n` +
-        `  a different school, spell it the way the roster and schedules spell it.\n`
+        `  a different school — South vs North Carolina, Miami (OH) vs Miami — re-run with\n` +
+        `  --allow-new to accept it as spelled.\n`
     );
     process.exit(1);
   }
 
-  if (novel.length && !args.flags.has("allow-new")) {
+  if (novel.length && !allowNew) {
     console.error(`\n  Week ${week} poll has team names the league has never seen — nothing written.\n`);
     novel.forEach((t) => console.error(`    - rank ${t.rank}: "${t.team}"`));
     console.error(
@@ -526,6 +538,15 @@ function main() {
   if (novel.length) {
     console.log(`  New to the league data (accepted via --allow-new):`);
     novel.forEach((t) => console.log(`    - ${t.team}`));
+    console.log("");
+  }
+
+  if (typos.length) {
+    console.log(`  Accepted via --allow-new, but each is one or two characters from a name`);
+    console.log(`  the league already uses. Check these against the screenshot before pushing:`);
+    typos.forEach((t) =>
+      console.log(`    - rank ${t.rank}: "${t.team}"  (close to "${t.suggestion}")`)
+    );
     console.log("");
   }
 
