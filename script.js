@@ -1868,6 +1868,9 @@ function renderFooter() {
     const items = [
       { label: "Discord", url: safeUrl(links.discord) },
       { label: "Rules", url: safeUrl(links.rules) },
+      /* Vacation Tracker. Same on every league, so it's a literal
+         here rather than per-league data. */
+      { label: "Vacation Tracker", url: "https://forms.gle/DSGCUREcdYovX6pi9" },
       /* Commissioner sign-in. Always shown, on every league — it's a
          login wall, not a back door, so a coach clicking it just
          finds a box they have no code for. Not run through safeUrl()
