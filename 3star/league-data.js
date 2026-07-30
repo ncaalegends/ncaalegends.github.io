@@ -67,7 +67,7 @@ const LEAGUE_INFO = {
 const COACHES = [
   { name: "Bl00dVayN3",      team: "California",         conference: "ACC", color: "#FDB515", twitch: "https://www.twitch.tv/bl00dvayn3", espnId: "25" },
   { name: "Temptiger",       team: "James Madison",      conference: "SEC", color: "#9B6BD8", twitch: "https://www.twitch.tv/temptiger", espnId: "256" },
-  { name: "DiabeticSnail22", team: "North Texas",        conference: "SEC", color: "#35B06A", twitch: "https://www.twitch.tv/diabeticsnail22", espnId: "249" },
+  { name: "DiabeticSnail22", team: "North Texas",        conference: "SEC", color: "#35B06A", twitch: "https://www.twitch.tv/diabeticsnail22", espnId: "249", departedAfterWeek: 4 },  // Went inactive here after Week 4; still active in the main dynasty. Weeks 0-4 stand (Texan_hog keeps the Week 4 loss); North Texas is CPU from Week 5. See the flag notes in main/league-data.js.
   { name: "Brian52682",      team: "Baylor",             conference: "XII", color: "#F5C542", twitch: "https://www.twitch.tv/brian52682", espnId: "239" },
   { name: "Dway",            team: "Iowa State",         conference: "XII", color: "#D6394E", twitch: "https://www.twitch.tv/dwayinspired", espnId: "66" },
   { name: "Salzy",           team: "Wisconsin",          conference: "B1G", color: "#D63B45", twitch: "https://www.twitch.tv/salzy117", espnId: "275" },

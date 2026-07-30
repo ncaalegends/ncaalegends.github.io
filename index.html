@@ -103,7 +103,18 @@ async function loadLeague(slug) {
 }
 
 function cardHtml(meta, data, failed) {
-  const coaches = failed ? null : (data.COACHES || []).length;
+  /* Coaches actually playing, which is not the length of the array.
+     A roster entry sticks around after someone leaves so their games
+     keep resolving — `active: false` for a coach holding a spot,
+     `departedAfterWeek` for one who quit mid-season. Both are off the
+     roster grid inside the league, so counting them here would make
+     this card disagree with the page it links to. Same rule as
+     ROSTER in script.js. */
+  const coaches = failed
+    ? null
+    : (data.COACHES || []).filter(
+        (c) => c.active !== false && c.departedAfterWeek == null
+      ).length;
   const week = failed ? "Unavailable" : weekLabel(data.SEASON.currentWeek);
   const status = failed ? "" : (data.SEASON.statusLine || "");
 

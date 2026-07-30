@@ -34,6 +34,12 @@ These numbers were measured against `main/` on 2026-07-26 by running
 `WeekCore.buildWeek` over weeks 0–15 with the same filtering `script.js` applies
 (`ROSTER` / `SCHEDULES`, inactive coaches removed).
 
+These are a dated snapshot, not live figures — several have moved since.
+Notably 3-star is down to **13** active coaches as of 2026-07-30:
+`DiabeticSnail22` left after Week 4 (`departedAfterWeek: 4`), which removes him
+from the roster and the poll while his played games stay on the books. See
+`SCOPING-mid-season-departure.md`.
+
 | Measure | main | 3star | 1star |
 |---|---|---|---|
 | Active coaches | 23 | 14 | 8 |

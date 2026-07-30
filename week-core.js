@@ -51,48 +51,92 @@
 
     const normalize = (s) => String(s ?? "").trim().toLowerCase();
 
-    /* A coach carrying `active: false` is on the books but not
-       currently playing (e.g. left for another dynasty, may return).
-       They're treated as absent from the league everywhere something
-       is derived: their team stops being a coach-vs-coach team, so
-       their games fall back to CPU, and their own schedule block is
-       skipped in buildWeek. All their data stays in the file — remove
-       the flag to bring them back exactly as they were. */
-    const COACHES = ALL_COACHES.filter((c) => c.active !== false);
+    /* ----------------------------------------------------------
+       DEPARTURES — two flavours, one comparison.
 
-    const rosterKeys = new Set();
-    COACHES.forEach((c) => {
+       `active: false` is a coach on the books but not playing (left
+       for another dynasty, may return) with no played games worth
+       keeping. They are absent from the league everywhere something
+       is derived: their team stops being a coach-vs-coach team, their
+       games fall back to CPU, and their own schedule block is skipped
+       in buildWeek.
+
+       `departedAfterWeek: N` is a coach who left PART WAY THROUGH a
+       season they had already played games in. Weeks 0..N are history
+       and must stay head-to-head — those games happened, and the
+       opponent's record and power-poll window depend on them. From
+       week N+1 the team behaves exactly like an `active: false` team.
+
+       Both collapse to one number: the last week this team counts as
+       a league team. `active: false` is -1 ("no week qualifies"), an
+       ordinary coach is Infinity. Every question below is then a
+       single comparison and `active: false` needs no special case.
+
+       Whether a coach gets a POWER POLL ROW is a different question,
+       answered by the current roster in computeRankings — see the
+       note there. A departed coach keeps their games forever and
+       loses their row; the two are deliberately not the same switch.
+
+       All the data stays in the file either way. Remove the flag to
+       bring a coach back exactly as they were.
+       ---------------------------------------------------------- */
+    const departureWeek = (c) => {
+      if (c.active === false) return -1;
+      if (c.departedAfterWeek != null) return Number(c.departedAfterWeek);
+      return Infinity;
+    };
+
+    /* Team key -> last week that team is a league team. A coach whose
+       `team` carries slash alternates contributes every one of them.
+       On a collision the later cutoff wins, so a team handed from a
+       departing coach to an active one stays live. */
+    const teamCutoff = new Map();
+    ALL_COACHES.forEach((c) => {
+      const until = departureWeek(c);
       String(c.team)
         .split("/")
         .forEach((part) => {
           const k = normalize(part);
-          if (k) rosterKeys.add(k);
+          if (!k) return;
+          const prev = teamCutoff.has(k) ? teamCutoff.get(k) : -Infinity;
+          teamCutoff.set(k, Math.max(prev, until));
         });
     });
 
-    // Teams belonging to an inactive coach, so buildWeek can leave
-    // their (now stale) schedule block out entirely.
-    const inactiveKeys = new Set();
-    ALL_COACHES.filter((c) => c.active === false).forEach((c) => {
-      String(c.team)
-        .split("/")
-        .forEach((part) => {
-          const k = normalize(part);
-          if (k) inactiveKeys.add(k);
-        });
-    });
+    /* A departed coach must still resolve to a roster entry, or their
+       already-played weeks render with an empty coach name — the exact
+       failure documented in docs/coach-modal-spec.md section 10. An
+       `active: false` coach has no games to attribute and stays
+       unresolvable, which is the behaviour that shipped. */
+    const RESOLVABLE = ALL_COACHES.filter((c) => c.active !== false);
 
     const rosterKeyFor = (scheduleName) => {
       const aliased = ALIASES[scheduleName];
       return aliased ? normalize(aliased) : normalize(scheduleName);
     };
 
-    const isLeagueTeam = (n) => rosterKeys.has(rosterKeyFor(n));
-    const isInactiveTeam = (n) => inactiveKeys.has(rosterKeyFor(n));
+    /* `week` defaults to "now". A caller asking about the league as it
+       stands today (a roster grid, a dropdown, the postseason) passes
+       nothing and gets the current answer; a caller rendering or
+       scoring a specific week passes it and gets the answer that was
+       true at the time. Infinity is later than every cutoff, so the
+       default reads as "after all departures have happened".
+
+       A team no coach has ever claimed isn't in the map at all, so it
+       is neither a league team nor an inactive one — a plain CPU
+       opponent, as before. */
+    const isLeagueTeam = (n, week) => {
+      const until = teamCutoff.get(rosterKeyFor(n));
+      return until !== undefined && (week === undefined ? Infinity : week) <= until;
+    };
+    const isInactiveTeam = (n, week) => {
+      const until = teamCutoff.get(rosterKeyFor(n));
+      return until !== undefined && (week === undefined ? Infinity : week) > until;
+    };
 
     const entryFor = (n) => {
       const key = rosterKeyFor(n);
-      return COACHES.find((c) =>
+      return RESOLVABLE.find((c) =>
         String(c.team).split("/").some((part) => normalize(part) === key)
       );
     };
@@ -138,11 +182,15 @@
     const missing = []; // coaches with no entry for this week at all
 
     (data.TEAM_SCHEDULES || []).forEach((t) => {
-      /* Skip an inactive coach's own schedule block outright — their
-         games still appear (as CPU) on the schedules of whoever they
-         played, so leaving their block in would double-list those
-         matchups and resurrect a By-Team page they no longer have. */
-      if (R.isInactiveTeam(t.team)) return;
+      /* Skip a departed coach's own schedule block — their games still
+         appear (as CPU) on the schedules of whoever they played, so
+         leaving their block in would double-list those matchups and
+         resurrect a By-Team page they no longer have.
+
+         Week-scoped: a coach who left after week 4 still owns weeks
+         0-4, and those weeks must keep producing league matchups or
+         the results vanish from their opponents' records. */
+      if (R.isInactiveTeam(t.team, week)) return;
 
       const entry = (t.weeks || []).find((w) => Number(w.week) === week);
 
@@ -163,7 +211,7 @@
       const home = entry.location === "at" ? entry.opponent : t.team;
       const away = entry.location === "at" ? t.team : entry.opponent;
 
-      if (R.isLeagueTeam(entry.opponent)) {
+      if (R.isLeagueTeam(entry.opponent, week)) {
         const pairKey = [R.rosterKeyFor(t.team), R.rosterKeyFor(entry.opponent)]
           .sort()
           .join("::");
@@ -650,8 +698,48 @@
         });
     }
 
+    /* ------------------------------------------------------------
+       WHO GETS A ROW — the current roster, not the game log.
+
+       Two different questions, and they must not share a switch:
+
+         Did this game happen between two humans?
+           A fact about the past. Permanent. Nothing that happens
+           later can change it. This is what `c.games` holds, and it
+           is what computeH2H reports — see the note there.
+
+         Should this coach have a row in the poll?
+           A statement about the league right now. Answered here.
+
+       Everything above builds `coaches` from MEETINGS, so without
+       this gate a coach who left in 2026 still holds a row in 2029:
+       the window is "the last N games regardless of season", so if
+       they never play again those same games sit there forever and it
+       never ages out on its own. The poll would drift into being part
+       current league, part ghosts.
+
+       The gate is applied HERE and not at ingest, and that placement
+       is the whole trick. A departed coach's games are the same
+       objects that feed their OPPONENTS' windows — filtering earlier
+       would take a still-active coach's result down with them, which
+       is exactly the bug this replaced (marking a coach `active:
+       false` mid-season used to erase their opponent's loss).
+
+       So: aggregate everyone, rank only the current roster.
+
+       Empty roster -> no gate, rather than an empty poll. A data file
+       that failed to load should degrade to the old behaviour, not
+       silently blank the page. */
+    const rosterKeys = new Set(
+      ((lastSeason && lastSeason.COACHES) || [])
+        .filter((c) => c.active !== false && c.departedAfterWeek == null)
+        .map((c) => coachKey(c.name))
+    );
+
     const ranked = [];
     coaches.forEach((c) => {
+      if (rosterKeys.size && !rosterKeys.has(c.key)) return;
+
       /* Newest first, then take the window off the front. Ordering is
          (year, sortKey), and sortKey already places the postseason
          after every regular week — so a title game counts as more
@@ -884,14 +972,15 @@
     };
 
     (data.TEAM_SCHEDULES || []).forEach((t) => {
-      if (R.isInactiveTeam(t.team)) return;
-
       (t.weeks || []).forEach((e) => {
         if (!e || !e.opponent) return;
-        if (!R.isLeagueTeam(e.opponent)) return;
-        if (R.isInactiveTeam(e.opponent)) return;
 
+        /* Week-scoped, so a departed coach's played weeks are still
+           audited for agreement and their abandoned ones are not. */
         const week = Number(e.week);
+        if (R.isInactiveTeam(t.team, week)) return;
+        if (!R.isLeagueTeam(e.opponent, week)) return;
+
         const aKey = R.rosterKeyFor(t.team);
         const bKey = R.rosterKeyFor(e.opponent);
         const pair = [aKey, bKey].sort().join("::") + "@" + week;
@@ -1031,6 +1120,13 @@
   /* ------------------------------------------------------------
      computeH2H — the career record, across every season given
      ------------------------------------------------------------
+     NO ROSTER GATE, DELIBERATELY. computeRankings drops coaches who
+     are no longer on the current roster, because a poll is a claim
+     about the league today. This function is the opposite: it is the
+     annals. A game played between two humans in 2026 belongs in both
+     their career records forever, whether either of them is still
+     around in 2029. Do not "fix" the asymmetry by filtering here.
+
      INPUT. Either a single season's data object, or an array of them
      ordered however you like:
 

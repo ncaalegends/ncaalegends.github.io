@@ -106,6 +106,29 @@ const LEAGUE_INFO = {
                schedule, and they leave the By Team dropdown, while
                all their data stays right here. Delete the flag to
                reinstate them exactly as they were.
+
+               Use this ONLY when they have no played games worth
+               keeping. It applies to the whole season, including
+               weeks already in the books, so a coach who had played
+               would take their opponents' results down with them.
+
+   departedAfterWeek:
+               optional, and the flag to reach for when someone quits
+               PART WAY THROUGH a season they've played in. `4` means
+               weeks 0-4 stand as real head-to-head games — their
+               opponents keep those results, records and power-poll
+               windows — and from week 5 the team is a CPU opponent.
+               They leave the roster grid, the By Team dropdown and
+               the power rankings, exactly like `active: false`.
+
+               Per-season and self-limiting: it belongs to the season
+               the departure happened in, freezes into seasons/<year>/
+               at rollover, and is simply not carried into next year's
+               roster. It never piles up.
+
+   Neither flag touches the career record. A game played between two
+   humans stays in both their histories forever — see the note on
+   computeH2H in week-core.js.
    ------------------------------------------------------------ */
 const COACHES = [
   { name: "Bl00dVayN3",      team: "South Carolina",               conference: "SEC", color: "#A6192E", twitch: "https://www.twitch.tv/bl00dvayn3", espnId: "2579" },

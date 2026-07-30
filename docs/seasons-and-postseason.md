@@ -123,9 +123,16 @@ in; the regular-season files already need hand-deduping (see the header of any
 **Rounds are ordered by their position in the array.** There is no `order`
 field; inserting a round means putting it in the right place.
 
-Games where either side is a CPU team or an inactive coach are dropped — the
+Games where either side is a CPU team or a departed coach are dropped — the
 same rule `buildWeek` applies to the regular season. A coach-vs-CPU bowl is real
 but isn't head-to-head.
+
+`buildWeek`'s version of that rule is week-scoped (a coach carrying
+`departedAfterWeek: N` is a league team through week N and CPU after it), but
+the postseason has no week number to scope by. It asks the unscoped question —
+"is this a league team now?" — which reads a departure as already having
+happened. That is the right answer: a coach who quit in week 5 is not in the
+playoff.
 
 ### Still to do when real data arrives
 

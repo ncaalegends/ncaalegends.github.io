@@ -46,29 +46,64 @@ const ROSTER_RAW = typeof COACHES !== "undefined" ? COACHES : [];
 const INFO = typeof LEAGUE_INFO !== "undefined" ? LEAGUE_INFO : { name: "League", tag: "" };
 
 /* ------------------------------------------------------------
-   INACTIVE COACHES
-   A coach marked `active: false` in league-data.js is on the books
-   but not currently playing — they've stepped away and may return.
-   Filtering them (and their now-stale schedule block) out here, at
-   the data handles, is all it takes: everything below reads ROSTER
-   and SCHEDULES, so the coach drops off the roster, their team stops
-   counting as a league (coach-vs-coach) team and reverts to CPU, and
-   they leave the By Team dropdown — with every byte of their data
-   still in the file. Delete the flag to bring them back untouched.
+   COACHES WHO HAVE LEFT
+   Two flags, two different amounts of history to preserve.
+
+   `active: false` — on the books but not playing, with no played
+   games worth keeping. They and their now-stale schedule block drop
+   out here, at the data handles: the coach leaves the roster, their
+   team stops counting as a league (coach-vs-coach) team and reverts
+   to CPU, and they leave the By Team dropdown.
+
+   `departedAfterWeek: N` — left PART WAY THROUGH a season they had
+   already played in. Same disappearance from the roster grid and the
+   dropdown, but weeks 0..N are history: those games happened, and
+   they still belong to whoever played them. So this file keeps a
+   third handle, ROSTER_HISTORY, which includes departed coaches, and
+   the name/colour lookups read it — otherwise an opponent's Week 4
+   row would lose the coach chip on a game that was really played.
+   Whether a departed coach still counts as a league team is a
+   per-week question, so isLeagueTeam takes a week; see week-core.js
+   makeResolver, which owns the authoritative version of this rule.
+
+   Every byte of their data stays in the file. Delete the flag to
+   bring a coach back untouched.
    ------------------------------------------------------------ */
 const isActiveCoach = (c) => c.active !== false;
+const hasDeparted = (c) => c.departedAfterWeek != null;
 const _inactiveNorm = (s) => String(s ?? "").trim().toLowerCase();
 const _inactiveKey = (name) => {
   const aliased = ALIASES[name];
   return aliased ? _inactiveNorm(aliased) : _inactiveNorm(name);
 };
+const _teamKeys = (c) =>
+  String(c.team).split("/").map((part) => _inactiveNorm(part));
+
+// Gone entirely — no games to preserve, no schedule block to keep.
 const INACTIVE_TEAM_KEYS = new Set(
-  ROSTER_RAW.filter((c) => !isActiveCoach(c)).flatMap((c) =>
-    String(c.team).split("/").map((part) => _inactiveNorm(part))
-  )
+  ROSTER_RAW.filter((c) => !isActiveCoach(c)).flatMap(_teamKeys)
 );
-const ROSTER = ROSTER_RAW.filter(isActiveCoach);
-const SCHEDULES = SCHEDULES_RAW.filter((t) => !INACTIVE_TEAM_KEYS.has(_inactiveKey(t.team)));
+
+/* Left mid-season -> team key -> last week they count as a league
+   team. Read by isLeagueTeam below. */
+const DEPARTED_TEAM_UNTIL = new Map();
+ROSTER_RAW.filter((c) => isActiveCoach(c) && hasDeparted(c)).forEach((c) => {
+  _teamKeys(c).forEach((k) => {
+    if (k) DEPARTED_TEAM_UNTIL.set(k, Number(c.departedAfterWeek));
+  });
+});
+
+/* ROSTER         the league as it stands now — cards, dropdown, live row
+   ROSTER_HISTORY everyone whose games still count — name/colour lookups
+   SCHEDULES      blocks worth rendering; a departed coach's own block
+                  goes, because their remaining weeks won't be played */
+const ROSTER = ROSTER_RAW.filter((c) => isActiveCoach(c) && !hasDeparted(c));
+const ROSTER_HISTORY = ROSTER_RAW.filter(isActiveCoach);
+const SCHEDULES = SCHEDULES_RAW.filter(
+  (t) =>
+    !INACTIVE_TEAM_KEYS.has(_inactiveKey(t.team)) &&
+    !DEPARTED_TEAM_UNTIL.has(_inactiveKey(t.team))
+);
 
 /* ------------------------------------------------------------
    TEAM NAME RESOLUTION
@@ -106,18 +141,29 @@ function rosterKeyFor(scheduleName) {
 /* Is this opponent another coach in the league?
    Checked against the ROSTER (22 teams), not against who has
    turned in a schedule (15) — otherwise a game against a coach
-   who hasn't sent a screenshot yet looks like a CPU game. */
-function isLeagueTeam(scheduleName) {
-  return ROSTER_KEYS.has(rosterKeyFor(scheduleName));
+   who hasn't sent a screenshot yet looks like a CPU game.
+
+   `week` is optional and means "as of that week". A coach who left
+   after week 4 was a league opponent in weeks 0-4 and is CPU from
+   week 5, so a caller rendering a specific row should pass its week.
+   Omitting it asks about the league today, which is what the roster
+   grid and the dropdown want. */
+function isLeagueTeam(scheduleName, week) {
+  const key = rosterKeyFor(scheduleName);
+  if (ROSTER_KEYS.has(key)) return true;
+  if (!DEPARTED_TEAM_UNTIL.has(key)) return false;
+  return week !== undefined && week <= DEPARTED_TEAM_UNTIL.get(key);
 }
 
 // Teams that have actually submitted a schedule. Used only for
 // deduping — a matchup can only appear twice if both sides are in.
 const KNOWN_SCHEDULE_TEAMS = new Set(SCHEDULES.map((t) => t.team));
 
+/* ROSTER_HISTORY, not ROSTER: a departed coach's played games still
+   carry their name and colour. */
 function rosterEntryFor(scheduleName) {
   const key = rosterKeyFor(scheduleName);
-  return ROSTER.find((c) =>
+  return ROSTER_HISTORY.find((c) =>
     String(c.team).split("/").some((part) => normalize(part) === key)
   );
 }
@@ -515,7 +561,7 @@ function buildWeekGames(week) {
 
     // Tagging and deduping are separate questions:
     // "is the opponent a league coach" vs "did they submit a schedule".
-    const isLeague = isLeagueTeam(entry.opponent);
+    const isLeague = isLeagueTeam(entry.opponent, week);
     const bothTracked = KNOWN_SCHEDULE_TEAMS.has(entry.opponent);
 
     if (bothTracked) {
@@ -882,7 +928,10 @@ function top25RowHtml(t, week) {
   const name = t.team;
   const src = teamLogoSrc(name);
   const mono = monogramFor(rosterEntryFor(name)?.team || name);
-  const coach = coachFor(name); // non-empty only when an active coach owns this team
+  /* Non-empty only when a coach owns this team RIGHT NOW. A departed
+     coach's old school is just another ranked CPU program, so it gets
+     no accent — no week passed, so this asks about today. */
+  const coach = isLeagueTeam(name) ? coachFor(name) : "";
   const color = coach ? colorFor(name) : "";
 
   /* League teams get a coloured accent bar + tint so a coach's team
@@ -1246,7 +1295,11 @@ function nextGameFor(coach) {
     week: Number(upcoming.week),
     opponent: upcoming.opponent,
     at: upcoming.location === "at",
-    coach: coachFor(upcoming.opponent),
+    /* A departed coach's school is a CPU opponent by the time anyone
+       is looking at an upcoming week, so it gets no coach name. */
+    coach: isLeagueTeam(upcoming.opponent, Number(upcoming.week))
+      ? coachFor(upcoming.opponent)
+      : "",
   };
 }
 
@@ -1573,7 +1626,10 @@ function renderTeamSchedule() {
         </div>`;
       }
 
-      const isLeague = isLeagueTeam(w.opponent);
+      /* As of THIS week — a coach who left after week 4 was a real
+         opponent in weeks 0-4 and is CPU from week 5 on, so the rows
+         above and below the departure read differently on purpose. */
+      const isLeague = isLeagueTeam(w.opponent, Number(w.week));
       const oppCoach = isLeague ? coachFor(w.opponent) : "";
       const played = w.teamScore != null && w.opponentScore != null;
 
