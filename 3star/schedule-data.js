@@ -141,7 +141,7 @@ const TEAM_SCHEDULES = [
       { week: 1, opponent: "FCS East", location: "vs", teamScore: 73, opponentScore: 3 },
       { week: 2, opponent: "Utah", location: "vs", teamScore: 45, opponentScore: 28 },
       { week: 3, note: "BYE" },
-      { week: 4, opponent: "UCLA", location: "vs" },
+      { week: 4, opponent: "UCLA", location: "vs", teamScore: 33, opponentScore: 23 },
       { week: 5, opponent: "Nebraska", location: "at" },
       { week: 6, opponent: "Ohio State", location: "at" },
       { week: 7, opponent: "Rutgers", location: "vs" },
