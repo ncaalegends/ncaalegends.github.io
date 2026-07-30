@@ -170,6 +170,80 @@ GitHub Pages picks it up within a minute or so.
 
 `advance.js` doesn't touch scores — that's `scores.js`, below.
 
+## nudge.js
+
+The daily "you still owe a game" reminder. Reads the current week,
+finds every game with no score recorded, and posts one Discord message
+tagging exactly those coaches.
+
+```
+node tools/nudge.js --league main --dry-run
+node tools/nudge.js --league 3star
+```
+
+You normally don't run this at all — **`.github/workflows/daily-nudge.yml`
+runs it for all three leagues every morning at 14:00 UTC (10:00 AM EDT).**
+
+### Why it's a GitHub Action and not a local scheduled task
+
+Scores arrive through the admin page, which commits straight to this
+repo, so the runner's checkout is always current — a local working copy
+usually isn't. And a reminder that only fires when someone's PC happens
+to be awake isn't a reminder.
+
+It gets `tools/config.json` from the `DISCORD_CONFIG` repo secret, the
+same way `league-update.yml` does. Nothing else to set up.
+
+### The two silences
+
+Both are deliberate, and both exist so the bot stays worth reading:
+
+- **Every game in → posts nothing.** No "all games are in!" each
+  morning while the league waits on the advance.
+- **Advanced less than 12 hours ago → posts nothing.** The advance
+  announcement already pinged everyone with a game, so a nudge the same
+  evening is noise. The first nudge of a week lands the next morning.
+  Twelve hours and a 10am post means an evening advance is covered and
+  anything before ~10pm the night before still gets nudged.
+
+The advance is dated by asking git which commit introduced the current
+`currentWeek:` value, scoped to that league's `league-data.js` — nothing
+but an advance rewrites it. No stored timestamp, so nothing to drift.
+
+**That check needs full git history.** `fetch-depth: 0` in the workflow
+is load-bearing: on a shallow clone the whole file reads as newly added,
+the pickaxe matches the clone's tip commit, and the reported age would
+be a few hours every single day — suppressing every nudge forever. So
+`nudge.js` detects a shallow repo and refuses to answer instead, which
+fails *open* (it posts). A duplicate nudge is mildly annoying; a nudge
+that silently never fires is invisible.
+
+### Flags
+
+| Flag | Meaning |
+|---|---|
+| `--league SLUG` | `main` \| `3star` \| `1star`. Defaults to main. |
+| `--dry-run` | Print the message. Post nothing. |
+| `--skip-hours N` | Post-advance quiet window. Default 12. `0` disables. |
+| `--force` | Post even inside that window. |
+
+Mentions work exactly as described under `advance.js` — same
+`makeMentioner`, same case-insensitive coach lookup, same
+`allowed_mentions` allowlist, same warning naming any coach with no ID
+on file. Unplayed games come from `buildWeek()`'s `scored` flag, so
+"unplayed" here means precisely what it means on the site and in the
+score prompts.
+
+### Testing it
+
+Actions tab → **Daily nudge** → **Run workflow**. It defaults to a dry
+run: the exact message for each league prints in the job log and Discord
+is left alone. Tick **post** to send it for real, **force** to bypass
+the 12-hour window.
+
+Writes nothing, commits nothing, touches the network only for the
+webhook POST.
+
 ## scores.js
 
 Records final scores into `schedule-data.js`. Double-click

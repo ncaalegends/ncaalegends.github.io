@@ -467,4 +467,9 @@ if (require.main === module) {
 /* post and webhookUrl are exported so tools/apply.js (the web path)
    posts through the exact same webhook resolution and HTTP call as a
    local advance — one implementation, no drift between the two paths. */
-module.exports = { updateSeason, buildMessage, seasonBlock, post, webhookUrl };
+/* makeMentioner is exported for the same reason: tools/nudge.js posts
+   its own message but must resolve coach names to pings through the
+   identical case-insensitive lookup and identical allowed_mentions
+   allowlist. A second copy would be a second place for a missing ID to
+   go unnoticed. */
+module.exports = { updateSeason, buildMessage, seasonBlock, post, webhookUrl, makeMentioner };

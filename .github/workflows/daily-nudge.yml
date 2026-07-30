@@ -1,0 +1,112 @@
+# ============================================================
+#  DAILY NUDGE — tag whoever still hasn't played
+# ------------------------------------------------------------
+#  Runs tools/nudge.js for all three leagues every morning. Each
+#  league posts to its own webhook, tagging only the coaches whose
+#  week-N game has no score recorded yet. A league with every game
+#  in posts nothing, and a league that advanced in the last 12
+#  hours posts nothing either — the advance announcement already
+#  pinged those people. See the header of tools/nudge.js.
+#
+#  WHY THIS LIVES HERE AND NOT ON A LAPTOP
+#  Scores arrive through the admin page, which commits straight to
+#  this repo, so the runner's checkout is always current in a way a
+#  local working copy is not. And a reminder that only fires when
+#  somebody's PC happens to be awake isn't a reminder.
+#
+#  TIME
+#  GitHub cron is UTC and does not follow daylight saving, so
+#  14:00 UTC is 10:00 AM EDT now and will become 9:00 AM once EST
+#  starts in November — change the 14 to a 15 then. GitHub also
+#  runs scheduled jobs on a best-effort basis and can be several
+#  minutes late (occasionally much more) when the queue is busy;
+#  nothing here is time-critical, so that's fine.
+#
+#  It writes nothing and commits nothing — read-only plus one
+#  webhook POST per league.
+# ============================================================
+
+name: Daily nudge
+
+on:
+  schedule:
+    - cron: "0 14 * * *" # 10:00 AM EDT / 9:00 AM EST
+  # Manual trigger, so it can be tested without waiting for morning.
+  # Defaults to a dry run: the message is printed to the job log and
+  # Discord is left alone. Flip `post` to true to really send it.
+  workflow_dispatch:
+    inputs:
+      post:
+        description: "Actually post to Discord (otherwise dry run)"
+        type: boolean
+        default: false
+      force:
+        description: "Post even if the advance was less than 12h ago"
+        type: boolean
+        default: false
+
+# Nothing is committed, so no write access is needed at all.
+permissions:
+  contents: read
+
+# A nudge and an admin submission touching the same repo at once is
+# harmless (this job never writes), but two nudges overlapping would
+# double-post. Queue them.
+concurrency:
+  group: daily-nudge
+  cancel-in-progress: false
+
+jobs:
+  nudge:
+    runs-on: ubuntu-latest
+
+    steps:
+      # fetch-depth: 0 is REQUIRED, not an optimization to undo later.
+      # nudge.js dates the last advance with a pickaxe search through
+      # this file's history; on a shallow clone that history doesn't
+      # exist and the check refuses to answer, which makes the
+      # advance-day suppression silently stop working.
+      - name: Check out the site
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # Same pattern as league-update.yml: tools/config.json holds the
+      # webhooks and coach IDs, is gitignored, and reaches the runner
+      # only through this secret. Written with printf from an env var so
+      # its contents are never pasted into a shell line.
+      - name: Provide Discord config
+        env:
+          DISCORD_CONFIG: ${{ secrets.DISCORD_CONFIG }}
+        run: |
+          if [ -n "$DISCORD_CONFIG" ]; then
+            printf '%s' "$DISCORD_CONFIG" > tools/config.json
+            echo "Discord config provided to the runner."
+          else
+            echo "::error::DISCORD_CONFIG secret is not set - nothing can be posted."
+            exit 1
+          fi
+
+      # One league failing must not stop the others, so each runs in its
+      # own step and the whole job is not `set -e`-fragile across them.
+      # A genuine failure still marks the run red and sends GitHub's
+      # normal failure email, which is the alerting story here.
+      - name: Nudge all three leagues
+        env:
+          # A scheduled run always posts for real. Only a manual run can
+          # be a dry run, and that is its default.
+          DRY: ${{ github.event_name == 'workflow_dispatch' && inputs.post != true && '--dry-run' || '' }}
+          FORCE: ${{ inputs.force == true && '--force' || '' }}
+        run: |
+          rc=0
+          for league in main 3star 1star; do
+            echo "::group::$league"
+            node tools/nudge.js --league "$league" $DRY $FORCE || rc=$?
+            echo "::endgroup::"
+          done
+          exit $rc
