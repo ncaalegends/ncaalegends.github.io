@@ -116,7 +116,7 @@ const TEAM_SCHEDULES = [
       { week: 1, opponent: "FCS Southeast", location: "vs", teamScore: 31, opponentScore: 7 },
       { week: 2, opponent: "Wawa University", location: "at", teamScore: 30, opponentScore: 15 },
       { week: 3, opponent: "Jacksonville State", location: "at", teamScore: 24, opponentScore: 21 },
-      { week: 4, opponent: "Houston", location: "vs" },
+      { week: 4, opponent: "Houston", location: "vs", teamScore: 25, opponentScore: 48 },
       { week: 5, opponent: "Coastal Carolina", location: "at" },
       { week: 6, opponent: "James Madison", location: "vs" },
       { week: 7, opponent: "Old Dominion", location: "at" },
