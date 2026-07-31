@@ -40,17 +40,17 @@ const SEASON = {
      life as the dynasty runs. 2026 -> 2027 -> 2028 and so on. */
   year: 2026,
 
-  currentWeek: 3,
+  currentWeek: 4,
 
   // Shown in the hero. Update as the league moves through phases.
-  statusLine: "WEEK 3",
+  statusLine: "WEEK 4",
 
   /* ADVANCE DEADLINE — the one place real-world time appears.
      League rule: the next advance happens no later than 6:00 PM EDT
      three days after the last advance. Update this every time you
      advance; it's plain text, so write it however reads best.
      Set it to "" to hide the countdown line entirely. */
-  nextAdvance: "Friday, July 31 - 6:00 PM EDT",
+  nextAdvance: "Sunday, August 2 - 6:00 PM EDT",
 };
 
 /* ------------------------------------------------------------
