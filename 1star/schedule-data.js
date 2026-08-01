@@ -252,7 +252,7 @@ const TEAM_SCHEDULES = [
       { week: 1, opponent: "New Glarus", location: "at", teamScore: 29, opponentScore: 34 },
       { week: 2, opponent: "Georgia Tech", location: "at", teamScore: 24, opponentScore: 27 },
       { week: 3, opponent: "California", location: "at", teamScore: 26, opponentScore: 28 },
-      { week: 4, opponent: "FCS Southeast", location: "vs" },
+      { week: 4, opponent: "FCS Southeast", location: "vs", teamScore: 45, opponentScore: 14 },
       { week: 5, opponent: "Missouri State", location: "vs" },
       { week: 6, opponent: "New Mexico State", location: "at" },
       { week: 7, opponent: "Patriot Tech", location: "vs" },
