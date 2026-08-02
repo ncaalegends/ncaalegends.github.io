@@ -210,7 +210,7 @@ const TEAM_SCHEDULES = [
       { week: 3, opponent: "New Glarus", location: "vs", teamScore: 37, opponentScore: 27 },
       { week: 4, opponent: "Coastal Carolina", location: "at", teamScore: 38, opponentScore: 31 },
       { week: 5, opponent: "Delaware", location: "at", teamScore: 30, opponentScore: 35 },
-      { week: 6, opponent: "Sam Houston", location: "vs" },
+      { week: 6, opponent: "Sam Houston", location: "vs", teamScore: 31, opponentScore: 49 },
       { week: 7, opponent: "Westeros", location: "at" },
       { week: 8, note: "BYE" },
       { week: 9, opponent: "Wawa University", location: "vs" },
