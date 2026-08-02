@@ -185,7 +185,7 @@ const TEAM_SCHEDULES = [
       { week: 2, opponent: "FCS Midwest", location: "vs", teamScore: 42, opponentScore: 7 },
       { week: 3, opponent: "Minnesota", location: "at", teamScore: 15, opponentScore: 21 },
       { week: 4, opponent: "Baldwin Wallace", location: "vs", teamScore: 13, opponentScore: 34 },
-      { week: 5, opponent: "Central Michigan", location: "at" },
+      { week: 5, opponent: "Central Michigan", location: "at", teamScore: 55, opponentScore: 24 },
       { week: 6, opponent: "Eastern Michigan", location: "vs" },
       { week: 7, opponent: "Miami University", location: "at" },
       { week: 8, opponent: "Minneapolis", location: "at" },
