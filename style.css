@@ -85,6 +85,26 @@ body[data-league="1star"] {
 
 * { box-sizing: border-box; }
 
+/* Tab panels differ in height, so switching tabs can take the page from
+   "needs a vertical scrollbar" to "doesn't" and back. On platforms with
+   classic (space-consuming) scrollbars — Windows, most Linux — that
+   changes the viewport width by ~15px and every centered element jumps
+   sideways by half that. macOS uses overlay scrollbars, which is why the
+   shift never showed up there.
+
+   Reserving the gutter permanently keeps the viewport width constant.
+   overflow-y: scroll is the fallback for browsers without
+   scrollbar-gutter (Safari < 16); it forces the track to always render,
+   achieving the same thing more bluntly. */
+html {
+  scrollbar-gutter: stable;
+  overflow-y: scroll;
+}
+
+@supports (scrollbar-gutter: stable) {
+  html { overflow-y: auto; }
+}
+
 body {
   margin: 0;
   background:
