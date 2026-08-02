@@ -232,7 +232,7 @@ const TEAM_SCHEDULES = [
       { week: 2, note: "BYE" },
       { week: 3, opponent: "Northwestern", location: "at", teamScore: 17, opponentScore: 28 },
       { week: 4, opponent: "Baylor", location: "at", teamScore: 23, opponentScore: 16 },
-      { week: 5, opponent: "Texas Tech", location: "vs" },
+      { week: 5, opponent: "Texas Tech", location: "vs", teamScore: 14, opponentScore: 59 },
       { week: 6, note: "BYE" },
       { week: 7, opponent: "Utah", location: "vs" },
       { week: 8, opponent: "Oklahoma State", location: "at" },
