@@ -1829,6 +1829,32 @@ function renderTicker() {
 
   track.innerHTML = oneCopy;
 
+  /* Under prefers-reduced-motion the CSS turns the band into a real
+     horizontal scroll container instead of a loop. A scroll container
+     showing the two identical halves the -50% animation needs would
+     read as the news repeating itself, so in that mode we render one
+     copy, skip the fill-the-viewport padding, and leave the duration
+     alone — there's no animation to time. */
+  if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+    /* A scroll container with no focusable children isn't reachable
+       by keyboard in every engine, so the band itself becomes a stop.
+
+       The markup carries aria-hidden because the looping track is the
+       same content twice and every fact in it is already on the page
+       below. Neither is true here — this is a single copy and it is
+       the only way a keyboard user reaches it — and a focusable
+       descendant of an aria-hidden node is a violation besides. So
+       the hint comes off in exactly this mode. */
+    const band = track.parentElement;
+    if (band) {
+      band.removeAttribute("aria-hidden");
+      band.tabIndex = 0;
+      band.setAttribute("role", "region");
+      band.setAttribute("aria-label", "League ticker");
+    }
+    return;
+  }
+
   const viewport = track.parentElement?.clientWidth || 0;
   let half = oneCopy;
   let guard = 0;

@@ -43,6 +43,36 @@
   --font-mono: 'JetBrains Mono', monospace;
 
   --cut: 14px; /* diagonal clip amount used across panels */
+
+  /* ----------------------------------------------------------
+     MOTION — two curves, and only two.
+
+     --ease-in decelerates into place: fast off the mark, soft
+     landing. That is what "something arrived and stopped" looks
+     like, so it drives every arrival (hover on, active, open).
+
+     --ease-out is the mirror — slow start, accelerating out of
+     frame. That is "this is over, don't wait for it", so it
+     drives every departure (hover off, close, deselect).
+
+     A departure is always SHORTER than an arrival. An exit that
+     takes as long as its entrance means whatever replaces it
+     either waits, which reads as lag, or crossfades through it,
+     which reads as a smear.
+
+     The idiom throughout this file: the base rule carries the
+     leaving transition, and the :hover / .active / [open] rule
+     overrides it with the arriving one.
+     ---------------------------------------------------------- */
+  --ease-in: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-out: cubic-bezier(0.4, 0, 1, 1);
+  --dur-in: 0.22s;
+  --dur-out: 0.13s;
+
+  /* Shorthand for the common case: a tint or a small transform
+     that only needs the curve and duration swapped on arrival. */
+  --leave: var(--dur-out) var(--ease-out);
+  --arrive: var(--dur-in) var(--ease-in);
 }
 
 /* ============================================================
@@ -244,10 +274,13 @@ a { color: var(--gold); }
   padding: 2px 4px;
   margin: -2px -4px;
   border-radius: 3px;
-  transition: background 0.15s;
+  transition: background var(--leave);
 }
 
-.league-home:hover { background: var(--gold-dim); }
+.league-home:hover {
+  background: var(--gold-dim);
+  transition: background var(--arrive);
+}
 
 .league-home:focus-visible {
   outline: 2px solid var(--gold);
@@ -313,10 +346,13 @@ a { color: var(--gold); }
   border-right: 3.5px solid transparent;
   border-top: 4px solid currentColor;
   opacity: 0.75;
-  transition: transform 0.15s;
+  transition: transform var(--leave);
 }
 
-.league-switch[open] > summary::after { transform: rotate(180deg); }
+.league-switch[open] > summary::after {
+  transform: rotate(180deg);
+  transition: transform var(--arrive);
+}
 
 .league-switch > summary:focus-visible {
   outline: 2px solid var(--chalk);
@@ -355,7 +391,7 @@ a { color: var(--gold); }
   letter-spacing: 0.03em;
   text-transform: uppercase;
   border-left: 2px solid transparent;
-  transition: background 0.12s, border-color 0.12s;
+  transition: background var(--leave), border-color var(--leave);
 }
 
 .league-menu-item:hover,
@@ -363,6 +399,7 @@ a { color: var(--gold); }
   background: var(--navy);
   border-left-color: var(--team);
   outline: none;
+  transition: background var(--arrive), border-color var(--arrive);
 }
 
 /* The dot carries each league's own accent, not the current page's,
@@ -420,7 +457,12 @@ a { color: var(--gold); }
   text-transform: uppercase;
   color: var(--steel);
   clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
-  transition: color 0.15s, background 0.15s;
+  transition: color var(--leave), background var(--leave);
+}
+
+.tab-btn:hover,
+.tab-btn.active {
+  transition: color var(--arrive), background var(--arrive);
 }
 
 .tab-btn:hover { color: var(--chalk); }
@@ -722,10 +764,13 @@ main {
   background: var(--navy-panel);
   border: 1px solid var(--line);
   border-left: 3px solid var(--steel-dim);
-  transition: border-left-color 0.15s, transform 0.15s;
+  transition: border-left-color var(--leave), transform var(--leave);
 }
 
-.game-card:hover { transform: translateY(-1px); }
+.game-card:hover {
+  transform: translateY(-1px);
+  transition: border-left-color var(--arrive), transform var(--arrive);
+}
 
 /* Coach vs. coach — the games that actually matter to the league. */
 .game-card.is-league { border-left-color: var(--gold); }
@@ -872,19 +917,30 @@ main {
 
 /* 4 columns, and each row supplies exactly 4 items: the ::before
    counter plus .p-main, .p-record, .p-trend. Add an element in
-   rankingRowHtml() and you must add a column here, or rows wrap. */
+   rankingRowHtml() and you must add a column here, or rows wrap.
+
+   The record column is a FIXED 36px, not auto. Every <li> is its own
+   grid, so an auto column is sized by that row's own content: "8-2"
+   gives a narrow column and "10-2" a wider one, which puts the
+   record/trend boundary in a different place on every row and makes
+   the trend arrows fail to line up down the list. 36px is the widest
+   state the box can ever hold (four mono digits at 0.85rem), so the
+   column is reserved once and the arrows form a straight edge. */
 .poll-list li {
   counter-increment: rank;
   display: grid;
-  grid-template-columns: 44px 1fr auto 48px;
+  grid-template-columns: 44px 1fr 36px 48px;
   align-items: center;
   gap: 12px;
   padding: 12px 8px;
   border-bottom: 1px solid var(--line);
-  transition: background 0.15s;
+  transition: background var(--leave);
 }
 
-.poll-list li:hover { background: rgba(242, 244, 248, 0.03); }
+.poll-list li:hover {
+  background: rgba(242, 244, 248, 0.03);
+  transition: background var(--arrive);
+}
 
 .poll-list li::before {
   content: counter(rank);
@@ -941,7 +997,7 @@ main {
 /* Full Power Rankings tab only: an L10 record + a right-aligned Score
    column, plus a column header. The Home preview keeps the compact
    4-column layout (no score). */
-#full-rankings li { grid-template-columns: 44px 1fr auto 48px 56px; }
+#full-rankings li { grid-template-columns: 44px 1fr 36px 48px 56px; }
 #full-rankings .p-score {
   font-family: var(--font-mono);
   font-weight: 600;
@@ -1008,7 +1064,11 @@ main {
 
 .t25-row {
   display: grid;
-  grid-template-columns: 30px 34px 1fr auto 40px;
+  /* Record is a fixed 42px rather than auto for the same reason the
+     Power Rankings row reserves its record column: an auto column is
+     sized per-row, so "10-2" and "9-3" push the trend arrows to two
+     different x-positions and the right edge of the poll frays. */
+  grid-template-columns: 30px 34px 1fr 42px 40px;
   align-items: center;
   gap: 10px;
   padding: 8px;
@@ -1201,7 +1261,7 @@ main {
   border: 1px solid var(--line);
   padding: 18px;
   clip-path: polygon(0 0, 100% 0, 100% 100%, 12px 100%, 0 calc(100% - 12px));
-  transition: background 0.15s, transform 0.15s;
+  transition: background var(--leave), transform var(--leave);
 }
 
 /* Team color as a ring around the logo. Far more legible than a 3px
@@ -1277,9 +1337,12 @@ main {
   background: var(--twitch);
   padding: 6px 12px;
   text-decoration: none;
-  transition: background 0.15s;
+  transition: background var(--leave);
 }
-.twitch-link:hover { background: var(--twitch-bright); }
+.twitch-link:hover {
+  background: var(--twitch-bright);
+  transition: background var(--arrive);
+}
 
 .no-stream {
   font-family: var(--font-mono);
@@ -1408,9 +1471,12 @@ main {
   background: #e02b3c;
   padding: 6px 11px;
   text-decoration: none;
-  transition: background 0.15s;
+  transition: background var(--leave);
 }
-.live-card-btn:hover { background: #f2404f; }
+.live-card-btn:hover {
+  background: #f2404f;
+  transition: background var(--arrive);
+}
 
 /* A live card earns a red edge — the badge alone is easy to miss in
    a grid of 24.
@@ -1525,9 +1591,12 @@ main {
   line-height: 1;
   padding: 0 2px;
   cursor: pointer;
-  transition: color 0.15s;
+  transition: color var(--leave);
 }
-.cm-close:hover { color: var(--chalk); }
+.cm-close:hover {
+  color: var(--chalk);
+  transition: color var(--arrive);
+}
 
 /* --- achievements ---
    Rendered only when a coach has at least one. An empty trophy row
@@ -1701,7 +1770,12 @@ main {
   text-transform: uppercase;
   color: var(--steel);
   clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
-  transition: color 0.15s, background 0.15s;
+  transition: color var(--leave), background var(--leave);
+}
+
+.sched-toggle-btn:hover,
+.sched-toggle-btn.active {
+  transition: color var(--arrive), background var(--arrive);
 }
 
 .sched-toggle-btn:hover { color: var(--chalk); }
@@ -1765,10 +1839,13 @@ main {
   border-left: 3px solid var(--steel-dim);
   padding: 14px 16px;
   margin-bottom: 10px;
-  transition: background 0.15s;
+  transition: background var(--leave);
 }
 
-.week-game-row:hover { background: #13233d; }
+.week-game-row:hover {
+  background: #13233d;
+  transition: background var(--arrive);
+}
 
 .week-game-row.is-league {
   border-left-color: var(--gold);
@@ -2095,9 +2172,13 @@ main {
 .footer-links a {
   color: var(--steel);
   text-decoration: none;
-  transition: color 0.15s;
+  transition: color var(--leave);
 }
-.footer-links a:hover { color: var(--gold); text-decoration: underline; }
+.footer-links a:hover {
+  color: var(--gold);
+  text-decoration: underline;
+  transition: color var(--arrive);
+}
 
 /* ============================================================
    RESPONSIVE
@@ -2133,7 +2214,27 @@ main {
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; scroll-behavior: auto !important; }
-  .ticker-track { animation: none; }
+
+  /* The ticker is the one place where "turn the animation off" used
+     to delete information rather than just skip the trip. The track
+     is a nowrap inline-flex inside an overflow:hidden band, so
+     stopping the scroll froze it at translateX(0) and everything
+     past the first screen-width became permanently unreachable.
+
+     So it stops looping and becomes a real scroll container instead.
+     renderTicker() cooperates by rendering a single copy of the
+     segments in this mode rather than the two identical halves the
+     -50% loop needs, so the content doesn't read as duplicated. */
+  .ticker {
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--steel-dim) transparent;
+    -webkit-overflow-scrolling: touch;
+  }
+  .ticker-track {
+    animation: none;
+    will-change: auto;
+  }
   .status-dot { animation: none; }
   .live-dot { animation: none; }
   .live-now-dot { animation: none; }
@@ -2141,10 +2242,30 @@ main {
   .coach-modal::backdrop { backdrop-filter: none; }
 }
 
-/* Focus visibility */
+/* Focus visibility.
+
+   The default ring is the league accent on a dark surface. The two
+   selected-tab states are the exception: they fill with that same
+   accent as a gradient, so an accent ring on top of them is gold on
+   gold and effectively invisible. Those flip to chalk, which is the
+   "element is the ring" case — the ring reads against the fill, not
+   against the page. */
 button:focus-visible, a:focus-visible {
   outline: 2px solid var(--gold);
   outline-offset: 2px;
+}
+
+.tab-btn.active:focus-visible,
+.sched-toggle-btn.active:focus-visible {
+  outline-color: var(--chalk);
+  outline-offset: 1px;
+}
+
+/* The ticker only takes focus under reduced motion, where it becomes
+   a scroll container (see the reduced-motion block above). */
+.ticker:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: -2px;
 }
 
 /* ============================================================
@@ -2178,12 +2299,13 @@ button:focus-visible, a:focus-visible {
   color: inherit;
   padding: 0;
   clip-path: polygon(var(--cut) 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%, 0 var(--cut));
-  transition: background 0.15s, transform 0.15s;
+  transition: background var(--leave), transform var(--leave);
 }
 
 .picker-card:hover {
   background: #16263f;
   transform: translateX(3px);
+  transition: background var(--arrive), transform var(--arrive);
 }
 
 .picker-card:focus-visible {
