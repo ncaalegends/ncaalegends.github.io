@@ -172,7 +172,7 @@ const TEAM_SCHEDULES = [
       { week: 2, opponent: "FCS Midwest", location: "vs", stadium: "Gerald J. Ford Stadium", teamScore: 30, opponentScore: 3 },
       { week: 3, opponent: "Louisville", location: "at", stadium: "L&N Stadium", teamScore: 20, opponentScore: 10 },
       { week: 4, opponent: "Missouri State", location: "vs", stadium: "Gerald J. Ford Stadium", teamScore: 28, opponentScore: 0 },
-      { week: 5, opponent: "Boston College", location: "vs", stadium: "Gerald J. Ford Stadium" },
+      { week: 5, opponent: "Boston College", location: "vs", stadium: "Gerald J. Ford Stadium", teamScore: 27, opponentScore: 24 },
       { week: 6, note: "BYE" },
       { week: 7, opponent: "Virginia", location: "vs", stadium: "Gerald J. Ford Stadium" },
       { week: 8, opponent: "California", location: "vs", stadium: "Gerald J. Ford Stadium" },
