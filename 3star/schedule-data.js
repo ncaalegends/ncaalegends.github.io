@@ -345,7 +345,7 @@ const TEAM_SCHEDULES = [
       { week: 3, opponent: "FCS Northwest", location: "vs", teamScore: 56, opponentScore: 7 },
       { week: 4, opponent: "North Texas", location: "at", teamScore: 48, opponentScore: 56 },
       { week: 5, opponent: "Texas", location: "vs", teamScore: 42, opponentScore: 38 },
-      { week: 6, opponent: "Auburn", location: "at" },
+      { week: 6, opponent: "Auburn", location: "at", teamScore: 21, opponentScore: 38 },
       { week: 7, opponent: "Charlotte", location: "at" },
       { week: 8, note: "BYE" },
       { week: 9, opponent: "Kentucky", location: "at" },
