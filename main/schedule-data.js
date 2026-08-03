@@ -40,7 +40,7 @@ const TEAM_SCHEDULES = [
       { week: 2, opponent: "Syracuse", location: "at", stadium: "JMA Wireless Dome", teamScore: 38, opponentScore: 17 },
       { week: 3, opponent: "FCS West", location: "vs", stadium: "California Memorial Stadium", teamScore: 63, opponentScore: 7 },
       { week: 4, opponent: "Clemson", location: "vs", stadium: "California Memorial Stadium", teamScore: 48, opponentScore: 37 },
-      { week: 5, opponent: "UNLV", location: "at", stadium: "Allegiant Stadium" },
+      { week: 5, opponent: "UNLV", location: "at", stadium: "Allegiant Stadium", teamScore: 49, opponentScore: 7 },
       { week: 6, opponent: "Virginia Tech", location: "vs", stadium: "California Memorial Stadium" },
       { week: 7, opponent: "Wake Forest", location: "vs", stadium: "California Memorial Stadium" },
       { week: 8, opponent: "SMU", location: "at", stadium: "Gerald J. Ford Stadium" },
