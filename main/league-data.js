@@ -140,7 +140,7 @@ const COACHES = [
   { name: "Texan_hog",       team: "Washington",                   conference: "B1G", color: "#7A5BB5", twitch: "https://www.twitch.tv/texan_hog08", espnId: "264" },  // UNVERIFIED — confirm via logo-check.html
   { name: "Miles",           team: "Georgia",                      conference: "SEC", color: "#D6203A", twitch: "https://www.twitch.tv/kyrvach", espnId: "61" },
   { name: "BlueMiniMeaniee", team: "Cal",                          conference: "ACC", color: "#FDB515", twitch: "https://www.twitch.tv/blueminimeaniee", espnId: "25" },
-  { name: "Woogity",         team: "Alabama",                      conference: "SEC", color: "#C7304A", twitch: "https://www.twitch.tv/kingwoogity", espnId: "333" },
+  { name: "Woogity",         team: "Alabama",                      conference: "SEC", color: "#C7304A", twitch: "https://www.twitch.tv/kingwoogity", espnId: "333", departedAfterWeek: 4 },  // Went inactive during week 5 — weeks 0-4 stand as real games; Alabama is a CPU opponent from week 5 on.
   { name: "Alex",            team: "Florida",                      conference: "SEC", color: "#FA4616", twitch: "https://www.twitch.tv/alexgators1", espnId: "57" },
   { name: "brewma",          team: "Wake Forest",                  conference: "ACC", color: "#C9A227", twitch: "https://www.twitch.tv/brewma2020", espnId: "154" },  // UNVERIFIED — confirm via logo-check.html
   { name: "Jake",            team: "Louisville",                   conference: "ACC", color: "#CB3B47", twitch: "", espnId: "97", active: false },  // Stepped away (playing in another dynasty) — may return. See `active` note above. Remove this flag to reinstate.
