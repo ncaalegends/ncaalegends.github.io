@@ -239,7 +239,7 @@ const TEAM_SCHEDULES = [
       { week: 3, opponent: "Kent State", location: "vs", stadium: "Ohio Stadium", teamScore: 45, opponentScore: 3 },
       { week: 4, opponent: "Illinois", location: "vs", stadium: "Ohio Stadium", teamScore: 55, opponentScore: 31 },
       { week: 5, opponent: "Iowa", location: "at", stadium: "Kinnick Stadium", teamScore: 35, opponentScore: 19 },
-      { week: 6, opponent: "Maryland", location: "vs", stadium: "Ohio Stadium" },
+      { week: 6, opponent: "Maryland", location: "vs", stadium: "Ohio Stadium", teamScore: 45, opponentScore: 24 },
       { week: 7, opponent: "Indiana", location: "at", stadium: "Memorial Stadium" },
       { week: 8, note: "BYE" },
       { week: 9, opponent: "USC", location: "at", stadium: "Los Angeles Memorial Coliseum" },
