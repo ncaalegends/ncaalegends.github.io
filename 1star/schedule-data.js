@@ -143,7 +143,7 @@ const TEAM_SCHEDULES = [
       { week: 4, opponent: "New Glarus", location: "vs", teamScore: 28, opponentScore: 35 },
       { week: 5, opponent: "Ohio", location: "vs", teamScore: 31, opponentScore: 6 },
       { week: 6, opponent: "Western Michigan", location: "at", teamScore: 21, opponentScore: 16 },
-      { week: 7, opponent: "USF", location: "at" },
+      { week: 7, opponent: "USF", location: "at", teamScore: 35, opponentScore: 7 },
       { week: 8, opponent: "North Shore", location: "vs" },
       { week: 9, opponent: "Sacramento State", location: "at" },
       { week: 10, note: "BYE" },
