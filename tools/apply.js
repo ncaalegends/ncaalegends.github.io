@@ -346,7 +346,7 @@ async function announce(p, L, data, wk, next) {
     return { note: " — NOT announced (no webhook on runner)" };
   }
 
-  const built = buildMessage(data, p.week, wk, next, cfg, L.siteUrl);
+  const built = buildMessage(data, p.week, wk, next, cfg, L.siteUrl, L.slug);
 
   /* Same health warnings the CLI prints. A missing ID pings nobody and
      is silent in Discord, so it has to surface in the run log. */

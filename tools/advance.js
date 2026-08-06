@@ -76,7 +76,7 @@ const {
    ------------------------------------------------------------ */
 const isSnowflake = (v) => /^\d{15,25}$/.test(String(v ?? "").trim());
 
-function makeMentioner(cfg) {
+function makeMentioner(cfg, slug) {
   const ids = cfg.coaches || {};
   const missing = new Set();
 
@@ -102,9 +102,17 @@ function makeMentioner(cfg) {
        roleMention.id        a ROLE snowflake -> <@&id>
        roleMention.everyone  the literal "@everyone" or "@here"
      A CHANNEL id is neither. <#channelId> renders a clickable link
-     and notifies nobody, so it is deliberately not accepted here. */
-  const roleId = String(cfg.roleMention?.id ?? "").trim();
-  const blanket = String(cfg.roleMention?.everyone ?? "").trim().toLowerCase();
+     and notifies nobody, so it is deliberately not accepted here.
+
+     Roles are PER LEAGUE: each league lives on its own Discord server,
+     so its role snowflake is meaningful only there. Posting main's role
+     ID into the 3-star server would render as a dead "@unknown-role"
+     and ping nobody. leagues[slug].roleMention wins; the top-level
+     roleMention is the fallback for a caller with no slug and for older
+     configs written before the leagues split. */
+  const roleCfg = cfg.leagues?.[slug]?.roleMention ?? cfg.roleMention ?? {};
+  const roleId = String(roleCfg.id ?? "").trim();
+  const blanket = String(roleCfg.everyone ?? "").trim().toLowerCase();
   const useBlanket = blanket === "@everyone" || blanket === "@here";
 
   let role = "";
@@ -130,9 +138,9 @@ function makeMentioner(cfg) {
    ------------------------------------------------------------ */
 const CONTENT_LIMIT = 2000;
 
-function buildMessage(data, week, wk, nextAdvance, cfg, siteUrl) {
+function buildMessage(data, week, wk, nextAdvance, cfg, siteUrl, slug) {
   const label = weekLabel(week);
-  const M = makeMentioner(cfg);
+  const M = makeMentioner(cfg, slug);
 
   /* ---- content: the part that actually notifies people ---- */
   const head = [
@@ -203,6 +211,9 @@ function buildMessage(data, week, wk, nextAdvance, cfg, siteUrl) {
     });
   }
 
+  /* Byes live in the embed and ping nobody individually — the coaches
+     on a bye are covered by the league role ping at the top of the
+     message, so this list is reference material, not a notification. */
   if (wk.notes.length) {
     fields.push({
       name: `Byes & Off Weeks (${wk.notes.length})`,
@@ -386,7 +397,7 @@ async function main() {
   }
 
   const cfg = loadConfig();
-  const built = buildMessage(data, week, wk, nextAdvance, cfg, siteUrl);
+  const built = buildMessage(data, week, wk, nextAdvance, cfg, siteUrl, slug);
   const { payload } = built;
 
   /* Mention health. A missing ID is silent in Discord — the name just

@@ -100,9 +100,9 @@ list and flags any coach missing an entry for that week.
 
 **Discord only sends a notification for mentions in the message body.**
 A mention inside an embed renders blue but pings nobody. That's why the
-role ping and the H2H matchups live in the plain `content` field
-while the CPU list sits in the embed — the pings have to be where they
-actually fire.
+role ping, the H2H matchups and the CPU games live in the plain
+`content` field while the bye list sits in the embed — the pings have to
+be where they actually fire.
 
 **Mentions need numeric IDs, not usernames.** `@dwayinspired` is inert
 text. The real thing is `<@123456789012345678>`. To get an ID: Discord
@@ -124,13 +124,35 @@ config, which means nothing else in the message can ever ping — a stray
 **A channel ID is not a ping.** `<#123...>` renders a clickable link to
 the channel and notifies nobody. The script won't accept one as a
 mention. Channel-wide pings only come from `@everyone`, `@here`, or a
-role — set via `roleMention` in the config, both fields blank for none.
+role.
 
-Because there's no blanket ping configured, **every coach with a game
-that week is mentioned individually in the message body** — H2H games
-and CPU games alike. That's deliberate: if CPU games sat in the embed
-where they'd look neater, the ~18 coaches playing CPU opponents would
-get no notification at all.
+**The role ping is per league.** Each league has its own Discord server,
+and a role snowflake only exists on the server that owns it — main's
+role ID pasted into the 3-star server renders as a dead
+`@unknown-role` and pings nobody. So each league carries its own
+`roleMention` inside its `leagues` entry:
+
+```json
+"leagues": {
+  "main":  { "roleMention": { "id": "15274...", "everyone": "" }, "webhookUrl": "..." },
+  "3star": { "roleMention": { "id": "15269...", "everyone": "" }, "webhookUrl": "..." }
+}
+```
+
+The top-level `roleMention` is only a fallback for a league that doesn't
+set its own. Blank a league's `id` to drop its channel-wide ping.
+
+The advance therefore pings twice over: **the role at the top catches
+everyone in the league**, and **every coach with a game that week is
+also mentioned individually** — H2H and CPU alike. The individual
+mentions still matter because they tell a coach which line is theirs;
+the role ping is what covers the people a game list can't reach, namely
+anyone on a **BYE**. That's why byes can stay in the embed as reference
+material: the deadline still reaches them through the role.
+
+The **nudge** deliberately does *not* use the role ping — it's aimed at
+the few coaches who still owe a game, and blasting the whole role every
+few days is how a reminder gets muted.
 
 The body has a hard 2000-character ceiling. Every week of the current
 season lands between 195 and 1280, so there's comfortable headroom, but

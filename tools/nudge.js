@@ -87,6 +87,13 @@ function outstanding(wk) {
    an embed renders blue and notifies nobody, which would make this
    entire tool decorative.
    ------------------------------------------------------------ */
+/* No slug is passed to makeMentioner on purpose, so no league role is
+   resolved and the nudge never carries a channel-wide ping. The advance
+   announcement pings the whole role because the whole league needs to
+   know the week moved; a nudge is the opposite — it's aimed at the
+   handful of people who still owe a game. Blasting the role would
+   notify the 20 coaches who already played, every few days, which is
+   exactly how a reminder gets muted. */
 function buildNudge(data, week, out, cfg, siteUrl) {
   const label = weekLabel(week);
   const M = makeMentioner(cfg);
@@ -94,7 +101,6 @@ function buildNudge(data, week, out, cfg, siteUrl) {
   const total = out.h2h.length + out.cpu.length;
 
   const head = [
-    M.role,
     `**${label} is still active — ${total} game${total === 1 ? "" : "s"} still to play.**`,
     nextAdvance ? `Deadline is **${nextAdvance}**.` : "",
   ]
