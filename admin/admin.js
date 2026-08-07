@@ -68,12 +68,19 @@ function scrollToMessage(el) {
   }
 }
 
-/* Week 14 and 15 carry names on the site; matching them here means
+/* Week 14 and 15 carry names on the site, and 16-19 are the game's
+   own Bowl Weeks 1-4, one per playoff round; matching them here means
    the dropdown reads the way the schedule does. */
+const BOWL_WEEK_NAME = {
+  16: "Bowl Week 1 — CFP First Round",
+  17: "Bowl Week 2 — CFP Quarterfinals",
+  18: "Bowl Week 3 — CFP Semifinals",
+  19: "Bowl Week 4 — National Championship",
+};
 function weekOptionLabel(w) {
   if (w === 14) return "Week 14 — Army-Navy";
   if (w === 15) return "Week 15 — Championships";
-  return `Week ${w}`;
+  return BOWL_WEEK_NAME[w] || `Week ${w}`;
 }
 
 /* ------------------------------------------------------------
@@ -255,15 +262,25 @@ async function switchLeague(slug) {
 function refreshWeekControls() {
   const current = Number(data.SEASON.currentWeek) || 0;
 
-  const opts = [];
-  for (let w = 0; w <= 15; w++) {
-    opts.push(`<option value="${w}">${esc(weekOptionLabel(w))}</option>`);
-  }
-  $("week-select").innerHTML = opts.join("");
-  $("week-select").value = String(current);
+  /* TWO DIFFERENT RANGES, on purpose. Scores are entered against
+     schedule rows, and schedules stop at the conference
+     championships — a bowl week has no rows to score, and its
+     results go in postseason-data.js instead. The season itself
+     keeps going for four more weeks, so the ADVANCE picker runs to
+     19 while the SCORE picker stops at 15. Sharing one list is what
+     would let someone pick "Bowl Week 2" on a page that can only
+     write regular-season scores. */
+  const opt = (w) => `<option value="${w}">${esc(weekOptionLabel(w))}</option>`;
+  const scoreOpts = [];
+  for (let w = 0; w <= 15; w++) scoreOpts.push(opt(w));
+  const advanceOpts = [];
+  for (let w = 0; w <= 19; w++) advanceOpts.push(opt(w));
 
-  $("advance-week").innerHTML = opts.join("");
-  $("advance-week").value = String(Math.min(current + 1, 15));
+  $("week-select").innerHTML = scoreOpts.join("");
+  $("week-select").value = String(Math.min(current, 15));
+
+  $("advance-week").innerHTML = advanceOpts.join("");
+  $("advance-week").value = String(Math.min(current + 1, 19));
 
   $("advance-next").value = data.SEASON.nextAdvance || "";
 

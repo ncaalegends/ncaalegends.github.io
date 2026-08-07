@@ -263,6 +263,61 @@
     return { league: [...league.values()], cpu, notes, missing };
   }
 
+  /* ============================================================
+     THE SEASON CALENDAR
+     ------------------------------------------------------------
+     Weeks 0-15 are the regular season, ending with the conference
+     championships. The game then plays FOUR more weeks, one per
+     playoff round, which it calls Bowl Week 1 through 4. So the
+     season's week axis runs 0-19, and weeks 16-19 map one-to-one
+     onto the CFP rounds already documented at buildPostseason().
+
+     THE SCHEDULES STOP AT 15. Bowl weeks have no entries in
+     schedule-data.js and aren't expected to — a playoff game is a
+     one-off neutral-site game and lives in postseason-data.js, in
+     the per-game shape that exists precisely because the per-team
+     week shape is wrong for it. So anything walking the schedule
+     loops to REGULAR_FINAL_WEEK, and anything asking "what has
+     happened by now" uses the round-to-week map below.
+
+     THAT MAP IS THE ONE NEW FACT. Postseason rounds have no `week`
+     field, deliberately — a round is a round, and giving it a number
+     would invite someone to look up "week 17's poll". But rounds DO
+     happen in a known week, and that is what makes "the season as it
+     stood in week 17" answerable: everything up to and including the
+     quarterfinals, and nothing after.
+     ============================================================ */
+  const REGULAR_FINAL_WEEK = 15; // conference championships
+  const BOWL_WEEKS = 4;
+  const FINAL_WEEK = REGULAR_FINAL_WEEK + BOWL_WEEKS; // 19
+
+  const BOWL_ROUNDS = ["cfp-r1", "cfp-qf", "cfp-sf", "cfp-nc"];
+  const BOWL_ROUND_LABEL = {
+    "cfp-r1": "CFP First Round",
+    "cfp-qf": "CFP Quarterfinals",
+    "cfp-sf": "CFP Semifinals",
+    "cfp-nc": "National Championship",
+  };
+
+  // week -> the CFP round played that week, for weeks 16-19.
+  const BOWL_ROUND_FOR_WEEK = {};
+  BOWL_ROUNDS.forEach((id, i) => (BOWL_ROUND_FOR_WEEK[REGULAR_FINAL_WEEK + 1 + i] = id));
+
+  /* The inverse, plus the conference championships — which are a
+     postseason ROUND but a regular-season WEEK, the one place the two
+     axes overlap. Anything not listed (the non-playoff bowls) is
+     treated as the first bowl week: bowl season starts then, and the
+     alternative — defaulting to week 15 — would count a bowl as
+     having been played during championship week. */
+  const ROUND_WEEK = { ccg: REGULAR_FINAL_WEEK };
+  BOWL_ROUNDS.forEach((id, i) => (ROUND_WEEK[id] = REGULAR_FINAL_WEEK + 1 + i));
+  const DEFAULT_ROUND_WEEK = REGULAR_FINAL_WEEK + 1;
+
+  const roundWeek = (roundId) =>
+    Object.prototype.hasOwnProperty.call(ROUND_WEEK, roundId)
+      ? ROUND_WEEK[roundId]
+      : DEFAULT_ROUND_WEEK;
+
   /* ------------------------------------------------------------
      WEEK LABEL — matches the site's own naming
      ------------------------------------------------------------
@@ -271,10 +326,19 @@
      with a middot; that's a display choice local to the page and is
      deliberately not unified here, because changing this string
      would change every future Discord post.
+
+     Bowl weeks are named the way the GAME names them — "Bowl Week 2"
+     — with the round in parentheses, because the commissioner reads
+     the week off the in-game screen and the round is what everyone
+     else cares about. Neither name alone is enough.
      ------------------------------------------------------------ */
   function weekLabel(week) {
     if (week === 14) return "Week 14 (Army-Navy)";
-    if (week === 15) return "Week 15 (Championships)";
+    if (week === REGULAR_FINAL_WEEK) return "Week 15 (Championships)";
+    const round = BOWL_ROUND_FOR_WEEK[week];
+    if (round) {
+      return `Bowl Week ${week - REGULAR_FINAL_WEEK} (${BOWL_ROUND_LABEL[round]})`;
+    }
     return `Week ${week}`;
   }
 
@@ -445,7 +509,8 @@
      nothing scoreable yet, and computeRankings returns no rows. */
   function latestH2HWeek(data) {
     let latest = null;
-    for (let week = 0; week <= 15; week++) {
+    // Schedules stop at the conference championships; see the calendar note.
+    for (let week = 0; week <= REGULAR_FINAL_WEEK; week++) {
       const wk = buildWeek(data, week);
       if (wk.league.some((m) => m.scored)) latest = week;
     }
@@ -526,7 +591,19 @@
      playoff teams. */
   function makePollLookup(data, R, cfg) {
     const byWeek = new Map();
-    (data.TOP25 || []).forEach((p) => {
+
+    /* The weekly poll is the AP's through week 9 and the committee's
+       from week 10 (see cfp-data.js). They are the same shape and
+       never cover the same week, so they fold into one week-keyed
+       lookup — which is what makes weeks 10-15 rank normally instead
+       of reading as a stretch of unranked opponents. CFP entries are
+       folded in second so they win any week both claim. */
+    const weekly = [
+      ...(data.TOP25 || []),
+      ...(Array.isArray(data.CFP_POLL) ? data.CFP_POLL : []),
+    ];
+    weekly.forEach((p) => {
+      if (!p || p.week == null) return;
       const m = new Map();
       (p.teams || []).forEach((t) => {
         const k = R.rosterKeyFor(t.team);
@@ -535,6 +612,9 @@
       byWeek.set(Number(p.week), m);
     });
 
+    /* "Last poll of the season", whichever kind it was — the
+       postseason fallback below wants the most recent measurement
+       that exists, not specifically an AP one. */
     const lastApWeek = byWeek.size ? Math.max(...byWeek.keys()) : null;
 
     // CFP_POLL: accept a single poll object or a list of them.
@@ -615,7 +695,10 @@
 
       const meetings = seasonMeetings(data, {
         year,
-        throughWeek: last ? opts.throughWeek : 15,
+        /* A season that isn't the current one is finished, so it's
+           taken whole — to FINAL_WEEK, not to the CCG, or an archived
+           season's playoff would drop out of every career number. */
+        throughWeek: last ? opts.throughWeek : FINAL_WEEK,
       });
 
       meetings.forEach((m) => {
@@ -1127,11 +1210,11 @@
   function seasonMeetings(data, opts) {
     opts = opts || {};
     const year = opts.year != null ? opts.year : (data.SEASON || {}).year ?? null;
-    const throughWeek = opts.throughWeek == null ? 15 : opts.throughWeek;
-    const includePostseason = throughWeek >= 15;
+    const throughWeek = opts.throughWeek == null ? FINAL_WEEK : opts.throughWeek;
     const out = [];
 
-    for (let week = 0; week <= throughWeek; week++) {
+    // Schedules stop at the conference championships; see the calendar note.
+    for (let week = 0; week <= Math.min(throughWeek, REGULAR_FINAL_WEEK); week++) {
       buildWeek(data, week).league.forEach((m) => {
         out.push({
           year,
@@ -1153,7 +1236,15 @@
       });
     }
 
-    (includePostseason ? buildPostseason(data) : []).forEach((m) => {
+    /* Each round in or out on its own, by the week it is played.
+       This used to be all-or-nothing at week 15, which had to call the
+       whole postseason unplayed during championship week — the week
+       the conference championships are actually played. Now "as it
+       stood in week 17" means through the quarterfinals, which is
+       what it should have meant all along. */
+    buildPostseason(data)
+      .filter((m) => throughWeek >= roundWeek(m.roundId))
+      .forEach((m) => {
       out.push({
         year,
         phase: "postseason",
@@ -1282,7 +1373,10 @@
         return (e && e.team) || n;
       };
       const meetings = seasonMeetings(data, {
-        throughWeek: last ? opts.throughWeek : 15,
+        /* A season that isn't the current one is finished, so it's
+           taken whole — to FINAL_WEEK, not to the CCG, or an archived
+           season's playoff would drop out of every career number. */
+        throughWeek: last ? opts.throughWeek : FINAL_WEEK,
       });
 
       meetings.forEach((m) => {
@@ -1502,6 +1596,12 @@
     computeH2H,
     auditScheduleSides,
     weekLabel,
+    REGULAR_FINAL_WEEK,
+    FINAL_WEEK,
+    BOWL_ROUNDS,
+    BOWL_ROUND_LABEL,
+    BOWL_ROUND_FOR_WEEK,
+    roundWeek,
     parseScore,
     scoreableGames,
     editsFor,

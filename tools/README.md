@@ -485,6 +485,173 @@ cheap model, because transcription is the only thing it does; every
 judgement stays here. It won't commit, won't advance, and won't pass
 `--force` on its own.
 
+## cfp.js
+
+Writes a week's CFP Top 25 and projected 12-team bracket into
+`cfp-data.js`.
+
+```
+node tools/cfp.js --week 10 --poll poll.txt --bracket bracket.txt
+node tools/cfp.js --week 11 --poll poll.txt
+node tools/cfp.js --week 14 --bracket bracket.txt --final
+```
+
+**The season has two halves.** Weeks 0–9 the game shows the AP Top 25
+and `top25.js` writes it. From week 10 it shows the CFP Top 25 plus a
+projected bracket, and this writes both. Same screenshot ritual, same
+guardrails, different file — `top25.js` refuses a week ≥ 10 and this
+one refuses a week < 10, so there's no way to put a poll in the wrong
+era by fumbling a flag.
+
+The two polls stitch into one timeline everywhere downstream: the `#N`
+schedule badges, the movement arrows, and strength of schedule all keep
+asking "what was the poll in week N" and get the right answer on either
+side of the boundary. The only user-facing difference is the name — the
+tab and the section retitle themselves to **CFP Top 25** — plus the
+bracket, which has no AP-era equivalent.
+
+`CFP_ERA_WEEK` is the boundary and it's stated in three places that must
+agree: `script.js`, `tools/lib/league.js`, and this script.
+
+### Poll input
+
+Identical to `top25.js` — 25 lines, rank, team, record.
+
+### Bracket input
+
+Twelve lines, seed, team, record, and an optional automatic-qualifier
+marker:
+
+```
+1 Ohio State 8-0
+4 Duke 8-0 *
+12 USF 8-0 *
+```
+
+The `*` is the in-game asterisk (a conference champion holding an
+automatic bid); `AQ` and `auto` are accepted too, and an asterisk glued
+to the team name works. It's display-only — the game has already moved
+the seed, and the site shows it only on the box where a team enters the
+bracket, not on every box it reaches afterwards.
+
+### Bowl names
+
+Optional directive lines, anywhere in the same bracket file:
+
+```
+qf: Cotton Bowl, Rose Bowl, Fiesta Bowl, Peach Bowl
+sf: Orange Bowl, Sugar Bowl
+nc: National Championship
+site: Las Vegas, NV
+```
+
+`qf` is four names **top to bottom**, matching the bracket you're
+reading; `sf` is two; `r1` is four if the game names the first-round
+sites. `site` is taken whole, commas and all. The counts are checked —
+a three-name `qf` line would otherwise leave one quarterfinal
+unlabelled, which looks like a design choice rather than a typo.
+
+**Enter each one once.** The site merges bowl names forward key by key,
+so quarterfinal bowls entered in week 10 keep showing when semifinal
+bowls arrive in week 13. They're a fact about the season, not the week,
+and re-entering them weekly is just another chance to typo one.
+
+**Don't transcribe the matchups.** The 12-team bracket's shape is
+fixed — seeds 1–4 bye, first round is 5v12 / 6v11 / 7v10 / 8v9 feeding
+4 / 1 / 3 / 2 — so the site draws the lines from the seed list. There
+is deliberately no second copy of the pairings that could disagree with
+the seeds. The script prints the derived bracket so it can be checked
+against the screenshot, which is the one thing the data can't check for
+itself: read a seed wrong and the wrong matchup is what makes it
+obvious.
+
+### Flags
+
+| Flag | Meaning |
+|---|---|
+| `--league SLUG` | `main` \| `3star` \| `1star`. Defaults to main. |
+| `--week N` | Week this is for, 10–15. Required. |
+| `--poll PATH` | The 25 CFP Top 25 lines. |
+| `--bracket PATH` | The 12 seed lines. |
+| `--final` | This bracket is settled, not projected. |
+| `--dry-run` | Print the blocks and every check. Write nothing. |
+| `--allow-new` | Accept a team the league has never referenced. |
+| `--force` | Overwrite a week that already exists. |
+
+At least one of `--poll` / `--bracket` is required. Most weeks you pass
+both, because both screenshots come off the same screen.
+
+### Projected vs final
+
+`projected: true` is the honest label from week 10 through the
+conference championships — this is the field *if the season ended
+today*, and it moves every week. Run the bracket entered after the CCGs
+with `--final` and the panel stops saying PROJECTED.
+
+### Extra checks this one has
+
+Beyond everything `top25.js` does:
+
+- **Poll and bracket cross-check.** Every seed must appear in that
+  week's CFP Top 25, with the same record. A team in the bracket but
+  not the poll, or a record that disagrees between the two, means one
+  of the two screenshots was misread — and since they're the same
+  screen, that's a real catch.
+- **Movement is labelled by poll kind.** Week 10's only comparison is
+  the week 9 AP poll, so the report says so and suppresses the
+  big-move warnings: the committee's first ranking isn't the same
+  measurement as the AP's, and 15-spot swings there are normal rather
+  than suspicious.
+
+### The advance gate follows the game
+
+From week 10 the main dynasty's advance requires that week's CFP poll
+**and** bracket instead of the AP poll — the bracket is the headline of
+the tab by then, so advancing without it would publish a week with an
+empty playoff panel. A league that has never entered a CFP week isn't
+behind on it, so the first advance into the era is waved through and
+the gate engages from the following week.
+
+3-star and 1-star are not gated, same as the AP poll.
+
+### Bowl weeks 16-19
+
+The season doesn't end at the conference championships. The game plays
+four more weeks, one per playoff round, and calls them Bowl Week 1
+through 4 — so weeks 16, 17, 18 and 19 are the CFP first round,
+quarterfinals, semifinals and national championship.
+
+**Nothing gets transcribed in a bowl week.** The committee stops
+publishing, so the poll freezes at the week-15 seeding poll and the site
+tags it `FINAL SEEDING`; the bracket is already final by then. This
+script refuses a week above 15 and says so. What changes is results, and
+those go in `postseason-data.js` — the bracket fills itself in from
+them, round by round.
+
+The advance gate for weeks 16-19 asks for one thing: a **settled**
+bracket, meaning one entered with `--final`. Advancing into the first
+round on a projection would publish a field the games are about to
+contradict. It does **not** gate on results — `postseason-data.js` has
+no writer yet, so that would be a wall with no door — and warns instead:
+
+```
+NOTE: CFP First Round: 3 of 4 results are in postseason-data.js.
+      The bracket will show the next round's slots empty until the rest are entered.
+```
+
+### How the bracket fills in
+
+It doesn't, from here. Results come from `postseason-data.js`: the
+bracket advances a slot by looking for a played game between two known
+teams in the `cfp-r1`, `cfp-qf`, `cfp-sf` and `cfp-nc` rounds. Those
+four ids are load-bearing — rename one and the bracket quietly stops
+filling past that round. A winner carries its seed, record and star
+forward, so a team looks the same in the title game as it did in the
+first round.
+
+Same renderer draws the week-10 projection and the finished bracket;
+there is no separate "results" mode to keep in sync.
+
 ## find-tools.cmd
 
 Not something you run. `advance.cmd`, `scores.cmd` and `preview.cmd`

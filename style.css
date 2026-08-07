@@ -2459,3 +2459,333 @@ button:focus-visible, a:focus-visible {
 @media (min-width: 720px) {
   .picker-grid { grid-template-columns: 1fr; }
 }
+
+/* ============================================================
+   CFP BRACKET
+   ------------------------------------------------------------
+   A real tree. Every box sits on one shared row grid, exactly
+   halfway between the two boxes that feed it, and the connector
+   lines are drawn from that geometry rather than measured after
+   the fact.
+
+   THE GRID IS MEASURED IN HALF-SLOTS (--row). A box spans two rows,
+   so "centred between two boxes" is a whole number of rows instead
+   of a fraction, and every position in script.js is an integer. One
+   consequence worth knowing: the vertical pitch between two adjacent
+   grid positions is --row + --vgap, which is what --drop counts in.
+
+   THE LINES ARE PSEUDO-ELEMENTS, not SVG and not JS. A box that
+   receives draws the elbow in the gutter to its left (::before); a
+   box that feeds draws a stub to its right (::after). Because a box
+   is always exactly midway between its two feeders, ONE symmetric
+   bracket centred on it lands on both — the only variable is its
+   height, which is 2 x --drop.
+
+   Nothing is measured after layout, so a long team name, a wrapped
+   line or a late-loading font cannot knock the lines out of true.
+   ============================================================ */
+/* The measurements the whole tree is built from. Declared on the
+   grid as well as the wrapper so the bracket survives being lifted
+   out of its wrapper — into a preview page, a screenshot harness,
+   anywhere. A tree whose connector lines silently vanish because an
+   ancestor went missing is a bad way to find that out. */
+.cfp-bracket-wrap,
+.cfp-bracket-grid {
+  /* One HALF-slot. A box spans two of these, so a box is 2 x --row
+     tall in grid terms and --row is the distance between a box and
+     the one half a step below it. */
+  --row: 38px;
+  /* What a box actually draws at. Deliberately shorter than its
+     2-row slot: the difference IS the air between boxes, and
+     decoupling the two means spacing can be tuned without moving a
+     single line or breaking the centring. */
+  --node-h: 50px;
+  --gut: 34px;
+  --pitch: var(--row);
+  /* The box's left accent bar. The connector needs it because
+     absolute offsets resolve against the PADDING box, not the border
+     box — the 4px seam between the elbow and its feeder was exactly
+     this being unaccounted for. */
+  --nb: 3px;
+}
+.cfp-bracket-wrap { margin: 0 0 34px; }
+.cfp-bracket-wrap[hidden] { display: none; }
+
+.cfp-head { margin-bottom: 6px; }
+.cfp-head .section-tag.is-projected {
+  color: var(--gold);
+  border-color: var(--line-gold);
+}
+
+.cfp-note {
+  margin: 0 0 16px;
+  color: var(--steel);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+.cfp-note .cfp-auto { font-size: 0.78rem; }
+
+/* Horizontal scroll is the fallback, not the intent — on a wide
+   screen the whole bracket fits and this does nothing. A tree can't
+   reflow to one column the way a list can, so on a phone it scrolls. */
+.cfp-bracket-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding: 2px 2px 10px;
+  scrollbar-width: thin;
+}
+
+.cfp-bracket-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 202px);
+  /* Row 1 is the round headings; every row after it is one half-slot.
+     grid-auto-rows rather than repeat(N, ...) because repeat()'s count
+     has to be a literal — it cannot read a custom property — so the
+     row count stays a fact about the 12-team bracket in script.js and
+     never has to be restated here. */
+  grid-template-rows: auto;
+  grid-auto-rows: var(--row);
+  column-gap: var(--gut);
+  row-gap: 0;
+  width: max-content;
+}
+.cfp-bracket-grid.has-champ { grid-template-columns: repeat(4, 202px) 182px; }
+
+.cfp-col-head {
+  grid-row: 1;
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+  padding-bottom: 6px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid var(--line-gold);
+}
+
+/* ------------------------------------------------------------
+   A BOX
+   ------------------------------------------------------------ */
+.cfp-node {
+  position: relative;
+  /* Centred in its two-row slot, so the gap above and below is equal
+     and every box's centre still lands exactly on its grid position —
+     which is what the connector lines are drawn against. */
+  align-self: center;
+  min-height: var(--node-h);
+  display: grid;
+  grid-template-columns: 20px 34px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  background: var(--navy-panel);
+  border: 1px solid var(--line);
+  border-left: 3px solid transparent;
+  border-radius: 3px;
+}
+
+/* PAINTED IN THE SCHOOL'S COLOUR, like the game's own bracket.
+   --fill and --ink are set inline per box; --ink is computed from
+   --fill's contrast rather than stored, so a pale primary (Colorado
+   gold, Carolina blue) gets dark text without anyone maintaining a
+   second column. The border darkens the fill's own edge instead of
+   using --line, which would read as a grey halo on a saturated box. */
+.cfp-node.has-fill {
+  background: var(--fill);
+  border-color: rgba(0, 0, 0, 0.4);
+  color: var(--ink);
+}
+.cfp-node.has-fill .cfp-team,
+.cfp-node.has-fill .cfp-seed { color: var(--ink); }
+.cfp-node.has-fill .cfp-record,
+.cfp-node.has-fill .cfp-coach { color: var(--ink); opacity: 0.7; }
+
+/* Two colours on one box, on purpose: the fill says which school,
+   the left bar says one of ours. The bar keeps the roster accent —
+   brightened for exactly this job — so it stays visible against a
+   fill it has no relationship to. */
+.cfp-node.is-coach { border-left-color: var(--team); }
+.cfp-node.is-coach .cfp-team { font-weight: 700; }
+
+.cfp-seed {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--steel);
+  text-align: center;
+}
+
+/* A pale chip under the logo. ESPN marks are drawn to sit on white,
+   and a good half of them disappear against their own school's
+   primary — a dark navy logo on a dark navy box. The chip is what
+   the in-game bracket does too.
+
+   Same 34px and same 11% inset as the Top 25 row's chip, deliberately:
+   a mark that reads clearly in the poll should read clearly in the
+   bracket, and two different sizes for the same asset is two things
+   to keep in step. Inset on the IMAGE rather than padding on the
+   chip, so the circle stays a full 34px and only the artwork sits in
+   from the edge. */
+.cfp-logo {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(242, 244, 248, 0.94);
+  overflow: hidden;
+}
+.cfp-logo img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 11%;
+  box-sizing: border-box;
+}
+.cfp-mono {
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  font-weight: 700;
+  /* Dark, because the monogram sits on the pale chip, not on the
+     box — it's the stand-in for a logo, not a piece of the fill. */
+  color: var(--navy-deep);
+}
+.cfp-logo:has(img) .cfp-mono { visibility: hidden; }
+
+.cfp-who { min-width: 0; }
+.cfp-team {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 0.84rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--steel);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cfp-coach {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--gold);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cfp-record {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  color: var(--steel-dim);
+}
+/* Only on a team's first box — see cfpNodeHtml(). */
+.cfp-auto { color: var(--gold); font-size: 0.66rem; }
+
+/* An empty box is a real part of the bracket, not a missing one — it
+   says "whoever wins the game to my left". Dashed fill, same size as
+   a filled box, so the tree doesn't reflow as results land. */
+.cfp-node.is-tbd {
+  grid-template-columns: minmax(0, 1fr);
+  background: repeating-linear-gradient(
+    45deg,
+    transparent 0 6px,
+    rgba(242, 244, 248, 0.03) 6px 12px
+  );
+  border-style: dashed;
+  border-left-style: solid;
+}
+.cfp-tbd {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.04em;
+  color: var(--steel-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ------------------------------------------------------------
+   THE LINES
+   ------------------------------------------------------------
+   ONE ELEMENT PER JOIN. A box that receives draws the whole elbow:
+   a rectangle spanning the full gutter to its left, centred on
+   itself, 2 x --drop tall so its top and bottom edges land exactly
+   on the centre lines of the two boxes feeding it. Three of its four
+   borders are drawn — the two horizontal runs and the vertical that
+   joins them — and that is the entire connector.
+
+   It used to be two elements meeting in the middle of the gutter,
+   which is where the visible seam came from: `right: 100%` resolves
+   against the PADDING box, so each half started 1-3px off from where
+   its arithmetic said, and the halves missed each other by 4px. One
+   element can't have a seam, so this is the fix rather than nudging
+   the two numbers until they touch.
+
+   --nb shifts the elbow left by the box's accent bar, putting the
+   vertical exactly on the box's outer edge instead of on top of the
+   bar. Nothing is measured after layout, so a long team name or a
+   late-loading font can't knock it out of true.
+   ------------------------------------------------------------ */
+.cfp-node.has-in::before {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  right: calc(100% + var(--nb));
+  top: 50%;
+  width: var(--gut);
+  height: calc(2 * var(--drop) * var(--pitch));
+  transform: translateY(-50%);
+  border: 0 solid var(--steel-dim);
+  border-top-width: 1px;
+  border-bottom-width: 1px;
+  border-right-width: 1px;
+}
+
+/* ------------------------------------------------------------
+   GAME NAMES
+   ------------------------------------------------------------
+   A grid item, not a child of a box, so it can sit exactly between
+   the two boxes playing the game rather than beside one of them. It
+   lands in the empty middle of the elbow — clear of both horizontal
+   runs — so no background knockout is needed and the lines stay
+   unbroken behind nothing.
+   ------------------------------------------------------------ */
+.cfp-bowl {
+  align-self: center;
+  justify-self: center;
+  max-width: 100%;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ------------------------------------------------------------
+   CHAMPION
+   ------------------------------------------------------------ */
+.cfp-node.is-champ {
+  border-color: var(--line-gold);
+  border-left-color: var(--gold);
+  background: var(--gold-dim);
+}
+.cfp-node.is-champ .cfp-team { color: var(--chalk); }
+.cfp-node.is-champ::before { border-color: var(--line-gold); }
+
+.cfp-site {
+  margin-top: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--steel-dim);
+}

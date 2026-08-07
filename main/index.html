@@ -163,8 +163,19 @@
 
   <!-- TOP 25 (in-game AP poll) -->
   <section id="top25" class="tab-panel" role="tabpanel" tabindex="-1">
+
+    <!-- CFP BRACKET
+         Empty and hidden until the season reaches the CFP era
+         (week 10) and a bracket has been transcribed into
+         cfp-data.js. renderCfpBracket() fills it and unhides it;
+         before then this is a zero-height comment's worth of page. -->
+    <div class="cfp-bracket-wrap" id="cfp-bracket" hidden></div>
+
     <div class="section-head">
-      <h2 class="section-title">Top 25</h2>
+      <!-- id, not just a class: the bracket above renders its own
+           .section-head, so "#top25 .section-title" would resolve to
+           whichever of the two happens to be first in the DOM. -->
+      <h2 class="section-title" id="top25-title">Top 25</h2>
       <span class="section-tag" id="top25-week-label"></span>
     </div>
     <ol class="top25-list" id="top25-list"></ol>
@@ -202,7 +213,10 @@
 <script src="league-data.js" defer></script>
 <script src="schedule-data.js" defer></script>
 <script src="top25-data.js" defer></script>
+<script src="cfp-data.js" defer></script>
+<script src="postseason-data.js" defer></script>
 <script src="../people.js" defer></script>
+<script src="../team-colors.js" defer></script>
 <script src="../week-core.js" defer></script>
 <script src="../script.js" defer></script>
 </body>

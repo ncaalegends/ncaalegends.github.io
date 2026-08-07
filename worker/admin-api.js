@@ -219,7 +219,13 @@ function checkPayload(payload, who) {
      editing the 3-star dynasty. */
   if (!who.leagues.includes(league)) return `your code doesn't cover ${league}`;
 
-  if (!Number.isInteger(week) || week < 0 || week > 15) return "week must be 0-15";
+  /* 0-19: the regular season through the conference championships,
+     then Bowl Weeks 1-4. Score entry is separately confined to the
+     regular season below, since bowl weeks have no schedule rows. */
+  if (!Number.isInteger(week) || week < 0 || week > 19) return "week must be 0-19";
+  if (action === "scores" && week > 15) {
+    return "scores can only be entered for weeks 0-15 — playoff results go in postseason-data.js";
+  }
 
   if (action === "scores") {
     if (!Array.isArray(payload.entries) || !payload.entries.length) return "no scores submitted";

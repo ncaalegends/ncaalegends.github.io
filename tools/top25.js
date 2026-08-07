@@ -77,7 +77,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const { parseArgs, die, resolveLeague, loadData } = require("./lib/league");
+const { parseArgs, die, resolveLeague, loadData, CFP_ERA_WEEK } = require("./lib/league");
 
 const POLL_SIZE = 25;
 const MAX_WEEK = 15;
@@ -434,6 +434,18 @@ function main() {
   const week = Number(args.week);
   if (!Number.isInteger(week) || week < 1 || week > MAX_WEEK) {
     die(`--week must be a whole number 1-${MAX_WEEK}, got "${args.week}". There's no preseason poll.`);
+  }
+  /* The AP poll stops existing at week 10 — the game switches to the
+     CFP Top 25 and a projected bracket, which live in cfp-data.js.
+     Refusing here (and cfp.js refusing weeks below 10) means a
+     fumbled flag can't file a poll into the wrong era, where it would
+     be invisible on the site and wrong in the SoS. */
+  if (week >= CFP_ERA_WEEK) {
+    die(
+      `week ${week} is in the CFP era — from week ${CFP_ERA_WEEK} the game shows the CFP Top 25\n` +
+        `  and a projected bracket, not the AP poll. Use tools/cfp.js instead:\n` +
+        `    node tools/cfp.js --league ${args.league || "main"} --week ${week} --poll poll.txt --bracket bracket.txt`
+    );
   }
 
   /* --- input --- */

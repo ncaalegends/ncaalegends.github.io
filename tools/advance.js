@@ -54,6 +54,7 @@ const {
   parseWeek,
   loadConfig,
   top25GateError,
+  bowlWeekWarning,
 } = require("./lib/league");
 
 /* ------------------------------------------------------------
@@ -384,6 +385,13 @@ async function main() {
     const gate = top25GateError(data, week, L);
     if (gate) die(gate);
   }
+
+  /* Advisory, not a gate: a missing previous round leaves the next
+     round's bracket slots empty, which is worth saying and not worth
+     blocking on. Printed for dry runs too — that's what a dry run is
+     for. */
+  const bowlNote = bowlWeekWarning(data, week);
+  if (bowlNote) console.log(`\n  NOTE: ${bowlNote}`);
 
   const wk = buildWeek(data, week);
   const label = weekLabel(week);
