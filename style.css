@@ -918,6 +918,8 @@ main {
 /* 4 columns, and each row supplies exactly 4 items: the ::before
    counter plus .p-main, .p-record, .p-trend. Add an element in
    rankingRowHtml() and you must add a column here, or rows wrap.
+   (.p-open is the exception — absolutely positioned, so it is not a
+   grid item and takes no track.)
 
    The record column is a FIXED 36px, not auto. Every <li> is its own
    grid, so an auto column is sized by that row's own content: "8-2"
@@ -965,6 +967,45 @@ main {
 .poll-list .p-text { min-width: 0; }
 .poll-list .p-team { font-weight: 600; display: block; }
 .poll-list .p-coach { font-size: 0.8rem; color: var(--steel); display: block; }
+
+/* THE WHOLE ROW IS A CLICK TARGET, without the row being a button —
+   the same treatment as .r-open on the roster cards, for the same
+   reason: a <button> wrapping the row's contents would bury the logo,
+   record and trend arrow inside one control.
+
+   `inset: 0` on a positioned ancestor, and the <li> is only relative
+   when it actually has an opener. Absolutely positioned children are
+   not grid items, so this claims none of the four columns. */
+.poll-list li.is-clickable { position: relative; cursor: pointer; }
+
+.p-open {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  appearance: none;
+  border: 0;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+  /* No visible box of its own — the row is the affordance. */
+  font: inherit;
+  color: inherit;
+}
+
+/* The hover tint already lives on .poll-list li:hover, so the row
+   responds on its own. This just brings the coach name up to full
+   contrast with it, so the row reads as one live target rather than
+   a tinted band with dim text. */
+.poll-list li.is-clickable:hover .p-coach { color: var(--chalk); }
+
+/* Focus ring on the ROW, not the invisible button — a ring around a
+   zero-content button would be drawn in the wrong place. */
+.p-open:focus { outline: none; }
+.p-open:focus-visible { outline: none; }
+.poll-list li:has(.p-open:focus-visible) {
+  outline: 2px solid var(--gold);
+  outline-offset: -2px;
+}
 .poll-list .p-record {
   font-family: var(--font-mono);
   color: var(--steel);
@@ -1695,6 +1736,52 @@ main {
    signal, never the only one. */
 .cm-res.win  { color: var(--win); }
 .cm-res.loss { color: var(--crimson); }
+/* --- last-5 rows (the card as opened from the poll) --- */
+
+/* The opponent's AP rank in the week the game was played — the
+   strength-of-schedule input, shown so a good win reads as a good
+   win. Absent entirely for unranked opponents rather than shown as
+   "#26": 26 is the engine's sentinel for "no poll entry", not a
+   rank anyone held. */
+.cm-opprank {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  color: var(--gold);
+}
+
+/* Each game's exact share of the power score. Fixed width and
+   tabular figures so the column reads as a column — this is a set of
+   numbers meant to be added up by eye against the total below it. */
+.cm-pts {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+  flex: none;
+  min-width: 48px;
+  text-align: right;
+  color: var(--steel);
+}
+.cm-pts.win { color: var(--win); }
+.cm-pts.loss { color: var(--crimson); }
+
+/* The sum. Heavier line above it and no logo, so it reads as the
+   total of the column rather than one more game. */
+.cm-total {
+  border-top: 1px solid var(--steel);
+  color: var(--chalk);
+}
+.cm-total .cm-row-team {
+  font-family: var(--font-mono);
+  font-size: 0.63rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--steel);
+}
+.cm-total .cm-pts {
+  color: var(--gold);
+  font-size: 0.9rem;
+}
+
 .cm-sim {
   border: 1px solid var(--line);
   padding: 1px 4px;

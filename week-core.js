@@ -624,8 +624,8 @@
         if (coachKey(m.homeCoach) === coachKey(m.awayCoach)) return;
 
         [
-          { me: m.homeCoach, myTeam: m.home, opp: m.away, pf: m.scored.home, pa: m.scored.away, home: true },
-          { me: m.awayCoach, myTeam: m.away, opp: m.home, pf: m.scored.away, pa: m.scored.home, home: false },
+          { me: m.homeCoach, myTeam: m.home, opp: m.away, oppCoach: m.awayCoach, pf: m.scored.home, pa: m.scored.away, home: true },
+          { me: m.awayCoach, myTeam: m.away, opp: m.home, oppCoach: m.homeCoach, pf: m.scored.away, pa: m.scored.home, home: false },
         ].forEach((s) => {
           const c = ensure(s.me);
 
@@ -657,9 +657,28 @@
           // plays, so they stop here.
           if (m.sim) return;
 
+          /* The opponent is stored under its ROSTER name for the same
+             reason c.team is: this game log is what the power-rankings
+             card lists, and a row reading "California" next to a Cal
+             logo is the exact mismatch SCHEDULE_TEAM_ALIASES exists to
+             close. entryFor() returns undefined for a CPU-era or
+             unaliased name, so the schedule spelling stays the
+             fallback rather than blanking the row. */
+          const oppEntry = R.entryFor(s.opp);
+
           c.games.push({
             year: year == null ? 0 : year,
             sortKey: m.sortKey,
+            /* Display fields. Nothing below here feeds the score — it
+               exists so the card can show WHY the score is what it is,
+               and the window slice is the only place it's read. */
+            phase: m.phase,
+            week: m.week,
+            label: m.label,
+            oppTeam: (oppEntry && oppEntry.team) || s.opp,
+            oppCoach: String(s.oppCoach || "").trim(),
+            home: s.home,
+            neutral: m.neutral === true,
             pf: s.pf,
             pa: s.pa,
             win,
@@ -778,6 +797,46 @@
            "L5" column. Spans seasons, so it can read 4-1 in week 1. */
         l5: `${wins}-${n - wins}`,
         windowSpansSeasons: new Set(games.map((g) => g.year)).size > 1,
+        /* THE WINDOW ITSELF, newest first, with each game's share of
+           the score attached.
+
+           powerScore is built from three AVERAGES plus one COUNT, so
+           "what did this game contribute" has an exact answer rather
+           than an attributed one: divide each averaged term by n and
+           leave the road bonus whole. The parts sum to powerScore —
+           that identity is the point, and it is what the card's
+           footer total is checked against.
+
+           Recomputed here rather than accumulated above because the
+           window is only known after the slice: a game's contribution
+           depends on n, so the same result is worth a different
+           number in a 3-game window than in a 5-game one. */
+        windowGames: games.map((g) => {
+          const margin = clampMargin(g.pf - g.pa, cap);
+          const sos = (cfg.unrankedRank - g.oppRank) * W.strengthOfSchedule;
+          return {
+            year: g.year,
+            phase: g.phase,
+            week: g.week,
+            label: g.label,
+            oppTeam: g.oppTeam,
+            oppCoach: g.oppCoach,
+            oppRank: g.oppRank,
+            // Rank 26 is the "no poll entry" sentinel, not a real rank.
+            oppRanked: g.oppRank < cfg.unrankedRank,
+            pf: g.pf,
+            pa: g.pa,
+            win: g.win,
+            home: g.home,
+            neutral: g.neutral,
+            roadWin: g.roadWin,
+            margin, // capped — the value that actually scored
+            rawMargin: g.pf - g.pa,
+            contribution:
+              ((g.win ? W.winPct : 0) + margin * W.avgMargin + sos) / n +
+              (g.roadWin ? W.roadWinBonus : 0),
+          };
+        }),
       });
     });
 

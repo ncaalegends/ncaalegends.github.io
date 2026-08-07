@@ -805,13 +805,47 @@ function trendFrom(prevRankByKey, r) {
   return { symbol: "&ndash;", cls: "same", label: "no change" };
 }
 
+/* A poll ROW opens the card showing the L5 window behind its score.
+
+   Stretched button, exactly as the roster cards do it: the whole row
+   is the target, but the row itself is not a <button>. Wrapping the
+   row's contents in one would nest the team logo, records and trend
+   arrows inside a control and hand a screen reader a single
+   unreadable label; the invisible overlay leaves the row as ordinary
+   markup and adds one control with one clear name.
+
+   It is positioned absolutely, which also keeps it OUT of the row's
+   grid: an absolutely-positioned child is not a grid item, so it
+   claims no track and the four-column layout is untouched. Adding it
+   as a normal element would have needed a fifth column.
+
+   Only names resolving to a CURRENT roster entry get one.
+   openCoachModal() looks the coach up in ROSTER and returns silently
+   if they aren't there, so a departed coach would otherwise get a row
+   that looks live and does nothing. The poll is already gated to the
+   current roster, so in practice every row is clickable; this is the
+   guard for when it isn't. */
+function pollRowOpenerHtml(name) {
+  const label = String(name || "");
+  if (!label) return "";
+
+  const key = personKey(label);
+  if (!ROSTER.some((c) => personKey(c.name) === key)) return "";
+
+  return `<button type="button" class="p-open" data-coach="${esc(key)}"
+            aria-label="View ${esc(label)} last 5 games"></button>`;
+}
+
 /* The rank number is drawn by a CSS counter on the <li>, so this
    returns exactly 3 children to fill the remaining 3 grid columns.
-   Adding an element here means adding a column in style.css. */
+   Adding an element here means adding a column in style.css — the
+   .p-open overlay is the one exception, being out of flow. */
 function rankingRowHtml(r, trend, showScore) {
   const score = r.powerScore != null ? r.powerScore.toFixed(1) : "";
+  const opener = pollRowOpenerHtml(r.coach || coachFor(r.team));
   return `
-    <li>
+    <li${opener ? ' class="is-clickable"' : ""}>
+      ${opener}
       <span class="p-main">
         ${teamMarkHtml(r.team, "sm")}
         <span class="p-text">
@@ -1383,7 +1417,84 @@ function h2hRowHtml(o) {
     </li>`;
 }
 
-function coachModalHtml(coach) {
+/* ------------------------------------------------------------
+   THE L5 SECTION — the same card, opened from the poll
+   ------------------------------------------------------------
+   The roster card answers "who is this coach". The poll card answers
+   "why is this coach ranked here", and those want different lower
+   halves: a career H2H list says nothing about a number computed
+   from five games, and "next game" is not evidence.
+
+   So the top half — identity, trophies, stat tiles — is shared
+   verbatim, and only the list below it swaps. One card, two
+   sections; not two cards that have to be kept in sync.
+
+   Rows are newest first, which is the order computeRankings already
+   returns the window in. Do not re-sort here: the engine's ordering
+   (year, then sortKey) is what puts a title game after week 15, and
+   a naive sort on week would undo that. */
+function powerGameRowHtml(g) {
+  /* Same rule as the H2H rows: a year is shown on anything that
+     isn't from the season being played. The window spans seasons by
+     design, so an unstamped "Wk 5" from two years ago is exactly the
+     misreading this prevents. */
+  const thisYear = SEASON.year ?? null;
+  const stamp =
+    g.year != null && thisYear != null && g.year !== thisYear
+      ? ` &rsquo;${String(g.year).slice(-2)}`
+      : "";
+  const when =
+    g.phase === "postseason" ? `${esc(g.label)}${stamp}` : `Wk ${g.week}${stamp}`;
+
+  /* Neutral sites are neither home nor away, and calling a title game
+     "at" its opponent would misdescribe it — the same distinction the
+     road-win bonus makes, so the label and the scoring agree. */
+  const site = g.neutral ? "vs" : g.home ? "vs" : "at";
+
+  const pts = `${g.contribution > 0 ? "+" : ""}${g.contribution.toFixed(1)}`;
+
+  return `
+    <li class="cm-row">
+      ${teamMarkHtml(g.oppTeam, "sm")}
+      <span class="cm-row-text">
+        <span class="cm-row-team">${site} ${esc(g.oppTeam)}</span>
+        <span class="cm-row-coach">${esc(g.oppCoach || "CPU")}${
+          g.oppRanked ? ` <span class="cm-opprank">#${g.oppRank}</span>` : ""
+        }</span>
+      </span>
+      <span class="cm-row-right">
+        <span class="cm-res ${g.win ? "win" : "loss"}">${g.win ? "W" : "L"} ${g.pf}&ndash;${g.pa}</span>
+        <span class="cm-when">${when}</span>
+      </span>
+      <span class="cm-pts ${g.contribution >= 0 ? "win" : "loss"}">${pts}</span>
+    </li>`;
+}
+
+function powerWindowHtml(c) {
+  const games = c.rank && Array.isArray(c.rank.windowGames) ? c.rank.windowGames : [];
+  if (!games.length) {
+    return `<li class="cm-empty">No scoring games yet &mdash; this coach isn&rsquo;t in the poll.</li>`;
+  }
+
+  /* The total is printed rather than implied. Every row's number is
+     that game's exact share of the score (see windowGames in
+     week-core.js), so the column adds up to this figure — showing it
+     is what makes the column checkable instead of decorative. */
+  const total = c.rank.powerScore;
+  return (
+    games.map(powerGameRowHtml).join("") +
+    `<li class="cm-row cm-total">
+      <span class="cm-row-text"><span class="cm-row-team">Power score</span></span>
+      <span class="cm-pts">${total.toFixed(1)}</span>
+    </li>`
+  );
+}
+
+/* `view` picks the lower half: "roster" (career head-to-head, the
+   card as opened from a roster tile) or "power" (the L5 window, as
+   opened from a name in the poll). Anything else falls back to
+   roster, so a bad handle degrades to the original card. */
+function coachModalHtml(coach, view) {
   const c = coachCareerFor(coach.name);
   const url = safeUrl(coach.twitch);
   const live = isLive(coach);
@@ -1423,8 +1534,13 @@ function coachModalHtml(coach) {
       ${statTile("L5", c.rank ? c.rank.l5 : null)}
       ${statTile("Seasons", c.seasons || null)}
     </div>
-    <h3 class="cm-section">Head-to-head</h3>
-    <ul class="cm-list">${rows}</ul>
+    ${
+      view === "power"
+        ? `<h3 class="cm-section">Last 5 &mdash; games scoring the poll</h3>
+           <ul class="cm-list">${powerWindowHtml(c)}</ul>`
+        : `<h3 class="cm-section">Head-to-head</h3>
+           <ul class="cm-list">${rows}</ul>`
+    }
     <div class="cm-foot">
       <span class="cm-next">${
         next
@@ -1452,8 +1568,13 @@ function coachModalHtml(coach) {
    re-renders on every live-status refresh, so the original node may
    no longer be in the document by then — this re-finds it by key. */
 let MODAL_OPENER_KEY = null;
+/* Which control class to hand focus back to. The poll and the roster
+   both carry a button per coach, so the key alone is ambiguous —
+   restoring focus to the roster's copy after opening from the poll
+   would scroll the reader into a tab they never left. */
+let MODAL_OPENER_CLASS = "r-open";
 
-function openCoachModal(key, { updateHash = true } = {}) {
+function openCoachModal(key, { updateHash = true, view = "roster" } = {}) {
   const dlg = document.getElementById("coach-modal");
   const body = document.getElementById("coach-modal-body");
   if (!dlg || !body) return;
@@ -1463,8 +1584,9 @@ function openCoachModal(key, { updateHash = true } = {}) {
 
   const color = safeHex(coach.color);
   dlg.style.setProperty("--team", color || "var(--gold)");
-  body.innerHTML = coachModalHtml(coach);
+  body.innerHTML = coachModalHtml(coach, view);
   MODAL_OPENER_KEY = key;
+  MODAL_OPENER_CLASS = view === "power" ? "p-open" : "r-open";
 
   if (!dlg.open) dlg.showModal();
   if (updateHash) history.replaceState(null, "", `#roster/coach/${key}`);
@@ -1483,8 +1605,24 @@ function setupCoachModal() {
      live status refreshes — a listener bound to a card would be
      thrown away with it. */
   document.addEventListener("click", (e) => {
-    const btn = e.target.closest && e.target.closest(".r-open");
-    if (btn) openCoachModal(btn.dataset.coach);
+    if (!e.target.closest) return;
+
+    const btn = e.target.closest(".r-open");
+    if (btn) {
+      openCoachModal(btn.dataset.coach);
+      return;
+    }
+
+    /* The poll opens the same card with the L5 window instead of the
+       H2H list, and deliberately does NOT write a hash. The roster
+       card's `#roster/coach/<key>` is a deep link INTO the roster
+       tab; writing it from the poll would rewrite the hash to
+       "#roster" on close and bounce the reader out of the tab they
+       were reading. The poll card is a detail view, not a location. */
+    const nameBtn = e.target.closest(".p-open");
+    if (nameBtn) {
+      openCoachModal(nameBtn.dataset.coach, { updateHash: false, view: "power" });
+    }
   });
 
   dlg.addEventListener("click", (e) => {
@@ -1507,7 +1645,7 @@ function setupCoachModal() {
        so it uses no selector parsing. */
     let back = null;
     if (MODAL_OPENER_KEY) {
-      document.querySelectorAll(".r-open").forEach((b) => {
+      document.querySelectorAll("." + MODAL_OPENER_CLASS).forEach((b) => {
         if (b.dataset.coach === MODAL_OPENER_KEY) back = b;
       });
     }
