@@ -819,7 +819,7 @@ function rankingRowHtml(r, trend, showScore) {
           <span class="p-coach">${esc(r.coach || coachFor(r.team))}</span>
         </span>
       </span>
-      <span class="p-record">${esc(r.l10 || r.record || "")}</span>
+      <span class="p-record">${esc(r.l5 || r.record || "")}</span>
       <span class="p-trend ${trend.cls}" title="${esc(trend.label)}">${trend.symbol}</span>
       ${showScore ? `<span class="p-score">${esc(score)}</span>` : ""}
     </li>`;
@@ -834,7 +834,7 @@ const RANKINGS_EMPTY_MSG =
 const RANKINGS_HEAD_HTML =
   '<li class="poll-head" aria-hidden="true">' +
   "<span></span><span>Team</span>" +
-  '<span class="ph-l10">L10</span><span></span>' +
+  '<span class="ph-l5">L5</span><span></span>' +
   '<span class="ph-score">Score</span></li>';
 
 function renderRankings() {
@@ -1420,7 +1420,7 @@ function coachModalHtml(coach) {
       ${statTile("Streak", c.streak ? c.streak.label : null, c.streak && c.streak.win ? "win" : "loss")}
       ${statTile("Total PF", c.playedGames ? c.pf.toLocaleString() : null)}
       ${statTile("Total PA", c.playedGames ? c.pa.toLocaleString() : null)}
-      ${statTile("L10", c.rank ? c.rank.l10 : null)}
+      ${statTile("L5", c.rank ? c.rank.l5 : null)}
       ${statTile("Seasons", c.seasons || null)}
     </div>
     <h3 class="cm-section">Head-to-head</h3>

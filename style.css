@@ -994,7 +994,7 @@ main {
   border-bottom: none;
 }
 
-/* Full Power Rankings tab only: an L10 record + a right-aligned Score
+/* Full Power Rankings tab only: an L5 record + a right-aligned Score
    column, plus a column header. The Home preview keeps the compact
    4-column layout (no score). */
 #full-rankings li { grid-template-columns: 44px 1fr 36px 48px 56px; }
@@ -2197,7 +2197,7 @@ main {
   /* The full rankings tab keeps its Score column on mobile (record
      drops, like the rows above). */
   #full-rankings li { grid-template-columns: 28px 1fr 38px 50px; }
-  #full-rankings .poll-head .ph-l10 { display: none; }
+  #full-rankings .poll-head .ph-l5 { display: none; }
 
   .tabs { width: 100%; }
   .tab-btn { flex: 1; padding: 9px 4px; text-align: center; }

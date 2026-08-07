@@ -182,7 +182,7 @@ choices is wrong for a career record:
 | Unplayed games | dropped | **included** |
 | Sims | excluded | included, flagged |
 | Keyed on | team | **coach** |
-| Window | last 10 games | none |
+| Window | last 5 games | none |
 
 Merging them would mean a pile of flags and the two would drift.
 
@@ -190,7 +190,7 @@ Merging them would mean a pile of flags and the two would drift.
 
 ## 4b. Power Rankings now span seasons
 
-**The poll ranks the last 10 head-to-head games a COACH has played, regardless
+**The poll ranks the last 5 head-to-head games a COACH has played, regardless
 of in-game year.** Previously it was one season, keyed on the team.
 
 A per-season poll resets every autumn and spends the first month of each year
@@ -204,7 +204,7 @@ been won somewhere else. A coach who moves carries their window with them.
 
 That's a real trade, made deliberately: resetting the window on a move breaks it
 exactly when a coach is most interesting to look at. The output carries
-`windowSpansSeasons: true` so the UI can mark a row whose L10 reaches back past
+`windowSpansSeasons: true` so the UI can mark a row whose L5 reaches back past
 this year.
 
 ### Identity comes from the current roster, not the game log
@@ -222,7 +222,7 @@ last known identity — which is the right answer for them.
 |---|---|
 | `key` | **coach** key now, was the roster key |
 | `team` / `coach` | current identity |
-| `l10` | record over the rolling window — **can span seasons** |
+| `l5` | record over the rolling window — **can span seasons** |
 | `record` | career H2H, sims included |
 | `seasonRecord` / `seasonYear` | most recent season only |
 | `playedGames` | games inside the window (sims excluded) |
@@ -277,7 +277,7 @@ previous poll with `throughWeek: week - 1`, and at week 0 of a new season that's
 `computeRankings` accepts a single data object or an array of seasons, so
 existing single-season calls are unchanged. Verified against `week-core.js` at
 `HEAD` across all three leagues at `throughWeek` = null/0/1/2/15: ranks, scores
-to 6dp, records and L10 all identical.
+to 6dp, records and L5 all identical.
 
 ---
 

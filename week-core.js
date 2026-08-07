@@ -426,7 +426,7 @@
     maxMarginPerGame: 21,
     // Only the most recent N *played* H2H games per team feed the
     // score. 0 / null uses full history.
-    gamesWindow: 10,
+    gamesWindow: 5,
   };
 
   function clampMargin(margin, cap) {
@@ -775,8 +775,8 @@
         seasonRecord: `${c.seasonW}-${c.seasonL}`, // most recent season
         seasonYear: lastYear,
         /* Record over the rolling window that feeds the score — the
-           "L10" column. Spans seasons, so it can read 7-3 in week 1. */
-        l10: `${wins}-${n - wins}`,
+           "L5" column. Spans seasons, so it can read 4-1 in week 1. */
+        l5: `${wins}-${n - wins}`,
         windowSpansSeasons: new Set(games.map((g) => g.year)).size > 1,
       });
     });
@@ -793,7 +793,7 @@
 
      The power poll answers "how good is this team right now". It
      looks at one season, drops unplayed games, drops sims, keys
-     everything on the TEAM, and slides a 10-game window over the
+     everything on the TEAM, and slides a 5-game window over the
      result. Every one of those choices is wrong for a career H2H
      record, which has to answer "what has happened between these two
      people, ever":
