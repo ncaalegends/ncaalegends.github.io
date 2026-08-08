@@ -305,7 +305,7 @@ const TEAM_SCHEDULES = [
       { week: 3, opponent: "Arkansas", location: "at", stadium: "DW Reynolds Razorback Stadium", teamScore: 31, opponentScore: 17 },
       { week: 4, opponent: "Oklahoma", location: "vs", stadium: "Sanford Stadium", teamScore: 21, opponentScore: 49 },
       { week: 5, opponent: "Vanderbilt", location: "vs", stadium: "Sanford Stadium", teamScore: 52, opponentScore: 26 },
-      { week: 6, opponent: "Alabama", location: "at", stadium: "Saban Field at Bryant-Denny Stadium" },
+      { week: 6, opponent: "Alabama", location: "at", stadium: "Saban Field at Bryant-Denny Stadium", teamScore: 31, opponentScore: 10 },
       { week: 7, opponent: "Auburn", location: "vs", stadium: "Sanford Stadium" },
       { week: 8, note: "BYE" },
       { week: 9, opponent: "Florida", location: "vs", stadium: "Mercedes-Benz Stadium" },
