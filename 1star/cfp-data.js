@@ -113,6 +113,60 @@
    the main dynasty's advance to week 10+ is gated on this file
    having that week.
    ============================================================ */
-const CFP_POLL = [];
+const CFP_POLL = [
+  {
+    week: 10,
+    teams: [
+      { rank: 1, team: "Miami", record: "9-0" },
+      { rank: 2, team: "Ohio State", record: "7-1" },
+      { rank: 3, team: "Oklahoma", record: "7-1" },
+      { rank: 4, team: "Georgia", record: "7-1" },
+      { rank: 5, team: "Indiana", record: "8-1" },
+      { rank: 6, team: "BYU", record: "8-0" },
+      { rank: 7, team: "Texas A&M", record: "7-1" },
+      { rank: 8, team: "Texas Tech", record: "7-1" },
+      { rank: 9, team: "LSU", record: "7-1" },
+      { rank: 10, team: "Houston", record: "7-1" },
+      { rank: 11, team: "Notre Dame", record: "6-2" },
+      { rank: 12, team: "Texas", record: "6-2" },
+      { rank: 13, team: "Iowa", record: "6-2" },
+      { rank: 14, team: "Duke", record: "7-1" },
+      { rank: 15, team: "Louisville", record: "6-2" },
+      { rank: 16, team: "Ole Miss", record: "5-3" },
+      { rank: 17, team: "Michigan", record: "5-3" },
+      { rank: 18, team: "Missouri", record: "6-2" },
+      { rank: 19, team: "Florida", record: "5-3" },
+      { rank: 20, team: "Boise State", record: "7-1" },
+      { rank: 21, team: "SMU", record: "6-2" },
+      { rank: 22, team: "Florida State", record: "6-2" },
+      { rank: 23, team: "Wisconsin", record: "6-2" },
+      { rank: 24, team: "Arizona", record: "6-2" },
+      { rank: 25, team: "Oregon", record: "5-3" },
+    ],
+  },
+];
 
-const CFP_BRACKET = [];
+const CFP_BRACKET = [
+  {
+    week: 10,
+    projected: true,
+    seeds: [
+      { seed:  1, team: "Miami", record: "9-0", auto: true },
+      { seed:  2, team: "Ohio State", record: "7-1", auto: true },
+      { seed:  3, team: "Oklahoma", record: "7-1" },
+      { seed:  4, team: "Georgia", record: "7-1", auto: true },
+      { seed:  5, team: "Indiana", record: "8-1" },
+      { seed:  6, team: "BYU", record: "8-0", auto: true },
+      { seed:  7, team: "Texas A&M", record: "7-1" },
+      { seed:  8, team: "Texas Tech", record: "7-1" },
+      { seed:  9, team: "LSU", record: "7-1" },
+      { seed: 10, team: "Houston", record: "7-1" },
+      { seed: 11, team: "Notre Dame", record: "6-2", auto: true },
+      { seed: 12, team: "Boise State", record: "7-1", auto: true },
+    ],
+    bowls: {
+      qf: ["Cotton Bowl", "Peach Bowl", "Fiesta Bowl", "Rose Bowl"],
+      site: "Las Vegas, NV",
+    },
+  },
+];
