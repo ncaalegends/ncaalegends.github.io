@@ -214,7 +214,7 @@ const TEAM_SCHEDULES = [
       { week: 7, opponent: "Westeros", location: "at", teamScore: 14, opponentScore: 38 },
       { week: 8, note: "BYE" },
       { week: 9, opponent: "Wawa University", location: "vs", teamScore: 10, opponentScore: 0, sim: true },
-      { week: 10, opponent: "New Mexico State", location: "at" },
+      { week: 10, opponent: "New Mexico State", location: "at", teamScore: 28, opponentScore: 17 },
       { week: 11, opponent: "Middle Tennessee", location: "vs" },
       { week: 12, note: "BYE" },
       { week: 13, opponent: "Kennesaw State", location: "at" },
