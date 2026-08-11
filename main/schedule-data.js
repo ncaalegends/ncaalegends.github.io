@@ -416,7 +416,7 @@ const TEAM_SCHEDULES = [
       { week: 4, opponent: "Maryland", location: "at", stadium: "SECU Stadium", teamScore: 35, opponentScore: 28 },
       { week: 5, note: "BYE" },
       { week: 6, opponent: "Oregon", location: "at", stadium: "Autzen Stadium", teamScore: 29, opponentScore: 28 },
-      { week: 7, opponent: "Wisconsin", location: "vs", stadium: "Rose Bowl Stadium" },
+      { week: 7, opponent: "Wisconsin", location: "vs", stadium: "Rose Bowl Stadium", teamScore: 31, opponentScore: 28 },
       { week: 8, opponent: "Michigan State", location: "vs", stadium: "Rose Bowl Stadium" },
       { week: 9, opponent: "Nevada", location: "vs", stadium: "Rose Bowl Stadium" },
       { week: 10, opponent: "Minnesota", location: "at", stadium: "Huntington Bank Stadium" },
@@ -511,7 +511,7 @@ const TEAM_SCHEDULES = [
       // Red River rivalry - listed "vs" on Oklahoma's screen but played
       // at the neutral-site Cotton Bowl, which is what Texas's file says.
       { week: 6, opponent: "Texas", location: "vs", stadium: "Cotton Bowl", teamScore: 7, opponentScore: 42 },
-      { week: 7, opponent: "Kentucky", location: "vs", stadium: "Gaylord Family Oklahoma Memorial Stadium" },
+      { week: 7, opponent: "Kentucky", location: "vs", stadium: "Gaylord Family Oklahoma Memorial Stadium", teamScore: 31, opponentScore: 24 },
       { week: 8, opponent: "Mississippi State", location: "at", stadium: "Davis Wade Stadium" },
       { week: 9, opponent: "South Carolina", location: "vs", stadium: "Gaylord Family Oklahoma Memorial Stadium" },
       { week: 10, opponent: "Florida", location: "at", stadium: "Ben Hill Griffin Stadium" },
