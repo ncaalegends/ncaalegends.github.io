@@ -113,7 +113,7 @@ function buildHeadsUp(data, nextWeek, wk, deadlineText, isToday, cfg, siteUrl) {
      24 people the advance is hours away when it's days away. So the
      forced case states the actual deadline instead. */
   const when = isToday
-    ? `later today${deadlineText ? ` — ${deadlineText}` : ""}`
+    ? `later today${deadlineText ? ` at ${deadlineText}` : ""}`
     : deadlineText || "soon";
 
   const head = [
@@ -249,13 +249,17 @@ async function main() {
   }
 
   const cfg = loadConfig();
-  /* On advance day, only quote the deadline when it names a TIME —
-     "later today — Wednesday, August 12th" says the same thing twice
-     and reads like a mistake, since "today" already established the
-     day. Off advance day (only reachable with --force) the day is
-     exactly what needs saying, so it's always included. */
-  const deadlineText =
-    advanceDay && Deadline.isDateOnly(at) ? "" : data.SEASON.nextAdvance || "";
+  /* On advance day the sentence has already said "today", so all
+     that's left to add is the clock time — "later today at 11:00 PM
+     EDT". Repeating the full date after the word "today" says the
+     same thing twice, and a date-only deadline has no time to add at
+     all, so it gets nothing.
+
+     Off advance day (only reachable with --force) the day is exactly
+     what needs saying, so the full sentence goes in. */
+  const deadlineText = advanceDay
+    ? Deadline.formatTime(at)
+    : data.SEASON.nextAdvance || "";
   const built = buildHeadsUp(data, nextWeek, wk, deadlineText, advanceDay, cfg, L.siteUrl);
 
   if (built.missingMentions.length) {

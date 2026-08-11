@@ -298,6 +298,17 @@
     return `${dayText} - ${time}`;
   }
 
+  /* Just the clock part — "6:00 PM EDT". For sentences that have
+     already established the day and only need the time, which is the
+     advance-day heads-up: "later today at 6:00 PM EDT" beats
+     repeating the full date after the word "today". Empty for a
+     date-only deadline, since there is no time to state. */
+  function formatTime(value) {
+    const d = value instanceof Date ? value : parseAt(value);
+    if (!d || isDateOnly(value)) return "";
+    return TIME_FMT.format(d).replace(/\u202f|\u00a0/g, " ");
+  }
+
   /* ------------------------------------------------------------
      "IS IT TODAY?"
      ------------------------------------------------------------
@@ -385,6 +396,7 @@
     canonical,
     isDateOnly,
     formatDeadline,
+    formatTime,
     dayKey,
     isSameZoneDay,
     isDeadlineToday,
