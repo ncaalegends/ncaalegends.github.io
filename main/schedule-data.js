@@ -350,7 +350,7 @@ const TEAM_SCHEDULES = [
       { week: 4, opponent: "Oklahoma State", location: "vs", stadium: "Milan Puskar Stadium", teamScore: 56, opponentScore: 3 },
       { week: 5, opponent: "Iowa State", location: "at", stadium: "Jack Trice Stadium", teamScore: 42, opponentScore: 21 },
       { week: 6, opponent: "Arizona", location: "vs", stadium: "Milan Puskar Stadium", teamScore: 36, opponentScore: 31 },
-      { week: 7, opponent: "Cincinnati", location: "vs", stadium: "Milan Puskar Stadium" },
+      { week: 7, opponent: "Cincinnati", location: "vs", stadium: "Milan Puskar Stadium", teamScore: 24, opponentScore: 10 },
       { week: 8, opponent: "TCU", location: "at", stadium: "Amon G. Carter Stadium" },
       { week: 9, note: "BYE" },
       { week: 10, opponent: "Texas Tech", location: "at", stadium: "Jones Stadium" },
