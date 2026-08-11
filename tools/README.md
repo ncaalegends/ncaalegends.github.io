@@ -121,8 +121,12 @@ again, with nothing anywhere saying why.
 A league that names a **day and no time** stores a bare date
 (`"2026-08-12"`) and its badge keeps reading `Wednesday, August 12th`
 with no clock time — that's how 1-star and 3-star have always looked.
-Internally the day resolves to 6 PM Eastern so the heads-up still knows
-whether the advance is ahead or behind; that never reaches the site.
+Internally the day resolves to **10 PM Eastern** so the heads-up still
+knows whether the advance is ahead or behind; that never reaches the
+site. It's late on purpose — these advances happen at night, and an
+earlier default would read as "already passed" while the advance was
+still hours away, silencing the heads-up on the exact morning it was
+meant to fire.
 
 All the conversion lives in `/deadline.js` at the repo root, shared with
 the admin page the same way `week-core.js` is — one copy, so the picker
@@ -304,6 +308,13 @@ of the Discord config and a schedule; a second workflow would have meant
 a second of each, including a second cron to remember to shift when
 daylight saving ends.
 
+**`force` and `headsup_force` are separate tickboxes**, and that split
+exists because sharing one wasn't. Forcing the nudge just skips a quiet
+window. Forcing the heads-up makes it post on a day that isn't an
+advance day — an assertion about the calendar that the league can check
+against reality. Leave `headsup_force` off unless you specifically want
+that.
+
 Writes nothing, commits nothing, touches the network only for the
 webhook POST.
 
@@ -350,7 +361,7 @@ already work out.
 |---|---|
 | `--league SLUG` | `main` \| `3star` \| `1star`. Defaults to main. |
 | `--dry-run` | Print the message. Post nothing. |
-| `--force` | Post even when it isn't advance day. Testing only. |
+| `--force` | Post even when it isn't advance day. Testing only — and note the message then states the real deadline rather than saying "later today", because on a forced run that isn't true. |
 | `--now ISO` | Pretend it's another moment, e.g. `--now "2026-08-11T14:00:00Z"`. Testing only. |
 
 `--now` plus `--dry-run` is how you check an advance day without waiting

@@ -23,8 +23,9 @@
 
    Like 1-star, this league names a day and not a clock time, so the
    stored value is a bare date and the badge carries no clock time.
-   The 6 PM Eastern the day resolves to is internal, used only to
-   decide whether an advance is still ahead.
+   A bare date resolves to 10 PM Eastern internally, used only to
+   decide whether an advance is still ahead; that never reaches the
+   site.
    ------------------------------------------------------------ */
 const SEASON = {
   // In-game year for this season's data. See the long note in

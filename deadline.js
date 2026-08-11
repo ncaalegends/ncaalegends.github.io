@@ -52,6 +52,11 @@
 
   const ZONE = "America/New_York";
 
+  /* What time of day a deadline written as a bare date means. See the
+     long note in parseAt below — it is deliberately late in the
+     evening, and it never appears on the site. */
+  const DEFAULT_HOUR = 22; // 10 PM Eastern
+
   /* ------------------------------------------------------------
      WHAT WAS EASTERN'S OFFSET AT THIS INSTANT
      ------------------------------------------------------------
@@ -194,14 +199,24 @@
     if (wall) {
       const [, y, mo, d, hh, mm] = wall;
       if (!isRealDate(+y, +mo, +d)) return null;
-      const hour = hh === undefined ? 18 : +hh;
+      /* A bare date with no time resolves to LATE that evening, not
+         midnight and not the middle of the day. Two things depend on
+         where this lands and they pull in opposite directions:
+
+           too early   the deadline reads as already passed while the
+                       advance is still hours away, and the heads-up
+                       goes quiet on the morning it was meant to fire
+           midnight    the day rolls over first, so a deadline set
+                       for "Tuesday" is never ahead on Tuesday at all
+
+         DEFAULT_HOUR is late enough to cover an evening advance —
+         these happen at night, after everyone's home — and still on
+         the correct calendar day. A league that wants an exact time
+         sets one; this is only what a bare date means. */
+      const hour = hh === undefined ? DEFAULT_HOUR : +hh;
       const min = mm === undefined ? 0 : +mm;
       if (hour > 23 || min > 59) return null;
-      /* A bare date with no time means the end of that day's
-         business, not midnight — midnight would make the heads-up
-         for a "Tuesday" deadline fire on a day the advance had
-         already technically passed. 6 PM matches the league rule
-         written in league-data.js. */
+
       const dt = instantFromZoneLocal(+y, +mo, +d, hour, min);
       return isNaN(dt.getTime()) ? null : dt;
     }
@@ -364,6 +379,7 @@
 
   return {
     ZONE,
+    DEFAULT_HOUR,
     parseAt,
     toIso,
     canonical,

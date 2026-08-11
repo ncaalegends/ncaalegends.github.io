@@ -58,7 +58,17 @@ on:
         type: boolean
         default: false
       force:
-        description: "Force: nudge ignores the 12h window, heads-up posts off advance day"
+        description: "Nudge: post even if the advance was less than 12h ago"
+        type: boolean
+        default: false
+      # SEPARATE FROM `force` ON PURPOSE. These two mean very
+      # different things, and sharing one tickbox got the heads-up
+      # posted on a day that wasn't an advance day — telling a league
+      # the advance was "later today" when it was two days out.
+      # Forcing the nudge is harmless; forcing the heads-up sends a
+      # statement about the calendar that isn't true.
+      headsup_force:
+        description: "Heads-up: post even though it isn't advance day (rarely what you want)"
         type: boolean
         default: false
 
@@ -140,17 +150,16 @@ jobs:
       # doesn't take the heads-up with it. They're independent posts
       # and a failure in one is not a reason to skip the other.
       #
-      # NOTE the --force here is NOT the nudge's --force. For the
-      # nudge it means "ignore the post-advance quiet window"; here it
-      # means "post even though it isn't advance day", which is only
-      # ever wanted for a manual test. Same input, deliberately, since
-      # both readings are "post anyway" — but on a scheduled run the
-      # input is unset and neither applies.
+      # This takes `headsup_force`, NOT `force`. The two words mean
+      # different things: the nudge's force skips a quiet window,
+      # this one overrides the calendar and asserts an advance is
+      # coming when it isn't. Almost nobody wants that — leave it
+      # unticked and this step posts only on real advance days.
       - name: Advance-day heads-up for all three leagues
         if: always()
         env:
           DRY: ${{ github.event_name == 'workflow_dispatch' && inputs.post != true && '--dry-run' || '' }}
-          FORCE: ${{ inputs.force == true && '--force' || '' }}
+          FORCE: ${{ inputs.headsup_force == true && '--force' || '' }}
         run: |
           rc=0
           for league in main 3star 1star; do

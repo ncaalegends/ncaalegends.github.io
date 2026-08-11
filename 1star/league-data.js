@@ -24,7 +24,7 @@
    THIS LEAGUE SETS A DAY, NOT A TIME. Writing the bare date
    "2026-08-12" rather than a full timestamp is what keeps the badge
    reading "Wednesday, August 12th" with no clock time attached, the
-   way it always has. Internally the day still resolves to 6 PM
+   way it always has. Internally the day still resolves to 10 PM
    Eastern so the advance-day heads-up has an instant to compare
    against — that just never reaches the site. Add a time here and
    the badge starts showing one.

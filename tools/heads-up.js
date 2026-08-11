@@ -102,12 +102,22 @@ const LAST_SCHEDULED_WEEK = 15;
    moved, and it does carry the role. Pinging the whole server twice
    in one day is how a bot gets muted.
    ------------------------------------------------------------ */
-function buildHeadsUp(data, nextWeek, wk, deadlineText, cfg, siteUrl) {
+function buildHeadsUp(data, nextWeek, wk, deadlineText, isToday, cfg, siteUrl) {
   const M = makeMentioner(cfg);
   const label = weekLabel(nextWeek);
 
+  /* "Later today" is only true on advance day, which is the only day
+     this posts on its own. A forced run (testing, or a manual
+     workflow dispatch with force ticked) can reach here on any day,
+     and saying "later today" then is worse than useless — it tells
+     24 people the advance is hours away when it's days away. So the
+     forced case states the actual deadline instead. */
+  const when = isToday
+    ? `later today${deadlineText ? ` — ${deadlineText}` : ""}`
+    : deadlineText || "soon";
+
   const head = [
-    `**Advance is scheduled for later today${deadlineText ? ` — ${deadlineText}` : ""}.**`,
+    `**Advance is scheduled for ${when}.**`,
     `Here's the H2Hs in ${label}, so you can start scheduling now.`,
   ].join("\n");
 
@@ -191,6 +201,7 @@ async function main() {
 
   const today = Deadline.isSameZoneDay(deadline, now);
   const ahead = deadline.getTime() > now.getTime();
+  const advanceDay = today && ahead;
   const hours = (deadline.getTime() - now.getTime()) / 3600000;
 
   console.log(
@@ -199,7 +210,7 @@ async function main() {
       `${ahead ? `${hours.toFixed(1)}h away` : `${Math.abs(hours).toFixed(1)}h ago`}`
   );
 
-  if (!(today && ahead)) {
+  if (!advanceDay) {
     if (!force) {
       console.log("  Not advance day (or the deadline has passed). Posting nothing.\n");
       return;
@@ -238,12 +249,14 @@ async function main() {
   }
 
   const cfg = loadConfig();
-  /* Only quote the deadline when it names a TIME. For a league that
-     sets a day and no clock time, "later today — Wednesday, August
-     12th" says the same thing twice and reads like a mistake. The
-     day is already established by "today". */
-  const deadlineText = Deadline.isDateOnly(at) ? "" : data.SEASON.nextAdvance || "";
-  const built = buildHeadsUp(data, nextWeek, wk, deadlineText, cfg, L.siteUrl);
+  /* On advance day, only quote the deadline when it names a TIME —
+     "later today — Wednesday, August 12th" says the same thing twice
+     and reads like a mistake, since "today" already established the
+     day. Off advance day (only reachable with --force) the day is
+     exactly what needs saying, so it's always included. */
+  const deadlineText =
+    advanceDay && Deadline.isDateOnly(at) ? "" : data.SEASON.nextAdvance || "";
+  const built = buildHeadsUp(data, nextWeek, wk, deadlineText, advanceDay, cfg, L.siteUrl);
 
   if (built.missingMentions.length) {
     console.log(
