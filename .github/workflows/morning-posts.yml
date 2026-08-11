@@ -1,11 +1,11 @@
 # ============================================================
 #  MORNING POSTS — the nudge, and the advance-day heads-up
 # ------------------------------------------------------------
-#  TWO JOBS SHARE ONE CRON, on purpose. Both run every morning,
+#  TWO JOBS SHARE ONE TRIGGER, on purpose. Both run every morning,
 #  both need the same checkout and the same Discord config, and
 #  both are read-only. A second workflow would mean a second
 #  checkout, a second copy of the secret plumbing, and a second
-#  cron to remember to shift when daylight saving ends.
+#  schedule to keep in sync.
 #
 #    tools/nudge.js     tags whoever still hasn't played THIS week
 #    tools/heads-up.js  on the morning of an advance, tags the
@@ -31,13 +31,27 @@
 #  local working copy is not. And a reminder that only fires when
 #  somebody's PC happens to be awake isn't a reminder.
 #
-#  TIME
-#  GitHub cron is UTC and does not follow daylight saving, so
-#  14:00 UTC is 10:00 AM EDT now and will become 9:00 AM once EST
-#  starts in November — change the 14 to a 15 then. GitHub also
-#  runs scheduled jobs on a best-effort basis and can be several
-#  minutes late (occasionally much more) when the queue is busy;
-#  nothing here is time-critical, so that's fine.
+#  TIME — AND WHY THERE IS NO `schedule:` BLOCK BELOW
+#  There used to be one, at 14:00 UTC, and it did not keep time.
+#  GitHub's cron is documented as best-effort: the trigger joins a
+#  queue that drains under load, and the top of the hour is the
+#  busiest slot on the fleet. The 10 AM nudge was arriving anywhere
+#  from 10:05 to after noon, which is no use for a reminder people
+#  plan a day around.
+#
+#  So the clock moved to the Cloudflare Worker that already runs the
+#  admin API — it holds a GitHub token and already knows how to fire
+#  a repository_dispatch, so this cost one handler and no new
+#  service. It fires within a minute of 10:00, and it works out the
+#  daylight saving change itself rather than leaving a comment
+#  telling a human to edit an hour every November. See the
+#  scheduled() handler at the bottom of worker/admin-api.js.
+#
+#  IF THE MORNING POSTS STOP ARRIVING, check the Worker's cron
+#  triggers and its logs first — a failure there is silent here,
+#  because "no dispatch" and "nothing to say" look identical from
+#  inside this file. The manual Run workflow button below is the way
+#  to post in the meantime.
 #
 #  It writes nothing and commits nothing — read-only plus at most
 #  one webhook POST per league per step.
@@ -46,8 +60,11 @@
 name: Morning posts
 
 on:
-  schedule:
-    - cron: "0 14 * * *" # 10:00 AM EDT / 9:00 AM EST
+  # The Cloudflare Worker is the clock — see the TIME note above.
+  # This event carries no payload; it means "it is 10 AM, go".
+  repository_dispatch:
+    types: [morning-posts]
+
   # Manual trigger, so it can be tested without waiting for morning.
   # Defaults to a dry run: the message is printed to the job log and
   # Discord is left alone. Flip `post` to true to really send it.
@@ -125,8 +142,9 @@ jobs:
       # normal failure email, which is the alerting story here.
       - name: Nudge all three leagues
         env:
-          # A scheduled run always posts for real. Only a manual run can
-          # be a dry run, and that is its default.
+          # A dispatched run (the Worker's 10 AM trigger) always posts
+          # for real. Only a manual run can be a dry run, and that is
+          # its default.
           DRY: ${{ github.event_name == 'workflow_dispatch' && inputs.post != true && '--dry-run' || '' }}
           FORCE: ${{ inputs.force == true && '--force' || '' }}
         run: |

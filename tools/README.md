@@ -243,7 +243,14 @@ node tools/nudge.js --league 3star
 ```
 
 You normally don't run this at all — **`.github/workflows/morning-posts.yml`
-runs it for all three leagues every morning at 14:00 UTC (10:00 AM EDT).**
+runs it for all three leagues every morning at 10:00 AM Eastern.**
+
+That time is kept by a cron trigger on the Cloudflare Worker, not by
+GitHub. GitHub's own cron is best-effort and was drifting badly — a
+10 AM nudge could land after noon — so the Worker fires a
+`repository_dispatch` and the workflow just listens. It also works out
+the daylight saving change by itself. Setup is in
+`worker/ADMIN-SETUP.md`, step 4b.
 
 ### Why it's a GitHub Action and not a local scheduled task
 
@@ -332,7 +339,7 @@ node tools/heads-up.js --league 3star
 
 Like the nudge, you normally don't run this — the same
 **`.github/workflows/morning-posts.yml`** runs it for all three leagues
-at 14:00 UTC (10:00 AM EDT), right after the nudge.
+at 10:00 AM Eastern, right after the nudge.
 
 ### It posts on exactly one condition
 

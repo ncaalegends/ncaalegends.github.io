@@ -142,7 +142,7 @@ Worker → **Settings** → **Variables and Secrets**:
 
 | Name | Type | Value |
 |---|---|---|
-| `GITHUB_TOKEN` | Secret | the token from step 1 |
+| `GITHUB_TOKEN` | Secret | the token from step 1 — also what the morning cron uses |
 | `ACCESS_CODES` | Secret | the JSON from step 2, all on one line |
 | `GITHUB_REPO` | Text | `ncaalegends/ncaalegends.github.io` |
 | `ALLOWED_ORIGINS` | Text | `https://ncaalegends.github.io,http://localhost:8080` |
@@ -152,6 +152,40 @@ Deploy again after adding these.
 `ALLOWED_ORIGINS` is what stops someone else's website from putting a
 form in front of your Worker. Unlike the Twitch worker, where it only
 protects a rate limit, here it's worth setting properly.
+
+## 4b. Add the cron triggers (the morning posts)
+
+The Worker is also the clock for the daily nudge and the advance-day
+heads-up. Without this step those never fire.
+
+Worker → **Settings** → **Triggers** → **Cron Triggers** → add **both**:
+
+```
+0 14 * * *
+0 15 * * *
+```
+
+Deploy again.
+
+**Why two.** Cron triggers are UTC only. 10:00 AM in New York is 14:00
+UTC in summer and 15:00 UTC in winter, so both are registered and the
+Worker discards whichever one isn't 10 AM Eastern that day — the
+changeover in March and November then needs nobody to remember
+anything. Exactly one fires per day; the other logs a line saying it
+was the wrong hour and stops.
+
+**Why this isn't GitHub's cron.** It was, and it didn't keep time.
+GitHub schedules are best-effort — the trigger queues and drains under
+load, worst at the top of the hour — so a 10:00 AM nudge was landing
+anywhere from 10:05 to after noon. Cloudflare fires within a minute.
+GitHub now only listens, via a `repository_dispatch` of type
+`morning-posts`.
+
+**If the morning posts stop arriving**, look here first: Worker →
+**Logs**. A dispatch failure is silent on the GitHub side, because
+"nobody triggered it" and "nothing to say this morning" produce the
+same empty result. In the meantime, Actions → **Morning posts** →
+**Run workflow** with **post** ticked does it by hand.
 
 ## 5. Point the page at the Worker
 

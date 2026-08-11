@@ -26,9 +26,35 @@
    The page calls /whoami at sign-in so it knows which leagues to
    offer. /submit re-checks everything /whoami checked — the reply
    from the first call is not a credential and is never trusted.
+
+   IT IS ALSO THE MORNING CLOCK
+   Nothing to do with the admin page: a cron trigger on this Worker
+   fires the daily nudge and the advance-day heads-up. GitHub's own
+   cron is best-effort and drains under load — 10:00 AM meant
+   anywhere from 10:05 to past noon — so the schedule moved here,
+   where it fires within a minute, and GitHub only listens. See the
+   scheduled() handler at the bottom.
    ============================================================ */
 
 const DISPATCH_EVENT = "league-update";
+
+/* The morning posts workflow listens for this. Separate event type
+   from the admin one so the two can never be confused: this one
+   carries no payload and needs no authorisation, because it asks for
+   nothing that isn't already public — "run the read-only job you run
+   every morning". */
+const MORNING_EVENT = "morning-posts";
+
+/* When the morning posts should go out, in the league's own timezone.
+   Cron triggers are UTC-only, so two of them are configured (14:00
+   and 15:00 UTC) and this is what decides which one is real: exactly
+   one of them is 10 AM in New York on any given day, and which one
+   changes twice a year on its own. That's the entire reason this
+   check exists — the old GitHub cron had a comment telling you to
+   edit the hour by hand every November, which is a thing nobody
+   remembers to do. */
+const POST_HOUR_ET = 10;
+const POST_ZONE = "America/New_York";
 
 /* Mirrors tools/apply.js, which is the authoritative copy. All three
    leagues can now be both scored and advanced from the web — the web
@@ -275,6 +301,14 @@ function checkPayload(payload, who) {
    DISPATCH
    ------------------------------------------------------------ */
 async function dispatch(env, payload) {
+  return dispatchEvent(env, DISPATCH_EVENT, { payload });
+}
+
+/* The one place a repository_dispatch is sent. Both callers — an
+   admin submission and the morning cron — go through here so the
+   token handling, the User-Agent GitHub insists on, and the "204 or
+   it didn't happen" check exist once. */
+async function dispatchEvent(env, eventType, clientPayload) {
   const repo = env.GITHUB_REPO;
   if (!repo) throw new Error("GITHUB_REPO is not configured");
   if (!env.GITHUB_TOKEN) throw new Error("GITHUB_TOKEN is not configured");
@@ -292,7 +326,7 @@ async function dispatch(env, payload) {
     /* Single top-level property, so the 10-property cap on
        client_payload can never be reached. See the note in
        .github/workflows/league-update.yml. */
-    body: JSON.stringify({ event_type: DISPATCH_EVENT, client_payload: { payload } }),
+    body: JSON.stringify({ event_type: eventType, client_payload: clientPayload }),
   });
 
   if (res.status !== 204) {
@@ -373,5 +407,72 @@ export default {
     }
 
     return json({ error: "Not found" }, 404, cors);
+  },
+
+  /* ------------------------------------------------------------
+     THE MORNING CLOCK
+     ------------------------------------------------------------
+     Fires the "Morning posts" workflow — the daily nudge and the
+     advance-day heads-up — at 10:00 AM Eastern, every day.
+
+     WHY THIS ISN'T GITHUB'S CRON ANY MORE
+     Because GitHub's cron is documented as best-effort: the trigger
+     goes into a queue that drains under load, and the top of the
+     hour is the busiest slot on the whole fleet. In practice the
+     10 AM nudge was landing anywhere from 10:05 to after noon, which
+     defeats a reminder people are supposed to plan a day around.
+     Cloudflare fires this within a minute, so GitHub's only job now
+     is to listen for the dispatch and run the tools.
+
+     DAYLIGHT SAVING IS HANDLED HERE, NOT BY A HUMAN
+     Cron triggers are UTC-only, so TWO are configured — 14:00 and
+     15:00 UTC — and the hour check below discards whichever one
+     isn't 10 AM in New York today. In summer that's the 14:00 one,
+     in winter the 15:00 one, and the switchover needs nobody to
+     remember anything. Configure both in the Cloudflare dashboard:
+     Worker → Settings → Triggers → Cron Triggers.
+
+       0 14 * * *
+       0 15 * * *
+
+     A FAILURE HERE IS SILENT, so it's worth knowing where to look:
+     if the morning posts stop arriving, check the Worker's cron
+     triggers and its logs before suspecting the tools. The workflow
+     also keeps its manual "Run workflow" button, which is the way to
+     post if this ever goes down.
+
+     Nothing is authenticated because nothing is asked for: this
+     triggers a read-only job that anyone can already see the output
+     of, and it carries no payload to be tampered with.
+     ------------------------------------------------------------ */
+  async scheduled(event, env, ctx) {
+    const hour = Number(
+      new Intl.DateTimeFormat("en-US", {
+        timeZone: POST_ZONE,
+        hour: "numeric",
+        hour12: false,
+      }).format(new Date(event.scheduledTime))
+    );
+
+    /* The other trigger — the one that's the wrong hour today. It
+       exists only so the pair survives the DST changeover, so this
+       is the normal path for one of the two every single day, not an
+       error worth shouting about. */
+    if (hour !== POST_HOUR_ET) {
+      console.log(
+        `[admin-api] cron "${event.cron}" is ${hour}:00 in ${POST_ZONE}, ` +
+          `not ${POST_HOUR_ET}:00 — the other trigger is today's. Nothing dispatched.`
+      );
+      return;
+    }
+
+    /* waitUntil, so the Worker isn't torn down mid-request. Without
+       it the fetch can be cancelled before GitHub answers and the
+       morning silently produces nothing. */
+    ctx.waitUntil(
+      dispatchEvent(env, MORNING_EVENT, {})
+        .then(() => console.log(`[admin-api] dispatched "${MORNING_EVENT}" for ${POST_HOUR_ET}:00 ET`))
+        .catch((e) => console.error("[admin-api] morning dispatch failed:", e.message))
+    );
   },
 };
