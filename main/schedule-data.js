@@ -487,7 +487,7 @@ const TEAM_SCHEDULES = [
       { week: 4, opponent: "Florida", location: "at", stadium: "Ben Hill Griffin Stadium", teamScore: 38, opponentScore: 18 },
       { week: 5, note: "BYE" },
       { week: 6, opponent: "Vanderbilt", location: "at", stadium: "FirstBank Stadium", teamScore: 17, opponentScore: 15 },
-      { week: 7, opponent: "Missouri", location: "vs", stadium: "Vaught-Hemingway Stadium" },
+      { week: 7, opponent: "Missouri", location: "vs", stadium: "Vaught-Hemingway Stadium", teamScore: 13, opponentScore: 55 },
       { week: 8, opponent: "Texas", location: "at", stadium: "Texas Memorial Stadium" },
       { week: 9, opponent: "Auburn", location: "vs", stadium: "Vaught-Hemingway Stadium" },
       { week: 10, opponent: "Georgia", location: "vs", stadium: "Vaught-Hemingway Stadium" },
