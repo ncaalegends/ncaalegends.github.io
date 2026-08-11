@@ -8,7 +8,7 @@
    pinged, and if the whole week is in it posts nothing at all.
 
    This is meant to run unattended on a schedule — see
-   .github/workflows/daily-nudge.yml. It is safe to run by hand too.
+   .github/workflows/morning-posts.yml. It is safe to run by hand too.
 
      node tools/nudge.js --league main --dry-run
      node tools/nudge.js --league 3star

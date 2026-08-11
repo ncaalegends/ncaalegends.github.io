@@ -15,10 +15,21 @@
    haven't been played yet — only Patriot Tech, Wawa and Westeros
    have a week 0 opponent at all; the other five are on a bye.
 
-   nextAdvance is the only real-world date on the site — a
+   The advance deadline is the only real-world date on the site — a
    scheduling deadline for coaches, not part of season chronology.
-   Plain text, so write it however reads best; no time is given
-   for this league. Set it to "" to hide the badge entirely.
+   It's stored twice: nextAdvanceAt is the authored value and
+   nextAdvance is the sentence generated from it, so neither is
+   hand-edited. See the long note in main/league-data.js.
+
+   THIS LEAGUE SETS A DAY, NOT A TIME. Writing the bare date
+   "2026-08-12" rather than a full timestamp is what keeps the badge
+   reading "Wednesday, August 12th" with no clock time attached, the
+   way it always has. Internally the day still resolves to 6 PM
+   Eastern so the advance-day heads-up has an instant to compare
+   against — that just never reaches the site. Add a time here and
+   the badge starts showing one.
+
+   Set both to "" to hide the badge entirely.
    ------------------------------------------------------------ */
 const SEASON = {
   // In-game year for this season's data. See the long note in
@@ -27,6 +38,7 @@ const SEASON = {
 
   currentWeek: 10,
   statusLine: "WEEK 10",
+  nextAdvanceAt: "2026-08-12",
   nextAdvance: "Wednesday, August 12th",
 };
 

@@ -11,14 +11,29 @@
         posts the announcement to a Discord webhook
 
    USAGE
-     node tools/advance.js --week 5 --next "Sunday, July 26 - 6:00 PM EDT"
+     node tools/advance.js --week 5 --next "2026-07-26 18:00"
      node tools/advance.js --league 3star --week 2 --no-post
 
    FLAGS
      --league SLUG     main | 3star | 1star. Defaults to main.
      --week N          the week now being played (0-15). Required.
-     --next "..."      advance deadline, free text. Required unless --no-post.
+     --next "..."      the next advance deadline, as a DATE, not a
+                       sentence. "2026-07-26 18:00" or "2026-07-26"
+                       for a league that names a day and no time.
+                       Eastern either way — see /deadline.js.
+                       Carried over from the file when omitted.
+     --at "..."        alias for --next, if that reads better.
      --status "..."    override the hero status line. Defaults to "WEEK N".
+
+   WHY THE DEADLINE IS A DATE AND NOT A SENTENCE
+   It used to be free text, typed however it read best, and that made
+   it impossible to ask "is the advance today?" — the question the
+   advance-day heads-up post (tools/heads-up.js) has to answer every
+   morning. So a date goes in, and the sentence coaches read comes
+   out: this writes BOTH nextAdvanceAt (the timestamp) and
+   nextAdvance (the generated text) into league-data.js. Free text is
+   now rejected rather than stored, because a deadline nothing can
+   read is how the heads-up silently stops firing.
      --dry-run         print the message, change nothing, post nothing.
      --no-post         update the data file but skip Discord.
      --no-write        post to Discord but leave the data file alone.
@@ -44,6 +59,11 @@ const path = require("path");
    shared with scores.js — see tools/lib/league.js. Keeping one copy
    is what guarantees Discord and the site never disagree about who
    plays whom. */
+/* The one implementation of Eastern-time handling, shared with the
+   admin page. Everything here that turns a date into a stored value
+   or a printed sentence goes through it. */
+const Deadline = require("../deadline");
+
 const {
   parseArgs,
   die,
@@ -286,7 +306,13 @@ function seasonBlock(src, leagueFile) {
   die(`SEASON block in ${leagueFile} is never closed — unbalanced braces`);
 }
 
-function updateSeason(leagueFile, week, statusLine, nextAdvance) {
+/* The deadline is written as a PAIR: the timestamp that tools read
+   and the sentence the site shows, generated from it. They are only
+   ever set together, here, which is what stops them drifting apart.
+   Pass nextAdvanceAt as undefined to leave the existing deadline
+   alone; pass "" to clear it, which blanks both fields and hides the
+   countdown line. */
+function updateSeason(leagueFile, week, statusLine, nextAdvanceAt) {
   const src = fs.readFileSync(leagueFile, "utf8");
   const { open, close, body } = seasonBlock(src, path.basename(leagueFile));
 
@@ -298,11 +324,32 @@ function updateSeason(leagueFile, week, statusLine, nextAdvance) {
     `$1${JSON.stringify(statusLine)}$2`,
     "statusLine"
   );
-  if (nextAdvance !== undefined) {
+  if (nextAdvanceAt !== undefined) {
+    const at = String(nextAdvanceAt).trim();
+    /* A non-empty value that won't parse must never reach the file.
+       It would sit there looking like a deadline while every tool
+       that reads it — starting with the heads-up — treats it as
+       absent. Callers validate first; this is the backstop. */
+    const stored = Deadline.canonical(at);
+    if (stored === null) {
+      die(`refusing to write an unreadable deadline: ${JSON.stringify(at)}`);
+    }
+    const text = stored ? Deadline.formatDeadline(stored) : "";
+
+    /* nextAdvanceAt: is matched before nextAdvance: on purpose — the
+       shorter regex requires the colon immediately after the name, so
+       it cannot match the longer key, but the ordering makes that
+       obvious to the next person reading it. */
+    next = replaceOne(
+      next,
+      /^(\s*nextAdvanceAt:\s*)"[^"]*"(,)/m,
+      `$1${JSON.stringify(stored)}$2`,
+      "nextAdvanceAt"
+    );
     next = replaceOne(
       next,
       /^(\s*nextAdvance:\s*)"[^"]*"(,)/m,
-      `$1${JSON.stringify(nextAdvance)}$2`,
+      `$1${JSON.stringify(text)}$2`,
       "nextAdvance"
     );
   }
@@ -360,6 +407,47 @@ async function post(url, payload) {
 }
 
 /* ------------------------------------------------------------
+   THE DEADLINE ARGUMENT
+   ------------------------------------------------------------
+   Turns whatever was typed on the command line into the pair the
+   rest of the run needs: `at`, the value stored in league-data.js,
+   and `text`, the sentence that goes on the site and into Discord.
+
+   Omitting the flag carries the existing deadline over untouched,
+   which is what makes `--no-write --week N` re-post the same
+   announcement rather than inventing a new date.
+
+   A value that doesn't parse stops the run. The tempting
+   alternative — store the text and leave the timestamp blank — is
+   exactly the failure this whole change exists to remove: the site
+   would look fine and the heads-up would never fire again, with
+   nothing anywhere saying why.
+   ------------------------------------------------------------ */
+function resolveDeadline(args, data) {
+  const raw = args.at !== undefined ? args.at : args.next;
+
+  if (raw === undefined) {
+    const at = data.SEASON.nextAdvanceAt ?? "";
+    return { at: undefined, text: at ? Deadline.formatDeadline(at) : data.SEASON.nextAdvance || "" };
+  }
+
+  const value = String(raw).trim();
+  if (!value) return { at: "", text: "" }; // deliberate clear
+
+  if (!Deadline.parseAt(value)) {
+    die(
+      `--next "${value}" isn't a date this can work with.\n` +
+        "  Give a date, not a sentence — the sentence is generated from it:\n" +
+        '    --next "2026-07-26 18:00"   Sunday, July 26th - 6:00 PM EDT\n' +
+        '    --next "2026-07-26"         Sunday, July 26th  (no time shown)\n' +
+        "  Times are Eastern. See /deadline.js."
+    );
+  }
+
+  return { at: value, text: Deadline.formatDeadline(value) };
+}
+
+/* ------------------------------------------------------------
    MAIN
    ------------------------------------------------------------ */
 async function main() {
@@ -374,7 +462,7 @@ async function main() {
   const paths = L.paths;
   const siteUrl = L.siteUrl;
 
-  const week = parseWeek(args.week, '--week 5 --next "Sunday 6PM EDT"');
+  const week = parseWeek(args.week, '--week 5 --next "2026-07-26 18:00"');
 
   const data = loadData(paths);
 
@@ -396,7 +484,9 @@ async function main() {
   const wk = buildWeek(data, week);
   const label = weekLabel(week);
   const statusLine = args.status || label.toUpperCase();
-  const nextAdvance = args.next !== undefined ? args.next : data.SEASON.nextAdvance;
+  /* `at` is what gets written, `text` is what gets shown. See
+     resolveDeadline above for why an unparseable value stops here. */
+  const { at: nextAdvanceAt, text: nextAdvance } = resolveDeadline(args, data);
 
   // Report before doing anything irreversible.
   console.log(`\n  ${meta.label} · ${label} — ${wk.league.length} H2H, ${wk.cpu.length} CPU, ${wk.notes.length} bye/off`);
@@ -438,7 +528,7 @@ async function main() {
   }
 
   if (!noWrite) {
-    const changed = updateSeason(paths.league, week, statusLine, nextAdvance);
+    const changed = updateSeason(paths.league, week, statusLine, nextAdvanceAt);
     console.log(
       changed
         ? `  ${meta.dir}/league-data.js updated → currentWeek ${week}, next advance "${nextAdvance}"`

@@ -49,12 +49,31 @@ echo.
 set /p WEEK="  Week we're advancing TO (0-15): "
 if "%WEEK%"=="" (echo   No week entered. & pause & exit /b 1)
 
+REM ------------------------------------------------------------
+REM  The deadline is now a DATE, not a sentence. The sentence the
+REM  site shows ("Sunday, July 26th - 6:00 PM EDT") is generated
+REM  from it — see /deadline.js. Typing prose here is rejected,
+REM  because a deadline nothing can read is how the advance-day
+REM  heads-up post silently stops firing.
+REM
+REM  Time is optional. Leave it blank and the badge shows the day
+REM  with no clock time, the way 1-star and 3-star have always read.
+REM ------------------------------------------------------------
 echo.
-echo   Next advance deadline, as it should read on the site.
-echo   Example: Sunday, July 26 - 6:00 PM EDT
+echo   Next advance deadline.
+echo   Date, as YYYY-MM-DD. Example: 2026-07-26
 echo.
-set /p NEXTADV="  Next deadline: "
-if "%NEXTADV%"=="" (echo   No deadline entered. & pause & exit /b 1)
+set /p NEXTDATE="  Next deadline date: "
+if "%NEXTDATE%"=="" (echo   No date entered. & pause & exit /b 1)
+
+echo.
+echo   Time, 24-hour, Eastern. Example: 18:00
+echo   Leave blank for a date with no time shown.
+echo.
+set /p NEXTTIME="  Next deadline time: "
+
+set "NEXTADV=%NEXTDATE%"
+if not "%NEXTTIME%"=="" set "NEXTADV=%NEXTDATE% %NEXTTIME%"
 
 echo.
 echo   ---------- PREVIEW ----------

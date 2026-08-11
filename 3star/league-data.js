@@ -15,10 +15,16 @@
    currentWeek: "PRESEASON" until Week 0 kicks off in-game, then
    the week number (0-15) currently being played.
 
-   nextAdvance is the only real-world date on the site. This league
-   is run by a different commissioner and isn't on the automated
-   advance tooling yet, so it's blank — which hides the countdown
-   line entirely rather than showing a stale deadline.
+   The advance deadline is the only real-world date on the site, and
+   it's stored twice: nextAdvanceAt is the authored value and
+   nextAdvance is the sentence generated from it. See the long note
+   in main/league-data.js — neither should be hand-edited, and both
+   go blank together to hide the countdown line.
+
+   Like 1-star, this league names a day and not a clock time, so the
+   stored value is a bare date and the badge carries no clock time.
+   The 6 PM Eastern the day resolves to is internal, used only to
+   decide whether an advance is still ahead.
    ------------------------------------------------------------ */
 const SEASON = {
   // In-game year for this season's data. See the long note in
@@ -27,7 +33,13 @@ const SEASON = {
 
   currentWeek: 9,
   statusLine: "WEEK 9",
-  nextAdvance: "Monday, August 13th",
+  /* Entered as "Monday, August 13th" on the Week 9 advance, back
+     when this was free text. The 13th is a Thursday — the date was
+     right and the weekday was the typo, so the generated text says
+     Thursday now. This is the class of mistake the picker removes:
+     nobody types the weekday any more. */
+  nextAdvanceAt: "2026-08-13",
+  nextAdvance: "Thursday, August 13th",
 };
 
 /* ------------------------------------------------------------

@@ -47,9 +47,24 @@ const SEASON = {
 
   /* ADVANCE DEADLINE — the one place real-world time appears.
      League rule: the next advance happens no later than 6:00 PM EDT
-     three days after the last advance. Update this every time you
-     advance; it's plain text, so write it however reads best.
-     Set it to "" to hide the countdown line entirely. */
+     three days after the last advance.
+
+     TWO FIELDS, ONE AUTHORED. nextAdvanceAt is the real value: an
+     ISO timestamp with an explicit Eastern offset. nextAdvance is
+     the sentence the site shows, and it is GENERATED from that
+     timestamp — the admin page and advance.js both write the pair
+     together, so don't hand-edit either one. If they ever disagree,
+     nextAdvanceAt is right and the next advance will correct the
+     text.
+
+     The timestamp exists because free text can't be computed with,
+     and the advance-day heads-up (tools/heads-up.js) has to answer
+     "is the advance today?" every morning before it decides whether
+     to post next week's H2H matchups. /deadline.js does the
+     conversion in both directions and explains the Eastern rule.
+
+     Set BOTH to "" to hide the countdown line entirely. */
+  nextAdvanceAt: "2026-08-11T18:00:00-04:00",
   nextAdvance: "Tuesday, August 11th - 6:00 PM EDT",
 };
 

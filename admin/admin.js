@@ -282,7 +282,14 @@ function refreshWeekControls() {
   $("advance-week").innerHTML = advanceOpts.join("");
   $("advance-week").value = String(Math.min(current + 1, 19));
 
-  $("advance-next").value = data.SEASON.nextAdvance || "";
+  /* Prefill from the stored timestamp, not from the sentence — the
+     sentence is generated and can't be parsed back reliably. A league
+     whose deadline predates this change simply starts blank, which is
+     honest: it has no machine-readable deadline yet. */
+  const picker = Deadline.toPickerFields(data.SEASON.nextAdvanceAt);
+  $("advance-date").value = picker.date;
+  $("advance-time").value = picker.time;
+  renderDeadlinePreview();
 
   $("current-week").textContent =
     `Currently on ${weekOptionLabel(current).toUpperCase()}` +
@@ -778,6 +785,62 @@ $("save-scores").addEventListener("click", async () => {
 });
 
 /* ------------------------------------------------------------
+   THE DEADLINE PICKERS
+   ------------------------------------------------------------
+   readDeadline() is the single place the two inputs become the one
+   value that gets sent. Returns:
+
+     { at, text }   a usable deadline
+     null           no date picked yet
+     false          a date that /deadline.js won't accept
+
+   The three are kept distinct because "you haven't picked one" and
+   "that isn't a real date" are different mistakes and deserve
+   different messages.
+
+   Time blank is not an error. It means a deadline stated as a day
+   with no clock time, which is how two of the three leagues have
+   always read — the bare date is stored, and 6 PM Eastern is
+   assumed internally so the heads-up still knows whether the
+   advance is ahead or behind.
+   ------------------------------------------------------------ */
+function readDeadline() {
+  const date = $("advance-date").value.trim();
+  const time = $("advance-time").value.trim();
+  if (!date) return null;
+
+  const at = time ? Deadline.fromPickerFields(date, time) : Deadline.canonical(date);
+  if (!at) return false;
+
+  return { at, text: Deadline.formatDeadline(at) };
+}
+
+/* Echo the generated sentence under the pickers. Nobody types this
+   string any more, so this is the one chance to notice that the date
+   says Thursday when you meant Tuesday — before 24 people see it. */
+function renderDeadlinePreview() {
+  const el = $("advance-preview");
+  if (!el) return;
+
+  const d = readDeadline();
+  el.classList.remove("bad");
+
+  if (d === null) {
+    el.textContent = "Pick a date and the site will read: …";
+    return;
+  }
+  if (d === false) {
+    el.classList.add("bad");
+    el.textContent = "That date isn't valid.";
+    return;
+  }
+  el.innerHTML = `The site will read: <strong>${esc(d.text)}</strong>`;
+}
+
+$("advance-date").addEventListener("input", renderDeadlinePreview);
+$("advance-time").addEventListener("input", renderDeadlinePreview);
+
+/* ------------------------------------------------------------
    ADVANCE — two steps, on purpose
    ------------------------------------------------------------
    Step one swaps the form for a plain-language description of what
@@ -787,13 +850,18 @@ $("save-scores").addEventListener("click", async () => {
    ------------------------------------------------------------ */
 $("advance-btn").addEventListener("click", () => {
   const week = Number($("advance-week").value);
-  const next = $("advance-next").value.trim();
   const msg = $("advance-msg");
 
-  if (!next) {
-    message(msg, "error", "Give a deadline — it's what coaches see on the site.");
+  const deadline = readDeadline();
+  if (deadline === null) {
+    message(msg, "error", "Pick a deadline date — it's what coaches see on the site.");
     return;
   }
+  if (deadline === false) {
+    message(msg, "error", "That deadline isn't a valid date.");
+    return;
+  }
+  const next = deadline.text;
 
   const current = Number(data.SEASON.currentWeek) || 0;
   const wk = WeekCore.buildWeek(data, week);
@@ -827,7 +895,15 @@ $("advance-yes").addEventListener("click", async () => {
   const btn = $("advance-yes");
   const msg = $("advance-msg");
   const week = Number($("advance-week").value);
-  const next = $("advance-next").value.trim();
+
+  /* Re-read rather than trusting what step one showed. The pickers
+     are still on the page behind the confirmation, and this is the
+     click that actually sends. */
+  const deadline = readDeadline();
+  if (!deadline) {
+    message(msg, "error", "The deadline stopped being valid — pick it again.");
+    return;
+  }
 
   btn.disabled = true;
   message(msg, "warn", "Advancing…");
@@ -839,7 +915,11 @@ $("advance-yes").addEventListener("click", async () => {
         action: "advance",
         league: $("league-select").value,
         week,
-        next,
+        /* The timestamp, not the sentence. apply.js regenerates the
+           sentence from it with the same code the command-line tool
+           uses, so the site and Discord can't end up describing the
+           same deadline differently. */
+        nextAt: deadline.at,
         confirm: true,
       },
     });

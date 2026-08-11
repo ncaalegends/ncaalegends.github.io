@@ -1,6 +1,23 @@
 # ============================================================
-#  DAILY NUDGE — tag whoever still hasn't played
+#  MORNING POSTS — the nudge, and the advance-day heads-up
 # ------------------------------------------------------------
+#  TWO JOBS SHARE ONE CRON, on purpose. Both run every morning,
+#  both need the same checkout and the same Discord config, and
+#  both are read-only. A second workflow would mean a second
+#  checkout, a second copy of the secret plumbing, and a second
+#  cron to remember to shift when daylight saving ends.
+#
+#    tools/nudge.js     tags whoever still hasn't played THIS week
+#    tools/heads-up.js  on the morning of an advance, tags the
+#                       coaches in NEXT week's H2H games so they
+#                       have all day to arrange a time
+#
+#  The heads-up posts on exactly one condition — SEASON.nextAdvanceAt
+#  falls today, Eastern, and hasn't passed — so on most mornings it
+#  prints a line to the log and posts nothing. It runs SECOND: on an
+#  advance day both may fire, and "here's what you still owe" reads
+#  better before "here's what's coming".
+#
 #  Runs tools/nudge.js for all three leagues every morning. Each
 #  league posts to its own webhook, tagging only the coaches whose
 #  week-N game has no score recorded yet. A league with every game
@@ -22,11 +39,11 @@
 #  minutes late (occasionally much more) when the queue is busy;
 #  nothing here is time-critical, so that's fine.
 #
-#  It writes nothing and commits nothing — read-only plus one
-#  webhook POST per league.
+#  It writes nothing and commits nothing — read-only plus at most
+#  one webhook POST per league per step.
 # ============================================================
 
-name: Daily nudge
+name: Morning posts
 
 on:
   schedule:
@@ -41,7 +58,7 @@ on:
         type: boolean
         default: false
       force:
-        description: "Post even if the advance was less than 12h ago"
+        description: "Force: nudge ignores the 12h window, heads-up posts off advance day"
         type: boolean
         default: false
 
@@ -53,7 +70,7 @@ permissions:
 # harmless (this job never writes), but two nudges overlapping would
 # double-post. Queue them.
 concurrency:
-  group: daily-nudge
+  group: morning-posts
   cancel-in-progress: false
 
 jobs:
@@ -107,6 +124,38 @@ jobs:
           for league in main 3star 1star; do
             echo "::group::$league"
             node tools/nudge.js --league "$league" $DRY $FORCE || rc=$?
+            echo "::endgroup::"
+          done
+          exit $rc
+
+      # THE ADVANCE-DAY HEADS-UP.
+      #
+      # Silent on most mornings by design — it posts only when this
+      # league's advance deadline falls today and is still ahead. The
+      # log line it prints either way is the whole diagnostic story:
+      # if a heads-up didn't go out, the run tells you which of the
+      # conditions wasn't met.
+      #
+      # `if: always()` so a league blowing up in the nudge step above
+      # doesn't take the heads-up with it. They're independent posts
+      # and a failure in one is not a reason to skip the other.
+      #
+      # NOTE the --force here is NOT the nudge's --force. For the
+      # nudge it means "ignore the post-advance quiet window"; here it
+      # means "post even though it isn't advance day", which is only
+      # ever wanted for a manual test. Same input, deliberately, since
+      # both readings are "post anyway" — but on a scheduled run the
+      # input is unset and neither applies.
+      - name: Advance-day heads-up for all three leagues
+        if: always()
+        env:
+          DRY: ${{ github.event_name == 'workflow_dispatch' && inputs.post != true && '--dry-run' || '' }}
+          FORCE: ${{ inputs.force == true && '--force' || '' }}
+        run: |
+          rc=0
+          for league in main 3star 1star; do
+            echo "::group::$league"
+            node tools/heads-up.js --league "$league" $DRY $FORCE || rc=$?
             echo "::endgroup::"
           done
           exit $rc

@@ -44,6 +44,8 @@
 const fs = require("fs");
 const path = require("path");
 
+const Deadline = require("../deadline");
+
 const {
   die,
   resolveLeague,
@@ -198,7 +200,35 @@ function validate(payload) {
     if (payload.confirm !== true) {
       bad("advance requires an explicit confirmation");
     }
-    out.next = payload.next === undefined ? undefined : requireSafeText(payload.next, "next");
+    /* THE DEADLINE ARRIVES AS A DATE, NOT A SENTENCE.
+       The admin page sends `nextAt` — "2026-08-14T18:00:00-04:00",
+       or a bare "2026-08-14" for a league that shows a day and no
+       time. The sentence coaches read is generated from it further
+       down, by the same code the command-line tool uses.
+
+       Rejecting an unparseable value outright is the point: storing
+       one would leave the site showing a deadline that no tool can
+       read, and the advance-day heads-up would stop firing with
+       nothing to say why. Anything not understood fails the
+       submission loudly instead.
+
+       `next` (free text) is still accepted from an older admin page
+       that hasn't been reloaded since this changed, but only to be
+       reinterpreted as a date — the same rule, not a bypass. */
+    const rawAt = payload.nextAt !== undefined ? payload.nextAt : payload.next;
+    if (rawAt === undefined) {
+      out.nextAt = undefined;
+    } else {
+      const at = requireString(rawAt, "nextAt", 40);
+      const stored = Deadline.canonical(at);
+      if (stored === null) {
+        bad(
+          `deadline ${JSON.stringify(at)} isn't a date — expected 2026-08-14T18:00:00-04:00 ` +
+            `or 2026-08-14`
+        );
+      }
+      out.nextAt = stored;
+    }
     out.status = payload.status === undefined ? undefined : requireSafeText(payload.status, "status");
   }
 
@@ -278,10 +308,13 @@ async function doAdvance(p, L) {
   const status = p.status || `WEEK ${p.week}`;
 
   /* Carry the existing deadline over when none was given, matching
-     advance.js's behaviour rather than blanking the badge. */
-  const next = p.next === undefined ? data.SEASON.nextAdvance : p.next;
+     advance.js's behaviour rather than blanking the badge. `at` is
+     what gets stored; `next` is the generated sentence, used for the
+     Discord message and the run summary. */
+  const at = p.nextAt === undefined ? data.SEASON.nextAdvanceAt ?? "" : p.nextAt;
+  const next = at ? Deadline.formatDeadline(at) : "";
 
-  const changed = updateSeason(L.paths.league, p.week, status, next);
+  const changed = updateSeason(L.paths.league, p.week, status, p.nextAt);
 
   const wk = buildWeek(data, p.week);
   console.log(

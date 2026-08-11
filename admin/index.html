@@ -105,7 +105,8 @@ label.field > span {
   margin-bottom: 6px;
 }
 
-input[type="text"], input[type="password"], input[type="number"], select {
+input[type="text"], input[type="password"], input[type="number"],
+input[type="date"], input[type="time"], select {
   width: 100%;
   background: var(--navy-deep);
   border: 1px solid var(--steel-dim);
@@ -120,6 +121,33 @@ input:focus, select:focus {
   outline-offset: 1px;
   border-color: var(--gold);
 }
+
+/* Date and time sit side by side on anything wider than a phone and
+   stack below that. The time is the narrower of the two because it
+   is also the optional one — see the note in the panel markup. */
+.field-pair { display: flex; gap: 12px; flex-wrap: wrap; }
+.field-pair > label.field { flex: 1 1 180px; margin-bottom: 0; }
+.field-pair > label.field.narrow { flex: 0 1 140px; }
+
+/* Safari and iOS render date/time inputs with their own light
+   chrome and their own idea of height. Both are forced back onto
+   the panel's palette so the row doesn't look pasted in. */
+input[type="date"], input[type="time"] {
+  min-height: 46px;
+  color-scheme: dark;
+}
+
+/* The sentence coaches will actually see, echoed live under the
+   pickers. The deadline is generated now rather than typed, so this
+   is the only place to catch a wrong date before it ships. */
+.deadline-preview {
+  margin: 10px 0 14px;
+  font-size: 14px;
+  color: var(--steel);
+  min-height: 20px;
+}
+.deadline-preview strong { color: var(--chalk); font-weight: 600; }
+.deadline-preview.bad { color: var(--rust, #b3261e); }
 
 .btn {
   font-family: var(--font-display);
@@ -500,10 +528,30 @@ details.entered .entered-body .game:first-child { border-top: 1px solid var(--li
           <span>Advance to week</span>
           <select id="advance-week"></select>
         </label>
-        <label class="field">
-          <span>Next deadline (as it should read on the site)</span>
-          <input type="text" id="advance-next" placeholder="Friday, August 1" maxlength="120">
-        </label>
+        <!-- THE DEADLINE IS PICKED, NOT TYPED.
+
+             It used to be a free-text box, and the sentence in it was
+             whatever read best. That made it impossible for anything
+             to ask "is the advance today?" — which is the question
+             the advance-day heads-up post has to answer every morning
+             before it tells coaches next week's H2H matchups. So a
+             date and a time go in, and the sentence comes out; the
+             preview underneath shows exactly what the site will say.
+
+             The time is OPTIONAL. Left blank, the badge shows the day
+             with no clock time, which is how 1-star and 3-star have
+             always read it. Times are Eastern. -->
+        <div class="field-pair">
+          <label class="field">
+            <span>Next deadline — date</span>
+            <input type="date" id="advance-date">
+          </label>
+          <label class="field narrow">
+            <span>Time (ET, optional)</span>
+            <input type="time" id="advance-time">
+          </label>
+        </div>
+        <div class="deadline-preview" id="advance-preview"></div>
         <button class="btn" type="button" id="advance-btn">Advance&hellip;</button>
       </div>
 
@@ -527,6 +575,7 @@ details.entered .entered-body .game:first-child { border-top: 1px solid var(--li
      the matchup logic the CLI tools use. Neither is admin-specific. -->
 <script src="../people.js"></script>
 <script src="../week-core.js"></script>
+<script src="../deadline.js"></script>
 <script src="admin.js"></script>
 </body>
 </html>

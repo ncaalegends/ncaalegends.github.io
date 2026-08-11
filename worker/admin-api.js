@@ -245,8 +245,27 @@ function checkPayload(payload, who) {
     }
   }
 
-  if (action === "advance" && payload.confirm !== true) {
-    return "advance was not confirmed";
+  if (action === "advance") {
+    if (payload.confirm !== true) return "advance was not confirmed";
+
+    /* The deadline is a date, not a sentence — the sentence the site
+       shows is generated from it downstream. Shape only: this checks
+       the two forms the admin page can produce and nothing more,
+       because apply.js re-parses it properly with the same code the
+       command-line tool uses. Rejecting it here just saves a
+       round-trip through Actions for an obviously wrong value.
+
+         2026-08-14T18:00:00-04:00   a day and a time
+         2026-08-14                  a day, no time shown */
+    if (payload.nextAt !== undefined) {
+      if (typeof payload.nextAt !== "string") return "deadline must be a string";
+      const at = payload.nextAt.trim();
+      const ok =
+        at === "" ||
+        /^\d{4}-\d{2}-\d{2}$/.test(at) ||
+        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?([+-]\d{2}:\d{2}|Z)$/.test(at);
+      if (!ok) return "deadline isn't a date like 2026-08-14T18:00:00-04:00";
+    }
   }
 
   return null;

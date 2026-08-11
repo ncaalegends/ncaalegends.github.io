@@ -87,7 +87,7 @@ as `script.js`, so what Discord says always matches what the site shows.
 | Flag | Meaning |
 |---|---|
 | `--week N` | Week now being played, 0–15. Required. |
-| `--next "..."` | Advance deadline, free text. Carries over the existing value if omitted. |
+| `--next "..."` | Next advance deadline, **as a date**: `2026-07-26 18:00`, or `2026-07-26` for a day with no time shown. Eastern. Carries over the existing value if omitted. `--at` is an alias. |
 | `--status "..."` | Override the hero status line. Defaults to `WEEK N`. |
 | `--dry-run` | Print the message. Change nothing, post nothing. |
 | `--no-post` | Update the data file, skip Discord. |
@@ -95,6 +95,41 @@ as `script.js`, so what Discord says always matches what the site shows.
 
 **Always dry-run first** if you're unsure — it shows the exact matchup
 list and flags any coach missing an entry for that week.
+
+### The deadline is a date now, not a sentence
+
+It used to be free text — whatever read best went in the box. That made
+it impossible for anything to ask *"is the advance today?"*, which is
+the one question `heads-up.js` has to answer every morning.
+
+So `SEASON` carries two fields, and you author one of them:
+
+```js
+nextAdvanceAt: "2026-08-11T18:00:00-04:00",   // you set this (via a date)
+nextAdvance:   "Tuesday, August 11th - 6:00 PM EDT",   // generated
+```
+
+`advance.js` writes both together, every time, from the date you give
+it. Don't hand-edit either — and if they ever disagree, the timestamp
+is the one that's right.
+
+Typing prose into `--next` is now an error rather than something that
+gets stored. That's deliberate: a deadline the tools can't read looks
+completely fine on the site while the heads-up quietly never fires
+again, with nothing anywhere saying why.
+
+A league that names a **day and no time** stores a bare date
+(`"2026-08-12"`) and its badge keeps reading `Wednesday, August 12th`
+with no clock time — that's how 1-star and 3-star have always looked.
+Internally the day resolves to 6 PM Eastern so the heads-up still knows
+whether the advance is ahead or behind; that never reaches the site.
+
+All the conversion lives in `/deadline.js` at the repo root, shared with
+the admin page the same way `week-core.js` is — one copy, so the picker
+in the browser and the tool on the command line can't disagree about
+what a date means. It computes Eastern's offset per instant rather than
+hardcoding one, so the changeover from EDT to EST mid-season takes care
+of itself.
 
 ### Mentions — the one thing that trips people up
 
@@ -203,7 +238,7 @@ node tools/nudge.js --league main --dry-run
 node tools/nudge.js --league 3star
 ```
 
-You normally don't run this at all — **`.github/workflows/daily-nudge.yml`
+You normally don't run this at all — **`.github/workflows/morning-posts.yml`
 runs it for all three leagues every morning at 14:00 UTC (10:00 AM EDT).**
 
 ### Why it's a GitHub Action and not a local scheduled task
@@ -258,10 +293,75 @@ score prompts.
 
 ### Testing it
 
-Actions tab → **Daily nudge** → **Run workflow**. It defaults to a dry
+Actions tab → **Morning posts** → **Run workflow**. It defaults to a dry
 run: the exact message for each league prints in the job log and Discord
 is left alone. Tick **post** to send it for real, **force** to bypass
 the 12-hour window.
+
+That one workflow runs both morning posts — the nudge, then
+`heads-up.js`. They share a cron because they share a checkout, a copy
+of the Discord config and a schedule; a second workflow would have meant
+a second of each, including a second cron to remember to shift when
+daylight saving ends.
+
+Writes nothing, commits nothing, touches the network only for the
+webhook POST.
+
+## heads-up.js
+
+The advance-day "here's who you play next" post. On the morning of an
+advance, it lists **next** week's head-to-head matchups and tags the
+coaches in them, so two people have all day to agree a time instead of
+starting that conversation at 6 PM.
+
+```
+node tools/heads-up.js --league main --dry-run
+node tools/heads-up.js --league 3star
+```
+
+Like the nudge, you normally don't run this — the same
+**`.github/workflows/morning-posts.yml`** runs it for all three leagues
+at 14:00 UTC (10:00 AM EDT), right after the nudge.
+
+### It posts on exactly one condition
+
+`SEASON.nextAdvanceAt` names a deadline that falls **today** in Eastern
+and **hasn't passed yet**. Everything else is silence, and the job log
+says which condition wasn't met:
+
+| Situation | Why nothing posts |
+|---|---|
+| No `nextAdvanceAt` | Nothing to compare against. |
+| Deadline another day | Not today's problem. |
+| Deadline already passed | The advance may have happened — the matchups would be the ones people are already playing. |
+| Preseason | No current week, so no next week. |
+| Next week past 15 | Bowl weeks come from the CFP bracket, not from a schedule this can read. |
+| No H2H games next week | An all-CPU week needs no coordinating. |
+
+That single condition is also why there's no "did I already post today"
+state anywhere. The cron is daily and the test is a calendar date, so it
+stays stateless — which matters, because the alternative is giving a
+read-only job write access to the repo just to remember something it can
+already work out.
+
+### Flags
+
+| Flag | Meaning |
+|---|---|
+| `--league SLUG` | `main` \| `3star` \| `1star`. Defaults to main. |
+| `--dry-run` | Print the message. Post nothing. |
+| `--force` | Post even when it isn't advance day. Testing only. |
+| `--now ISO` | Pretend it's another moment, e.g. `--now "2026-08-11T14:00:00Z"`. Testing only. |
+
+`--now` plus `--dry-run` is how you check an advance day without waiting
+for one.
+
+### No role ping
+
+Same reasoning as the nudge: this is aimed at the handful of people with
+a game to arrange, not at the league. The advance announcement a few
+hours later carries the role and tells everyone the week moved. Pinging
+the whole server twice in one day is how a bot gets muted.
 
 Writes nothing, commits nothing, touches the network only for the
 webhook POST.
