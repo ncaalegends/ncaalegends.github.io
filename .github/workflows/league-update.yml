@@ -59,10 +59,22 @@ jobs:
       - name: Check out the site
         uses: actions/checkout@v4
 
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
+      # NO setup-node STEP, DELIBERATELY
+      # The ubuntu runner image already ships Node 20, and everything
+      # under tools/ uses Node built-ins only — no packages, no
+      # install, nothing to pin. actions/setup-node was spending
+      # 10-15 seconds to provide a runtime that was already there,
+      # and this workflow is the one a commissioner waits on after
+      # hitting Send.
+      #
+      # If a future runner image ships a Node this code doesn't like,
+      # the fix is to put the step back:
+      #     - uses: actions/setup-node@v4
+      #       with: { node-version: "20" }
+      # The "Show Node version" line below is what tells you that
+      # happened, so check it before assuming the payload is at fault.
+      - name: Show Node version
+        run: node --version
 
       # Written to the runner's temp dir, not the working tree, so
       # there's no chance of committing the payload alongside the

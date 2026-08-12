@@ -369,6 +369,30 @@ details.entered .entered-body .game:first-child { border-top: 1px solid var(--li
 }
 .game.is-final .final-line .lock { color: var(--steel); font-size: 12px; margin-left: 8px; }
 
+/* A game shown as saved before the published file has confirmed it.
+   Gold rather than green, and the same gold as the "waiting" message
+   below the list, so the row and the caption are visibly the same
+   state — this is deliberately NOT the colour a settled result uses.
+   The pulse is what stops it reading as finished at a glance. */
+.game.is-final.is-pending .final-line { color: var(--gold); }
+.pending-tag {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  animation: pending-pulse 1.6s ease-in-out infinite;
+}
+@keyframes pending-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.45; }
+}
+
+/* Respect a stated preference for less motion — a pulsing row is
+   exactly the kind of thing that setting exists for. The colour
+   still carries the meaning without it. */
+@media (prefers-reduced-motion: reduce) {
+  .pending-tag { animation: none; }
+}
+
 .note-line { color: var(--steel); font-size: 13px; padding: 7px 0; }
 
 /* ---- messages ---- */
@@ -575,6 +599,9 @@ details.entered .entered-body .game:first-child { border-top: 1px solid var(--li
      the matchup logic the CLI tools use. Neither is admin-specific. -->
 <script src="../people.js"></script>
 <script src="../week-core.js"></script>
+<!-- score-core needs week-core loaded first and says so loudly if it
+     isn't; keep them in this order. -->
+<script src="../score-core.js"></script>
 <script src="../deadline.js"></script>
 <script src="admin.js"></script>
 </body>

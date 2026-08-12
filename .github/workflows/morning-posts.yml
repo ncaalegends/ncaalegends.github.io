@@ -115,6 +115,14 @@ jobs:
         with:
           fetch-depth: 0
 
+      # KEPT HERE ON PURPOSE, unlike league-update.yml, which dropped
+      # it. That workflow runs while a commissioner watches a spinner,
+      # so 10-15 seconds of installing a Node the runner already had
+      # was worth removing. This one fires from a cron at 10 AM with
+      # nobody waiting, so the version pin is free and worth keeping:
+      # if a runner image ever ships a Node that breaks the tools,
+      # these posts failing quietly at dawn is a worse way to find out
+      # than a submission failing while someone is looking at it.
       - name: Set up Node
         uses: actions/setup-node@v4
         with:

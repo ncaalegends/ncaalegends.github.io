@@ -8,9 +8,9 @@
 
      node tools/apply.js payload.json
 
-   NOTHING IS REIMPLEMENTED HERE. Scores go through scores.js's
-   own parseSet() and applyScores(); the advance goes through
-   advance.js's updateSeason(). This file is validation and
+   NOTHING IS REIMPLEMENTED HERE. Scores go through score-core's
+   resolveEntries() and scores.js's applyScores(); the advance goes
+   through advance.js's updateSeason(). This file is validation and
    plumbing, so a score submitted from a phone hits the same
    guardrails as one typed at the prompt — the tie check, the
    ambiguous-name check, the bye check, all of it.
@@ -54,7 +54,8 @@ const {
   weekLabel,
   top25GateError,
 } = require("./lib/league");
-const { applyScores, parseSet, scoreableGames } = require("./scores");
+const { applyScores, scoreableGames } = require("./scores");
+const { resolveEntries, ScoreError } = require("../score-core");
 const { updateSeason, buildMessage, post, webhookUrl } = require("./advance");
 
 /* Read tools/config.json (which on the Actions runner IS the
@@ -250,29 +251,32 @@ function doScores(p, L) {
     die(`no games to score in ${weekLabel(p.week).toLowerCase()} for ${L.label}.`);
   }
 
-  const edits = [];
-  const answered = [];
+  /* score-core's resolveEntries is the same code the command line
+     reaches through parseSet and the same code the Worker checks
+     against before it dispatches. That's what makes a score
+     submitted from a phone hit every guardrail one typed at the
+     prompt does: unknown name, ambiguous name, naming a CPU
+     opponent instead of the coach's team, flipping the score when
+     the caller named the far side of the matchup, and refusing to
+     silently overwrite a game that's already final.
 
-  for (const entry of p.entries) {
-    /* parseSet is the CLI's own parser. Handing it the same
-       "Team 27-24" string the command line would use means the
-       web path inherits every check it does: unknown name,
-       ambiguous name, naming a CPU opponent instead of the
-       coach's team, and flipping the score when the caller named
-       the other side of the matchup. */
-    const r = parseSet(`${entry.team} ${entry.score}`, games, p.week, data, entry.sim);
-
-    if (r.game.scored && !p.force) {
-      die(
-        `${r.game.label} is already final (${r.game.scored}).\n` +
-          `  The admin page should have asked before sending this.`
-      );
+     This used to reconstruct a "Team 27-24" string and hand it to
+     the CLI's own --set parser, purely to reach that logic. The
+     entries arrive structured; taking them apart into a string so
+     something else could take the string apart again was a seam
+     where a team name with a trailing number could go wrong. */
+  let resolved;
+  try {
+    resolved = resolveEntries(p.entries, games, p.week, data, p.force);
+  } catch (e) {
+    if (!(e instanceof ScoreError)) throw e;
+    if (e.code === "already-scored") {
+      die(`${e.message}\n  The admin page should have asked before sending this.`);
     }
-
-    edits.push(...r.edits);
-    answered.push(r.summary);
+    die(e.message);
   }
 
+  const { edits, answered } = resolved;
   const result = applyScores(L.paths.schedule, edits);
 
   console.log(`\n  ${L.label} · ${weekLabel(p.week)} — ${answered.length} game(s) by ${p.actor}:\n`);

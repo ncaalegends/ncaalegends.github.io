@@ -25,3 +25,9 @@ tools/config.json
 
 # Planning notes — working drafts, not part of the tooling docs
 tools/SCOPING-*.md
+docs/SCOPING-*.md
+
+# NOTE: docs/SCOPING-mid-season-departure.md was committed before this
+# pattern existed, so it is still tracked and this line does not touch
+# it — gitignore only applies to files git isn't already following. If
+# you want it gone too: git rm --cached docs/SCOPING-mid-season-departure.md

@@ -39,6 +39,21 @@ let data = null; // loaded league + schedule data for the current league
 let games = []; // scoreableGames() for the selected week
 let unlocked = new Set(); // indexes of already-final games the user chose to edit
 
+/* Games shown as saved before the published file has confirmed them.
+   Keyed "team|week". See "SHOWING THE SCORE BEFORE THE SITE HAS IT"
+   further down for what puts things in here and what takes them out. */
+const pending = new Set();
+const pendingKey = (team, week) => `${team}|${week}`;
+
+/* Scores typed in, submitted, and then un-painted because the site
+   never confirmed them. Keyed the same way, and used to refill the
+   boxes on the way back so an unconfirmed save doesn't also cost the
+   user their typing — they may well need to send it again, and
+   asking them to re-read a week's worth of scores off a screenshot
+   because this page couldn't confirm them is the kind of small
+   insult that makes people go back to messaging them to RekenCrew. */
+const restored = new Map();
+
 const $ = (id) => document.getElementById(id);
 
 const esc = (s) =>
@@ -298,8 +313,22 @@ function refreshWeekControls() {
   renderGames();
 }
 
-$("league-select").addEventListener("change", (e) => switchLeague(e.target.value));
-$("week-select").addEventListener("change", () => renderGames());
+/* Both of these drop any optimistic paint. The pending set is keyed
+   by team and week, and a team can play in several weeks — leaving a
+   stale key behind would mark an unrelated game as SAVING and hide
+   its Edit button. Changing the view also means the user has stopped
+   watching the save they started, so there's nothing left for the
+   marker to communicate. */
+$("league-select").addEventListener("change", (e) => {
+  pending.clear();
+  restored.clear();
+  switchLeague(e.target.value);
+});
+$("week-select").addEventListener("change", () => {
+  pending.clear();
+  restored.clear();
+  renderGames();
+});
 
 /* ------------------------------------------------------------
    RENDER THE WEEK
@@ -335,15 +364,33 @@ function renderGames() {
      ordered here. */
   const todo = [];
   const done = [];
-  games.forEach((g, i) => (g.scored ? done : todo).push({ g, i }));
+  const saving = [];
+
+  games.forEach((g, i) => {
+    /* A game painted optimistically is scored as far as the data is
+       concerned, but it must not drop into the collapsed Entered
+       section — the user just pressed Save and watching their games
+       disappear into a closed accordion is the opposite of the
+       feedback this is for. It gets its own group at the top until
+       the published file confirms it. */
+    if (g.scored && pending.has(pendingKey(g.perspective, week))) saving.push({ g, i });
+    else if (g.scored) done.push({ g, i });
+    else todo.push({ g, i });
+  });
 
   let html = "";
+
+  if (saving.length) {
+    html +=
+      `<div class="group-head">Saving <span class="group-count">${saving.length}</span></div>` +
+      saving.map(({ g, i }) => gameHtml(g, i, week)).join("");
+  }
 
   if (todo.length) {
     html +=
       `<div class="group-head">To enter <span class="group-count">${todo.length}</span></div>` +
-      todo.map(({ g, i }) => gameHtml(g, i)).join("");
-  } else {
+      todo.map(({ g, i }) => gameHtml(g, i, week)).join("");
+  } else if (!saving.length) {
     html += `<p class="all-done">All games this week are entered.</p>`;
   }
 
@@ -357,7 +404,7 @@ function renderGames() {
       `<summary>Entered <span class="group-count muted">${done.length}</span>` +
       `<span class="ent-hint"></span></summary>` +
       `<div class="entered-body">` +
-      done.map(({ g, i }) => gameHtml(g, i)).join("") +
+      done.map(({ g, i }) => gameHtml(g, i, week)).join("") +
       `</div></details>`;
   }
 
@@ -476,7 +523,7 @@ function renderGaps() {
   });
 }
 
-function gameHtml(g, i) {
+function gameHtml(g, i, week) {
   /* A league (coach-vs-coach) game is the one that actually matters
      for standings — a CPU game is a formality. So H2H gets the
      accent LEAGUE tag and the row a left accent bar + tint; CPU
@@ -494,6 +541,21 @@ function gameHtml(g, i) {
 
   if (g.scored) {
     const simTag = g.sim ? ` <span class="sim-tag">SIM</span>` : "";
+
+    /* Painted a moment ago and not yet confirmed by the published
+       file. Reads SAVING instead of FINAL, and offers no Edit button
+       — editing a score that hasn't landed yet would race the
+       submission already in flight. */
+    const isPending = pending.has(pendingKey(g.perspective, week));
+
+    if (isPending) {
+      return (
+        `<div class="${cls} is-final is-pending" data-game="${i}">${head}` +
+        `<div class="final-line"><span class="pending-tag">SAVING…</span> &nbsp;${esc(g.scored)}${simTag}` +
+        `</div></div>`
+      );
+    }
+
     return (
       `<div class="${cls} is-final" data-game="${i}">${head}` +
       `<div class="final-line">FINAL &nbsp;${esc(g.scored)}${simTag}` +
@@ -503,7 +565,10 @@ function gameHtml(g, i) {
     );
   }
 
-  return `<div class="${cls}" data-game="${i}">${head}${scoreInputsHtml(g, i, null)}</div>`;
+  /* Anything a failed save handed back. Normally empty. */
+  const prefill = restored.get(pendingKey(g.perspective, week)) || null;
+
+  return `<div class="${cls}" data-game="${i}">${head}${scoreInputsHtml(g, i, prefill)}</div>`;
 }
 
 /* Two labelled boxes rather than one "27-24" field. The text form
@@ -713,6 +778,106 @@ function scoresLanded(fresh, week, entries) {
 }
 
 /* ------------------------------------------------------------
+   SHOWING THE SCORE BEFORE THE SITE HAS IT
+   ------------------------------------------------------------
+   The wait above is 60-90 seconds and there is nothing useful to
+   do about that from here — the Actions run and the Pages deploy
+   are what they are. What IS fixable is that the page used to sit
+   completely unchanged for the whole minute: the boxes you just
+   typed into still showed your typing, nothing moved, and a save
+   that was working looked exactly like a save that had failed.
+   That, not the duration, is what the "no feedback" report was
+   really about.
+
+   So the moment the Worker accepts the submission, the scores are
+   painted into the page's own copy of the data as though they had
+   published. The games move to the Entered section and read FINAL,
+   marked "saving" until the real file confirms them.
+
+   THIS IS A CLAIM, AND IT CAN BE WRONG
+   The Worker accepting a submission means it dispatched, not that
+   apply.js liked it. So the paint is explicitly provisional and
+   every path that doesn't end in confirmation takes it back:
+   waitForPublish timing out, or the submission failing outright.
+   An optimistic paint that survives a failure is worse than no
+   paint at all — it turns "did that work?" into "it said it
+   worked", which is how a score goes missing for a week.
+
+   The edits come from score-core, the same function apply.js uses
+   on the runner. Deriving them here from the entries by hand would
+   be a second implementation of the H2H mirroring rule, and the
+   whole point of that module is that there isn't one.
+   ------------------------------------------------------------ */
+/* Write the edits into the in-memory TEAM_SCHEDULES, exactly where
+   applyScoresToSource would write them in the file. Returns a
+   function that puts everything back. */
+function paintPending(week, entries) {
+  let edits;
+  try {
+    edits = ScoreCore.resolveEntries(entries, games, week, data, unlocked.size > 0).edits;
+  } catch (e) {
+    /* resolveEntries rejecting here means the page and the data
+       disagree — a stale page, most likely. The submission is
+       already away and apply.js will have the final say, so this
+       isn't the place to report it; just don't paint anything. */
+    return () => {};
+  }
+
+  const undo = [];
+
+  for (const e of edits) {
+    const team = (data.TEAM_SCHEDULES || []).find((t) => t.team === e.team);
+    if (!team) continue;
+    const row = (team.weeks || []).find((w) => w.week === e.week);
+    if (!row || row.opponent === undefined) continue;
+
+    undo.push({
+      row,
+      teamScore: row.teamScore,
+      opponentScore: row.opponentScore,
+      sim: row.sim,
+    });
+
+    row.teamScore = e.teamScore;
+    row.opponentScore = e.opponentScore;
+    if (e.sim !== undefined) {
+      if (e.sim) row.sim = true;
+      else delete row.sim;
+    }
+
+    pending.add(pendingKey(e.team, e.week));
+  }
+
+  renderGames();
+
+  return () => {
+    /* Put the typed scores back in the boxes, not just the boxes
+       back. entries are already validated "27-24" strings by the
+       time they get here. */
+    for (const e of entries) {
+      const [a, b] = String(e.score).split("-");
+      restored.set(pendingKey(e.team, week), { team: a, opponent: b });
+    }
+
+    for (const u of undo) {
+      /* Restore by deleting rather than assigning undefined — an
+         explicit `teamScore: undefined` would make the game read as
+         scored-but-blank everywhere downstream. */
+      if (u.teamScore === undefined) delete u.row.teamScore;
+      else u.row.teamScore = u.teamScore;
+
+      if (u.opponentScore === undefined) delete u.row.opponentScore;
+      else u.row.opponentScore = u.opponentScore;
+
+      if (u.sim === undefined) delete u.row.sim;
+      else u.row.sim = u.sim;
+    }
+    pending.clear();
+    renderGames();
+  };
+}
+
+/* ------------------------------------------------------------
    SAVE SCORES
    ------------------------------------------------------------ */
 $("save-scores").addEventListener("click", async () => {
@@ -750,6 +915,12 @@ $("save-scores").addEventListener("click", async () => {
 
     const n = `${entries.length} game${entries.length === 1 ? "" : "s"}`;
 
+    /* Show them as final straight away, marked as still saving. See
+       the block above for why this is provisional and what takes it
+       back. */
+    restored.clear();
+    const unpaint = paintPending(week, entries);
+
     /* Submitted, not saved. Say exactly that until we know better. */
     message(msg, "warn", `Sent ${n}. Waiting for the site to publish…`);
     scrollToMessage(msg);
@@ -764,17 +935,25 @@ $("save-scores").addEventListener("click", async () => {
       /* Re-render from the published file, so the games the user just
          entered now show as FINAL and the missing-scores banner
          updates. The page agreeing with the site is the feedback
-         that actually matters — the message is just the caption. */
+         that actually matters — the message is just the caption.
+
+         This replaces the painted copy wholesale rather than clearing
+         the flags on it, so what's on screen at the end came from the
+         published file and not from anything this page assumed. */
+      pending.clear();
+      restored.clear();
       data = fresh;
       renderGames();
       message(msg, "ok", `Done — ${n} recorded and live on the site.`);
     } else {
+      unpaint();
       message(
         msg,
         "warn",
         `Sent ${n}, but the site still hasn't updated after 3 minutes.\n` +
-          `This usually means it's just running slow — reload this page in a few minutes to check.\n` +
-          `If it still isn't there, tell RekenCrew rather than entering them again.`
+          `The scores have been put back the way they were on this page — that's not a sign\n` +
+          `they were lost, only that this page can't confirm them. Reload in a few minutes to check.\n` +
+          `If they still aren't there, tell RekenCrew rather than entering them again.`
       );
     }
   } catch (err) {
