@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NCAA Legends — 3-Star Pick'em</title>
+<meta name="description" content="NCAA Legends 3-Star Dynasty pick'em — vote in Discord, results and the season scoreboard here.">
+
+<!-- MOCKUP. Static sample data, no Worker, no D1. Everything in
+     POLLS below is invented. See docs/SCOPING-voting-polls.md. -->
+
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="../../favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="../../apple-touch-icon.png">
+<meta name="theme-color" content="#060b16">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- The whole point: this page inherits the league stylesheet rather
+     than restating it. Only pick'em-specific rules live below. -->
+<link rel="stylesheet" href="../../style.css">
+
+<style>
+/* ============================================================
+   PICK'EM
+   ------------------------------------------------------------
+   Reuses the site's tokens throughout — --gold is the league
+   accent (ice blue here), --win/--crimson are the reserved
+   result colors, and every panel repeats the notched clip-path
+   geometry from style.css so this reads as the same product.
+   ============================================================ */
+
+.pk-panel {
+  background: var(--navy-panel);
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--gold);
+  clip-path: polygon(var(--cut) 0, 100% 0, 100% calc(100% - var(--cut)),
+                     calc(100% - var(--cut)) 100%, 0 100%, 0 var(--cut));
+}
+
+/* --- the explainer strip under the page title --- */
+.pk-intro {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  flex-wrap: wrap;
+  padding: 18px 22px;
+  margin-top: 24px;
+}
+.pk-intro-text { flex: 1; min-width: 240px; }
+.pk-intro-text h1 {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+.pk-intro-text p {
+  margin: 6px 0 0;
+  color: var(--steel);
+  font-size: 0.88rem;
+  max-width: 56ch;
+}
+.pk-intro-stat { text-align: right; }
+.pk-intro-stat .n {
+  font-family: var(--font-mono);
+  font-size: 2.1rem;
+  font-weight: 700;
+  color: var(--gold);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.pk-intro-stat .l {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  color: var(--steel);
+  text-transform: uppercase;
+  margin-top: 6px;
+}
+
+/* --- open poll --- */
+.pk-open {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  padding: 16px 22px;
+  margin-top: 20px;
+  border-top-color: var(--crimson);
+}
+.pk-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--crimson);
+}
+.pk-live .status-dot { background: var(--crimson); }
+.pk-open-main { flex: 1; min-width: 220px; }
+.pk-open-match {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+.pk-open-meta {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  color: var(--steel);
+  margin-top: 3px;
+}
+.pk-btn {
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 10px 20px;
+  background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+  color: var(--navy-deep);
+  text-decoration: none;
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+  transition: filter var(--leave);
+}
+.pk-btn:hover { filter: brightness(1.12); transition: filter var(--arrive); }
+
+/* --- result cards --- */
+.pk-results { display: grid; gap: 12px; }
+
+.pk-card { padding: 0; }
+.pk-card-head {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 14px;
+  align-items: center;
+  padding: 15px 20px;
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--leave);
+}
+.pk-card-head:hover {
+  background: rgba(242, 244, 248, 0.03);
+  transition: background var(--arrive);
+}
+
+.pk-kind {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  padding: 2px 7px;
+  color: var(--navy-deep);
+  background: var(--steel);
+  clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%);
+}
+.pk-kind.is-dynasty { background: var(--gold); }
+
+.pk-match {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  margin-top: 7px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+.pk-side.won { color: var(--win); }
+.pk-side.lost { color: var(--steel); text-decoration: line-through; }
+.pk-vs { font-size: 0.75rem; color: var(--steel-dim); }
+
+/* The split bar. Only ever rendered for settled or closed polls —
+   an open poll shows a vote count and nothing else, so nobody can
+   watch the tally and switch sides before the deadline. */
+.pk-bar {
+  display: flex;
+  height: 6px;
+  margin-top: 11px;
+  background: var(--navy-deep);
+  overflow: hidden;
+}
+.pk-bar span { display: block; height: 100%; }
+.pk-bar .a { background: var(--gold); }
+.pk-bar .b { background: var(--steel-dim); }
+
+.pk-split {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  color: var(--steel);
+  margin-top: 7px;
+  font-variant-numeric: tabular-nums;
+}
+
+.pk-card-right {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--steel);
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+.pk-chev { display: block; font-size: 1rem; margin-top: 8px; color: var(--steel-dim); }
+.pk-card-head[aria-expanded="true"] .pk-chev { color: var(--gold); }
+
+/* --- expanded: who picked which side --- */
+.pk-picks {
+  border-top: 1px solid var(--line);
+  padding: 16px 20px 18px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+.pk-picks[hidden] { display: none; }
+.pk-col-head {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--steel);
+  padding-bottom: 9px;
+  margin-bottom: 11px;
+  border-bottom: 1px solid var(--line);
+}
+.pk-col.is-winner .pk-col-head { color: var(--win); }
+.pk-names { display: flex; flex-wrap: wrap; gap: 6px; }
+.pk-name {
+  font-size: 0.78rem;
+  padding: 4px 9px;
+  background: rgba(242, 244, 248, 0.05);
+  border-left: 2px solid var(--steel-dim);
+  color: var(--steel);
+}
+.pk-col.is-winner .pk-name {
+  border-left-color: var(--win);
+  color: var(--chalk);
+  background: rgba(62, 207, 126, 0.08);
+}
+.pk-none { font-size: 0.78rem; color: var(--steel-dim); font-style: italic; }
+
+/* --- scoreboard --- */
+.pk-board { list-style: none; margin: 0; padding: 0; counter-reset: pkrank; }
+.pk-board li {
+  counter-increment: pkrank;
+  display: grid;
+  grid-template-columns: 40px 1fr 74px 1fr 56px;
+  align-items: center;
+  gap: 14px;
+  padding: 11px 8px;
+  border-bottom: 1px solid var(--line);
+  transition: background var(--leave);
+}
+.pk-board li:hover {
+  background: rgba(242, 244, 248, 0.03);
+  transition: background var(--arrive);
+}
+.pk-board li::before {
+  content: counter(pkrank);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--steel);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.pk-board li:nth-child(-n + 3)::before { color: var(--chalk); }
+.pk-board li:first-child::before { color: var(--gold); }
+.pk-coach { font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.pk-wl {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+.pk-wl .w { color: var(--win); font-weight: 700; }
+.pk-wl .sep { color: var(--steel-dim); margin: 0 2px; }
+.pk-wl .l { color: var(--steel); }
+
+.pk-entrybar { background: var(--navy-deep); height: 8px; }
+.pk-entrybar span { display: block; height: 100%; background: var(--gold); }
+
+.pk-entries {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--gold);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.pk-board-key {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--steel);
+  letter-spacing: 0.06em;
+  padding: 0 8px 11px;
+  text-transform: uppercase;
+}
+
+/* --- history view --- */
+.pk-view[hidden] { display: none; }
+.pk-back {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--gold);
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  font-weight: 600;
+}
+.pk-back:hover { text-decoration: underline; }
+
+@media (max-width: 700px) {
+  .pk-picks { grid-template-columns: 1fr; }
+  .pk-board li {
+    grid-template-columns: 32px 1fr 70px 48px;
+    gap: 10px;
+  }
+  .pk-entrybar { display: none; }
+  .pk-intro-stat { text-align: left; }
+}
+</style>
+</head>
+
+<body data-league="3star">
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="league-mark">
+      <a class="league-home" href="../../" aria-label="All NCAA Legends leagues"><span class="hash">//</span></a>
+      <span class="league-name">NCAA LEGENDS</span>
+      <span class="league-badge">3-STAR DYNASTY</span>
+    </div>
+    <nav class="tabs" aria-label="Sections">
+      <a class="tab-btn" href="../">Home</a>
+      <a class="tab-btn" href="../#schedule">Schedule</a>
+      <a class="tab-btn" href="../#rankings">Rankings</a>
+      <a class="tab-btn" href="../#roster">Roster</a>
+      <a class="tab-btn active" href="./" aria-current="page">Pick'em</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <div class="pk-panel pk-intro">
+    <div class="pk-intro-text">
+      <h1>3-Star Pick'em</h1>
+      <p>Polls post in <strong>#pick-em</strong> and you vote there. Every correct
+         pick is one entry in the end-of-season drawing — pick more, win more
+         entries, better odds. Skipping a poll never counts against you.</p>
+    </div>
+    <div class="pk-intro-stat">
+      <div class="n" id="stat-entries">—</div>
+      <div class="l">Entries in the pot</div>
+    </div>
+  </div>
+
+  <div class="pk-panel pk-open" id="open-poll"></div>
+
+  <!-- ============ RECENT RESULTS ============ -->
+  <div class="pk-view" id="view-recent">
+    <div class="section-block">
+      <div class="section-head">
+        <h2 class="section-title">Recent Results</h2>
+        <button class="link-btn" id="btn-history">See full history &rarr;</button>
+      </div>
+      <div class="pk-results" id="recent-list"></div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-head">
+        <h2 class="section-title">Scoreboard</h2>
+        <span class="section-tag" id="board-tag"></span>
+      </div>
+      <div class="pk-board-key">
+        <span>W &mdash; correct picks &middot; entries</span>
+        <span>L &mdash; incorrect picks</span>
+      </div>
+      <ol class="pk-board" id="board"></ol>
+    </div>
+  </div>
+
+  <!-- ============ FULL HISTORY ============ -->
+  <div class="pk-view" id="view-history" hidden>
+    <div class="section-block">
+      <div class="section-head">
+        <h2 class="section-title">Full History</h2>
+        <button class="pk-back" id="btn-back">&larr; Back to scoreboard</button>
+      </div>
+      <div class="pk-results" id="history-list"></div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+/* ============================================================
+   MOCK DATA
+   ------------------------------------------------------------
+   Stands in for what the Worker would return from D1. Shape
+   mirrors the schema in docs/SCOPING-voting-polls.md: a poll
+   carries two free-text labels, a kind, a close time and an
+   outcome; votes are keyed by coach.
+
+   Picks are generated from a seeded RNG rather than typed out,
+   so the scoreboard is computed from real per-vote data the way
+   the live page would compute it — and stays identical on every
+   reload.
+   ============================================================ */
+
+const COACHES = [
+  "Bl00dVayN3", "Temptiger", "Brian52682", "Dway", "Salzy",
+  "Oldarmy324", "Cleveland", "Trick whitey", "Texan_hog", "RonRicoFSU",
+  "EHDC12", "wacky9speedy", "EYEDONTPULL19", "CoachLawless",
+  "DiabeticSnail22", "RekenCrew"
+];
+
+const MATCHUPS = [
+  ["dynasty", "Bl00dVayN3",  "Temptiger",     "Week 9"],
+  ["external", "Ohio State", "Michigan",      "Rivalry week"],
+  ["dynasty", "Salzy",       "Oldarmy324",    "Week 9"],
+  ["dynasty", "RonRicoFSU",  "Texan_hog",     "Week 8"],
+  ["external", "Georgia",    "Alabama",       "SEC championship"],
+  ["dynasty", "EHDC12",      "Cleveland",     "Week 8"],
+  ["dynasty", "Brian52682",  "Dway",          "Week 7"],
+  ["external", "Chiefs",     "Bills",         "AFC divisional"],
+  ["dynasty", "Trick whitey","CoachLawless",  "Week 7"],
+  ["dynasty", "wacky9speedy","EYEDONTPULL19", "Week 6"],
+  ["external", "Texas",      "Oklahoma",      "Red River"],
+  ["dynasty", "Temptiger",   "Salzy",         "Week 6"]
+];
+
+/* Small deterministic LCG — same board every reload. */
+let _s = 20260813;
+const rnd = () => (_s = (_s * 1103515245 + 12345) % 2147483648) / 2147483648;
+
+/* A per-coach bias so the scoreboard has believable spread instead
+   of everyone landing on the same number. */
+const SKILL = {};
+COACHES.forEach((c, i) => { SKILL[c] = 0.42 + ((i * 37) % 100) / 260; });
+
+const DAY = 86400000;
+const now = Date.now();
+
+const POLLS = MATCHUPS.map(([kind, a, b, note], i) => {
+  const outcome = rnd() < 0.5 ? "a" : "b";
+  const votes = {};
+  COACHES.forEach(c => {
+    if (rnd() < 0.12) return;                    // sat this one out
+    const right = rnd() < SKILL[c];
+    votes[c] = right ? outcome : (outcome === "a" ? "b" : "a");
+  });
+  return {
+    id: 100 + MATCHUPS.length - i,
+    kind, a, b, note,
+    closesAt: now - (i + 1) * 3 * DAY,
+    outcome,
+    votes
+  };
+});
+
+/* One poll closed but not yet ruled on, and one still open. */
+const PENDING = {
+  id: 200, kind: "dynasty", a: "Cleveland", b: "Bl00dVayN3", note: "Week 10",
+  closesAt: now - 6 * 3600000, outcome: null,
+  votes: Object.fromEntries(COACHES.slice(0, 13).map((c, i) => [c, i % 3 ? "a" : "b"]))
+};
+
+const OPEN = {
+  id: 201, kind: "external", a: "Notre Dame", b: "USC", note: "Saturday primetime",
+  closesAt: now + 41 * 3600000, voteCount: 11
+};
+
+/* ------------------------------------------------------------
+   SCOREBOARD
+   The live version is one SQL GROUP BY. Here it's the same
+   logic in JS: a correct pick is a win, an incorrect pick is a
+   loss, an absent pick is neither, and an unsettled poll counts
+   for nobody yet.
+   ------------------------------------------------------------ */
+function buildBoard() {
+  const rows = COACHES.map(c => ({ coach: c, w: 0, l: 0 }));
+  const byCoach = Object.fromEntries(rows.map(r => [r.coach, r]));
+  POLLS.forEach(p => {
+    if (p.outcome !== "a" && p.outcome !== "b") return;
+    Object.entries(p.votes).forEach(([c, choice]) => {
+      if (!byCoach[c]) return;
+      choice === p.outcome ? byCoach[c].w++ : byCoach[c].l++;
+    });
+  });
+  return rows.sort((x, y) => y.w - x.w || x.l - y.l || x.coach.localeCompare(y.coach));
+}
+
+/* ------------------------------------------------------------
+   RENDERING
+   ------------------------------------------------------------ */
+const esc = s => String(s).replace(/[&<>"]/g, m =>
+  ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[m]));
+
+const fmtDate = ts => new Date(ts).toLocaleDateString(undefined,
+  { month: "short", day: "numeric" });
+
+function countsFor(p) {
+  let a = 0, b = 0;
+  Object.values(p.votes).forEach(v => v === "a" ? a++ : b++);
+  return { a, b, total: a + b };
+}
+
+function cardHtml(p) {
+  const { a, b, total } = countsFor(p);
+  const settled = p.outcome === "a" || p.outcome === "b";
+  const pct = total ? Math.round((a / total) * 100) : 50;
+  const cls = side => !settled ? "" : (p.outcome === side ? "won" : "lost");
+
+  return `
+  <div class="pk-panel pk-card">
+    <button class="pk-card-head" aria-expanded="false" data-poll="${p.id}">
+      <div>
+        <span class="pk-kind ${p.kind === "dynasty" ? "is-dynasty" : ""}">${p.kind === "dynasty" ? "DYNASTY" : "CFB / NFL"}</span>
+        <div class="pk-match">
+          <span class="pk-side ${cls("a")}">${esc(p.a)}</span>
+          <span class="pk-vs">vs</span>
+          <span class="pk-side ${cls("b")}">${esc(p.b)}</span>
+        </div>
+        <div class="pk-bar">
+          <span class="a" style="width:${pct}%"></span>
+          <span class="b" style="width:${100 - pct}%"></span>
+        </div>
+        <div class="pk-split">${a} &ndash; ${b} &middot; ${total} votes &middot; ${esc(p.note)}</div>
+      </div>
+      <div class="pk-card-right">
+        ${settled ? "CLOSED " + fmtDate(p.closesAt) : "AWAITING RESULT"}
+        <span class="pk-chev" aria-hidden="true">&#9662;</span>
+      </div>
+    </button>
+    <div class="pk-picks" id="picks-${p.id}" hidden>
+      ${colHtml(p, "a")}
+      ${colHtml(p, "b")}
+    </div>
+  </div>`;
+}
+
+function colHtml(p, side) {
+  const names = Object.entries(p.votes)
+    .filter(([, v]) => v === side).map(([c]) => c).sort();
+  const won = p.outcome === side;
+  return `
+    <div class="pk-col ${won ? "is-winner" : ""}">
+      <div class="pk-col-head">${esc(side === "a" ? p.a : p.b)} &middot; ${names.length}${won ? " &mdash; correct" : ""}</div>
+      <div class="pk-names">
+        ${names.length
+          ? names.map(n => `<span class="pk-name">${esc(n)}</span>`).join("")
+          : '<span class="pk-none">Nobody picked this side.</span>'}
+      </div>
+    </div>`;
+}
+
+function renderOpen() {
+  const el = document.getElementById("open-poll");
+  const hrs = Math.round((OPEN.closesAt - now) / 3600000);
+  el.innerHTML = `
+    <span class="pk-live"><span class="status-dot"></span>VOTING OPEN</span>
+    <div class="pk-open-main">
+      <div class="pk-open-match">${esc(OPEN.a)} <span class="pk-vs">vs</span> ${esc(OPEN.b)}</div>
+      <div class="pk-open-meta">${OPEN.voteCount} votes cast &middot; closes in ${hrs} hours &middot; ${esc(OPEN.note)}</div>
+    </div>
+    <a class="pk-btn" href="#">Vote in Discord</a>`;
+}
+
+function renderBoard() {
+  const rows = buildBoard();
+  const max = Math.max(1, ...rows.map(r => r.w));
+  const total = rows.reduce((s, r) => s + r.w, 0);
+
+  document.getElementById("stat-entries").textContent = total;
+  document.getElementById("board-tag").textContent =
+    POLLS.length + " polls settled · 1 pending";
+
+  document.getElementById("board").innerHTML = rows.map(r => `
+    <li>
+      <span class="pk-coach">${esc(r.coach)}</span>
+      <span class="pk-wl"><span class="w">${r.w}</span><span class="sep">&ndash;</span><span class="l">${r.l}</span></span>
+      <span class="pk-entrybar"><span style="width:${Math.round((r.w / max) * 100)}%"></span></span>
+      <span class="pk-entries">${r.w}</span>
+    </li>`).join("");
+}
+
+function renderLists() {
+  document.getElementById("recent-list").innerHTML =
+    [PENDING, ...POLLS.slice(0, 2)].map(cardHtml).join("");
+  document.getElementById("history-list").innerHTML =
+    [PENDING, ...POLLS].map(cardHtml).join("");
+}
+
+/* Expand/collapse — delegated, so it covers both lists and any
+   card rendered later without rebinding. */
+document.addEventListener("click", e => {
+  const head = e.target.closest(".pk-card-head");
+  if (head) {
+    const open = head.getAttribute("aria-expanded") === "true";
+    head.setAttribute("aria-expanded", String(!open));
+    document.getElementById("picks-" + head.dataset.poll).hidden = open;
+    return;
+  }
+  if (e.target.closest("#btn-history")) swap(true);
+  if (e.target.closest("#btn-back")) swap(false);
+});
+
+function swap(toHistory) {
+  document.getElementById("view-recent").hidden = toHistory;
+  document.getElementById("view-history").hidden = !toHistory;
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+renderOpen();
+renderLists();
+renderBoard();
+</script>
+
+</body>
+</html>

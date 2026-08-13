@@ -1,0 +1,271 @@
+/* ============================================================
+   PICK'EM — admin styles
+   ------------------------------------------------------------
+   Loaded by admin/index.html alongside its own <style> block.
+   Kept in a separate file rather than appended to that block so
+   the pick'em feature can be removed by deleting two <link>/
+   <script> tags and a chunk of markup, without picking edits out
+   of the commissioner tools' own CSS.
+
+   Everything here reads tokens from ../style.css. Class names are
+   prefixed or scoped under .pickem-zone so nothing can leak into
+   the scores and advance panels.
+   ============================================================ */
+
+/* ------------------------------------------------------------
+   THE MODE SWITCHER
+   Reuses .tabs / .tab-btn straight from style.css — the same
+   control the league pages use for Home / Schedule / Rankings.
+
+   It is deliberately NOT the league dropdown. That control
+   answers "which league am I working on"; this one answers "what
+   am I doing". Folding pick'em into the league list would make
+   one control answer both, and would leave the Week picker beside
+   it meaning nothing half the time.
+   ------------------------------------------------------------ */
+.admin-tabs { margin: 0 0 18px; }
+.admin-tabs .tab-btn { flex: 1; text-align: center; }
+
+/* ------------------------------------------------------------
+   THE ZONE
+   Pick'em belongs to 3-star but is NOT governed by the league
+   picker — a code with leagues:["3star"] still can't post polls,
+   and one with no leagues at all could. So the accent is set
+   locally rather than following data-league on <body>, and the
+   panels never imply the dropdown controls them.
+   ------------------------------------------------------------ */
+.pickem-zone {
+  --gold: #4ec3f2;
+  --gold-bright: #86d9fa;
+  --gold-dim: rgba(78, 195, 242, 0.14);
+  --line-gold: rgba(78, 195, 242, 0.35);
+}
+
+/* Crimson edge, and only ever rendered when it has something in
+   it — an empty red panel teaches you to ignore red panels. */
+.pickem-zone .panel.attention { border-left-color: var(--crimson); }
+.pickem-zone .panel.attention h2 { color: var(--crimson); }
+
+/* ---- new poll ---- */
+.pk-kind-row { display: flex; gap: 8px; margin-bottom: 16px; }
+.pk-kind-btn {
+  flex: 1;
+  font-family: var(--font-display);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 11px 8px;
+  cursor: pointer;
+  background: var(--navy-deep);
+  border: 1px solid var(--steel-dim);
+  color: var(--steel);
+  transition: color var(--leave), background var(--leave), border-color var(--leave);
+}
+.pk-kind-btn[aria-pressed="true"] {
+  background: var(--gold-dim);
+  border-color: var(--gold);
+  color: var(--gold-bright);
+  transition: color var(--arrive), background var(--arrive), border-color var(--arrive);
+}
+
+/* ---- tap to fill ----
+   The boxes below are still the source of truth; a chip just types
+   into them. That keeps "free text for anything" true while making
+   the common case — a league game this week or next — two taps. */
+.pk-fill-head { display: flex; align-items: flex-end; gap: 12px; margin-bottom: 10px; }
+.pk-fill-head select { width: auto; min-width: 190px; }
+
+.pk-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px; }
+
+.pk-chip {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.03em;
+  padding: 6px 10px;
+  cursor: pointer;
+  color: var(--steel);
+  background: rgba(242, 244, 248, 0.05);
+  border: 1px solid var(--steel-dim);
+  transition: color var(--leave), border-color var(--leave);
+}
+.pk-chip:hover { color: var(--chalk); border-color: var(--gold); transition: color var(--arrive), border-color var(--arrive); }
+
+/* A game that's already been played. Still fillable — Blood might
+   want a poll on something settled — but dimmed and marked so it
+   isn't picked by accident when scanning for this week's slate. */
+.pk-chip.played { opacity: 0.5; }
+.pk-chip.played::after {
+  content: " · played";
+  color: var(--steel-dim);
+}
+
+.pk-chips-none {
+  font-size: 12.5px;
+  color: var(--steel-dim);
+  font-style: italic;
+  margin-bottom: 18px;
+}
+
+.pk-vs-line { display: flex; align-items: center; gap: 12px; }
+.pk-vs-line label.field { flex: 1; margin-bottom: 0; }
+.pk-vs-line .pk-vs {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--steel-dim);
+  padding-top: 22px;
+}
+
+/* ---- what posts to Discord ----
+   A preview, not a mock: the same strings that go in the embed
+   and on the buttons. This is the last chance to catch a typo,
+   because a poll message cannot be edited after it's posted. */
+.pk-preview {
+  background: var(--navy-deep);
+  border: 1px solid var(--steel-dim);
+  padding: 14px 16px;
+  margin: 4px 0 16px;
+}
+.pk-preview-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--steel-dim);
+  margin-bottom: 10px;
+}
+.pk-embed { border-left: 3px solid var(--gold); padding-left: 12px; }
+.pk-embed-title {
+  font-family: var(--font-display);
+  font-size: 15px;
+  color: var(--chalk);
+  letter-spacing: 0.02em;
+}
+.pk-embed-match { font-size: 14px; color: var(--chalk); margin-top: 3px; }
+.pk-embed-foot {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--steel);
+  margin-top: 5px;
+}
+.pk-embed-btns { display: flex; gap: 8px; margin-top: 12px; }
+.pk-embed-btn {
+  flex: 1;
+  text-align: center;
+  font-size: 13px;
+  padding: 9px 6px;
+  background: #4f545c;          /* Discord secondary — both sides grey */
+  color: #fff;
+  border-radius: 3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---- poll rows ---- */
+.pk-poll { border-top: 1px solid var(--line); padding: 15px 0; }
+.pk-poll:last-child { border-bottom: 1px solid var(--line); }
+.pk-poll-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.pk-poll-match {
+  font-family: var(--font-display);
+  font-size: 16px;
+  color: var(--chalk);
+  letter-spacing: 0.02em;
+}
+.pk-poll-meta {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--steel);
+  margin-top: 3px;
+}
+.pk-tag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  padding: 2px 6px;
+  margin-left: 8px;
+  border: 1px solid var(--steel-dim);
+  color: var(--steel);
+  vertical-align: 2px;
+}
+.pk-tag.dyn { border-color: var(--gold); color: var(--gold-bright); background: var(--gold-dim); }
+.pk-tag.live { border-color: var(--crimson); color: var(--crimson); }
+
+/* ---- outcome ---- */
+.pk-outcome-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.pk-out-btn {
+  flex: 1 1 130px;
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  padding: 10px 12px;
+  cursor: pointer;
+  background: var(--navy-deep);
+  border: 1px solid var(--steel-dim);
+  color: var(--chalk);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color var(--leave), border-color var(--leave);
+}
+.pk-out-btn:hover { border-color: var(--win); color: var(--win); }
+.pk-out-btn.void { flex: 0 0 90px; color: var(--steel); }
+.pk-out-btn.void:hover { border-color: var(--crimson); color: var(--crimson); }
+
+.pk-settled-line {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--steel);
+  margin-top: 8px;
+}
+.pk-settled-line .won { color: var(--win); font-weight: 700; }
+.pk-settled-line .void { color: var(--crimson); }
+
+/* ---- settled, collapsed ---- */
+details.pk-settled { margin-top: 4px; }
+details.pk-settled > summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 11px 12px;
+  border: 1px solid var(--line);
+  background: rgba(242, 244, 248, 0.03);
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--steel);
+  transition: color var(--leave);
+}
+details.pk-settled > summary::-webkit-details-marker { display: none; }
+details.pk-settled > summary:hover { color: var(--chalk); }
+.pk-count {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 1px 9px;
+  border-radius: 999px;
+  background: rgba(242, 244, 248, 0.06);
+  color: var(--steel);
+}
+
+/* The standing note under Open now. Not a warning — an
+   explanation of an absence, which otherwise reads as a bug. */
+.pk-note {
+  font-size: 12.5px;
+  color: var(--steel);
+  line-height: 1.55;
+  margin: 14px 0 0;
+  padding-left: 11px;
+  border-left: 2px solid var(--steel-dim);
+}
+
+.pk-empty { color: var(--win); font-size: 14px; padding: 4px 0 2px; }
+.pk-loading { color: var(--steel); font-size: 13px; padding: 6px 0; }

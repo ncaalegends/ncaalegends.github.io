@@ -203,6 +203,12 @@ $("signin-form").addEventListener("submit", async (e) => {
       .join("");
 
     await switchLeague(who.leagues[0]);
+
+    /* Pick'em is a separate grant checked against a different
+       Worker, so admin.js only hands over the code and lets
+       pickem.js decide whether there's a tab to show. Absent or
+       unauthorised, nothing happens and this page is unchanged. */
+    if (window.PickEm) PickEm.onSignIn(code);
   } catch (err) {
     message($("signin-msg"), "error", err.message);
   } finally {
@@ -228,6 +234,7 @@ $("signout-btn").addEventListener("click", () => {
   message($("signin-msg"), "");
   message($("scores-msg"), "");
   message($("advance-msg"), "");
+  if (window.PickEm) PickEm.onSignOut();
 });
 
 /* ------------------------------------------------------------

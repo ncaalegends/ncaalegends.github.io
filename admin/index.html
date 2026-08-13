@@ -24,6 +24,11 @@
      the pages coaches actually visit. -->
 <link rel="stylesheet" href="../style.css">
 
+<!-- Pick'em styles. Separate file so the feature can be removed by
+     deleting two tags and its markup, without unpicking edits from
+     the block below. -->
+<link rel="stylesheet" href="pickem.css">
+
 <style>
 /* ============================================================
    ADMIN — scoped styles
@@ -509,8 +514,20 @@ details.entered .entered-body .game:first-child { border-top: 1px solid var(--li
         <span>Signed in as <strong id="who-name"></strong></span>
         <button class="btn btn-quiet" type="button" id="signout-btn" style="padding:6px 12px;font-size:12px;">Sign out</button>
       </div>
+    </section>
 
-      <div class="week-strip" style="margin-top:16px;">
+    <!-- Shown by pickem.js only when the signed-in code carries
+         pick'em access. Without it the page is exactly what it has
+         always been: no tabs, no second mode, nothing to explain. -->
+    <nav class="tabs admin-tabs hidden" id="mode-tabs" role="tablist" aria-label="Tools">
+      <button class="tab-btn active" type="button" data-mode="league" role="tab" aria-selected="true">Scores &amp; Week</button>
+      <button class="tab-btn" type="button" data-mode="pickem" role="tab" aria-selected="false">Pick'em</button>
+    </nav>
+
+    <div id="mode-league">
+
+    <section class="panel">
+      <div class="week-strip">
         <label class="field" style="margin:0;">
           <span>League</span>
           <select id="league-select"></select>
@@ -592,6 +609,110 @@ details.entered .entered-body .game:first-child { border-top: 1px solid var(--li
       <div id="advance-msg"></div>
     </section>
 
+    </div><!-- /mode-league -->
+
+    <!-- ============ PICK'EM ============
+         Belongs to 3-star but is NOT governed by the league picker
+         above — pick'em is its own grant. The zone sets the 3-star
+         accent locally so the colour never implies otherwise.
+         Everything here is driven by admin/pickem.js. -->
+    <div class="pickem-zone hidden" id="mode-pickem">
+
+      <section class="panel attention hidden" id="pk-await-panel">
+        <h2>Needs a result</h2>
+        <p class="hint">These polls have closed. Nothing scores and nobody earns drawing entries until you say what happened.</p>
+        <div id="pk-await"></div>
+      </section>
+
+      <section class="panel">
+        <h2>New poll</h2>
+        <p class="hint">Both sides are free text, so this works for a league game or anything else &mdash; a real CFB matchup, an NFL game, whatever's worth arguing about.</p>
+
+        <div class="pk-kind-row">
+          <button class="pk-kind-btn" type="button" data-kind="dynasty" aria-pressed="true">Dynasty game</button>
+          <button class="pk-kind-btn" type="button" data-kind="external" aria-pressed="false">Outside game</button>
+        </div>
+
+        <!-- Tap-to-fill from the 3-star schedule. Always 3-star,
+             whatever the league dropdown on the Scores tab says —
+             pick'em isn't governed by that control. The week picker
+             runs ahead of the current week on purpose: a poll for a
+             Week 11 game is often posted during Week 10. -->
+        <div id="pk-fill-wrap" class="hidden">
+          <div class="pk-fill-head">
+            <label class="field" style="margin:0;flex:0 0 auto;">
+              <span>Fill from schedule</span>
+              <select id="pk-week"></select>
+            </label>
+          </div>
+          <div class="pk-chips" id="pk-chips"></div>
+        </div>
+
+        <div class="pk-vs-line">
+          <label class="field"><span>Option A</span><input type="text" id="pk-a" placeholder="Bl00dVayN3" maxlength="80" spellcheck="false"></label>
+          <span class="pk-vs">VS</span>
+          <label class="field"><span>Option B</span><input type="text" id="pk-b" placeholder="Temptiger" maxlength="80" spellcheck="false"></label>
+        </div>
+
+        <label class="field" style="margin-top:14px;">
+          <span>Note (optional)</span>
+          <input type="text" id="pk-note" placeholder="Week 10" maxlength="120">
+        </label>
+
+        <div class="field-pair">
+          <label class="field">
+            <span>Closes &mdash; date</span>
+            <input type="date" id="pk-date">
+          </label>
+          <label class="field narrow">
+            <span>Time</span>
+            <input type="time" id="pk-time" value="20:00">
+          </label>
+        </div>
+        <div class="deadline-preview" id="pk-preview-line"></div>
+
+        <!-- The last chance to catch a typo: a posted poll message
+             cannot be edited, so a mistake means delete and repost. -->
+        <div class="pk-preview">
+          <div class="pk-preview-label">What posts to Discord</div>
+          <div class="pk-embed">
+            <div class="pk-embed-title" id="pk-pv-title">Dynasty pick'em</div>
+            <div class="pk-embed-match" id="pk-pv-match"></div>
+            <div class="pk-embed-foot" id="pk-pv-foot"></div>
+          </div>
+          <div class="pk-embed-btns">
+            <div class="pk-embed-btn" id="pk-pv-a"></div>
+            <div class="pk-embed-btn" id="pk-pv-b"></div>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn" type="button" id="pk-post">Post poll</button>
+        </div>
+        <div id="pk-post-msg"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Open now</h2>
+        <p class="hint">Live in the channel.</p>
+        <div id="pk-open"></div>
+        <div id="pk-list-msg"></div>
+        <p class="pk-note">You can see turnout but not the split, on purpose. You're in the drawing too, and anyone who can see 11&ndash;2 before the deadline can move their own pick to match. The split appears everywhere the moment a poll closes.</p>
+        <div class="btn-row" style="margin-top:14px;">
+          <button class="btn btn-quiet" type="button" id="pk-refresh" style="padding:6px 12px;font-size:12px;">Refresh</button>
+        </div>
+      </section>
+
+      <details class="pk-settled">
+        <summary><span>Settled polls</span><span class="pk-count" id="pk-settled-count">0</span></summary>
+        <div class="panel" style="border-left-color:var(--steel-dim);margin-top:0;">
+          <p class="hint">Ruled and scored. Clearing one sends it back to needing a result and recalculates every entry from it.</p>
+          <div id="pk-settled"></div>
+        </div>
+      </details>
+
+    </div><!-- /mode-pickem -->
+
   </div>
 </div>
 
@@ -604,5 +725,10 @@ details.entered .entered-body .game:first-child { border-top: 1px solid var(--li
 <script src="../score-core.js"></script>
 <script src="../deadline.js"></script>
 <script src="admin.js"></script>
+<!-- After admin.js: it calls PickEm.onSignIn() once a code is
+     accepted. pickem.js talks to a different Worker and checks the
+     code again there, so the tab appears only for codes carrying
+     pick'em access. -->
+<script src="pickem.js"></script>
 </body>
 </html>

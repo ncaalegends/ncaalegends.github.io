@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Commissioner Tools + Pick'em (mockup) — NCAA Legends</title>
+<meta name="robots" content="noindex, nofollow">
+
+<!-- ============================================================
+     MOCKUP — what admin/index.html looks like once pick'em is
+     folded into it. Scores and Advance are stubs; the pick'em
+     panels are the real proposal. No Worker, no D1.
+
+     The point of this file is the CAPABILITY GATE. Sign in with
+     either demo code to see what each person gets:
+
+       BLOOD-DEMO   leagues:["3star"]  pickem:true
+       DAVE-DEMO    leagues:["1star"]  pickem:false
+
+     One sign-in, one page, no navigation — which is the whole
+     reason this isn't a separate URL. See admin.js's note on why
+     the access code lives in a variable and nowhere else.
+     ============================================================ -->
+
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<meta name="theme-color" content="#060b16">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css">
+
+<style>
+/* ---- base admin styles, mirrored from admin/index.html ---- */
+.admin-wrap { max-width: 780px; margin: 0 auto; padding: 28px 18px 80px; }
+.admin-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
+.admin-title { font-family: var(--font-display); font-size: clamp(26px,6vw,38px); font-weight: 700; letter-spacing: .02em; color: var(--chalk); margin: 0; text-transform: uppercase; }
+.admin-title span { color: var(--gold); }
+.admin-sub { color: var(--steel); font-size: 14px; margin: 0 0 26px; }
+
+.panel { background: var(--navy-panel); border: 1px solid var(--line); border-left: 3px solid var(--gold); padding: 20px 18px; margin-bottom: 18px; }
+.panel h2 { font-family: var(--font-display); font-size: 17px; letter-spacing: .08em; text-transform: uppercase; color: var(--gold); margin: 0 0 4px; }
+.panel .hint { color: var(--steel); font-size: 13px; margin: 0 0 16px; line-height: 1.5; }
+
+label.field { display: block; margin-bottom: 14px; }
+label.field > span { display: block; font-size: 12px; letter-spacing: .09em; text-transform: uppercase; color: var(--steel); margin-bottom: 6px; }
+input[type="text"], input[type="password"], input[type="date"], input[type="time"], select {
+  width: 100%; background: var(--navy-deep); border: 1px solid var(--steel-dim); color: var(--chalk);
+  font-family: var(--font-body); font-size: 16px; padding: 11px 12px; border-radius: 2px; }
+input:focus, select:focus { outline: 2px solid var(--gold); outline-offset: 1px; border-color: var(--gold); }
+input[type="date"], input[type="time"] { min-height: 46px; color-scheme: dark; }
+.field-pair { display: flex; gap: 12px; flex-wrap: wrap; }
+.field-pair > label.field { flex: 1 1 180px; margin-bottom: 0; }
+.field-pair > label.field.narrow { flex: 0 1 150px; }
+.week-strip { display: flex; gap: 12px; flex-wrap: wrap; }
+.week-strip > label.field { flex: 1 1 160px; }
+
+.deadline-preview { margin: 12px 0 14px; font-size: 14px; color: var(--steel); min-height: 20px; }
+.deadline-preview strong { color: var(--chalk); font-weight: 600; }
+.deadline-preview.bad { color: var(--crimson); }
+
+.btn { font-family: var(--font-display); font-size: 15px; letter-spacing: .08em; text-transform: uppercase; padding: 12px 22px; border: 0; background: var(--gold); color: var(--navy-deep); cursor: pointer;
+  clip-path: polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px); }
+.btn:hover { background: var(--gold-bright); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn-quiet { background: transparent; color: var(--steel); border: 1px solid var(--steel-dim); clip-path: none; }
+.btn-quiet:hover { background: rgba(242,244,248,.05); color: var(--chalk); }
+.btn-sm { font-size: 12px; padding: 7px 14px; }
+.btn-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.hidden { display: none !important; }
+
+.who { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-size: 14px; color: var(--steel); }
+.who strong { color: var(--chalk); }
+.caps { font-family: var(--font-mono); font-size: 11px; letter-spacing: .08em; color: var(--steel); margin-top: 5px; }
+.caps b { color: var(--gold-bright); font-weight: 600; }
+
+.all-done { color: var(--win); font-size: 14px; padding: 4px 0 2px; }
+.stub { color: var(--steel-dim); font-size: 13px; font-style: italic; padding: 8px 0; }
+
+/* ============================================================
+   THE PICK'EM ZONE
+   ------------------------------------------------------------
+   Pick'em belongs to 3-star, but it is NOT gated by the league
+   picker above it — a code with leagues:["3star"] still can't
+   post polls, and one with leagues:[] could. So the zone carries
+   the 3-star accent locally rather than following data-league,
+   and says which league it's for in its own header. That way the
+   colour never implies the league selector controls it.
+   ============================================================ */
+.pickem-zone {
+  --gold: #4ec3f2;
+  --gold-bright: #86d9fa;
+  --gold-dim: rgba(78,195,242,.14);
+}
+
+/* The mode switcher reuses .tabs / .tab-btn straight from
+   style.css — the same control the league pages use for Home /
+   Schedule / Rankings. Nothing new to design, and it reads as the
+   same product the moment it renders.
+
+   It is NOT the league dropdown. That control answers "which
+   league am I working on"; this one answers "what am I doing".
+   Folding pick'em into the league list would make one control
+   answer both, and would then need the Week picker beside it to
+   mean nothing half the time. */
+.admin-tabs { margin: 0 0 18px; }
+.admin-tabs .tab-btn { flex: 1; text-align: center; }
+.admin-tabs.tabs[hidden] { display: none; }
+
+.panel.attention { border-left-color: var(--crimson); }
+.panel.attention h2 { color: var(--crimson); }
+
+.kind-row { display: flex; gap: 8px; margin-bottom: 16px; }
+.kind-btn { flex: 1; font-family: var(--font-display); font-size: 13px; letter-spacing: .06em; text-transform: uppercase; padding: 11px 8px; cursor: pointer;
+  background: var(--navy-deep); border: 1px solid var(--steel-dim); color: var(--steel); transition: all var(--leave); }
+.kind-btn[aria-pressed="true"] { background: var(--gold-dim); border-color: var(--gold); color: var(--gold-bright); transition: all var(--arrive); }
+
+.quickfill { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.chip { font-family: var(--font-mono); font-size: 11.5px; padding: 5px 10px; cursor: pointer; color: var(--steel); background: rgba(242,244,248,.05); border: 1px solid var(--steel-dim); }
+.chip:hover { color: var(--chalk); border-color: var(--gold); }
+
+.vs-line { display: flex; align-items: center; gap: 12px; }
+.vs-line .field { flex: 1; margin-bottom: 0; }
+.vs-line .vs { font-family: var(--font-mono); font-size: 12px; color: var(--steel-dim); padding-top: 22px; }
+
+.dc-preview { background: var(--navy-deep); border: 1px solid var(--steel-dim); padding: 14px 16px; margin: 4px 0 16px; }
+.dc-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--steel-dim); margin-bottom: 10px; }
+.dc-embed { border-left: 3px solid var(--gold); padding-left: 12px; }
+.dc-title { font-family: var(--font-display); font-size: 15px; color: var(--chalk); letter-spacing: .02em; }
+.dc-match { font-size: 14px; color: var(--chalk); margin-top: 3px; }
+.dc-foot { font-family: var(--font-mono); font-size: 11.5px; color: var(--steel); margin-top: 5px; }
+.dc-btns { display: flex; gap: 8px; margin-top: 12px; }
+.dc-btn { flex: 1; text-align: center; font-size: 13px; padding: 9px 6px; background: #5865f2; color: #fff; border-radius: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.poll { border-top: 1px solid var(--line); padding: 15px 0; }
+.poll:last-child { border-bottom: 1px solid var(--line); }
+.poll-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.poll-match { font-family: var(--font-display); font-size: 16px; color: var(--chalk); letter-spacing: .02em; }
+.poll-meta { font-family: var(--font-mono); font-size: 11.5px; color: var(--steel); margin-top: 3px; }
+.poll-tag { display: inline-block; font-family: var(--font-mono); font-size: 10px; letter-spacing: .1em; padding: 2px 6px; margin-left: 8px; border: 1px solid var(--steel-dim); color: var(--steel); vertical-align: 2px; }
+.poll-tag.dyn { border-color: var(--gold); color: var(--gold-bright); background: var(--gold-dim); }
+.poll-tag.live { border-color: var(--crimson); color: var(--crimson); }
+
+.outcome-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.out-btn { flex: 1 1 130px; font-size: 13.5px; padding: 10px 12px; cursor: pointer; background: var(--navy-deep); border: 1px solid var(--steel-dim); color: var(--chalk); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.out-btn:hover { border-color: var(--win); color: var(--win); }
+.out-btn.void { flex: 0 0 90px; color: var(--steel); }
+.out-btn.void:hover { border-color: var(--crimson); color: var(--crimson); }
+
+.settled-line { font-family: var(--font-mono); font-size: 12px; color: var(--steel); margin-top: 8px; }
+.settled-line .won { color: var(--win); font-weight: 700; }
+.settled-line .void { color: var(--crimson); }
+
+details.settled > summary { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 11px 12px; border: 1px solid var(--line); background: rgba(242,244,248,.03); font-family: var(--font-display); font-size: 12px; letter-spacing: .09em; text-transform: uppercase; color: var(--steel); }
+details.settled > summary::-webkit-details-marker { display: none; }
+details.settled > summary:hover { color: var(--chalk); }
+.group-count { font-family: var(--font-mono); font-size: 12px; padding: 1px 9px; border-radius: 999px; background: rgba(242,244,248,.06); color: var(--steel); }
+
+.link-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 11px 0; border-top: 1px solid var(--line); }
+.link-row:last-child { border-bottom: 1px solid var(--line); }
+.link-id { font-family: var(--font-mono); font-size: 12px; color: var(--steel); flex: 1 1 160px; min-width: 0; }
+.link-id strong { color: var(--chalk); display: block; font-family: var(--font-body); font-size: 14px; font-weight: 600; }
+.link-row select { flex: 1 1 170px; width: auto; padding: 8px 10px; font-size: 14px; }
+
+.msg { font-size: 13.5px; padding: 10px 12px; margin-top: 14px; border-left: 3px solid var(--win); background: rgba(62,207,126,.08); color: var(--chalk); }
+.note { font-size: 12.5px; color: var(--steel); line-height: 1.55; margin: 14px 0 0; padding-left: 11px; border-left: 2px solid var(--steel-dim); }
+.demo-codes { font-family: var(--font-mono); font-size: 12px; color: var(--steel); line-height: 1.9; margin-top: 10px; }
+.demo-codes b { color: var(--gold-bright); font-weight: 600; }
+</style>
+</head>
+
+<body data-league="main">
+
+<div class="admin-wrap">
+
+  <div class="admin-head">
+    <h1 class="admin-title">Commissioner <span>Tools</span></h1>
+    <a href="../" style="color:var(--steel);font-size:13px;">&larr; Back to the site</a>
+  </div>
+  <p class="admin-sub">Record scores, advance the week, and run the pick'em. Changes go live on the site about a minute after you save.</p>
+
+  <!-- ============ SIGN IN ============ -->
+  <section class="panel" id="signin-panel">
+    <h2>Sign in</h2>
+    <p class="hint">Enter the access code RekenCrew sent you. It's tied to you personally, so don't share it &mdash; if someone else needs access, they get their own.</p>
+    <form id="signin-form" autocomplete="off">
+      <label class="field">
+        <span>Access code</span>
+        <input type="password" id="code-input" autocomplete="current-password" spellcheck="false" required>
+      </label>
+      <button class="btn" type="submit">Sign in</button>
+    </form>
+    <p class="demo-codes">
+      Mockup &mdash; try either:<br>
+      <b>BLOOD-DEMO</b> &mdash; 3-star + pick'em<br>
+      <b>DAVE-DEMO</b> &mdash; 1-star, no pick'em
+    </p>
+  </section>
+
+  <!-- ============ WORKSPACE ============ -->
+  <div id="workspace" class="hidden">
+
+    <section class="panel">
+      <div class="who">
+        <span>Signed in as <strong id="who-name"></strong></span>
+        <button class="btn btn-quiet btn-sm" type="button" id="signout-btn">Sign out</button>
+      </div>
+      <div class="caps" id="who-caps"></div>
+    </section>
+
+    <!-- Only rendered when the signed-in code carries more than one
+         mode. A commissioner without pick'em sees no tabs at all and
+         the page is exactly what it is today. -->
+    <nav class="tabs admin-tabs hidden" id="mode-tabs" role="tablist" aria-label="Tools">
+      <button class="tab-btn active" type="button" data-mode="league" role="tab" aria-selected="true">Scores &amp; Week</button>
+      <button class="tab-btn" type="button" data-mode="pickem" role="tab" aria-selected="false">Pick'em</button>
+    </nav>
+
+    <!-- ============ LEAGUE MODE ============ -->
+    <div id="mode-league">
+      <section class="panel">
+        <div class="week-strip">
+          <label class="field" style="margin:0;"><span>League</span><select id="league-select"></select></label>
+          <label class="field" style="margin:0;"><span>Week</span>
+            <select id="week-select"><option>Week 9</option><option>Week 10</option></select></label>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Scores</h2>
+        <p class="hint">Fill in the games you've played. Leave the rest blank &mdash; blank means "not played yet", not "0&ndash;0".</p>
+        <p class="stub">[ existing scores table &mdash; unchanged ]</p>
+      </section>
+
+      <section class="panel">
+        <h2>Advance the week</h2>
+        <p class="hint">Moves the league to a new week and updates the deadline coaches see.</p>
+        <p class="stub">[ existing advance form &mdash; unchanged ]</p>
+      </section>
+    </div>
+
+    <!-- ============ PICK'EM MODE ============ -->
+    <div class="pickem-zone hidden" id="mode-pickem">
+
+      <section class="panel attention hidden" id="await-panel">
+        <h2>Needs a result</h2>
+        <p class="hint">These polls have closed. Nothing scores and nobody earns entries until you say what happened.</p>
+        <div id="await-list"></div>
+      </section>
+
+      <section class="panel">
+        <h2>New poll</h2>
+        <p class="hint">Both sides are free text, so this works for a league game or anything else &mdash; a real CFB matchup, an NFL game, whatever's worth arguing about.</p>
+
+        <div class="kind-row">
+          <button class="kind-btn" type="button" data-kind="dynasty" aria-pressed="true">Dynasty game</button>
+          <button class="kind-btn" type="button" data-kind="external" aria-pressed="false">Outside game</button>
+        </div>
+
+        <div id="quickfill-wrap">
+          <label class="field" style="margin-bottom:8px;"><span>Week 10 matchups &mdash; tap to fill</span></label>
+          <div class="quickfill" id="quickfill"></div>
+        </div>
+
+        <div class="vs-line">
+          <label class="field"><span>Option A</span><input type="text" id="opt-a" placeholder="Bl00dVayN3"></label>
+          <span class="vs">VS</span>
+          <label class="field"><span>Option B</span><input type="text" id="opt-b" placeholder="Temptiger"></label>
+        </div>
+
+        <div class="field-pair" style="margin-top:14px;">
+          <label class="field"><span>Closes &mdash; date</span><input type="date" id="close-date"></label>
+          <label class="field narrow"><span>Time (ET)</span><input type="time" id="close-time" value="20:00"></label>
+        </div>
+        <div class="deadline-preview" id="close-preview"></div>
+
+        <div class="dc-preview">
+          <div class="dc-label">What posts to #pick-em</div>
+          <div class="dc-embed">
+            <div class="dc-title" id="pv-title">Week 10 pick'em</div>
+            <div class="dc-match" id="pv-match"></div>
+            <div class="dc-foot" id="pv-foot"></div>
+          </div>
+          <div class="dc-btns"><div class="dc-btn" id="pv-a"></div><div class="dc-btn" id="pv-b"></div></div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn" type="button" id="post-btn">Post poll</button>
+          <span style="font-size:12.5px;color:var(--steel);" id="post-hint"></span>
+        </div>
+        <div id="post-msg"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Open now</h2>
+        <p class="hint">Live in the channel. You can see turnout but not the split.</p>
+        <div id="open-list"></div>
+        <p class="note">The running split is hidden here on purpose. You're in the drawing too, and anyone who can see 11&ndash;2 before the deadline can change their own pick to match. Turnout is safe to show; the split appears everywhere the moment the poll closes.</p>
+      </section>
+
+      <section class="panel hidden" id="link-panel">
+        <h2>Unlinked voters</h2>
+        <p class="hint">Someone voted from a Discord account not yet matched to a coach. Their votes are already counted &mdash; they're keyed to the Discord ID, not the name &mdash; but the scoreboard shows the raw handle until you link them.</p>
+        <div id="link-list"></div>
+      </section>
+
+      <details class="settled">
+        <summary><span>Settled polls</span><span class="group-count" id="settled-count">0</span></summary>
+        <div class="panel" style="border-left-color:var(--steel-dim);margin-top:0;">
+          <p class="hint">Ruled and scored. Changing one recalculates the scoreboard for everyone who picked that game.</p>
+          <div id="settled-list"></div>
+        </div>
+      </details>
+
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   WHOAMI — what the Worker would return
+   ============================================================ */
+const ACCOUNTS = {
+  "BLOOD-DEMO": { name: "Bl00dVayN3", leagues: ["3star"], pickem: true },
+  "DAVE-DEMO":  { name: "Dave",       leagues: ["1star"], pickem: false }
+};
+const LEAGUE_LABEL = { main: "Main Dynasty", "1star": "1-Star Dynasty", "3star": "3-Star Dynasty" };
+let me = null;
+
+const COACHES = ["Bl00dVayN3","Temptiger","Brian52682","Dway","Salzy","Oldarmy324",
+  "Cleveland","Trick whitey","Texan_hog","RonRicoFSU","EHDC12","wacky9speedy",
+  "EYEDONTPULL19","CoachLawless","DiabeticSnail22","RekenCrew"];
+const WEEK_MATCHUPS = [["Cleveland","Bl00dVayN3"],["Salzy","EHDC12"],["RonRicoFSU","Dway"],["Temptiger","Texan_hog"]];
+
+const HOUR = 3600000, DAY = 86400000, now = Date.now();
+
+let polls = [
+  { id:214, kind:"dynasty",  a:"Cleveland", b:"Bl00dVayN3", note:"Week 10", closesAt: now - 6*HOUR,  votes:14, outcome:null },
+  { id:213, kind:"external", a:"Georgia",   b:"Alabama",    note:"SEC championship", closesAt: now - 2*DAY, votes:15, outcome:null },
+  { id:215, kind:"external", a:"Notre Dame",b:"USC",        note:"Saturday primetime", closesAt: now + 41*HOUR, votes:11, outcome:null },
+  { id:212, kind:"dynasty",  a:"Salzy",     b:"Oldarmy324", note:"Week 9", closesAt: now - 5*DAY, votes:15, outcome:"a", split:[9,6] },
+  { id:211, kind:"external", a:"Ohio State",b:"Michigan",   note:"Rivalry week", closesAt: now - 8*DAY, votes:16, outcome:"b", split:[6,10] },
+  { id:210, kind:"dynasty",  a:"EHDC12",    b:"Trick whitey", note:"Week 9", closesAt: now - 9*DAY, votes:14, outcome:"void", split:[7,7] }
+];
+let unlinked = [{ id:"184327572382461952", handle:"snail_backup" }];
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
+const fmt = ts => new Date(ts).toLocaleDateString(undefined,{month:"short",day:"numeric"});
+const fmtFull = ts => new Date(ts).toLocaleString(undefined,{weekday:"long",month:"long",day:"numeric",hour:"numeric",minute:"2-digit"});
+let kind = "dynasty";
+
+/* ============================================================
+   SIGN IN — one code, one page. Everything below is shown or
+   hidden from the same /whoami response.
+   ============================================================ */
+$("#signin-form").onsubmit = e => {
+  e.preventDefault();
+  const acct = ACCOUNTS[$("#code-input").value.trim().toUpperCase()];
+  if (!acct) { $("#code-input").value = ""; $("#code-input").placeholder = "Try BLOOD-DEMO or DAVE-DEMO"; return; }
+  me = acct;
+  $("#who-name").textContent = me.name;
+  $("#who-caps").innerHTML =
+    "leagues: <b>" + me.leagues.map(l => LEAGUE_LABEL[l]).join(", ") + "</b>" +
+    " &nbsp;·&nbsp; pick'em: <b>" + (me.pickem ? "yes" : "no") + "</b>";
+  $("#league-select").innerHTML = me.leagues.map(l => `<option>${LEAGUE_LABEL[l]}</option>`).join("");
+
+  /* Tabs appear only when there's more than one mode to switch
+     between. With pick'em off, the page is what it is today. */
+  $("#mode-tabs").classList.toggle("hidden", !me.pickem);
+  setMode("league");
+
+  $("#signin-panel").classList.add("hidden");
+  $("#workspace").classList.remove("hidden");
+  render();
+};
+
+function setMode(mode) {
+  $("#mode-league").classList.toggle("hidden", mode !== "league");
+  $("#mode-pickem").classList.toggle("hidden", mode !== "pickem");
+  document.querySelectorAll("#mode-tabs .tab-btn").forEach(b => {
+    const on = b.dataset.mode === mode;
+    b.classList.toggle("active", on);
+    b.setAttribute("aria-selected", String(on));
+  });
+}
+
+$("#mode-tabs").onclick = e => {
+  const b = e.target.closest(".tab-btn");
+  if (b) setMode(b.dataset.mode);
+};
+$("#signout-btn").onclick = () => {
+  me = null;
+  $("#workspace").classList.add("hidden");
+  $("#signin-panel").classList.remove("hidden");
+  $("#code-input").value = "";
+};
+
+/* ============================================================
+   NEW POLL
+   ============================================================ */
+document.querySelectorAll(".kind-btn").forEach(b => b.onclick = () => {
+  kind = b.dataset.kind;
+  document.querySelectorAll(".kind-btn").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.kind === kind)));
+  $("#quickfill-wrap").classList.toggle("hidden", kind !== "dynasty");
+  $("#opt-a").placeholder = kind === "dynasty" ? "Bl00dVayN3" : "Ohio State";
+  $("#opt-b").placeholder = kind === "dynasty" ? "Temptiger" : "Michigan";
+  preview();
+});
+
+$("#quickfill").innerHTML = WEEK_MATCHUPS.map(([a,b]) =>
+  `<button class="chip" type="button" data-a="${esc(a)}" data-b="${esc(b)}">${esc(a)} v ${esc(b)}</button>`).join("");
+$("#quickfill").onclick = e => {
+  const c = e.target.closest(".chip"); if (!c) return;
+  $("#opt-a").value = c.dataset.a; $("#opt-b").value = c.dataset.b; preview();
+};
+
+function closeTs() {
+  const d = $("#close-date").value, t = $("#close-time").value || "20:00";
+  return d ? new Date(d + "T" + t + ":00").getTime() : null;
+}
+
+function preview() {
+  const a = $("#opt-a").value.trim() || $("#opt-a").placeholder;
+  const b = $("#opt-b").value.trim() || $("#opt-b").placeholder;
+  const ts = closeTs();
+  const ok = ts && ts > Date.now() && $("#opt-a").value.trim() && $("#opt-b").value.trim();
+
+  $("#pv-title").textContent = kind === "dynasty" ? "Week 10 pick'em" : "Pick'em";
+  $("#pv-match").textContent = a + " vs " + b;
+  $("#pv-foot").textContent = ts ? "Closes " + fmtFull(ts) + " ET" : "Closes —";
+  $("#pv-a").textContent = a; $("#pv-b").textContent = b;
+
+  const p = $("#close-preview");
+  if (!ts) { p.className = "deadline-preview"; p.textContent = "Pick a closing date."; }
+  else if (ts <= Date.now()) { p.className = "deadline-preview bad"; p.textContent = "That's in the past."; }
+  else {
+    p.className = "deadline-preview";
+    p.innerHTML = "Closes <strong>" + fmtFull(ts) + " ET</strong> — about " + Math.round((ts - Date.now())/HOUR) + " hours of voting.";
+  }
+  $("#post-btn").disabled = !ok;
+  $("#post-hint").textContent = ok ? "" : "Fill both sides and a future close time.";
+}
+["#opt-a","#opt-b","#close-date","#close-time"].forEach(s => { $(s).oninput = preview; $(s).onchange = preview; });
+
+$("#post-btn").onclick = () => {
+  polls.unshift({ id: 300 + polls.length, kind, a: $("#opt-a").value.trim(), b: $("#opt-b").value.trim(),
+    note: kind === "dynasty" ? "Week 10" : "", closesAt: closeTs(), votes: 0, outcome: null });
+  $("#opt-a").value = ""; $("#opt-b").value = "";
+  $("#post-msg").innerHTML = '<div class="msg">Posted to #pick-em. Coaches can vote now.</div>';
+  setTimeout(() => $("#post-msg").innerHTML = "", 4000);
+  preview(); render();
+};
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+const tag = p => p.kind === "dynasty"
+  ? '<span class="poll-tag dyn">DYNASTY</span>' : '<span class="poll-tag">OUTSIDE</span>';
+
+function render() {
+  if (!me || !me.pickem) return;
+  const open    = polls.filter(p => p.closesAt > now && p.outcome === null);
+  const waiting = polls.filter(p => p.closesAt <= now && p.outcome === null);
+  const settled = polls.filter(p => p.outcome !== null);
+
+  $("#await-panel").classList.toggle("hidden", !waiting.length);
+  $("#await-list").innerHTML = waiting.map(p => `
+    <div class="poll">
+      <div class="poll-top"><div>
+        <span class="poll-match">${esc(p.a)} vs ${esc(p.b)}</span>${tag(p)}
+        <div class="poll-meta">Closed ${fmt(p.closesAt)} &middot; ${p.votes} votes${p.note ? " &middot; " + esc(p.note) : ""}</div>
+      </div></div>
+      <div class="outcome-row">
+        <button class="out-btn" data-win="${p.id}:a">${esc(p.a)} won</button>
+        <button class="out-btn" data-win="${p.id}:b">${esc(p.b)} won</button>
+        <button class="out-btn void" data-win="${p.id}:void">Void</button>
+      </div>
+    </div>`).join("");
+
+  $("#open-list").innerHTML = open.length ? open.map(p => `
+    <div class="poll">
+      <div class="poll-top">
+        <div>
+          <span class="poll-match">${esc(p.a)} vs ${esc(p.b)}</span>${tag(p)}<span class="poll-tag live">LIVE</span>
+          <div class="poll-meta">${p.votes} of ${COACHES.length} voted &middot; closes in ${Math.max(0,Math.round((p.closesAt-now)/HOUR))}h &middot; ${fmtFull(p.closesAt)}</div>
+        </div>
+        <button class="btn btn-quiet btn-sm" data-close="${p.id}">Close early</button>
+      </div>
+    </div>`).join("") : '<p class="all-done">Nothing open right now.</p>';
+
+  $("#settled-count").textContent = settled.length;
+  $("#settled-list").innerHTML = settled.map(p => {
+    const label = p.outcome === "void"
+      ? '<span class="void">Voided — scored for nobody</span>'
+      : '<span class="won">' + esc(p.outcome === "a" ? p.a : p.b) + '</span> won';
+    return `
+    <div class="poll">
+      <div class="poll-top">
+        <div>
+          <span class="poll-match">${esc(p.a)} vs ${esc(p.b)}</span>${tag(p)}
+          <div class="poll-meta">${fmt(p.closesAt)} &middot; ${p.split ? p.split[0] + "&ndash;" + p.split[1] : p.votes} votes</div>
+        </div>
+        <button class="btn btn-quiet btn-sm" data-redo="${p.id}">Change</button>
+      </div>
+      <div class="settled-line">${label}</div>
+    </div>`;
+  }).join("");
+
+  $("#link-panel").classList.toggle("hidden", !unlinked.length);
+  $("#link-list").innerHTML = unlinked.map(u => `
+    <div class="link-row">
+      <span class="link-id"><strong>${esc(u.handle)}</strong>${esc(u.id)}</span>
+      <select data-link="${esc(u.id)}">
+        <option value="">Link to coach&hellip;</option>
+        ${COACHES.map(c => `<option>${esc(c)}</option>`).join("")}
+      </select>
+    </div>`).join("");
+}
+
+document.addEventListener("click", e => {
+  const win = e.target.closest("[data-win]");
+  if (win) { const [id,out] = win.dataset.win.split(":");
+    polls.find(x => x.id === +id).outcome = out; render(); return; }
+  const redo = e.target.closest("[data-redo]");
+  if (redo) { const p = polls.find(x => x.id === +redo.dataset.redo);
+    p.outcome = null; p.closesAt = Math.min(p.closesAt, now - HOUR); render();
+    setMode("pickem");
+    $("#await-panel").scrollIntoView({ behavior:"smooth", block:"center" }); return; }
+  const cl = e.target.closest("[data-close]");
+  if (cl) { polls.find(x => x.id === +cl.dataset.close).closesAt = now - 1; render(); }
+});
+
+document.addEventListener("change", e => {
+  const sel = e.target.closest("[data-link]");
+  if (sel && sel.value) { unlinked = unlinked.filter(u => u.id !== sel.dataset.link); render(); }
+});
+
+$("#close-date").value = new Date(now + 2*DAY).toISOString().slice(0,10);
+preview();
+</script>
+
+</body>
+</html>
