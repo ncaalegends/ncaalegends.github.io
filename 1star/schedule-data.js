@@ -259,7 +259,7 @@ const TEAM_SCHEDULES = [
       { week: 8, note: "BYE" },
       { week: 9, opponent: "Sam Houston", location: "at", teamScore: 30, opponentScore: 20 },
       { week: 10, opponent: "Kennesaw State", location: "at", teamScore: 28, opponentScore: 14 },
-      { week: 11, opponent: "Jacksonville State", location: "vs" },
+      { week: 11, opponent: "Jacksonville State", location: "vs", teamScore: 20, opponentScore: 27 },
       { week: 12, opponent: "Middle Tennessee", location: "at" },
       { week: 13, note: "BYE" },
       { week: 14, note: "Army-Navy Week" },
