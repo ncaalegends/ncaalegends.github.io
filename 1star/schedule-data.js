@@ -101,7 +101,7 @@ const TEAM_SCHEDULES = [
       { week: 8, opponent: "James Madison", location: "vs", teamScore: 42, opponentScore: 7 },
       { week: 9, opponent: "Dillon", location: "at", teamScore: 14, opponentScore: 34 },
       { week: 10, opponent: "Georgia State", location: "vs", teamScore: 31, opponentScore: 38 },
-      { week: 11, opponent: "Marshall", location: "at" },
+      { week: 11, opponent: "Marshall", location: "at", teamScore: 28, opponentScore: 0 },
       { week: 12, opponent: "UL Monroe", location: "vs" },
       { week: 13, opponent: "Baldwin Wallace", location: "at" },
       { week: 14, note: "Army-Navy Week" },
