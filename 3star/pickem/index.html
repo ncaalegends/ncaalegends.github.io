@@ -6,8 +6,14 @@
 <title>NCAA Legends — 3-Star Pick'em</title>
 <meta name="description" content="NCAA Legends 3-Star Dynasty pick'em — vote in Discord, results and the season scoreboard here.">
 
-<!-- MOCKUP. Static sample data, no Worker, no D1. Everything in
-     POLLS below is invented. See docs/SCOPING-voting-polls.md. -->
+<!-- Read-only view of the pick'em. Voting happens in Discord; this
+     page renders what came back, from GET /public on the pick'em
+     Worker. Design notes in docs/SCOPING-voting-polls.md.
+
+     The shared chrome — ticker, header, league switcher, footer —
+     comes from script.js and the league data files loaded at the
+     bottom, the same ones 3star/index.html uses. script.js takes its
+     shell-only branch here because this page has no .tab-panel. -->
 
 <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="../../favicon-32.png">
@@ -91,6 +97,12 @@
   margin-top: 20px;
   border-top-color: var(--crimson);
 }
+/* [hidden] sets display:none in the UA sheet, which a class rule
+   setting display:flex beats on specificity — so the panel stayed
+   visible as an empty red-edged box when nothing was open. Same trap
+   as .tabs[hidden]; stated explicitly rather than relying on order. */
+.pk-open[hidden] { display: none; }
+
 .pk-live {
   display: inline-flex;
   align-items: center;
@@ -301,6 +313,16 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* The empty state is a row in the <ol>, so without this it picks up
+   the rank counter and renders a lone "1" above the message. */
+.pk-board li.pk-board-empty {
+  display: block;
+  counter-increment: none;
+  color: var(--steel);
+  font-size: 0.88rem;
+}
+.pk-board li.pk-board-empty::before { content: none; }
+
 .pk-board-key {
   display: flex;
   gap: 18px;
@@ -343,17 +365,38 @@
 
 <a class="skip-link" href="#main">Skip to content</a>
 
+<!-- Same chrome as every league page: ticker, header with the league
+     switcher, and footer. All three are filled by script.js from the
+     league data files loaded at the bottom — see the shell-only
+     branch in its init(). -->
+<div class="ticker" aria-hidden="true">
+  <div class="ticker-track" id="ticker-track"></div>
+</div>
+
 <header class="site-header">
   <div class="header-inner">
     <div class="league-mark">
       <a class="league-home" href="../../" aria-label="All NCAA Legends leagues"><span class="hash">//</span></a>
-      <span class="league-name">NCAA LEGENDS</span>
-      <span class="league-badge">3-STAR DYNASTY</span>
+      <span class="league-name" id="league-name">NCAA LEGENDS</span>
+
+      <!-- The badge doubles as the league switcher, exactly as on the
+           league pages. script.js fills the menu from SITE_LEAGUES. -->
+      <details class="league-switch" id="league-switch">
+        <summary class="league-badge" id="league-badge"
+                 aria-label="Switch league">3-STAR DYNASTY</summary>
+        <div class="league-menu" id="league-menu"></div>
+      </details>
     </div>
+    <!-- Every tab is an <a> here: this page has no panels to switch,
+         so each one navigates back to the league page and lands on
+         the right tab via its hash. Same list and same order as
+         3star/index.html so the strip doesn't appear to change shape
+         when you cross between them. -->
     <nav class="tabs" aria-label="Sections">
       <a class="tab-btn" href="../">Home</a>
       <a class="tab-btn" href="../#schedule">Schedule</a>
       <a class="tab-btn" href="../#rankings">Rankings</a>
+      <a class="tab-btn" href="../#top25">Top 25</a>
       <a class="tab-btn" href="../#roster">Roster</a>
       <a class="tab-btn active" href="./" aria-current="page">Pick'em</a>
     </nav>
@@ -365,7 +408,7 @@
   <div class="pk-panel pk-intro">
     <div class="pk-intro-text">
       <h1>3-Star Pick'em</h1>
-      <p>Polls post in <strong>#pick-em</strong> and you vote there. Every correct
+      <p>Polls post in <strong>#3-star-pickem</strong> and you vote there. Every correct
          pick is one entry in the end-of-season drawing — pick more, win more
          entries, better odds. Skipping a poll never counts against you.</p>
     </div>
@@ -413,243 +456,277 @@
 
 </main>
 
+<footer class="site-footer">
+  <div class="footer-status" id="footer-status"></div>
+  <div class="footer-links" id="footer-links"></div>
+</footer>
 <script>
+/* Everything below is inside an IIFE, and must stay that way.
 
-/* ============================================================
-   3-STAR PICK'EM — the public board
-   ------------------------------------------------------------
-   Read-only. Voting happens in Discord; this page renders what
-   came back. One request to the Worker serves the whole page.
+   This page loads ../../script.js as well, and a classic <script>
+   shares one global scope with every other classic <script> on the
+   page. Two top-level `const esc` declarations — one here, one in
+   script.js — is a duplicate binding, and the engine rejects the
+   WHOLE of script.js at parse time. The symptom isn't a warning
+   beside a working page: it's the ticker, footer and league switcher
+   silently never rendering, reported as one SyntaxError pointing at
+   script.js line 1 rather than at the file that caused it.
 
-   THE VISIBILITY RULE
-   An open poll shows how many people have voted and NOT how they
-   split. That's enforced in the Worker's query — the split simply
-   isn't in the JSON for an open poll — and this file could not
-   render it if it wanted to. Belt and braces on the one rule that
-   keeps everyone committing independently.
-   ============================================================ */
-
-const PICKEM_API = "https://ncaa-legends-pickem.westfall-105.workers.dev";
-
-/* Where "Vote in Discord" points. Channel link, not a message
-   link, so it stays right no matter which poll is open. */
-const PICKEM_CHANNEL_URL =
-  "https://discord.com/channels/1241189747276382239/1537451105598836766";
-
-let DATA = { open: [], closed: [] };
-
-const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, m =>
-  ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[m]));
-
-/* Times are unix SECONDS end to end — Discord's unit, the
-   database's unit, and the Worker's. Convert once, here. */
-const fmtDate = ts => new Date(ts * 1000).toLocaleDateString(undefined,
-  { month: "short", day: "numeric" });
-
-const nowSec = () => Math.floor(Date.now() / 1000);
-
-/* ------------------------------------------------------------
-   THE SCOREBOARD
-   ------------------------------------------------------------
-   Derived from the settled polls already on the page rather than
-   sent down pre-computed, so the totals and the picks behind them
-   can never disagree — there is only one copy of the arithmetic.
-
-   Every correct pick is one entry in the drawing. A wrong pick is
-   a loss and costs nothing; not voting is neither, and simply
-   isn't a point. That's why the ranking is raw wins: under a
-   percentage, the winning move would be to sit out anything
-   uncertain.
+   Same reason admin/pickem.js is wrapped. Nothing here needs to be
+   global — no inline handlers, no cross-file calls.
    ------------------------------------------------------------ */
-function buildBoard() {
-  const rows = new Map();
-  const seen = (name) => {
-    if (!rows.has(name)) rows.set(name, { coach: name, w: 0, l: 0 });
-    return rows.get(name);
-  };
+(function () {
+  "use strict";
 
-  DATA.closed.forEach(p => {
-    if (p.outcome !== "a" && p.outcome !== "b") return;   // pending or void
-    ["a", "b"].forEach(side => {
-      (p.picks[side] || []).forEach(name => {
-        const r = seen(name);
-        side === p.outcome ? r.w++ : r.l++;
+
+  /* ============================================================
+     3-STAR PICK'EM — the public board
+     ------------------------------------------------------------
+     Read-only. Voting happens in Discord; this page renders what
+     came back. One request to the Worker serves the whole page.
+
+     THE VISIBILITY RULE
+     An open poll shows how many people have voted and NOT how they
+     split. That's enforced in the Worker's query — the split simply
+     isn't in the JSON for an open poll — and this file could not
+     render it if it wanted to. Belt and braces on the one rule that
+     keeps everyone committing independently.
+     ============================================================ */
+
+  const PICKEM_API = "https://ncaa-legends-pickem.westfall-105.workers.dev";
+
+  /* Where "Vote in Discord" points. Channel link, not a message
+     link, so it stays right no matter which poll is open. */
+  const PICKEM_CHANNEL_URL =
+    "https://discord.com/channels/1241189747276382239/1537451105598836766";
+
+  let DATA = { open: [], closed: [] };
+
+  const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, m =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[m]));
+
+  /* Times are unix SECONDS end to end — Discord's unit, the
+     database's unit, and the Worker's. Convert once, here. */
+  const fmtDate = ts => new Date(ts * 1000).toLocaleDateString(undefined,
+    { month: "short", day: "numeric" });
+
+  const nowSec = () => Math.floor(Date.now() / 1000);
+
+  /* ------------------------------------------------------------
+     THE SCOREBOARD
+     ------------------------------------------------------------
+     Derived from the settled polls already on the page rather than
+     sent down pre-computed, so the totals and the picks behind them
+     can never disagree — there is only one copy of the arithmetic.
+
+     Every correct pick is one entry in the drawing. A wrong pick is
+     a loss and costs nothing; not voting is neither, and simply
+     isn't a point. That's why the ranking is raw wins: under a
+     percentage, the winning move would be to sit out anything
+     uncertain.
+     ------------------------------------------------------------ */
+  function buildBoard() {
+    const rows = new Map();
+    const seen = (name) => {
+      if (!rows.has(name)) rows.set(name, { coach: name, w: 0, l: 0 });
+      return rows.get(name);
+    };
+
+    DATA.closed.forEach(p => {
+      if (p.outcome !== "a" && p.outcome !== "b") return;   // pending or void
+      ["a", "b"].forEach(side => {
+        (p.picks[side] || []).forEach(name => {
+          const r = seen(name);
+          side === p.outcome ? r.w++ : r.l++;
+        });
       });
     });
-  });
 
-  return [...rows.values()].sort(
-    (x, y) => y.w - x.w || x.l - y.l || x.coach.localeCompare(y.coach)
-  );
-}
+    return [...rows.values()].sort(
+      (x, y) => y.w - x.w || x.l - y.l || x.coach.localeCompare(y.coach)
+    );
+  }
 
-/* ------------------------------------------------------------
-   RENDERING
-   ------------------------------------------------------------ */
-function countsFor(p) {
-  const a = (p.picks.a || []).length;
-  const b = (p.picks.b || []).length;
-  return { a, b, total: a + b };
-}
+  /* ------------------------------------------------------------
+     RENDERING
+     ------------------------------------------------------------ */
+  function countsFor(p) {
+    const a = (p.picks.a || []).length;
+    const b = (p.picks.b || []).length;
+    return { a, b, total: a + b };
+  }
 
-function cardHtml(p) {
-  const { a, b, total } = countsFor(p);
-  const settled = p.outcome === "a" || p.outcome === "b";
-  const voided = p.outcome === "void";
-  const pct = total ? Math.round((a / total) * 100) : 50;
-  const cls = side => !settled ? "" : (p.outcome === side ? "won" : "lost");
+  function cardHtml(p) {
+    const { a, b, total } = countsFor(p);
+    const settled = p.outcome === "a" || p.outcome === "b";
+    const voided = p.outcome === "void";
+    const pct = total ? Math.round((a / total) * 100) : 50;
+    const cls = side => !settled ? "" : (p.outcome === side ? "won" : "lost");
 
-  const status = settled ? "CLOSED " + fmtDate(p.closes_at)
-               : voided  ? "VOIDED"
-               : "AWAITING RESULT";
+    const status = settled ? "CLOSED " + fmtDate(p.closes_at)
+                 : voided  ? "VOIDED"
+                 : "AWAITING RESULT";
 
-  return `
-  <div class="pk-panel pk-card">
-    <button class="pk-card-head" aria-expanded="false" data-poll="${p.id}">
-      <div>
-        <span class="pk-kind ${p.kind === "dynasty" ? "is-dynasty" : ""}">${p.kind === "dynasty" ? "DYNASTY" : "CFB / NFL"}</span>
-        <div class="pk-match">
-          <span class="pk-side ${cls("a")}">${esc(p.a)}</span>
-          <span class="pk-vs">vs</span>
-          <span class="pk-side ${cls("b")}">${esc(p.b)}</span>
+    return `
+    <div class="pk-panel pk-card">
+      <button class="pk-card-head" aria-expanded="false" data-poll="${p.id}">
+        <div>
+          <span class="pk-kind ${p.kind === "dynasty" ? "is-dynasty" : ""}">${p.kind === "dynasty" ? "DYNASTY" : "CFB / NFL"}</span>
+          <div class="pk-match">
+            <span class="pk-side ${cls("a")}">${esc(p.a)}</span>
+            <span class="pk-vs">vs</span>
+            <span class="pk-side ${cls("b")}">${esc(p.b)}</span>
+          </div>
+          <div class="pk-bar">
+            <span class="a" style="width:${pct}%"></span>
+            <span class="b" style="width:${100 - pct}%"></span>
+          </div>
+          <div class="pk-split">${a} &ndash; ${b} &middot; ${total} vote${total === 1 ? "" : "s"}${p.note ? " &middot; " + esc(p.note) : ""}</div>
         </div>
-        <div class="pk-bar">
-          <span class="a" style="width:${pct}%"></span>
-          <span class="b" style="width:${100 - pct}%"></span>
+        <div class="pk-card-right">
+          ${status}
+          <span class="pk-chev" aria-hidden="true">&#9662;</span>
         </div>
-        <div class="pk-split">${a} &ndash; ${b} &middot; ${total} vote${total === 1 ? "" : "s"}${p.note ? " &middot; " + esc(p.note) : ""}</div>
-      </div>
-      <div class="pk-card-right">
-        ${status}
-        <span class="pk-chev" aria-hidden="true">&#9662;</span>
-      </div>
-    </button>
-    <div class="pk-picks" id="picks-${p.id}" hidden>
-      ${colHtml(p, "a")}
-      ${colHtml(p, "b")}
-    </div>
-  </div>`;
-}
-
-function colHtml(p, side) {
-  const names = (p.picks[side] || []).slice().sort((x, y) => x.localeCompare(y));
-  const won = p.outcome === side;
-  return `
-    <div class="pk-col ${won ? "is-winner" : ""}">
-      <div class="pk-col-head">${esc(side === "a" ? p.a : p.b)} &middot; ${names.length}${won ? " &mdash; correct" : ""}</div>
-      <div class="pk-names">
-        ${names.length
-          ? names.map(n => `<span class="pk-name">${esc(n)}</span>`).join("")
-          : '<span class="pk-none">Nobody picked this side.</span>'}
+      </button>
+      <div class="pk-picks" id="picks-${p.id}" hidden>
+        ${colHtml(p, "a")}
+        ${colHtml(p, "b")}
       </div>
     </div>`;
-}
+  }
 
-function renderOpen() {
-  const el = document.getElementById("open-poll");
-
-  /* Hidden entirely when nothing is open. An empty "voting now"
-     panel reads as broken. */
-  if (!DATA.open.length) { el.hidden = true; return; }
-  el.hidden = false;
-
-  el.innerHTML = DATA.open.map(p => {
-    const hrs = Math.max(0, Math.round((p.closes_at - nowSec()) / 3600));
-    const when = hrs >= 1 ? `closes in ${hrs} hour${hrs === 1 ? "" : "s"}`
-                          : "closes within the hour";
+  function colHtml(p, side) {
+    const names = (p.picks[side] || []).slice().sort((x, y) => x.localeCompare(y));
+    const won = p.outcome === side;
     return `
-      <span class="pk-live"><span class="status-dot"></span>VOTING OPEN</span>
-      <div class="pk-open-main">
-        <div class="pk-open-match">${esc(p.a)} <span class="pk-vs">vs</span> ${esc(p.b)}</div>
-        <div class="pk-open-meta">${p.votes} vote${p.votes === 1 ? "" : "s"} cast &middot; ${when}${p.note ? " &middot; " + esc(p.note) : ""}</div>
-      </div>
-      <a class="pk-btn" href="${PICKEM_CHANNEL_URL}">Vote in Discord</a>`;
-  }).join("");
-}
-
-function renderBoard() {
-  const rows = buildBoard();
-  const max = Math.max(1, ...rows.map(r => r.w));
-  const entries = rows.reduce((s, r) => s + r.w, 0);
-  const settled = DATA.closed.filter(p => p.outcome === "a" || p.outcome === "b").length;
-  const pending = DATA.closed.filter(p => p.outcome === null).length;
-
-  document.getElementById("stat-entries").textContent = entries;
-  document.getElementById("board-tag").textContent =
-    `${settled} poll${settled === 1 ? "" : "s"} settled` +
-    (pending ? ` · ${pending} pending` : "");
-
-  document.getElementById("board").innerHTML = rows.length
-    ? rows.map(r => `
-      <li>
-        <span class="pk-coach">${esc(r.coach)}</span>
-        <span class="pk-wl"><span class="w">${r.w}</span><span class="sep">&ndash;</span><span class="l">${r.l}</span></span>
-        <span class="pk-entrybar"><span style="width:${Math.round((r.w / max) * 100)}%"></span></span>
-        <span class="pk-entries">${r.w}</span>
-      </li>`).join("")
-    : '<li style="grid-template-columns:1fr;color:var(--steel);">Nothing settled yet — the board fills in once results are in.</li>';
-}
-
-function renderLists() {
-  const recent = document.getElementById("recent-list");
-  const history = document.getElementById("history-list");
-
-  if (!DATA.closed.length) {
-    recent.innerHTML = history.innerHTML =
-      '<p style="color:var(--steel);">No polls have closed yet.</p>';
-    return;
+      <div class="pk-col ${won ? "is-winner" : ""}">
+        <div class="pk-col-head">${esc(side === "a" ? p.a : p.b)} &middot; ${names.length}${won ? " &mdash; correct" : ""}</div>
+        <div class="pk-names">
+          ${names.length
+            ? names.map(n => `<span class="pk-name">${esc(n)}</span>`).join("")
+            : '<span class="pk-none">Nobody picked this side.</span>'}
+        </div>
+      </div>`;
   }
-  recent.innerHTML = DATA.closed.slice(0, 3).map(cardHtml).join("");
-  history.innerHTML = DATA.closed.map(cardHtml).join("");
-}
 
-/* Expand/collapse — delegated, so it covers both lists and any
-   card rendered later without rebinding. */
-document.addEventListener("click", e => {
-  const head = e.target.closest(".pk-card-head");
-  if (head) {
-    const open = head.getAttribute("aria-expanded") === "true";
-    head.setAttribute("aria-expanded", String(!open));
-    document.getElementById("picks-" + head.dataset.poll).hidden = open;
-    return;
+  function renderOpen() {
+    const el = document.getElementById("open-poll");
+
+    /* Hidden entirely when nothing is open. An empty "voting now"
+       panel reads as broken. */
+    if (!DATA.open.length) { el.hidden = true; return; }
+    el.hidden = false;
+
+    el.innerHTML = DATA.open.map(p => {
+      const hrs = Math.max(0, Math.round((p.closes_at - nowSec()) / 3600));
+      const when = hrs >= 1 ? `closes in ${hrs} hour${hrs === 1 ? "" : "s"}`
+                            : "closes within the hour";
+      return `
+        <span class="pk-live"><span class="status-dot"></span>VOTING OPEN</span>
+        <div class="pk-open-main">
+          <div class="pk-open-match">${esc(p.a)} <span class="pk-vs">vs</span> ${esc(p.b)}</div>
+          <div class="pk-open-meta">${p.votes} vote${p.votes === 1 ? "" : "s"} cast &middot; ${when}${p.note ? " &middot; " + esc(p.note) : ""}</div>
+        </div>
+        <a class="pk-btn" href="${PICKEM_CHANNEL_URL}">Vote in Discord</a>`;
+    }).join("");
   }
-  if (e.target.closest("#btn-history")) swap(true);
-  if (e.target.closest("#btn-back")) swap(false);
-});
 
-function swap(toHistory) {
-  document.getElementById("view-recent").hidden = toHistory;
-  document.getElementById("view-history").hidden = !toHistory;
-  window.scrollTo({ top: 0, behavior: "smooth" });
-}
+  function renderBoard() {
+    const rows = buildBoard();
+    const max = Math.max(1, ...rows.map(r => r.w));
+    const entries = rows.reduce((s, r) => s + r.w, 0);
+    const settled = DATA.closed.filter(p => p.outcome === "a" || p.outcome === "b").length;
+    const pending = DATA.closed.filter(p => p.outcome === null).length;
 
-/* ------------------------------------------------------------
-   LOAD
-   ------------------------------------------------------------ */
-async function load() {
-  try {
-    const res = await fetch(PICKEM_API.replace(/\/+$/, "") + "/public");
-    if (!res.ok) throw new Error("HTTP " + res.status);
-    DATA = await res.json();
-  } catch {
-    /* Say so plainly rather than rendering an empty board, which
-       would read as "nobody has any entries" — the one wrong
-       impression this page must never give. */
-    document.getElementById("open-poll").hidden = true;
-    document.getElementById("recent-list").innerHTML =
-      '<p style="color:var(--crimson);">Couldn\'t load the pick\'em right now. Try again in a moment.</p>';
-    document.getElementById("board").innerHTML = "";
-    document.getElementById("stat-entries").textContent = "—";
-    return;
+    document.getElementById("stat-entries").textContent = entries;
+    document.getElementById("board-tag").textContent =
+      `${settled} poll${settled === 1 ? "" : "s"} settled` +
+      (pending ? ` · ${pending} pending` : "");
+
+    document.getElementById("board").innerHTML = rows.length
+      ? rows.map(r => `
+        <li>
+          <span class="pk-coach">${esc(r.coach)}</span>
+          <span class="pk-wl"><span class="w">${r.w}</span><span class="sep">&ndash;</span><span class="l">${r.l}</span></span>
+          <span class="pk-entrybar"><span style="width:${Math.round((r.w / max) * 100)}%"></span></span>
+          <span class="pk-entries">${r.w}</span>
+        </li>`).join("")
+      : '<li class="pk-board-empty">Nothing settled yet — the board fills in once results are in.</li>';
   }
-  renderOpen();
-  renderLists();
-  renderBoard();
-}
 
-load();
+  function renderLists() {
+    const recent = document.getElementById("recent-list");
+    const history = document.getElementById("history-list");
 
+    if (!DATA.closed.length) {
+      recent.innerHTML = history.innerHTML =
+        '<p style="color:var(--steel);">No polls have closed yet.</p>';
+      return;
+    }
+    recent.innerHTML = DATA.closed.slice(0, 3).map(cardHtml).join("");
+    history.innerHTML = DATA.closed.map(cardHtml).join("");
+  }
+
+  /* Expand/collapse — delegated, so it covers both lists and any
+     card rendered later without rebinding. */
+  document.addEventListener("click", e => {
+    const head = e.target.closest(".pk-card-head");
+    if (head) {
+      const open = head.getAttribute("aria-expanded") === "true";
+      head.setAttribute("aria-expanded", String(!open));
+      document.getElementById("picks-" + head.dataset.poll).hidden = open;
+      return;
+    }
+    if (e.target.closest("#btn-history")) swap(true);
+    if (e.target.closest("#btn-back")) swap(false);
+  });
+
+  function swap(toHistory) {
+    document.getElementById("view-recent").hidden = toHistory;
+    document.getElementById("view-history").hidden = !toHistory;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  /* ------------------------------------------------------------
+     LOAD
+     ------------------------------------------------------------ */
+  async function load() {
+    try {
+      const res = await fetch(PICKEM_API.replace(/\/+$/, "") + "/public");
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      DATA = await res.json();
+    } catch {
+      /* Say so plainly rather than rendering an empty board, which
+         would read as "nobody has any entries" — the one wrong
+         impression this page must never give. */
+      document.getElementById("open-poll").hidden = true;
+      document.getElementById("recent-list").innerHTML =
+        '<p style="color:var(--crimson);">Couldn\'t load the pick\'em right now. Try again in a moment.</p>';
+      document.getElementById("board").innerHTML = "";
+      document.getElementById("stat-entries").textContent = "—";
+      return;
+    }
+    renderOpen();
+    renderLists();
+    renderBoard();
+  }
+
+  load();
+})();
 </script>
 
+<!-- The league data the shared chrome needs: the ticker reads the
+     schedule and the poll, the footer reads LEAGUE_INFO. Same set and
+     same order as 3star/index.html, so nothing here can drift from
+     what the league page loads. -->
+<script src="../league-data.js" defer></script>
+<script src="../schedule-data.js" defer></script>
+<script src="../top25-data.js" defer></script>
+<script src="../cfp-data.js" defer></script>
+<script src="../postseason-data.js" defer></script>
+<script src="../../people.js" defer></script>
+<script src="../../team-colors.js" defer></script>
+<script src="../../week-core.js" defer></script>
+<script src="../../script.js" defer></script>
 </body>
 </html>

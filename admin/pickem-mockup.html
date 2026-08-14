@@ -274,7 +274,7 @@ details.settled > summary:hover { color: var(--chalk); }
         <div class="deadline-preview" id="close-preview"></div>
 
         <div class="dc-preview">
-          <div class="dc-label">What posts to #pick-em</div>
+          <div class="dc-label">What posts to #3-star-pickem</div>
           <div class="dc-embed">
             <div class="dc-title" id="pv-title">Week 10 pick'em</div>
             <div class="dc-match" id="pv-match"></div>
@@ -446,7 +446,7 @@ $("#post-btn").onclick = () => {
   polls.unshift({ id: 300 + polls.length, kind, a: $("#opt-a").value.trim(), b: $("#opt-b").value.trim(),
     note: kind === "dynasty" ? "Week 10" : "", closesAt: closeTs(), votes: 0, outcome: null });
   $("#opt-a").value = ""; $("#opt-b").value = "";
-  $("#post-msg").innerHTML = '<div class="msg">Posted to #pick-em. Coaches can vote now.</div>';
+  $("#post-msg").innerHTML = '<div class="msg">Posted to #3-star-pickem. Coaches can vote now.</div>';
   setTimeout(() => $("#post-msg").innerHTML = "", 4000);
   preview(); render();
 };

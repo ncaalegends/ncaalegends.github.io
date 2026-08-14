@@ -355,6 +355,34 @@ const pollKindForWeek = (week) => POLL_BLOCKS.get(Number(week))?.kind || "ap";
 const pollLabelForWeek = (week) =>
   pollKindForWeek(week) === "cfp" ? "CFP Top 25" : "Top 25";
 
+/* Retitle the Top 25 tab wherever it appears. Split out of
+   renderTop25 because the tab strip exists on pages that have no
+   Top 25 panel to render — /3star/pickem/ — and a strip that says
+   "TOP 25" on one page and "CFP TOP 25" on the next reads as a bug.
+
+   Matches on either the panel button (data-tab) or a link to the
+   tab (href ending #top25), so it works on both shapes without the
+   caller knowing which it's looking at. */
+function renderPollTabLabel() {
+  const tabs = document.querySelectorAll(
+    '.tab-btn[data-tab="top25"], .tab-btn[href$="#top25"]'
+  );
+  if (!tabs.length) return;
+
+  /* No polls at all: the league page drops the tab entirely in
+     pruneEmptyTabs(), so a shell page must drop its link too or it
+     would offer a route to a tab that no longer exists. */
+  if (!POLL_BLOCKS.size) {
+    tabs.forEach((el) => el.remove());
+    return;
+  }
+
+  const week = currentPollWeek();
+  if (week == null) return;
+  const name = pollLabelForWeek(week);
+  tabs.forEach((el) => { el.textContent = name; });
+}
+
 const pollWeeksAvailable = () => [...POLL_BY_WEEK.keys()].sort((a, b) => a - b);
 const latestPollWeek = () => {
   const ws = pollWeeksAvailable();
@@ -1193,7 +1221,7 @@ function renderTop25() {
      without opening the tab. */
   const name = pollLabelForWeek(week);
   setText(document.getElementById("top25-title"), name);
-  setText(document.querySelector('.tab-btn[data-tab="top25"]'), name);
+  renderPollTabLabel();
 
   /* Once the playoff starts, the poll stops moving: the committee's
      last ranking is the one the bracket was seeded from and the game
@@ -2731,6 +2759,43 @@ function init() {
 
   const heroSubEl = document.getElementById("hero-sub");
   if (heroSubEl) heroSubEl.textContent = (INFO.tag || "").toUpperCase();
+
+  /* SHELL-ONLY PAGES.
+     ------------------------------------------------------------
+     /3star/pickem/ wears the same chrome as a league page — ticker,
+     header, league switcher, footer — but has no tab panels, because
+     it isn't a tab. It renders its own content from the pick'em
+     Worker.
+
+     Detected by the absence of .tab-panel rather than by a flag on
+     the page, so a new shell page gets this for free and can't
+     forget to declare itself. Everything above this line is chrome
+     and has already run; everything below assumes panels exist.
+
+     Two things are deliberately skipped rather than merely allowed
+     to no-op:
+
+       document.title  — the renderers below tolerate missing
+         elements, but this one would overwrite a title the page set
+         for itself, and a pick'em page called "3-Star Dynasty" is
+         wrong in the tab bar, in bookmarks and in link previews.
+
+       setupTabs()  — it reads the hash on load and calls showTab(),
+         which clears .active from every .tab-btn it finds. On a page
+         whose current tab is a link rather than a button, that would
+         quietly un-highlight the tab you're standing on. */
+  if (!document.querySelector(".tab-panel")) {
+    renderTicker();
+    renderFooter();
+    /* The Top 25 tab retitles itself to "CFP Top 25" from week 10 —
+       that rename is the whole user-facing difference between the AP
+       era and the committee's, and it normally happens inside
+       renderTop25(), which a shell page never reaches. Without this
+       the tab strip would disagree with itself depending on which
+       page you were standing on. */
+    renderPollTabLabel();
+    return;
+  }
 
   document.title = INFO.tag ? `${INFO.name} — ${INFO.tag}` : INFO.name;
 

@@ -72,6 +72,14 @@
       <button class="tab-btn" data-tab="rankings" role="tab" aria-selected="false" aria-controls="rankings">Rankings</button>
       <button class="tab-btn" data-tab="top25" role="tab" aria-selected="false" aria-controls="top25">Top 25</button>
       <button class="tab-btn" data-tab="roster" role="tab" aria-selected="false" aria-controls="roster">Roster</button>
+      <!-- A link, not a tab: pick'em is its own page rather than a
+           panel on this one. Deliberately carries no data-tab, which
+           is what setupTabs() binds to — so the tab handler never
+           sees it and the browser just follows the href. showTab()
+           does touch every .tab-btn, but an element with no
+           dataset.tab can only ever compare false and be left
+           inactive, which is correct here. -->
+      <a class="tab-btn" href="pickem/">Pick'em</a>
     </nav>
   </div>
 </header>

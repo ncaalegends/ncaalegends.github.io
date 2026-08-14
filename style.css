@@ -448,6 +448,12 @@ a { color: var(--gold); }
   clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
 }
 
+/* Most tabs are <button> — they switch a panel on this page. One is
+   an <a>, because Pick'em is a different page rather than a panel.
+   Both need to look identical, so this rule has to survive being put
+   on an anchor: text-decoration is reset here (nothing else does it
+   globally), and the .tab-btn class already outranks `a { color:
+   var(--gold) }` on specificity, so the colour needs no help. */
 .tab-btn {
   padding: 9px 18px;
   font-family: var(--font-display);
@@ -456,6 +462,7 @@ a { color: var(--gold); }
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--steel);
+  text-decoration: none;
   clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
   transition: color var(--leave), background var(--leave);
 }

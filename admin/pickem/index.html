@@ -178,7 +178,7 @@ details.settled > summary:hover { color: var(--chalk); }
     <h1 class="admin-title">Pick'em <span>Tools</span></h1>
     <a href="../" style="color:var(--steel);font-size:13px;">&larr; Commissioner tools</a>
   </div>
-  <p class="admin-sub">Post polls to #pick-em and record what actually happened. Results appear on the site within seconds.</p>
+  <p class="admin-sub">Post polls to #3-star-pickem and record what actually happened. Results appear on the site within seconds.</p>
 
   <!-- ============ SIGN IN ============ -->
   <section class="panel" id="signin-panel">
@@ -239,7 +239,7 @@ details.settled > summary:hover { color: var(--chalk); }
       <div class="deadline-preview" id="close-preview"></div>
 
       <div class="dc-preview">
-        <div class="dc-label">What posts to #pick-em</div>
+        <div class="dc-label">What posts to #3-star-pickem</div>
         <div class="dc-embed">
           <div class="dc-title" id="pv-title">Week 10 pick'em</div>
           <div class="dc-match" id="pv-match">Option A vs Option B</div>
@@ -392,7 +392,7 @@ $("#post-btn").onclick = () => {
     note: kind === "dynasty" ? "Week 10" : "", closesAt: closeTs(),
     votes: 0, outcome: null });
   $("#opt-a").value = ""; $("#opt-b").value = "";
-  $("#post-msg").innerHTML = '<div class="msg">Posted to #pick-em. Coaches can vote now.</div>';
+  $("#post-msg").innerHTML = '<div class="msg">Posted to #3-star-pickem. Coaches can vote now.</div>';
   setTimeout(() => $("#post-msg").innerHTML = "", 4000);
   preview(); render();
 };
