@@ -191,7 +191,7 @@ const TEAM_SCHEDULES = [
       { week: 8, opponent: "Minneapolis", location: "at", teamScore: 21, opponentScore: 14 },
       { week: 9, note: "BYE" },
       { week: 10, opponent: "Ohio", location: "vs", teamScore: 17, opponentScore: 23 },
-      { week: 11, opponent: "Western Michigan", location: "vs" },
+      { week: 11, opponent: "Western Michigan", location: "vs", teamScore: 30, opponentScore: 28 },
       { week: 12, opponent: "UMass", location: "at" },
       { week: 13, opponent: "Buffalo", location: "vs" },
       { week: 14, note: "Army-Navy Week" },
