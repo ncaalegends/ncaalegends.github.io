@@ -96,6 +96,7 @@ const ADMIN_ROUTES = {
   "/polls/create": handlePollsCreate,
   "/polls/outcome": handlePollsOutcome,
   "/polls/close": handlePollsClose,
+  "/polls/import": handlePollsImport,
 };
 
 export default {
@@ -113,6 +114,14 @@ export default {
 
     if (request.method === "POST" && ADMIN_ROUTES[url.pathname]) {
       return withAdmin(request, env, ADMIN_ROUTES[url.pathname]);
+    }
+
+    /* The public board. No code, no CORS restriction — /3star/pickem/
+       is a public page by decision, and everything here is a
+       leaderboard rather than a credential. See the "the page is
+       public, and that's fine" section of the scoping doc. */
+    if (request.method === "GET" && url.pathname === "/public") {
+      return handlePublic(env);
     }
 
     /* /health does real work rather than just reporting that
@@ -184,7 +193,19 @@ export default {
         checks.ed25519 !== "KEY_NOT_HEX"
       );
 
-      return json({ ok: true, service: "pickem", ready, checks, ts: nowSeconds() });
+      /* Which routes this deployment actually has. Sounds trivial;
+         it isn't. Every "Not found" during setup so far has meant
+         "the Worker in Cloudflare is older than the file on disk",
+         and there was no way to see that short of trying a request
+         and reading the 404. Now the answer is one URL. */
+      return json({
+        ok: true,
+        service: "pickem",
+        ready,
+        routes: Object.keys(ADMIN_ROUTES).sort(),
+        checks,
+        ts: nowSeconds(),
+      });
     }
 
     if (request.method === "POST" && url.pathname === "/dev/poll") {
@@ -901,6 +922,341 @@ async function handlePollsClose(body, env) {
 }
 
 /* ============================================================
+   THE PUBLIC BOARD
+   ------------------------------------------------------------
+   One request serves the whole /3star/pickem/ page: open polls,
+   the archive, and everything the leaderboard is computed from.
+
+   THE VISIBILITY RULE IS ENFORCED HERE, IN THE QUERY.
+   An OPEN poll returns how many people have voted and nothing
+   about the split. Not hidden by CSS, not withheld by the front
+   end — absent from the JSON. Anyone can open devtools, and the
+   first person to look is the one who most wants to know. A
+   closed poll returns everything, because at that point there is
+   nothing left to influence.
+
+   The leaderboard itself is deliberately NOT computed here. The
+   page derives it from the settled polls it already has, so the
+   numbers on screen and the picks behind them can never disagree
+   — there's only one copy of the arithmetic.
+   ============================================================ */
+async function handlePublic(env) {
+  const now = nowSeconds();
+
+  const polls = (await env.DB.prepare(
+    `SELECT id, kind, option_a_label, option_b_label, note,
+            closes_at, outcome, message_id
+       FROM polls
+      ORDER BY closes_at DESC`
+  ).all()).results || [];
+
+  /* Names resolved at render time from the mapping table, never
+     frozen into the vote row. A coach who changes their Discord
+     handle keeps one continuous record. */
+  const votes = (await env.DB.prepare(
+    `SELECT v.poll_id, v.choice,
+            COALESCE(c.display_name, vo.nickname, vo.handle, 'Unknown') AS name
+       FROM votes v
+       LEFT JOIN coaches c ON c.discord_id = v.user_id
+       LEFT JOIN voters  vo ON vo.user_id  = v.user_id
+      ORDER BY name COLLATE NOCASE`
+  ).all()).results || [];
+
+  const byPoll = new Map();
+  for (const v of votes) {
+    if (!byPoll.has(v.poll_id)) byPoll.set(v.poll_id, { a: [], b: [] });
+    byPoll.get(v.poll_id)[v.choice].push(v.name);
+  }
+
+  const open = [];
+  const closed = [];
+
+  for (const p of polls) {
+    const picks = byPoll.get(p.id) || { a: [], b: [] };
+    const base = {
+      id: p.id,
+      kind: p.kind,
+      a: p.option_a_label,
+      b: p.option_b_label,
+      note: p.note,
+      closes_at: p.closes_at,
+    };
+
+    if (p.closes_at > now && p.outcome === null) {
+      /* Count only. No names, no split, nothing to copy. */
+      open.push({ ...base, votes: picks.a.length + picks.b.length });
+    } else {
+      closed.push({ ...base, outcome: p.outcome, picks });
+    }
+  }
+
+  return json(
+    { open, closed, generated_at: now },
+    200,
+    {
+      "Access-Control-Allow-Origin": "*",
+      /* A minute of edge cache. A vote that lands during it shows
+         up a minute later, which is well inside how quickly anyone
+         reloads a leaderboard — and it means a link escaping into
+         the wild costs one origin request a minute rather than one
+         per visitor. */
+      "Cache-Control": "public, max-age=60",
+    }
+  );
+}
+
+/* ============================================================
+   IMPORT A NATIVE DISCORD POLL
+   ------------------------------------------------------------
+   Blood ran a pick'em with Discord's built-in poll before this
+   was finished, and those nine picks are real entries in the
+   drawing. Retyping them from a screenshot would key them on
+   usernames, and the leaderboard is keyed on Discord IDs — so
+   every one of those people would split into two identities the
+   moment they clicked a button on a later poll.
+
+   So the bot goes and reads the actual poll instead. It doesn't
+   have to own a poll to read its voters; it needs View Channel
+   and READ MESSAGE HISTORY on the channel, which is one extra
+   permission beyond what posting requires.
+
+   This is deliberately a general importer rather than a one-off
+   script: native polls are the obvious fallback if the buttons
+   are ever unavailable, and having a way back from one costs
+   about as much as hard-coding this single case would have.
+   ============================================================ */
+async function handlePollsImport(body, env, me) {
+  const messageId = String(body.message_id || "").trim();
+  if (!/^\d+$/.test(messageId)) {
+    return json({ error: "Need the poll message's ID." }, 400);
+  }
+
+  /* Importing twice would create a second poll carrying the same
+     nine votes, and the leaderboard would count them all again.
+     UNIQUE(poll_id, user_id) can't catch that — it's one poll per
+     row, not one row per message — so the check lives here. */
+  const already = await env.DB.prepare(
+    "SELECT id FROM polls WHERE message_id = ?"
+  ).bind(messageId).first();
+  if (already) {
+    return json({ error: `Already imported as poll ${already.id}.` }, 409);
+  }
+
+  /* The poll being imported may well live somewhere other than the
+     pick'em channel — the first one Blood ran was posted in the
+     3-star channel, before this had a home of its own. So the
+     channel is a parameter, defaulting to the pick'em channel for
+     the ordinary case. The bot needs View Channel and Read Message
+     History wherever it's pointed. */
+  const channelId = String(body.channel_id || env.PICKEM_CHANNEL_ID || "").trim();
+  if (!/^\d+$/.test(channelId)) {
+    return json({ error: "Need a channel ID to read from." }, 400);
+  }
+
+  let message;
+  try {
+    message = await discord(`/channels/${channelId}/messages/${messageId}`, env);
+  } catch (err) {
+    const msg = String(err);
+    return json({
+      error: "Couldn't read that message.",
+      hint: msg.includes("50001") || msg.includes("50013")
+        ? "The bot needs Read Message History on that channel, on top of View Channel."
+        : msg.includes("404")
+          ? "No message with that ID in the pick'em channel. Check you copied the poll's own ID."
+          : undefined,
+      detail: msg,
+    }, 502);
+  }
+
+  /* A Discord poll lives on its OWN message. The commonest mistake
+     here is copying the ID of the text message that introduced the
+     poll — they sit next to each other in the channel and look like
+     one post. So say which was found rather than just refusing. */
+  const poll = message.poll;
+  if (!poll) {
+    const preview = (message.content || "").trim().slice(0, 60);
+    return json({
+      error: "That message has no poll on it.",
+      hint: preview
+        ? `It's a text message starting "${preview}…". A poll is its own ` +
+          "message — long-press the one showing the vote bars and copy that ID."
+        : "A poll is its own message — copy the ID of the one showing the vote bars.",
+    }, 400);
+  }
+  if (!Array.isArray(poll.answers) || poll.answers.length !== 2) {
+    return json({
+      error: `That poll has ${poll.answers ? poll.answers.length : 0} options; ` +
+             "this imports two-option polls only.",
+    }, 400);
+  }
+
+  /* Answer order is the poll's own order, so option A here is the
+     option Blood typed first — the same convention the button
+     polls use. */
+  const [ansA, ansB] = poll.answers;
+  const labelA = String(body.a || ansA.poll_media?.text || "Option A").slice(0, 80);
+  const labelB = String(body.b || ansB.poll_media?.text || "Option B").slice(0, 80);
+
+  const expiry = poll.expiry ? Math.floor(Date.parse(poll.expiry) / 1000) : null;
+  const closesAt = Number.isFinite(expiry) && expiry
+    ? expiry
+    : Math.floor(Date.parse(message.timestamp) / 1000);
+
+  if (closesAt > nowSeconds()) {
+    return json({ error: "That poll hasn't closed yet. Import it once it has." }, 409);
+  }
+
+  /* Voters, per answer, paginated. Nine fits in one page; the loop
+     is here so a full-league poll doesn't silently import the
+     first hundred and drop the rest. */
+  let voters;
+  try {
+    voters = {
+      a: await answerVoters(channelId, messageId, ansA.answer_id, env),
+      b: await answerVoters(channelId, messageId, ansB.answer_id, env),
+    };
+  } catch (err) {
+    return json({ error: "Couldn't read the voter lists.", detail: String(err) }, 502);
+  }
+
+  /* Discord lets someone vote for both sides if the poll allowed
+     multi-select. This one doesn't, and neither does the rest of
+     this system, so a double voter is dropped from both rather
+     than silently counted once. Better to under-count and say so
+     than to guess which side they meant. */
+  const idsA = new Set(voters.a.map(u => u.id));
+  const both = voters.b.filter(u => idsA.has(u.id)).map(u => u.id);
+  const bothSet = new Set(both);
+
+  /* ROLE CHECK — the same test every button click gets.
+
+     A native poll can't gate on a role: anyone who can see the
+     channel can vote in it. The button handler rejects a
+     non-3-star click outright, so an import that took the poll at
+     face value would let picks into the drawing that the live
+     path would have refused. Applying it here is what makes
+     "imported" and "clicked" mean the same thing.
+
+     Judged as the roster stands NOW, not as it stood when the poll
+     ran. That's the right way round for a prize: eligibility is a
+     statement about who's in the league, and someone who has since
+     left shouldn't be accumulating entries toward it. */
+  const roleSkipped = [];
+  if (env.GUILD_ID && env.THREE_STAR_ROLE_ID) {
+    const everyone = [...voters.a, ...voters.b];
+    const seen = new Set();
+
+    for (const u of everyone) {
+      if (seen.has(u.id)) continue;
+      seen.add(u.id);
+      let member = null;
+      try {
+        member = await discord(`/guilds/${env.GUILD_ID}/members/${u.id}`, env);
+      } catch {
+        /* 404 means they've left the server entirely. Same outcome
+           as lacking the role, and for the same reason. */
+      }
+      const ok = member && Array.isArray(member.roles) &&
+                 member.roles.includes(env.THREE_STAR_ROLE_ID);
+      if (!ok) {
+        roleSkipped.push(u.username || u.id);
+        bothSet.add(u.id);   // reuse the skip set
+      }
+    }
+  }
+
+  const now = nowSeconds();
+  const inserted = await env.DB.prepare(
+    `INSERT INTO polls (kind, option_a_label, option_b_label, note, closes_at,
+                        channel_id, message_id, created_by, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+     RETURNING id`
+  ).bind(
+    body.kind === "external" ? "external" : "dynasty",
+    labelA, labelB,
+    String(body.note || "").trim().slice(0, 120) || null,
+    closesAt, channelId, messageId,
+    `${me.name} (imported)`, now
+  ).first();
+
+  const pollId = inserted.id;
+  const statements = [];
+  let counted = 0;
+
+  for (const [choice, list] of [["a", voters.a], ["b", voters.b]]) {
+    for (const u of list) {
+      if (bothSet.has(u.id)) continue;
+      counted++;
+      statements.push(
+        env.DB.prepare(
+          `INSERT INTO votes (poll_id, user_id, choice, first_cast_at, updated_at)
+           VALUES (?1, ?2, ?3, ?4, ?4)
+           ON CONFLICT (poll_id, user_id) DO UPDATE SET choice = ?3`
+        ).bind(pollId, u.id, choice, closesAt),
+        env.DB.prepare(
+          "INSERT INTO vote_history (poll_id, user_id, choice, cast_at) VALUES (?, ?, ?, ?)"
+        ).bind(pollId, u.id, choice, closesAt),
+        env.DB.prepare(
+          `INSERT INTO voters (user_id, handle, nickname, last_seen_at)
+           VALUES (?1, ?2, NULL, ?3)
+           ON CONFLICT (user_id) DO UPDATE SET handle = ?2`
+        ).bind(u.id, u.username || null, closesAt)
+      );
+    }
+  }
+
+  if (statements.length) await env.DB.batch(statements);
+
+  /* outcome stays NULL on purpose. The poll closing and the game
+     being decided are different events, so this lands in "Needs a
+     result" like any other closed poll and Blood rules on it
+     there. */
+  /* Both skip reasons are reported by name rather than folded into
+     a count. An import that quietly dropped someone would be found
+     out weeks later by the person missing an entry. */
+  return json({
+    ok: true,
+    poll_id: pollId,
+    a: { label: labelA, raw_votes: voters.a.length },
+    b: { label: labelB, raw_votes: voters.b.length },
+    counted,
+    skipped_not_3star: roleSkipped,
+    skipped_voted_both: both.length,
+    role_check: env.GUILD_ID && env.THREE_STAR_ROLE_ID
+      ? "applied"
+      : "SKIPPED — set GUILD_ID to enable",
+  });
+}
+
+async function answerVoters(channelId, messageId, answerId, env) {
+  const out = [];
+  let after = null;
+
+  for (;;) {
+    const qs = new URLSearchParams({ limit: "100" });
+    if (after) qs.set("after", after);
+    const page = await discord(
+      `/channels/${channelId}/polls/${messageId}/answers/${answerId}?${qs}`,
+      env
+    );
+    const users = page.users || [];
+    out.push(...users);
+    if (users.length < 100) break;
+    after = users[users.length - 1].id;
+  }
+  return out;
+}
+
+async function discord(path, env) {
+  const res = await fetch(DISCORD_API + path, {
+    headers: { Authorization: `Bot ${env.DISCORD_BOT_TOKEN}` },
+  });
+  if (!res.ok) throw new Error(`Discord ${res.status}: ${await res.text()}`);
+  return res.json();
+}
+
+/* ============================================================
    CORS
    ------------------------------------------------------------
    ALLOWED_ORIGINS is what stops someone else's website putting a
@@ -948,10 +1304,10 @@ function reply(content) {
   });
 }
 
-function json(obj, status = 200) {
+function json(obj, status = 200, extraHeaders) {
   return new Response(JSON.stringify(obj), {
     status,
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(extraHeaders || {}) },
   });
 }
 

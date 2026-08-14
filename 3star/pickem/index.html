@@ -414,123 +414,94 @@
 </main>
 
 <script>
-/* ============================================================
-   MOCK DATA
-   ------------------------------------------------------------
-   Stands in for what the Worker would return from D1. Shape
-   mirrors the schema in docs/SCOPING-voting-polls.md: a poll
-   carries two free-text labels, a kind, a close time and an
-   outcome; votes are keyed by coach.
 
-   Picks are generated from a seeded RNG rather than typed out,
-   so the scoreboard is computed from real per-vote data the way
-   the live page would compute it — and stays identical on every
-   reload.
+/* ============================================================
+   3-STAR PICK'EM — the public board
+   ------------------------------------------------------------
+   Read-only. Voting happens in Discord; this page renders what
+   came back. One request to the Worker serves the whole page.
+
+   THE VISIBILITY RULE
+   An open poll shows how many people have voted and NOT how they
+   split. That's enforced in the Worker's query — the split simply
+   isn't in the JSON for an open poll — and this file could not
+   render it if it wanted to. Belt and braces on the one rule that
+   keeps everyone committing independently.
    ============================================================ */
 
-const COACHES = [
-  "Bl00dVayN3", "Temptiger", "Brian52682", "Dway", "Salzy",
-  "Oldarmy324", "Cleveland", "Trick whitey", "Texan_hog", "RonRicoFSU",
-  "EHDC12", "wacky9speedy", "EYEDONTPULL19", "CoachLawless",
-  "DiabeticSnail22", "RekenCrew"
-];
+const PICKEM_API = "https://ncaa-legends-pickem.westfall-105.workers.dev";
 
-const MATCHUPS = [
-  ["dynasty", "Bl00dVayN3",  "Temptiger",     "Week 9"],
-  ["external", "Ohio State", "Michigan",      "Rivalry week"],
-  ["dynasty", "Salzy",       "Oldarmy324",    "Week 9"],
-  ["dynasty", "RonRicoFSU",  "Texan_hog",     "Week 8"],
-  ["external", "Georgia",    "Alabama",       "SEC championship"],
-  ["dynasty", "EHDC12",      "Cleveland",     "Week 8"],
-  ["dynasty", "Brian52682",  "Dway",          "Week 7"],
-  ["external", "Chiefs",     "Bills",         "AFC divisional"],
-  ["dynasty", "Trick whitey","CoachLawless",  "Week 7"],
-  ["dynasty", "wacky9speedy","EYEDONTPULL19", "Week 6"],
-  ["external", "Texas",      "Oklahoma",      "Red River"],
-  ["dynasty", "Temptiger",   "Salzy",         "Week 6"]
-];
+/* Where "Vote in Discord" points. Channel link, not a message
+   link, so it stays right no matter which poll is open. */
+const PICKEM_CHANNEL_URL =
+  "https://discord.com/channels/1241189747276382239/1537451105598836766";
 
-/* Small deterministic LCG — same board every reload. */
-let _s = 20260813;
-const rnd = () => (_s = (_s * 1103515245 + 12345) % 2147483648) / 2147483648;
+let DATA = { open: [], closed: [] };
 
-/* A per-coach bias so the scoreboard has believable spread instead
-   of everyone landing on the same number. */
-const SKILL = {};
-COACHES.forEach((c, i) => { SKILL[c] = 0.42 + ((i * 37) % 100) / 260; });
+const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, m =>
+  ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[m]));
 
-const DAY = 86400000;
-const now = Date.now();
+/* Times are unix SECONDS end to end — Discord's unit, the
+   database's unit, and the Worker's. Convert once, here. */
+const fmtDate = ts => new Date(ts * 1000).toLocaleDateString(undefined,
+  { month: "short", day: "numeric" });
 
-const POLLS = MATCHUPS.map(([kind, a, b, note], i) => {
-  const outcome = rnd() < 0.5 ? "a" : "b";
-  const votes = {};
-  COACHES.forEach(c => {
-    if (rnd() < 0.12) return;                    // sat this one out
-    const right = rnd() < SKILL[c];
-    votes[c] = right ? outcome : (outcome === "a" ? "b" : "a");
-  });
-  return {
-    id: 100 + MATCHUPS.length - i,
-    kind, a, b, note,
-    closesAt: now - (i + 1) * 3 * DAY,
-    outcome,
-    votes
-  };
-});
-
-/* One poll closed but not yet ruled on, and one still open. */
-const PENDING = {
-  id: 200, kind: "dynasty", a: "Cleveland", b: "Bl00dVayN3", note: "Week 10",
-  closesAt: now - 6 * 3600000, outcome: null,
-  votes: Object.fromEntries(COACHES.slice(0, 13).map((c, i) => [c, i % 3 ? "a" : "b"]))
-};
-
-const OPEN = {
-  id: 201, kind: "external", a: "Notre Dame", b: "USC", note: "Saturday primetime",
-  closesAt: now + 41 * 3600000, voteCount: 11
-};
+const nowSec = () => Math.floor(Date.now() / 1000);
 
 /* ------------------------------------------------------------
-   SCOREBOARD
-   The live version is one SQL GROUP BY. Here it's the same
-   logic in JS: a correct pick is a win, an incorrect pick is a
-   loss, an absent pick is neither, and an unsettled poll counts
-   for nobody yet.
+   THE SCOREBOARD
+   ------------------------------------------------------------
+   Derived from the settled polls already on the page rather than
+   sent down pre-computed, so the totals and the picks behind them
+   can never disagree — there is only one copy of the arithmetic.
+
+   Every correct pick is one entry in the drawing. A wrong pick is
+   a loss and costs nothing; not voting is neither, and simply
+   isn't a point. That's why the ranking is raw wins: under a
+   percentage, the winning move would be to sit out anything
+   uncertain.
    ------------------------------------------------------------ */
 function buildBoard() {
-  const rows = COACHES.map(c => ({ coach: c, w: 0, l: 0 }));
-  const byCoach = Object.fromEntries(rows.map(r => [r.coach, r]));
-  POLLS.forEach(p => {
-    if (p.outcome !== "a" && p.outcome !== "b") return;
-    Object.entries(p.votes).forEach(([c, choice]) => {
-      if (!byCoach[c]) return;
-      choice === p.outcome ? byCoach[c].w++ : byCoach[c].l++;
+  const rows = new Map();
+  const seen = (name) => {
+    if (!rows.has(name)) rows.set(name, { coach: name, w: 0, l: 0 });
+    return rows.get(name);
+  };
+
+  DATA.closed.forEach(p => {
+    if (p.outcome !== "a" && p.outcome !== "b") return;   // pending or void
+    ["a", "b"].forEach(side => {
+      (p.picks[side] || []).forEach(name => {
+        const r = seen(name);
+        side === p.outcome ? r.w++ : r.l++;
+      });
     });
   });
-  return rows.sort((x, y) => y.w - x.w || x.l - y.l || x.coach.localeCompare(y.coach));
+
+  return [...rows.values()].sort(
+    (x, y) => y.w - x.w || x.l - y.l || x.coach.localeCompare(y.coach)
+  );
 }
 
 /* ------------------------------------------------------------
    RENDERING
    ------------------------------------------------------------ */
-const esc = s => String(s).replace(/[&<>"]/g, m =>
-  ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[m]));
-
-const fmtDate = ts => new Date(ts).toLocaleDateString(undefined,
-  { month: "short", day: "numeric" });
-
 function countsFor(p) {
-  let a = 0, b = 0;
-  Object.values(p.votes).forEach(v => v === "a" ? a++ : b++);
+  const a = (p.picks.a || []).length;
+  const b = (p.picks.b || []).length;
   return { a, b, total: a + b };
 }
 
 function cardHtml(p) {
   const { a, b, total } = countsFor(p);
   const settled = p.outcome === "a" || p.outcome === "b";
+  const voided = p.outcome === "void";
   const pct = total ? Math.round((a / total) * 100) : 50;
   const cls = side => !settled ? "" : (p.outcome === side ? "won" : "lost");
+
+  const status = settled ? "CLOSED " + fmtDate(p.closes_at)
+               : voided  ? "VOIDED"
+               : "AWAITING RESULT";
 
   return `
   <div class="pk-panel pk-card">
@@ -546,10 +517,10 @@ function cardHtml(p) {
           <span class="a" style="width:${pct}%"></span>
           <span class="b" style="width:${100 - pct}%"></span>
         </div>
-        <div class="pk-split">${a} &ndash; ${b} &middot; ${total} votes &middot; ${esc(p.note)}</div>
+        <div class="pk-split">${a} &ndash; ${b} &middot; ${total} vote${total === 1 ? "" : "s"}${p.note ? " &middot; " + esc(p.note) : ""}</div>
       </div>
       <div class="pk-card-right">
-        ${settled ? "CLOSED " + fmtDate(p.closesAt) : "AWAITING RESULT"}
+        ${status}
         <span class="pk-chev" aria-hidden="true">&#9662;</span>
       </div>
     </button>
@@ -561,8 +532,7 @@ function cardHtml(p) {
 }
 
 function colHtml(p, side) {
-  const names = Object.entries(p.votes)
-    .filter(([, v]) => v === side).map(([c]) => c).sort();
+  const names = (p.picks[side] || []).slice().sort((x, y) => x.localeCompare(y));
   const won = p.outcome === side;
   return `
     <div class="pk-col ${won ? "is-winner" : ""}">
@@ -577,39 +547,60 @@ function colHtml(p, side) {
 
 function renderOpen() {
   const el = document.getElementById("open-poll");
-  const hrs = Math.round((OPEN.closesAt - now) / 3600000);
-  el.innerHTML = `
-    <span class="pk-live"><span class="status-dot"></span>VOTING OPEN</span>
-    <div class="pk-open-main">
-      <div class="pk-open-match">${esc(OPEN.a)} <span class="pk-vs">vs</span> ${esc(OPEN.b)}</div>
-      <div class="pk-open-meta">${OPEN.voteCount} votes cast &middot; closes in ${hrs} hours &middot; ${esc(OPEN.note)}</div>
-    </div>
-    <a class="pk-btn" href="#">Vote in Discord</a>`;
+
+  /* Hidden entirely when nothing is open. An empty "voting now"
+     panel reads as broken. */
+  if (!DATA.open.length) { el.hidden = true; return; }
+  el.hidden = false;
+
+  el.innerHTML = DATA.open.map(p => {
+    const hrs = Math.max(0, Math.round((p.closes_at - nowSec()) / 3600));
+    const when = hrs >= 1 ? `closes in ${hrs} hour${hrs === 1 ? "" : "s"}`
+                          : "closes within the hour";
+    return `
+      <span class="pk-live"><span class="status-dot"></span>VOTING OPEN</span>
+      <div class="pk-open-main">
+        <div class="pk-open-match">${esc(p.a)} <span class="pk-vs">vs</span> ${esc(p.b)}</div>
+        <div class="pk-open-meta">${p.votes} vote${p.votes === 1 ? "" : "s"} cast &middot; ${when}${p.note ? " &middot; " + esc(p.note) : ""}</div>
+      </div>
+      <a class="pk-btn" href="${PICKEM_CHANNEL_URL}">Vote in Discord</a>`;
+  }).join("");
 }
 
 function renderBoard() {
   const rows = buildBoard();
   const max = Math.max(1, ...rows.map(r => r.w));
-  const total = rows.reduce((s, r) => s + r.w, 0);
+  const entries = rows.reduce((s, r) => s + r.w, 0);
+  const settled = DATA.closed.filter(p => p.outcome === "a" || p.outcome === "b").length;
+  const pending = DATA.closed.filter(p => p.outcome === null).length;
 
-  document.getElementById("stat-entries").textContent = total;
+  document.getElementById("stat-entries").textContent = entries;
   document.getElementById("board-tag").textContent =
-    POLLS.length + " polls settled · 1 pending";
+    `${settled} poll${settled === 1 ? "" : "s"} settled` +
+    (pending ? ` · ${pending} pending` : "");
 
-  document.getElementById("board").innerHTML = rows.map(r => `
-    <li>
-      <span class="pk-coach">${esc(r.coach)}</span>
-      <span class="pk-wl"><span class="w">${r.w}</span><span class="sep">&ndash;</span><span class="l">${r.l}</span></span>
-      <span class="pk-entrybar"><span style="width:${Math.round((r.w / max) * 100)}%"></span></span>
-      <span class="pk-entries">${r.w}</span>
-    </li>`).join("");
+  document.getElementById("board").innerHTML = rows.length
+    ? rows.map(r => `
+      <li>
+        <span class="pk-coach">${esc(r.coach)}</span>
+        <span class="pk-wl"><span class="w">${r.w}</span><span class="sep">&ndash;</span><span class="l">${r.l}</span></span>
+        <span class="pk-entrybar"><span style="width:${Math.round((r.w / max) * 100)}%"></span></span>
+        <span class="pk-entries">${r.w}</span>
+      </li>`).join("")
+    : '<li style="grid-template-columns:1fr;color:var(--steel);">Nothing settled yet — the board fills in once results are in.</li>';
 }
 
 function renderLists() {
-  document.getElementById("recent-list").innerHTML =
-    [PENDING, ...POLLS.slice(0, 2)].map(cardHtml).join("");
-  document.getElementById("history-list").innerHTML =
-    [PENDING, ...POLLS].map(cardHtml).join("");
+  const recent = document.getElementById("recent-list");
+  const history = document.getElementById("history-list");
+
+  if (!DATA.closed.length) {
+    recent.innerHTML = history.innerHTML =
+      '<p style="color:var(--steel);">No polls have closed yet.</p>';
+    return;
+  }
+  recent.innerHTML = DATA.closed.slice(0, 3).map(cardHtml).join("");
+  history.innerHTML = DATA.closed.map(cardHtml).join("");
 }
 
 /* Expand/collapse — delegated, so it covers both lists and any
@@ -632,9 +623,32 @@ function swap(toHistory) {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-renderOpen();
-renderLists();
-renderBoard();
+/* ------------------------------------------------------------
+   LOAD
+   ------------------------------------------------------------ */
+async function load() {
+  try {
+    const res = await fetch(PICKEM_API.replace(/\/+$/, "") + "/public");
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    DATA = await res.json();
+  } catch {
+    /* Say so plainly rather than rendering an empty board, which
+       would read as "nobody has any entries" — the one wrong
+       impression this page must never give. */
+    document.getElementById("open-poll").hidden = true;
+    document.getElementById("recent-list").innerHTML =
+      '<p style="color:var(--crimson);">Couldn\'t load the pick\'em right now. Try again in a moment.</p>';
+    document.getElementById("board").innerHTML = "";
+    document.getElementById("stat-entries").textContent = "—";
+    return;
+  }
+  renderOpen();
+  renderLists();
+  renderBoard();
+}
+
+load();
+
 </script>
 
 </body>
