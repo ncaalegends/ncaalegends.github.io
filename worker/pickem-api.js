@@ -197,12 +197,23 @@ export default {
          it isn't. Every "Not found" during setup so far has meant
          "the Worker in Cloudflare is older than the file on disk",
          and there was no way to see that short of trying a request
-         and reading the 404. Now the answer is one URL. */
+         and reading the 404.
+
+         EVERY route, not just the admin table. The first version
+         listed only Object.keys(ADMIN_ROUTES), which quietly
+         omitted the GET routes — so checking whether /public had
+         deployed by looking here gave a confidently wrong answer.
+         A diagnostic that reports a subset is worse than none. */
       return json({
         ok: true,
         service: "pickem",
         ready,
-        routes: Object.keys(ADMIN_ROUTES).sort(),
+        routes: [
+          "GET /health",
+          "GET /public",
+          "POST /interactions",
+          ...Object.keys(ADMIN_ROUTES).sort().map(r => "POST " + r),
+        ],
         checks,
         ts: nowSeconds(),
       });
