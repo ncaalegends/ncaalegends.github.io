@@ -129,10 +129,33 @@ input:focus, select:focus {
 
 /* Date and time sit side by side on anything wider than a phone and
    stack below that. The time is the narrower of the two because it
-   is also the optional one — see the note in the panel markup. */
+   is also the optional one — see the note in the panel markup.
+
+   THE STACK IS A MEDIA QUERY, NOT flex-wrap. It used to be wrap
+   alone, and on a phone that never fired: 180 + 140 + 12 = 332px of
+   flex-basis still "fits" a 350px content box, so the row stayed on
+   one line. It only looked like it fitted. iOS gives date and time
+   inputs a chunky intrinsic width and min-width:auto stops a flex
+   item shrinking under it, so both inputs overflowed their tracks
+   and the time control sat on top of the date control — the exact
+   overlap in the bug report.
+
+   Two fixes, and both are needed. min-width:0 lets the items
+   actually shrink to their track, which is what makes the side-by-side
+   layout honest on a tablet. The media query stacks them outright
+   below 460px, because two of these controls genuinely do not fit on
+   a phone at a legible size, and shrinking them further would just
+   clip the AM/PM. */
 .field-pair { display: flex; gap: 12px; flex-wrap: wrap; }
-.field-pair > label.field { flex: 1 1 180px; margin-bottom: 0; }
-.field-pair > label.field.narrow { flex: 0 1 140px; }
+.field-pair > label.field { flex: 1 1 180px; min-width: 0; margin-bottom: 0; }
+.field-pair > label.field.narrow { flex: 0 1 140px; min-width: 0; }
+
+@media (max-width: 460px) {
+  .field-pair { display: block; }
+  .field-pair > label.field,
+  .field-pair > label.field.narrow { margin-bottom: 14px; }
+  .field-pair > label.field:last-child { margin-bottom: 0; }
+}
 
 /* Safari and iOS render date/time inputs with their own light
    chrome and their own idea of height. Both are forced back onto

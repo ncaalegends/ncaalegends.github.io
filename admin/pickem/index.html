@@ -40,9 +40,21 @@ input[type="text"], input[type="password"], input[type="date"], input[type="time
 }
 input:focus, select:focus { outline: 2px solid var(--gold); outline-offset: 1px; border-color: var(--gold); }
 input[type="date"], input[type="time"] { min-height: 46px; color-scheme: dark; }
+/* Kept in step with the copy in admin/index.html — see the long note
+   there. flex-wrap alone never fires on a phone (180 + 150 + 12 still
+   "fits" a 350px box), and iOS won't shrink a date or time input below
+   its intrinsic width, so the two controls overlap. min-width:0 plus an
+   explicit stack below 460px. */
 .field-pair { display: flex; gap: 12px; flex-wrap: wrap; }
-.field-pair > label.field { flex: 1 1 180px; margin-bottom: 0; }
-.field-pair > label.field.narrow { flex: 0 1 150px; }
+.field-pair > label.field { flex: 1 1 180px; min-width: 0; margin-bottom: 0; }
+.field-pair > label.field.narrow { flex: 0 1 150px; min-width: 0; }
+
+@media (max-width: 460px) {
+  .field-pair { display: block; }
+  .field-pair > label.field,
+  .field-pair > label.field.narrow { margin-bottom: 14px; }
+  .field-pair > label.field:last-child { margin-bottom: 0; }
+}
 
 .deadline-preview { margin: 12px 0 14px; font-size: 14px; color: var(--steel); min-height: 20px; }
 .deadline-preview strong { color: var(--chalk); font-weight: 600; }

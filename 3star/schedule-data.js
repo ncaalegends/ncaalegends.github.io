@@ -158,18 +158,31 @@ const TEAM_SCHEDULES = [
   {
     team: "Rutgers",
     conference: "B1G",
+    /* Weeks 1-10 were played by the CPU — the spot was held but
+       unplayed until Miles took it over at Week 11 (joinedAtWeek in
+       league-data.js). The results are transcribed anyway so his
+       schedule page isn't half empty and the site can show the record
+       he inherited.
+
+       They are recorded here as CPU results and must stay that way.
+       The Week 7 loss at Maryland is the one to watch: Trick whitey's
+       block already carries it as 45-19 and the two entries agree,
+       but it is NOT a head-to-head game and it must not enter either
+       coach's H2H record or power-poll window. isLeagueTeam("Rutgers",
+       7) returns false, which is what keeps that true. Same for the
+       Week 10 loss at Wisconsin, 48-16 on Salzy's block. */
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "UMass", location: "vs" },
-      { week: 2, opponent: "Boston College", location: "at" },
-      { week: 3, opponent: "USC", location: "vs" },
-      { week: 4, opponent: "FCS East", location: "vs" },
-      { week: 5, opponent: "Indiana", location: "vs" },
+      { week: 1, opponent: "UMass", location: "vs", teamScore: 21, opponentScore: 9 },
+      { week: 2, opponent: "Boston College", location: "at", teamScore: 24, opponentScore: 21 },
+      { week: 3, opponent: "USC", location: "vs", teamScore: 24, opponentScore: 38 },
+      { week: 4, opponent: "FCS East", location: "vs", teamScore: 34, opponentScore: 6 },
+      { week: 5, opponent: "Indiana", location: "vs", teamScore: 21, opponentScore: 38 },
       { week: 6, note: "BYE" },
-      { week: 7, opponent: "Maryland", location: "at" },
-      { week: 8, opponent: "Northwestern", location: "at" },
-      { week: 9, opponent: "Michigan", location: "vs" },
-      { week: 10, opponent: "Wisconsin", location: "at" },
+      { week: 7, opponent: "Maryland", location: "at", teamScore: 19, opponentScore: 45 },
+      { week: 8, opponent: "Northwestern", location: "at", teamScore: 21, opponentScore: 24 },
+      { week: 9, opponent: "Michigan", location: "vs", teamScore: 10, opponentScore: 23 },
+      { week: 10, opponent: "Wisconsin", location: "at", teamScore: 16, opponentScore: 48 },
       { week: 11, opponent: "Nebraska", location: "vs" },
       { week: 12, opponent: "Penn State", location: "at" },
       { week: 13, opponent: "Michigan State", location: "vs" },

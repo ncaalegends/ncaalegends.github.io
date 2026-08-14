@@ -141,7 +141,32 @@ const LEAGUE_INFO = {
                at rollover, and is simply not carried into next year's
                roster. It never piles up.
 
-   Neither flag touches the career record. A game played between two
+   joinedAtWeek:
+               optional, and the mirror of departedAfterWeek: someone
+               taking a team over PART WAY THROUGH a season already in
+               progress. `11` means weeks 0-10 were played by the CPU
+               and stay CPU — nobody's earlier win over that school
+               turns into a head-to-head result — and from week 11 the
+               team is a league team like any other.
+
+               UNLIKE the other two flags, this one does NOT hide the
+               coach. They are on the roster grid, in the By Team
+               dropdown and in the power rankings from the moment you
+               add them, because they are in the league from the
+               moment you add them; the flag governs which GAMES count,
+               not whether the person exists. That asymmetry is
+               deliberate — you want to announce a new coach before
+               their first kickoff, and you never want to announce a
+               departed one after their last.
+
+               Their own earlier schedule rows still render, as the
+               CPU results they were. Their record starts accruing
+               head-to-head from the joined week.
+
+               Per-season and self-limiting in the same way: drop the
+               flag at rollover and they're an ordinary coach.
+
+   No flag touches the career record. A game played between two
    humans stays in both their histories forever — see the note on
    computeH2H in week-core.js.
    ------------------------------------------------------------ */

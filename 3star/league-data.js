@@ -92,7 +92,7 @@ const COACHES = [
   { name: "EHDC12",          team: "North Carolina",     conference: "ACC", color: "#7BAFD4", twitch: "https://www.twitch.tv/DCGQManOfTheYear7", espnId: "153" },
   { name: "wacky9speedy",    team: "Charlotte",          conference: "SEC", color: "#4FAE84", twitch: "https://www.twitch.tv/wacky9speedy", espnId: "2429" },
   { name: "EYEDONTPULL19",   team: "UCF",                conference: "XII", color: "#E0C158", twitch: "", espnId: "2116" },
-  { name: "CoachLawless",    team: "Rutgers",            conference: "B1G", color: "#E03A57", twitch: "https://www.twitch.tv/coachlawless", espnId: "164", active: false },  // Inactive — Rutgers reverts to a CPU opponent. Remove this flag to reinstate.
+  { name: "Miles",           team: "Rutgers",            conference: "B1G", color: "#E03A57", twitch: "https://www.twitch.tv/kyrvach", espnId: "164", joinedAtWeek: 11 },  // Took Rutgers over from CoachLawless, who held the spot as `active: false` and never played a game. Weeks 0-10 were played by the CPU and stay CPU — in particular Trick whitey's Week 7 win over Rutgers is NOT a head-to-head result. Same Miles as the main dynasty (Georgia): one Twitch, and one shared entry in tools/config.json for Discord pings.
 ];
 
 /* ------------------------------------------------------------

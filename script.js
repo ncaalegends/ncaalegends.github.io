@@ -93,6 +93,29 @@ ROSTER_RAW.filter((c) => isActiveCoach(c) && hasDeparted(c)).forEach((c) => {
   });
 });
 
+/* Joined mid-season -> team key -> FIRST week they count as a league
+   team. The mirror of DEPARTED_TEAM_UNTIL, and it exists for the
+   same reason: the games before they arrived were played against a
+   CPU version of their school and have to keep reading that way.
+
+   Unlike a departure, an arrival does NOT take the coach off the
+   roster grid — they are in the league now, they just aren't in
+   last month's results. So this map is consulted by isLeagueTeam
+   alone and deliberately touches neither ROSTER nor SCHEDULES: the
+   new coach gets their card, their dropdown entry and their upcoming
+   fixtures on day one. week-core.js makeResolver owns the
+   authoritative version of this rule. */
+const ARRIVED_TEAM_FROM = new Map();
+ROSTER_RAW.filter((c) => isActiveCoach(c) && c.joinedAtWeek != null).forEach(
+  (c) => {
+    _teamKeys(c).forEach((k) => {
+      if (!k) return;
+      const prev = ARRIVED_TEAM_FROM.has(k) ? ARRIVED_TEAM_FROM.get(k) : Infinity;
+      ARRIVED_TEAM_FROM.set(k, Math.min(prev, Number(c.joinedAtWeek)));
+    });
+  }
+);
+
 /* ROSTER         the league as it stands now — cards, dropdown, live row
    ROSTER_HISTORY everyone whose games still count — name/colour lookups
    SCHEDULES      blocks worth rendering; a departed coach's own block
@@ -145,11 +168,22 @@ function rosterKeyFor(scheduleName) {
 
    `week` is optional and means "as of that week". A coach who left
    after week 4 was a league opponent in weeks 0-4 and is CPU from
-   week 5, so a caller rendering a specific row should pass its week.
-   Omitting it asks about the league today, which is what the roster
-   grid and the dropdown want. */
+   week 5; a coach who took a team over in week 11 is CPU in weeks
+   0-10 and a league opponent from 11. Either way a caller rendering
+   a specific row should pass its week. Omitting it asks about the
+   league today, which is what the roster grid and the dropdown want.
+
+   Note the order: the arrival check runs BEFORE the ROSTER_KEYS
+   short-circuit. A coach who joined mid-season is a perfectly
+   ordinary member of ROSTER, so the old early `return true` would
+   have handed them every one of their team's earlier CPU games as
+   head-to-head. */
 function isLeagueTeam(scheduleName, week) {
   const key = rosterKeyFor(scheduleName);
+  if (ARRIVED_TEAM_FROM.has(key)) {
+    const w = week === undefined ? Infinity : week;
+    if (w < ARRIVED_TEAM_FROM.get(key)) return false;
+  }
   if (ROSTER_KEYS.has(key)) return true;
   if (!DEPARTED_TEAM_UNTIL.has(key)) return false;
   return week !== undefined && week <= DEPARTED_TEAM_UNTIL.get(key);

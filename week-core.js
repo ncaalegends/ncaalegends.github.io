@@ -52,7 +52,7 @@
     const normalize = (s) => String(s ?? "").trim().toLowerCase();
 
     /* ----------------------------------------------------------
-       DEPARTURES — two flavours, one comparison.
+       DEPARTURES AND ARRIVALS — three flavours, one interval.
 
        `active: false` is a coach on the books but not playing (left
        for another dynasty, may return) with no played games worth
@@ -86,20 +86,51 @@
       return Infinity;
     };
 
-    /* Team key -> last week that team is a league team. A coach whose
-       `team` carries slash alternates contributes every one of them.
-       On a collision the later cutoff wins, so a team handed from a
-       departing coach to an active one stays live. */
+    /* `joinedAtWeek: N` is the mirror image — a coach who took over a
+       team PART WAY THROUGH a season that was already being played.
+       Weeks before N are not theirs: the team was a CPU opponent then,
+       and the games their new school played in weeks 0..N-1 were CPU
+       games for whoever played them. They must stay that way. A team
+       inherited in week 11 does not retroactively turn the week 7
+       result into a head-to-head win.
+
+       So a team is a league team on a CLOSED INTERVAL [from, until]
+       rather than everything up to a cutoff. An ordinary coach is
+       [-Infinity, Infinity] and needs no flag, exactly as before.
+
+       This is deliberately about the TEAM and the WEEK, not about the
+       coach's standing in the league. Whether the new coach shows on
+       the roster grid today is a separate question with a separate
+       answer — see the note on rosterKeys in computeRankings. Someone
+       announced now but playing from week 11 is a normal thing to
+       want, and these two switches let you have it. */
+    const arrivalWeek = (c) =>
+      c.joinedAtWeek != null ? Number(c.joinedAtWeek) : -Infinity;
+
+    /* Team key -> the window in which that team is a league team. A
+       coach whose `team` carries slash alternates contributes every
+       one of them.
+
+       On a collision the window WIDENS in both directions: the later
+       cutoff wins so a team handed from a departing coach to an active
+       one stays live, and the earlier arrival wins for the same
+       reason read backwards. Two coaches sharing a team key is always
+       a handover, and a handover should leave no dead week in the
+       middle. */
     const teamCutoff = new Map();
+    const teamArrival = new Map();
     ALL_COACHES.forEach((c) => {
       const until = departureWeek(c);
+      const from = arrivalWeek(c);
       String(c.team)
         .split("/")
         .forEach((part) => {
           const k = normalize(part);
           if (!k) return;
-          const prev = teamCutoff.has(k) ? teamCutoff.get(k) : -Infinity;
-          teamCutoff.set(k, Math.max(prev, until));
+          const prevUntil = teamCutoff.has(k) ? teamCutoff.get(k) : -Infinity;
+          teamCutoff.set(k, Math.max(prevUntil, until));
+          const prevFrom = teamArrival.has(k) ? teamArrival.get(k) : Infinity;
+          teamArrival.set(k, Math.min(prevFrom, from));
         });
     });
 
@@ -126,12 +157,18 @@
        is neither a league team nor an inactive one — a plain CPU
        opponent, as before. */
     const isLeagueTeam = (n, week) => {
-      const until = teamCutoff.get(rosterKeyFor(n));
-      return until !== undefined && (week === undefined ? Infinity : week) <= until;
+      const key = rosterKeyFor(n);
+      const until = teamCutoff.get(key);
+      if (until === undefined) return false;
+      const w = week === undefined ? Infinity : week;
+      return w >= teamArrival.get(key) && w <= until;
     };
     const isInactiveTeam = (n, week) => {
-      const until = teamCutoff.get(rosterKeyFor(n));
-      return until !== undefined && (week === undefined ? Infinity : week) > until;
+      const key = rosterKeyFor(n);
+      const until = teamCutoff.get(key);
+      if (until === undefined) return false;
+      const w = week === undefined ? Infinity : week;
+      return w < teamArrival.get(key) || w > until;
     };
 
     const entryFor = (n) => {
