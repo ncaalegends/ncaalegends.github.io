@@ -512,7 +512,7 @@ const TEAM_SCHEDULES = [
       // at the neutral-site Cotton Bowl, which is what Texas's file says.
       { week: 6, opponent: "Texas", location: "vs", stadium: "Cotton Bowl", teamScore: 7, opponentScore: 42 },
       { week: 7, opponent: "Kentucky", location: "vs", stadium: "Gaylord Family Oklahoma Memorial Stadium", teamScore: 31, opponentScore: 24 },
-      { week: 8, opponent: "Mississippi State", location: "at", stadium: "Davis Wade Stadium" },
+      { week: 8, opponent: "Mississippi State", location: "at", stadium: "Davis Wade Stadium", teamScore: 45, opponentScore: 10 },
       { week: 9, opponent: "South Carolina", location: "vs", stadium: "Gaylord Family Oklahoma Memorial Stadium" },
       { week: 10, opponent: "Florida", location: "at", stadium: "Ben Hill Griffin Stadium" },
       { week: 11, opponent: "Ole Miss", location: "vs", stadium: "Gaylord Family Oklahoma Memorial Stadium" },
