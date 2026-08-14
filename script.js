@@ -2714,12 +2714,28 @@ function renderLeagueSwitch() {
 
   const current = document.body.dataset.league || "";
 
+  /* WHERE THE SIBLING LEAGUES ARE.
+
+     This used to be a hard-coded "../", which is right from /3star/
+     and wrong from anywhere deeper: /3star/pickem/ resolved "../main/"
+     to /3star/main/ and 404'd. So find the current league's own
+     segment in the path and rebuild from in front of it — correct at
+     any depth, and under any base path, which also keeps local
+     preview working when the site isn't served from the root.
+
+     Falls back to "../" when the league dir isn't in the path at all,
+     which is the old behaviour and the right guess for a page that
+     isn't inside a league folder. */
+  const path = location.pathname;
+  const at = current ? path.lastIndexOf(`/${current}/`) : -1;
+  const base = at === -1 ? "../" : path.slice(0, at + 1);
+
   menu.innerHTML = leagues
     .map((l) => {
       const here = l.dir === current;
       return `
         <a class="league-menu-item${here ? " is-current" : ""}"
-           href="../${esc(l.dir)}/"
+           href="${esc(base)}${esc(l.dir)}/"
            style="--team:${esc(l.accent)}"
            ${here ? 'aria-current="page"' : ""}>
           <span class="lm-dot"></span>

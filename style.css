@@ -440,12 +440,38 @@ a { color: var(--gold); }
    so the diagonal edges would lose their line and only the top and
    bottom would keep one. The dark fill against the header gradient
    carries the shape on its own. */
+/* WRAPS TO A SECOND ROW rather than squeezing or scrolling.
+
+   The strip holds a variable number of tabs whose labels change
+   length at runtime — "Top 25" becomes "CFP Top 25" in week 10 — so
+   anything that makes them share a fixed width has a cliff. Three
+   alternatives were tried and rejected:
+
+     flex: 1 on each tab divided the width equally. Fine at five
+     tabs; at six it stacked "CFP TOP 25" into three lines and
+     dragged the strip's height with it.
+
+     overflow-x: auto scrolled sideways. Fine by touch, but on a
+     narrow desktop window there's no scrollbar to see and no swipe
+     to try, so the last tab is simply gone — and the last tab is
+     Pick'em, which is in the strip precisely to be seen.
+
+     A "More" menu holding the middle tabs. Correct in principle and
+     it looked wrong in practice: a dropdown panel is a heavier
+     object than the thing it replaced, and the strip stopped
+     reading as a strip.
+
+   Wrapping is the dull option and the only one with no hidden
+   state: every tab is visible at every width, and adding a seventh
+   just makes the row taller. */
 .tabs {
   display: flex;
+  flex-wrap: wrap;
   gap: 3px;
   background: var(--navy-deep);
   padding: 4px 6px;
   clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+  max-width: 100%;
 }
 
 /* Most tabs are <button> — they switch a panel on this page. One is
@@ -463,6 +489,11 @@ a { color: var(--gold); }
   text-transform: uppercase;
   color: var(--steel);
   text-decoration: none;
+  /* Never break a label. "CFP TOP 25" wrapping to three stacked
+     lines is what a shrunk flex item does by default, and it drags
+     the whole strip's height with it. */
+  white-space: nowrap;
+  flex: 0 0 auto;
   clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
   transition: color var(--leave), background var(--leave);
 }
@@ -2294,7 +2325,8 @@ main {
   #full-rankings .poll-head .ph-l5 { display: none; }
 
   .tabs { width: 100%; }
-  .tab-btn { flex: 1; padding: 9px 4px; text-align: center; }
+  .tab-btn { padding: 9px 12px; }
+
 
   .game-grid { grid-template-columns: 1fr; }
   .week-game-row { gap: 8px; }
