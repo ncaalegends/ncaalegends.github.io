@@ -1808,17 +1808,22 @@ function coachCareerFor(name) {
   const meetings = h2h
     ? h2h.opponents.reduce((all, o) => all.concat(o.meetings), [])
     : [];
-  const played = meetings.filter((m) => m.played);
+  /* A sim is decided (m.played) but was never actually played coach
+     vs coach, so it stays out of every stat below — PF, PA, average
+     margin, streak — same as it's already kept out of h2h.wins /
+     h2h.losses in computeH2H. It still shows up in the log via
+     h2hRowHtml, tagged SIM; it's just not counted here. */
+  const counted = meetings.filter((m) => m.played && !m.sim);
 
-  const pf = played.reduce((s, m) => s + m.pf, 0);
-  const pa = played.reduce((s, m) => s + m.pa, 0);
-  const enoughForAverages = played.length >= MIN_GAMES_FOR_AVERAGES;
+  const pf = counted.reduce((s, m) => s + m.pf, 0);
+  const pa = counted.reduce((s, m) => s + m.pa, 0);
+  const enoughForAverages = counted.length >= MIN_GAMES_FOR_AVERAGES;
 
   /* Streak walks the timeline newest-first and stops at the first
      result that breaks it. Meetings inside an opponent are already
      sorted newest-first, but ACROSS opponents they are not, so this
      re-sorts the flat list rather than trusting the grouping. */
-  const chron = played
+  const chron = counted
     .slice()
     .sort((a, b) => b.year - a.year || b.sortKey - a.sortKey);
   let streak = null;
@@ -1839,10 +1844,10 @@ function coachCareerFor(name) {
     name: h2h ? h2h.name : String(name),
     wins: h2h ? h2h.wins : 0,
     losses: h2h ? h2h.losses : 0,
-    playedGames: played.length,
+    playedGames: counted.length,
     pf,
     pa,
-    avgMargin: enoughForAverages ? (pf - pa) / played.length : null,
+    avgMargin: enoughForAverages ? (pf - pa) / counted.length : null,
     streak, // a count, shown from the first game — see the note above
     seasons: seasons.size || (CAREER.length ? 1 : 0),
     opponents: h2h ? h2h.opponents : [],
@@ -2774,29 +2779,42 @@ function renderLeagueSwitch() {
 /* ------------------------------------------------------------
    MOBILE TAB MENU
    ------------------------------------------------------------
-   The hamburger is a <details>, same as the league switcher, so
-   open/close and keyboard access come free. This only adds what
-   <details> doesn't do on its own: close after picking a tab, close
-   on outside click, and close on Escape. Runs on every page —
-   league pages and shell pages like /3star/pickem/ alike — so it
-   has to be independent of setupTabs(), which shell pages skip.
-   ------------------------------------------------------------ */
+   A plain button + .open class, not a <details> — see the note in
+   style.css on why: recent Chrome hides details content through an
+   internal ::details-content pseudo-element that a CSS override
+   can't force open, which made the tab strip disappear on DESKTOP
+   too, not just fail to collapse on mobile. A button has no such
+   internal state, so open/close is entirely ours to drive: click to
+   toggle, click a tab or click outside or press Escape to close.
+   Runs on every page — league pages and shell pages like
+   /3star/pickem/ alike — so it has to be independent of
+   setupTabs(), which shell pages skip. */
 function setupTabsMenu() {
   const menu = document.getElementById("tabs-menu");
-  if (!menu) return;
+  const toggle = document.getElementById("tabs-toggle");
+  if (!menu || !toggle) return;
+
+  const setOpen = (open) => {
+    menu.classList.toggle("open", open);
+    toggle.setAttribute("aria-expanded", open ? "true" : "false");
+  };
+
+  toggle.addEventListener("click", () => {
+    setOpen(!menu.classList.contains("open"));
+  });
 
   menu.querySelectorAll(".tab-btn").forEach((btn) => {
-    btn.addEventListener("click", () => { menu.open = false; });
+    btn.addEventListener("click", () => setOpen(false));
   });
 
   document.addEventListener("click", (e) => {
-    if (menu.open && !menu.contains(e.target)) menu.open = false;
+    if (menu.classList.contains("open") && !menu.contains(e.target)) setOpen(false);
   });
 
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && menu.open) {
-      menu.open = false;
-      menu.querySelector("summary")?.focus();
+    if (e.key === "Escape" && menu.classList.contains("open")) {
+      setOpen(false);
+      toggle.focus();
     }
   });
 }

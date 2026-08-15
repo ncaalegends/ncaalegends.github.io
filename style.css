@@ -513,19 +513,27 @@ a { color: var(--gold); }
 /* ============================================================
    MOBILE TAB MENU
    ------------------------------------------------------------
-   Wraps the same <nav class="tabs"> in a <details> so it can fold
-   into a hamburger below 560px. Desktop is unaffected: the summary
-   stays hidden and an explicit `display: flex` on .tabs overrides
-   the browser's own "hide details content when closed" rule, which
-   would otherwise apply regardless of viewport width.
+   Wraps the same <nav class="tabs"> with a hamburger <button> that
+   only appears below 560px. Deliberately NOT a <details>: recent
+   Chrome renders details content through an internal
+   ::details-content pseudo-element for its open/close animation,
+   and a plain child selector like `.tabs-menu > .tabs` can no
+   longer force that pseudo-element open regardless of specificity —
+   which is exactly what happened here first (tabs vanished on
+   desktop too). A real button with a JS-toggled .open class has no
+   such internal state to fight. script.js's setupTabsMenu() wires
+   the click, plus outside-click and Escape to close.
+
+   Desktop needs nothing special: .tabs is a plain nav with its own
+   `display: flex` from the base .tabs rule above, so it just renders
+   normally; only the mobile media query below ever hides it.
    ============================================================ */
 .tabs-menu { position: relative; }
 
-.tabs-menu > .tabs { display: flex; }
-
 .tabs-toggle {
   display: none;
-  list-style: none;
+  border: 0;
+  padding: 0;
   cursor: pointer;
   user-select: none;
   align-items: center;
@@ -535,8 +543,6 @@ a { color: var(--gold); }
   background: var(--navy-deep);
   clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
 }
-.tabs-toggle::-webkit-details-marker { display: none; }
-.tabs-toggle::marker { content: ""; }
 
 .tabs-toggle-bars,
 .tabs-toggle-bars::before,
@@ -561,9 +567,9 @@ a { color: var(--gold); }
 .tabs-menu:hover .tabs-toggle-bars,
 .tabs-menu:hover .tabs-toggle-bars::before,
 .tabs-menu:hover .tabs-toggle-bars::after,
-.tabs-menu[open] .tabs-toggle-bars,
-.tabs-menu[open] .tabs-toggle-bars::before,
-.tabs-menu[open] .tabs-toggle-bars::after {
+.tabs-menu.open .tabs-toggle-bars,
+.tabs-menu.open .tabs-toggle-bars::before,
+.tabs-menu.open .tabs-toggle-bars::after {
   background: var(--chalk);
   transition: background var(--arrive);
 }
@@ -589,7 +595,7 @@ a { color: var(--gold); }
     box-shadow: 0 14px 34px rgba(0, 0, 0, 0.5);
   }
 
-  .tabs-menu[open] > .tabs { display: flex; }
+  .tabs-menu.open > .tabs { display: flex; }
 
   .tabs-menu > .tabs .tab-btn {
     text-align: left;

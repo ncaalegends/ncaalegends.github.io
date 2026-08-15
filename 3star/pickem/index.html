@@ -392,13 +392,14 @@
          the right tab via its hash. Same list and same order as
          3star/index.html so the strip doesn't appear to change shape
          when you cross between them. -->
-    <!-- On mobile this whole block collapses into a hamburger, using
-         the same <details> trick as the league switcher above. Desktop
-         is untouched by CSS that forces .tabs open regardless of the
-         [open] attribute. -->
-    <details class="tabs-menu" id="tabs-menu">
-      <summary class="tabs-toggle" aria-label="Menu"><span class="tabs-toggle-bars"></span></summary>
-      <nav class="tabs" aria-label="Sections">
+    <!-- On mobile this whole block collapses into a hamburger. A plain
+         button + JS-toggled .open class, not <details> — see the note
+         in style.css on the MOBILE TAB MENU rules for why <details>
+         doesn't work here. Desktop needs nothing special: .tabs just
+         renders as a normal nav. -->
+    <div class="tabs-menu" id="tabs-menu">
+      <button type="button" class="tabs-toggle" id="tabs-toggle" aria-label="Menu" aria-haspopup="true" aria-expanded="false" aria-controls="tabs"><span class="tabs-toggle-bars"></span></button>
+      <nav class="tabs" id="tabs" aria-label="Sections">
         <a class="tab-btn" href="../">Home</a>
         <a class="tab-btn" href="../#schedule">Schedule</a>
         <a class="tab-btn" href="../#rankings">Rankings</a>
@@ -406,7 +407,7 @@
         <a class="tab-btn" href="../#roster">Roster</a>
         <a class="tab-btn active" href="./" aria-current="page">Pick'em</a>
       </nav>
-    </details>
+    </div>
   </div>
 </header>
 

@@ -535,15 +535,15 @@
   }
 
   /* The latest week that has any scored coach-vs-coach result —
-     simmed ones included, because they still move the win-loss
-     record and so belong inside the poll's range. This is the week
-     the live poll represents; the previous week's poll (for the
-     up/down arrows) is this minus one. Returns null when no
+     simmed ones included, because a sim still closes out the week on
+     the schedule; it just doesn't count toward anyone's record. This
+     is the week the live poll represents; the previous week's poll
+     (for the up/down arrows) is this minus one. Returns null when no
      coach-vs-coach game has been recorded yet.
 
      Note this can be non-null while the poll itself is still empty:
-     if every H2H game so far was a sim, there's a record to show but
-     nothing scoreable yet, and computeRankings returns no rows. */
+     if every H2H game so far was a sim, there's a week to point at
+     but nothing scoreable yet, and computeRankings returns no rows. */
   function latestH2HWeek(data) {
     let latest = null;
     // Schedules stop at the conference championships; see the calendar note.
@@ -581,8 +581,9 @@
        window     the last cfg.gamesWindow PLAYED, NON-SIM
                   coach-vs-coach games, ordered across seasons.
                   0 / null means "whole career".
-       record     career H2H, sims included. It is the coach's total
-                  against other humans, ever.
+       record     career H2H, sims excluded. It is the coach's total
+                  against other humans, ever, in games that were
+                  actually played rather than simmed through.
        season     the same for the most recent season only, so the UI
                   can show "this year" beside the career number.
        CPU games  never counted, in any of the above.
@@ -713,7 +714,7 @@
           teamYear: -Infinity,
           games: [], // played, non-sim — feeds the score
           recW: 0,
-          recL: 0, // career H2H, sims included
+          recL: 0, // career H2H — sims excluded, same as everywhere else
           seasonW: 0,
           seasonL: 0, // most recent season only
         });
@@ -766,16 +767,20 @@
           }
 
           const win = s.pf > s.pa;
+
+          /* A sim means the game was never actually played coach vs
+             coach, so it doesn't touch the record, the season record,
+             or the game log below — it stops right here. Kept out of
+             `games` too, which is why it can never enter the window
+             either. */
+          if (m.sim) return;
+
           if (win) c.recW++;
           else c.recL++;
           if (last) {
             if (win) c.seasonW++;
             else c.seasonL++;
           }
-
-          // Sims move the record but are not evidence of how a coach
-          // plays, so they stop here.
-          if (m.sim) return;
 
           /* The opponent is stored under its ROSTER name for the same
              reason c.team is: this game log is what the power-rankings
@@ -908,7 +913,7 @@
         coach: c.coach,
         powerScore,
         playedGames: n, // games inside the window (sims excluded)
-        h2hWins: c.recW, // career H2H, sims included
+        h2hWins: c.recW, // career H2H, sims excluded
         h2hLosses: c.recL,
         record: `${c.recW}-${c.recL}`, // career
         seasonRecord: `${c.seasonW}-${c.seasonL}`, // most recent season
@@ -1342,12 +1347,19 @@
      OUTPUT
        Map(coachKey -> {
          coachKey, name, teams: [{year, team}],
-         played, wins, losses,          // decided meetings, sims incl.
+         played, wins, losses,          // decided, non-sim meetings
          opponents: [{
            coachKey, name, wins, losses, played, upcoming,
            meetings: [ ... newest first ... ]
          }]
        })
+
+     SIMS. A simmed game is decided (it has a score) but was never
+     actually played coach vs coach, so it does not touch played,
+     wins, or losses at either level. It still appears in `meetings`
+     with `played: true, sim: true` — the card's log shows it, tagged,
+     it just isn't counted. Matches computeRankings, which excludes
+     sims from the record the same way.
 
      Each meeting carries: year, phase, week, roundLabel, label, team,
      oppTeam, home, neutral, played, sim, pf, pa, win, margin, stadium.
@@ -1439,8 +1451,12 @@
           const pf = played ? (s.home ? m.scored.home : m.scored.away) : null;
           const pa = played ? (s.home ? m.scored.away : m.scored.home) : null;
           const win = played ? pf > pa : null;
+          // A sim has a score but was never actually played coach vs
+          // coach, so it's decided without being counted — see the
+          // SIMS note on computeH2H above.
+          const counts = played && !m.sim;
 
-          if (played) {
+          if (counts) {
             o.played++;
             c.played++;
             if (win) {
@@ -1450,7 +1466,7 @@
               o.losses++;
               c.losses++;
             }
-          } else {
+          } else if (!played) {
             o.upcoming++;
           }
 
