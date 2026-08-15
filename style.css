@@ -2736,8 +2736,7 @@ button:focus-visible, a:focus-visible {
 }
 .cfp-node.has-fill .cfp-team,
 .cfp-node.has-fill .cfp-seed { color: var(--ink); }
-.cfp-node.has-fill .cfp-record,
-.cfp-node.has-fill .cfp-coach { color: var(--ink); opacity: 0.7; }
+.cfp-node.has-fill .cfp-record { color: var(--ink); opacity: 0.7; }
 
 /* Two colours on one box, on purpose: the fill says which school,
    the left bar says one of ours. The bar keeps the roster accent —
@@ -2806,14 +2805,38 @@ button:focus-visible, a:focus-visible {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+/* A pill, same idea as .t25-coach on the poll rows — it's the same
+   "this is one of ours" marker. NOT the same background, though:
+   .t25-coach's gold-dim tint sits on the page's own navy, which is
+   always dark, so a 14% gold wash reads fine. A bracket box's fill is
+   an arbitrary team colour (Colorado's is itself gold-ish), and that
+   same tint over a light or same-hued fill goes gold-on-gold —
+   exactly the "hard to see" problem this replaces.
+
+   So the chip gets a SOLID dark background instead of a tint, in the
+   page's own navy rather than anything derived from the fill. Bright
+   accent text on dark navy is the site's default pairing everywhere
+   else, so it's already proven to read — the chip just carries its
+   own little patch of "everywhere else" onto a box that would
+   otherwise fight it. */
 .cfp-coach {
-  display: block;
+  display: inline-block;
+  margin-top: 2px;
+  max-width: 100%;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: rgba(6, 11, 22, 0.82);
+  border: 1px solid var(--line-gold);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  color: var(--gold-bright);
   font-family: var(--font-mono);
   font-size: 0.6rem;
-  color: var(--gold);
+  font-weight: 700;
+  line-height: 1.5;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  vertical-align: top;
 }
 .cfp-record {
   font-family: var(--font-mono);
