@@ -362,13 +362,13 @@ function renderGames() {
     return;
   }
 
-  /* Split into what's left and what's done, and put what's left on
-     top. On a 10+ game week most of the list is finished, and the
-     old schedule-order interleaving meant hunting through finished
-     games to find the blanks. The original index travels with each
-     game in the data attributes, so collect() and the edit handlers
-     still address games by their real index no matter how the DOM is
-     ordered here. */
+  /* Split into what's left, what's done, and what's mid-save, and put
+     what's left on top. On a 10+ game week most of the list is
+     finished, and the old schedule-order interleaving meant hunting
+     through finished games to find the blanks. The original index
+     travels with each game in the data attributes, so collect() and
+     the edit handlers still address games by their real index no
+     matter how the DOM is ordered here. */
   const todo = [];
   const done = [];
   const saving = [];
@@ -386,12 +386,6 @@ function renderGames() {
   });
 
   let html = "";
-
-  if (saving.length) {
-    html +=
-      `<div class="group-head">Saving <span class="group-count">${saving.length}</span></div>` +
-      saving.map(({ g, i }) => gameHtml(g, i, week)).join("");
-  }
 
   if (todo.length) {
     html +=
@@ -413,6 +407,16 @@ function renderGames() {
       `<div class="entered-body">` +
       done.map(({ g, i }) => gameHtml(g, i, week)).join("") +
       `</div></details>`;
+  }
+
+  /* Mid-save games go last, right above the Save scores button. With
+     a long week the button is well below the fold, so the games being
+     saved need to sit next to it rather than up top where they'd be
+     out of view by the time the save actually completes. */
+  if (saving.length) {
+    html +=
+      `<div class="group-head">Saving <span class="group-count">${saving.length}</span></div>` +
+      saving.map(({ g, i }) => gameHtml(g, i, week)).join("");
   }
 
   host.innerHTML = html;
