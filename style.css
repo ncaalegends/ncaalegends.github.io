@@ -511,6 +511,94 @@ a { color: var(--gold); }
 }
 
 /* ============================================================
+   MOBILE TAB MENU
+   ------------------------------------------------------------
+   Wraps the same <nav class="tabs"> in a <details> so it can fold
+   into a hamburger below 560px. Desktop is unaffected: the summary
+   stays hidden and an explicit `display: flex` on .tabs overrides
+   the browser's own "hide details content when closed" rule, which
+   would otherwise apply regardless of viewport width.
+   ============================================================ */
+.tabs-menu { position: relative; }
+
+.tabs-menu > .tabs { display: flex; }
+
+.tabs-toggle {
+  display: none;
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 34px;
+  background: var(--navy-deep);
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+}
+.tabs-toggle::-webkit-details-marker { display: none; }
+.tabs-toggle::marker { content: ""; }
+
+.tabs-toggle-bars,
+.tabs-toggle-bars::before,
+.tabs-toggle-bars::after {
+  width: 16px;
+  height: 2px;
+  background: var(--steel);
+  transition: background var(--leave);
+}
+.tabs-toggle-bars {
+  position: relative;
+}
+.tabs-toggle-bars::before,
+.tabs-toggle-bars::after {
+  content: "";
+  position: absolute;
+  left: 0;
+}
+.tabs-toggle-bars::before { top: -5px; }
+.tabs-toggle-bars::after { top: 5px; }
+
+.tabs-menu:hover .tabs-toggle-bars,
+.tabs-menu:hover .tabs-toggle-bars::before,
+.tabs-menu:hover .tabs-toggle-bars::after,
+.tabs-menu[open] .tabs-toggle-bars,
+.tabs-menu[open] .tabs-toggle-bars::before,
+.tabs-menu[open] .tabs-toggle-bars::after {
+  background: var(--chalk);
+  transition: background var(--arrive);
+}
+
+.tabs-toggle:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 1px;
+}
+
+@media (max-width: 560px) {
+  .tabs-toggle { display: flex; }
+
+  .tabs-menu > .tabs {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    width: max-content;
+    max-width: calc(100vw - 32px);
+    z-index: 20;
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.5);
+  }
+
+  .tabs-menu[open] > .tabs { display: flex; }
+
+  .tabs-menu > .tabs .tab-btn {
+    text-align: left;
+    clip-path: none;
+    padding: 10px 14px;
+  }
+}
+
+/* ============================================================
    LAYOUT
    ============================================================ */
 main {
@@ -2311,7 +2399,15 @@ main {
 @media (max-width: 560px) {
   main { padding: 24px 16px 64px; }
   .jumbo-number { font-size: 4rem; }
-  .header-inner { flex-direction: column; align-items: flex-start; gap: 12px; }
+  /* Row, not column: the hamburger replaces the wrapping tab strip
+     that used to force the header onto two lines. */
+  .header-inner { flex-wrap: nowrap; align-items: center; gap: 12px; }
+  .league-mark { flex: 1 1 auto; min-width: 0; }
+  .league-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
   .hero { padding: 44px 18px 32px; }
 
   /* Hiding .p-record drops the row to 3 items, matching 3 columns. */
@@ -2323,10 +2419,6 @@ main {
      drops, like the rows above). */
   #full-rankings li { grid-template-columns: 28px 1fr 38px 50px; }
   #full-rankings .poll-head .ph-l5 { display: none; }
-
-  .tabs { width: 100%; }
-  .tab-btn { padding: 9px 12px; }
-
 
   .game-grid { grid-template-columns: 1fr; }
   .week-game-row { gap: 8px; }

@@ -66,7 +66,13 @@
         <div class="league-menu" id="league-menu"></div>
       </details>
     </div>
-    <nav class="tabs" id="tabs" role="tablist" aria-label="Sections">
+    <!-- On mobile this whole block collapses into a hamburger, using
+         the same <details> trick as the league switcher above. Desktop
+         is untouched by CSS that forces .tabs open regardless of the
+         [open] attribute. -->
+    <details class="tabs-menu" id="tabs-menu">
+      <summary class="tabs-toggle" aria-label="Menu"><span class="tabs-toggle-bars"></span></summary>
+      <nav class="tabs" id="tabs" role="tablist" aria-label="Sections">
       <button class="tab-btn active" data-tab="home" role="tab" aria-selected="true" aria-controls="home">Home</button>
       <button class="tab-btn" data-tab="schedule" role="tab" aria-selected="false" aria-controls="schedule">Schedule</button>
       <button class="tab-btn" data-tab="rankings" role="tab" aria-selected="false" aria-controls="rankings">Rankings</button>
@@ -80,7 +86,8 @@
            dataset.tab can only ever compare false and be left
            inactive, which is correct here. -->
       <a class="tab-btn" href="pickem/">Pick'em</a>
-    </nav>
+      </nav>
+    </details>
   </div>
 </header>
 

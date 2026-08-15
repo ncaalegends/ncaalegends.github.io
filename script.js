@@ -2588,8 +2588,14 @@ function renderFooter() {
          finds a box they have no code for. Not run through safeUrl()
          because that only accepts absolute http(s) URLs and this is
          a relative path within the site, written here as a literal
-         rather than taken from data. */
-      { label: "Commissioner tools", url: "../admin/", internal: true },
+         rather than taken from data.
+
+         Root-relative, not "../admin/" — a literal "../" only reaches
+         /admin/ from a page one level deep (/3star/). From a page two
+         levels deep (/3star/pickem/) it resolves to /3star/admin/ and
+         404s. siteRoot() finds the actual site root at any depth, the
+         same way renderLeagueSwitch() locates the sibling leagues. */
+      { label: "Commissioner tools", url: `${siteRoot()}admin/`, internal: true },
     ].filter((l) => l.url);
 
     linksEl.innerHTML = items
@@ -2701,6 +2707,29 @@ function setupTabs() {
    only things it doesn't do are close on outside click and close on
    Escape, both added below.
    ------------------------------------------------------------ */
+/* WHERE THE SITE ROOT IS.
+
+   Used for any link that has to reach a top-level folder (another
+   league, /admin/) from a page whose own depth varies — /3star/ is
+   one level down, /3star/pickem/ is two. A hard-coded "../" is only
+   ever right for the shallowest case: from /3star/pickem/ it
+   resolves to /3star/admin/ and 404s.
+
+   So find the current league's own segment in the path and rebuild
+   from in front of it — correct at any depth, and under any base
+   path, which also keeps local preview working when the site isn't
+   served from the root.
+
+   Falls back to "../" when the league dir isn't in the path at all,
+   which is the right guess for a page that isn't inside a league
+   folder. */
+function siteRoot() {
+  const current = document.body.dataset.league || "";
+  const path = location.pathname;
+  const at = current ? path.lastIndexOf(`/${current}/`) : -1;
+  return at === -1 ? "../" : path.slice(0, at + 1);
+}
+
 function renderLeagueSwitch() {
   const wrap = document.getElementById("league-switch");
   const menu = document.getElementById("league-menu");
@@ -2713,22 +2742,7 @@ function renderLeagueSwitch() {
   }
 
   const current = document.body.dataset.league || "";
-
-  /* WHERE THE SIBLING LEAGUES ARE.
-
-     This used to be a hard-coded "../", which is right from /3star/
-     and wrong from anywhere deeper: /3star/pickem/ resolved "../main/"
-     to /3star/main/ and 404'd. So find the current league's own
-     segment in the path and rebuild from in front of it — correct at
-     any depth, and under any base path, which also keeps local
-     preview working when the site isn't served from the root.
-
-     Falls back to "../" when the league dir isn't in the path at all,
-     which is the old behaviour and the right guess for a page that
-     isn't inside a league folder. */
-  const path = location.pathname;
-  const at = current ? path.lastIndexOf(`/${current}/`) : -1;
-  const base = at === -1 ? "../" : path.slice(0, at + 1);
+  const base = siteRoot();
 
   menu.innerHTML = leagues
     .map((l) => {
@@ -2758,6 +2772,36 @@ function renderLeagueSwitch() {
 }
 
 /* ------------------------------------------------------------
+   MOBILE TAB MENU
+   ------------------------------------------------------------
+   The hamburger is a <details>, same as the league switcher, so
+   open/close and keyboard access come free. This only adds what
+   <details> doesn't do on its own: close after picking a tab, close
+   on outside click, and close on Escape. Runs on every page —
+   league pages and shell pages like /3star/pickem/ alike — so it
+   has to be independent of setupTabs(), which shell pages skip.
+   ------------------------------------------------------------ */
+function setupTabsMenu() {
+  const menu = document.getElementById("tabs-menu");
+  if (!menu) return;
+
+  menu.querySelectorAll(".tab-btn").forEach((btn) => {
+    btn.addEventListener("click", () => { menu.open = false; });
+  });
+
+  document.addEventListener("click", (e) => {
+    if (menu.open && !menu.contains(e.target)) menu.open = false;
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && menu.open) {
+      menu.open = false;
+      menu.querySelector("summary")?.focus();
+    }
+  });
+}
+
+/* ------------------------------------------------------------
    INIT
    ------------------------------------------------------------ */
 function init() {
@@ -2772,6 +2816,7 @@ function init() {
   if (badgeEl) badgeEl.textContent = (INFO.tag || "").toUpperCase();
 
   renderLeagueSwitch();
+  setupTabsMenu();
 
   const heroSubEl = document.getElementById("hero-sub");
   if (heroSubEl) heroSubEl.textContent = (INFO.tag || "").toUpperCase();
