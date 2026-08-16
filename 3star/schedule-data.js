@@ -183,7 +183,7 @@ const TEAM_SCHEDULES = [
       { week: 8, opponent: "Northwestern", location: "at", teamScore: 21, opponentScore: 24 },
       { week: 9, opponent: "Michigan", location: "vs", teamScore: 10, opponentScore: 23 },
       { week: 10, opponent: "Wisconsin", location: "at", teamScore: 16, opponentScore: 48 },
-      { week: 11, opponent: "Nebraska", location: "vs" },
+      { week: 11, opponent: "Nebraska", location: "vs", teamScore: 35, opponentScore: 38 },
       { week: 12, opponent: "Penn State", location: "at" },
       { week: 13, opponent: "Michigan State", location: "vs" },
       { week: 14, note: "Army-Navy Week" },
