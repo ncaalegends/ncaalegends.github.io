@@ -113,6 +113,59 @@
    the main dynasty's advance to week 10+ is gated on this file
    having that week.
    ============================================================ */
-const CFP_POLL = [];
+const CFP_POLL = [
+  {
+    week: 10,
+    teams: [
+      { rank: 1, team: "Michigan", record: "8-0" },
+      { rank: 2, team: "Notre Dame", record: "8-0" },
+      { rank: 3, team: "Ohio State", record: "7-1" },
+      { rank: 4, team: "Texas", record: "7-1" },
+      { rank: 5, team: "Washington", record: "8-0" },
+      { rank: 6, team: "South Carolina", record: "8-0" },
+      { rank: 7, team: "Georgia", record: "7-1" },
+      { rank: 8, team: "LSU", record: "7-1" },
+      { rank: 9, team: "California", record: "9-0" },
+      { rank: 10, team: "Oregon", record: "6-2" },
+      { rank: 11, team: "SMU", record: "7-1" },
+      { rank: 12, team: "TCU", record: "7-1" },
+      { rank: 13, team: "Colorado", record: "8-0" },
+      { rank: 14, team: "USC", record: "7-2" },
+      { rank: 15, team: "Clemson", record: "6-2" },
+      { rank: 16, team: "Tennessee", record: "6-2" },
+      { rank: 17, team: "UCLA", record: "7-1" },
+      { rank: 18, team: "Indiana", record: "6-3" },
+      { rank: 19, team: "Missouri", record: "6-2" },
+      { rank: 20, team: "UNLV", record: "7-1" },
+      { rank: 21, team: "Nebraska", record: "5-2" },
+      { rank: 22, team: "Oklahoma", record: "5-3" },
+      { rank: 23, team: "West Virginia", record: "7-1" },
+      { rank: 24, team: "Auburn", record: "5-3" },
+      { rank: 25, team: "Boston College", record: "6-2" },
+    ],
+  },
+];
 
-const CFP_BRACKET = [];
+const CFP_BRACKET = [
+  {
+    week: 10,
+    projected: true,
+    seeds: [
+      { seed:  1, team: "Michigan", record: "8-0", auto: true },
+      { seed:  2, team: "Notre Dame", record: "8-0", auto: true },
+      { seed:  3, team: "Ohio State", record: "7-1" },
+      { seed:  4, team: "Texas", record: "7-1" },
+      { seed:  5, team: "Washington", record: "8-0" },
+      { seed:  6, team: "South Carolina", record: "8-0", auto: true },
+      { seed:  7, team: "Georgia", record: "7-1" },
+      { seed:  8, team: "LSU", record: "7-1" },
+      { seed:  9, team: "California", record: "9-0", auto: true },
+      { seed: 10, team: "Oregon", record: "6-2" },
+      { seed: 11, team: "Colorado", record: "8-0", auto: true },
+      { seed: 12, team: "UNLV", record: "7-1", auto: true },
+    ],
+    bowls: {
+      site: "Las Vegas, NV",
+    },
+  },
+];
