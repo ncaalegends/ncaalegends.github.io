@@ -251,7 +251,7 @@ const TEAM_SCHEDULES = [
       { week: 8, opponent: "Oklahoma State", location: "at", teamScore: 28, opponentScore: 25 },
       { week: 9, opponent: "Kansas State", location: "vs", teamScore: 45, opponentScore: 17 },
       { week: 10, opponent: "Arizona State", location: "at", teamScore: 35, opponentScore: 31 },
-      { week: 11, opponent: "Houston", location: "vs" },
+      { week: 11, opponent: "Houston", location: "vs", teamScore: 49, opponentScore: 21 },
       { week: 12, opponent: "Cincinnati", location: "at" },
       { week: 13, opponent: "UCF", location: "vs" },
       { week: 14, note: "Army-Navy Week" },
