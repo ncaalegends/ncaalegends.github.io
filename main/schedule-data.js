@@ -489,7 +489,7 @@ const TEAM_SCHEDULES = [
       { week: 6, opponent: "Vanderbilt", location: "at", stadium: "FirstBank Stadium", teamScore: 17, opponentScore: 15 },
       { week: 7, opponent: "Missouri", location: "vs", stadium: "Vaught-Hemingway Stadium", teamScore: 13, opponentScore: 55 },
       { week: 8, opponent: "Texas", location: "at", stadium: "Texas Memorial Stadium", teamScore: 14, opponentScore: 37, sim: true },
-      { week: 9, opponent: "Auburn", location: "vs", stadium: "Vaught-Hemingway Stadium" },
+      { week: 9, opponent: "Auburn", location: "vs", stadium: "Vaught-Hemingway Stadium", teamScore: 20, opponentScore: 38 },
       { week: 10, opponent: "Georgia", location: "vs", stadium: "Vaught-Hemingway Stadium" },
       { week: 11, opponent: "Oklahoma", location: "at", stadium: "Gaylord Family Oklahoma Memorial Stadium" },
       { week: 12, opponent: "FCS Southeast", location: "vs", stadium: "Vaught-Hemingway Stadium" },
