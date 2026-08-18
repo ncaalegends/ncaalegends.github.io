@@ -36,10 +36,10 @@ const SEASON = {
   // main/league-data.js — it governs the seasons/<year>/ archive.
   year: 2026,
 
-  currentWeek: 12,
-  statusLine: "WEEK 12",
-  nextAdvanceAt: "2026-08-18T22:00:00-04:00",
-  nextAdvance: "Tuesday, August 18th - 10:00 PM EDT",
+  currentWeek: 13,
+  statusLine: "WEEK 13",
+  nextAdvanceAt: "2026-08-20T22:00:00-04:00",
+  nextAdvance: "Thursday, August 20th - 10:00 PM EDT",
 };
 
 /* ------------------------------------------------------------
