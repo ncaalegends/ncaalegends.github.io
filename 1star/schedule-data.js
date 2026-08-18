@@ -171,7 +171,7 @@ const TEAM_SCHEDULES = [
       { week: 10, opponent: "UMass", location: "at", teamScore: 31, opponentScore: 6 },
       { week: 11, opponent: "Buffalo", location: "vs", teamScore: 44, opponentScore: 27 },
       { week: 12, opponent: "Ohio", location: "at", teamScore: 36, opponentScore: 29 },
-      { week: 13, opponent: "Central Michigan", location: "vs" },
+      { week: 13, opponent: "Central Michigan", location: "vs", teamScore: 31, opponentScore: 24 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, note: "MAC Championship" },
     ],
