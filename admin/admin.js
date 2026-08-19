@@ -56,6 +56,25 @@ const restored = new Map();
 
 const $ = (id) => document.getElementById(id);
 
+/* Where the league sits on the 0-19 week axis.
+
+   `currentWeek` is a number or one of two sentinels, and THE TWO DO
+   NOT COERCE ALIKE. The plain `Number(x) || 0` this replaces sent
+   both to 0 — right for the preseason, where nothing has happened,
+   and wrong for the offseason, where everything has. A 0 there points
+   the week pickers and the gap scan at the season opener one advance
+   after the national championship.
+
+   Mirrors seasonIndex() in script.js and tools/lib/league.js. Three
+   copies because the browser, the site and Node don't share a module
+   system; if you change one, change all three. */
+const seasonIndex = (value) => {
+  if (value === "PRESEASON") return 0;
+  if (value === "OFFSEASON") return 19;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : 0;
+};
+
 const esc = (s) =>
   String(s == null ? "" : s).replace(/[&<>"']/g, (c) =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])
@@ -282,26 +301,27 @@ async function switchLeague(slug) {
    confirmed advance can refresh the page from the published file
    without re-fetching or resetting the league. */
 function refreshWeekControls() {
-  const current = Number(data.SEASON.currentWeek) || 0;
+  const current = seasonIndex(data.SEASON.currentWeek);
 
-  /* TWO DIFFERENT RANGES, on purpose. Scores are entered against
-     schedule rows, and schedules stop at the conference
-     championships — a bowl week has no rows to score, and its
-     results go in postseason-data.js instead. The season itself
-     keeps going for four more weeks, so the ADVANCE picker runs to
-     19 while the SCORE picker stops at 15. Sharing one list is what
-     would let someone pick "Bowl Week 2" on a page that can only
-     write regular-season scores. */
+  /* ONE RANGE NOW, 0-19. Both pickers run the full season.
+
+     They used to differ: scores stopped at 15 because a bowl week had
+     no schedule rows to write into, and playoff results lived only in
+     postseason-data.js. That changed — a postseason game involving a
+     coached team is stored in that team's own schedule rows, exactly
+     like every other game they play, and only CPU-vs-CPU games (which
+     no coach can report anyway) stay in postseason-data.js.
+
+     So weeks 16-19 have rows, and the score picker has to reach them
+     or a coach's bowl game can't be entered from the web at all. */
   const opt = (w) => `<option value="${w}">${esc(weekOptionLabel(w))}</option>`;
-  const scoreOpts = [];
-  for (let w = 0; w <= 15; w++) scoreOpts.push(opt(w));
-  const advanceOpts = [];
-  for (let w = 0; w <= 19; w++) advanceOpts.push(opt(w));
+  const weekOpts = [];
+  for (let w = 0; w <= 19; w++) weekOpts.push(opt(w));
 
-  $("week-select").innerHTML = scoreOpts.join("");
-  $("week-select").value = String(Math.min(current, 15));
+  $("week-select").innerHTML = weekOpts.join("");
+  $("week-select").value = String(Math.min(current, 19));
 
-  $("advance-week").innerHTML = advanceOpts.join("");
+  $("advance-week").innerHTML = weekOpts.join("");
   $("advance-week").value = String(Math.min(current + 1, 19));
 
   /* Prefill from the stored timestamp, not from the sentence — the
@@ -469,7 +489,7 @@ function renderGames() {
    normal state, not something to chase.
    ------------------------------------------------------------ */
 function findGaps() {
-  const current = Number(data.SEASON.currentWeek) || 0;
+  const current = seasonIndex(data.SEASON.currentWeek);
   const viewing = Number($("week-select").value);
   const out = [];
 
@@ -1053,7 +1073,7 @@ $("advance-btn").addEventListener("click", () => {
   }
   const next = deadline.text;
 
-  const current = Number(data.SEASON.currentWeek) || 0;
+  const current = seasonIndex(data.SEASON.currentWeek);
   const wk = WeekCore.buildWeek(data, week);
 
   let warn = "";

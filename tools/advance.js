@@ -75,6 +75,10 @@ const {
   loadConfig,
   top25GateError,
   bowlWeekWarning,
+  seasonIndex,
+  isSentinel,
+  SENTINELS,
+  REGULAR_FINAL_WEEK,
 } = require("./lib/league");
 
 /* ------------------------------------------------------------
@@ -159,15 +163,104 @@ function makeMentioner(cfg, slug) {
    ------------------------------------------------------------ */
 const CONTENT_LIMIT = 2000;
 
+/* ------------------------------------------------------------
+   GAMELESS WEEKS
+   ------------------------------------------------------------
+   Week 14 is Army-Navy: every team is on a bye and nobody plays.
+   The ordinary message is wrong for it in three separate ways —
+   it asks coaches to get games in during a week that has none,
+   prints an "H2H Games (0)" and a "CPU Games (0)" section back to
+   back, and fills its one populated embed field with one identical
+   bye line per team.
+
+   THE TEST IS STRUCTURAL, NOT A WEEK NUMBER. "No league games and
+   no CPU games" is true by construction from the data, so there is
+   no constant to keep in step with schedule-data.js, and a future
+   gameless week is handled without anyone remembering to add it
+   here. Comparing against 14 would be a second place that has to
+   agree with the schedules about what week 14 is.
+
+   THE BLURB IS AUTHORED, NOT DERIVED. What a week is FOR isn't in
+   the data — the schedules only know that nobody plays. Deriving
+   it from the shared bye note would produce "Army-Navy Week" for
+   this one and nothing sensible for any other. So the sentence is
+   written down, per week, and falls back to a generic line.
+   ------------------------------------------------------------ */
+const gameless = (wk) => wk.league.length === 0 && wk.cpu.length === 0;
+
+const WEEK_BLURB = {
+  14: "No games this week: every team is on a bye. Use it to recruit.",
+  /* The offseason is one held state, not nine weeks. The in-game
+     steps — End of Season Recap and NIL, Players Leaving, four weeks
+     of portal recruiting, Signing Day, Training Results, Encourage
+     Transfers — are announced and advanced in Discord, and the site
+     holds until the rollover. Nine week numbers with no games would
+     answer every question the week axis exists to ask with
+     "nothing"; `statusLine` names the current step for free. */
+  OFFSEASON:
+    "The season is complete. Offseason moves — NIL, the portal, signing day — " +
+    "run in Discord from here until next season's preseason.",
+};
+
+const DEFAULT_BLURB = "No games this week — every team is off.";
+
+/* Weeks that are SUPPOSED to have nobody playing. Any other gameless
+   week is more likely to be untranscribed than genuinely empty, and
+   warnGameless() below says so.
+
+   Week 15 is the one that matters. Until the conference championship
+   matchups are read off the screenshot, every team's week 15 row is
+   still the `note: "SEC Championship"` placeholder it was seeded
+   with — so championship week looks exactly like a bye week, and the
+   post would tell the league everyone is off on the biggest night of
+   the regular season.
+
+   It is a WARNING and not a block, because a genuinely gameless week
+   15 is possible: in a small league both teams in a title game can be
+   CPU. The commissioner is the one who knows which it is. */
+const EXPECTED_GAMELESS = new Set([14]);
+
+function warnGameless(week, wk) {
+  if (!gameless(wk)) return null;
+  // A sentinel has no games by definition — that isn't news.
+  if (SENTINELS.includes(week) || EXPECTED_GAMELESS.has(Number(week))) return null;
+
+  const w = Number(week);
+  const what =
+    w === REGULAR_FINAL_WEEK
+      ? "the conference championship matchups"
+      : w > REGULAR_FINAL_WEEK
+      ? "this round's bowl and playoff matchups"
+      : "this week's matchups";
+
+  return (
+    `week ${week} has no games at all — every team is on a bye or has no entry.\n` +
+    `           ${what.charAt(0).toUpperCase() + what.slice(1)} have probably not been\n` +
+    `           transcribed yet. The post will tell the league everyone is off.\n` +
+    `           A genuinely empty week is possible (every game CPU-vs-CPU), so this\n` +
+    `           is a warning and not a block — but check before you advance.`
+  );
+}
+
 function buildMessage(data, week, wk, nextAdvance, cfg, siteUrl, slug) {
-  const label = weekLabel(week);
+  const sentinel = SENTINELS.includes(week);
+  const label = sentinel ? "the Offseason" : weekLabel(week);
   const M = makeMentioner(cfg, slug);
+  const quiet = gameless(wk);
 
   /* ---- content: the part that actually notifies people ---- */
   const head = [
     M.role,
     `**We've advanced to ${label}.**`,
-    nextAdvance ? `Get your games in by **${nextAdvance}**.` : "",
+    /* A gameless week still has a deadline — the week ends on
+       schedule — but it isn't a deadline for games, so it's stated
+       as the advance it actually is. */
+    quiet ? WEEK_BLURB[week] || DEFAULT_BLURB : "",
+    nextAdvance
+      ? quiet
+        ? `**Next advance:** ${nextAdvance}`
+        : `Get your games in by **${nextAdvance}**.`
+      : "",
   ]
     .filter(Boolean)
     .join("\n");
@@ -198,10 +291,14 @@ function buildMessage(data, week, wk, nextAdvance, cfg, siteUrl, slug) {
 
   const section = (title, body) => `\n\n__**${title}**__\n${body}`;
 
-  let content =
-    head +
-    section(`H2H Games (${wk.league.length})`, leagueBody) +
-    section(`CPU Games (${wk.cpu.length})`, cpuBody);
+  /* On a gameless week both sections would read "(0)" over a line
+     saying there aren't any, which is two ways of printing nothing.
+     The blurb in the head already said it once. */
+  let content = quiet
+    ? head
+    : head +
+      section(`H2H Games (${wk.league.length})`, leagueBody) +
+      section(`CPU Games (${wk.cpu.length})`, cpuBody);
 
   /* Hard Discord limit of 2000. If we blow it, CPU games fall back to
      the embed — they lose their pings, but H2H games (the ones that
@@ -236,16 +333,31 @@ function buildMessage(data, week, wk, nextAdvance, cfg, siteUrl, slug) {
      on a bye are covered by the league role ping at the top of the
      message, so this list is reference material, not a notification. */
   if (wk.notes.length) {
-    fields.push({
-      name: `Byes & Off Weeks (${wk.notes.length})`,
-      value: truncate(
-        wk.notes.map((n) => `**${n.coach || n.team}** (${n.team}) — ${n.note}`).join("\n"),
-        1024
-      ),
-    });
+    /* When every team carries the SAME note — Army-Navy, and any
+       other week the whole league sits out — the per-team list is
+       one fact repeated once per coach. Collapse it. The roster is
+       already on the site the embed links to. */
+    const notes = wk.notes.map((n) => String(n.note || "").trim());
+    const uniform = quiet && notes.length > 1 && new Set(notes).size === 1;
+
+    fields.push(
+      uniform
+        ? { name: notes[0], value: `_All ${wk.notes.length} teams are off this week._` }
+        : {
+            name: `Byes & Off Weeks (${wk.notes.length})`,
+            value: truncate(
+              wk.notes.map((n) => `**${n.coach || n.team}** (${n.team}) — ${n.note}`).join("\n"),
+              1024
+            ),
+          }
+    );
   }
 
-  if (nextAdvance) {
+  /* On a gameless week the head already carries the next advance,
+     because there was no "get your games in" line for it to sit
+     under. Repeating it in the embed would print the same date
+     twice in a short message. */
+  if (nextAdvance && !quiet) {
     fields.push({ name: "​", value: `**Next advance:** ${nextAdvance}` });
   }
 
@@ -317,7 +429,18 @@ function updateSeason(leagueFile, week, statusLine, nextAdvanceAt) {
   const { open, close, body } = seasonBlock(src, path.basename(leagueFile));
 
   let next = body;
-  next = replaceOne(next, /^(\s*currentWeek:\s*)(?:"PRESEASON"|\d+)(,)/m, `$1${week}$2`, "currentWeek");
+  /* Matches either sentinel or a number, and writes back whichever
+     form `week` is: a number goes in bare, "OFFSEASON" goes in
+     quoted. Without the quoting, advancing to the offseason would
+     write `currentWeek: OFFSEASON` — a bare identifier that throws a
+     ReferenceError the moment any page loads the file. */
+  const written = SENTINELS.includes(week) ? JSON.stringify(week) : String(week);
+  next = replaceOne(
+    next,
+    /^(\s*currentWeek:\s*)(?:"PRESEASON"|"OFFSEASON"|\d+)(,)/m,
+    `$1${written}$2`,
+    "currentWeek"
+  );
   next = replaceOne(
     next,
     /^(\s*statusLine:\s*)"[^"]*"(,)/m,
@@ -466,23 +589,37 @@ async function main() {
 
   const data = loadData(paths);
 
-  /* Don't advance into a week whose Top 25 isn't in yet — a dry run is
-     just a preview, so it's allowed through to show the message.
-     Applies to main only; the gate itself decides that, per league. */
-  if (!dryRun) {
-    const gate = top25GateError(data, week, L);
-    if (gate) die(gate);
+  /* The offseason is not a week, so neither gate applies to it. The
+     poll gate would demand a CFP Top 25 that stopped being published
+     in December, and the bowl warning would report on rounds that are
+     all finished. Asking either would be asking about games in a
+     phase defined by not having any. */
+  const sentinel = isSentinel(week);
+
+  if (!sentinel) {
+    /* Don't advance into a week whose Top 25 isn't in yet — a dry run
+       is just a preview, so it's allowed through to show the message.
+       Applies to main only; the gate itself decides that, per league. */
+    if (!dryRun) {
+      const gate = top25GateError(data, week, L);
+      if (gate) die(gate);
+    }
+
+    /* Advisory, not a gate: a missing previous round leaves the next
+       round's bracket slots empty, which is worth saying and not worth
+       blocking on. Printed for dry runs too — that's what a dry run is
+       for. */
+    const bowlNote = bowlWeekWarning(data, week);
+    if (bowlNote) console.log(`\n  NOTE: ${bowlNote}`);
   }
 
-  /* Advisory, not a gate: a missing previous round leaves the next
-     round's bracket slots empty, which is worth saying and not worth
-     blocking on. Printed for dry runs too — that's what a dry run is
-     for. */
-  const bowlNote = bowlWeekWarning(data, week);
-  if (bowlNote) console.log(`\n  NOTE: ${bowlNote}`);
-
-  const wk = buildWeek(data, week);
-  const label = weekLabel(week);
+  /* buildWeek on a sentinel finds no entry for any team, which would
+     report all N coaches as "missing a week entry". They aren't
+     missing anything — there is no week to have an entry for. */
+  const wk = sentinel
+    ? { league: [], cpu: [], notes: [], missing: [] }
+    : buildWeek(data, week);
+  const label = sentinel ? "the Offseason" : weekLabel(week);
   const statusLine = args.status || label.toUpperCase();
   /* `at` is what gets written, `text` is what gets shown. See
      resolveDeadline above for why an unparseable value stops here. */
@@ -493,6 +630,8 @@ async function main() {
   if (wk.missing.length) {
     console.log(`  WARNING: no week ${week} entry for: ${wk.missing.join(", ")}`);
   }
+  const gamelessNote = warnGameless(week, wk);
+  if (gamelessNote) console.log(`  WARNING: ${gamelessNote}`);
 
   const cfg = loadConfig();
   const built = buildMessage(data, week, wk, nextAdvance, cfg, siteUrl, slug);

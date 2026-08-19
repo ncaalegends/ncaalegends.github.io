@@ -18,6 +18,36 @@
        weeks 0-13   regular season games
        week 14      Army-Navy Week
        week 15      conference championship
+       weeks 16-19  Bowl Weeks 1-4 (CFP rounds + bowls)
+
+   THE POSTSEASON LIVES HERE TOO — weeks 15-19. A conference
+   championship, a bowl or a CFP round that a COACHED team played is
+   an ordinary row on that team's schedule, with three optional extra
+   fields:
+
+     neutral: true      no true home team. home/away still decide
+                        which score is which; the row renders "VS" at
+                        the named stadium rather than claiming "AT".
+     title: "Rose Bowl" the game's own name. Replaces the week number
+                        in the schedule row and the card footer.
+     round: "cfp-qf"    the machine-readable round id. One of:
+                        ccg, bowl-w1, bowl-w2,
+                        cfp-r1, cfp-qf, cfp-sf, cfp-nc
+
+   `round` IS LOAD-BEARING AND `title` IS NOT. Conference titles, CFP
+   appearances and national championships on the roster cards are
+   derived by matching `round`; a bowl game with a title and no round
+   renders correctly and earns nothing. The round is never inferred
+   from the title, because a sponsor renaming a bowl would silently
+   stop counting it.
+
+     { week: 17, opponent: "Miami", location: "vs", neutral: true,
+       stadium: "AT&T Stadium", title: "Cotton Bowl", round: "cfp-qf",
+       teamScore: 31, opponentScore: 24 }
+
+   A game between two teams NOBODY coaches — most of the CFP bracket
+   — has no coach's schedule to live on and goes in
+   postseason-data.js instead.
    In-game week 14 and "Conf Champ" both read BYE for all eight
    teams right now; they're written as the labelled weeks anyway
    so the site renders them consistently with the other leagues.

@@ -26,6 +26,7 @@ tools/config.json
 # Planning notes — working drafts, not part of the tooling docs
 tools/SCOPING-*.md
 docs/SCOPING-*.md
+docs/PLAN-*.md
 
 # NOTE: docs/SCOPING-mid-season-departure.md was committed before this
 # pattern existed, so it is still tracked and this line does not touch

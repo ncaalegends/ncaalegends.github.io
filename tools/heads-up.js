@@ -78,11 +78,20 @@ const { makeMentioner, post, webhookUrl } = require("./advance");
 
 const CONTENT_LIMIT = 2000;
 
-/* The last week that has schedule rows. Past this the season is the
-   CFP bracket, which lives in postseason-data.js and is seeded from
-   results rather than laid out in advance — there is no "next week's
-   matchups" to preview, so this stops. */
-const LAST_SCHEDULED_WEEK = 15;
+/* The last week that has schedule rows — now the national
+   championship, not the conference championships.
+
+   It used to stop at 15, because the postseason lived entirely in
+   postseason-data.js and there was no "next week's matchups" to
+   preview. That changed: a championship, bowl or playoff game a
+   COACHED team plays is a row on that team's own schedule, so weeks
+   16-19 have matchups to preview like any other week. Only
+   CPU-vs-CPU games stay in postseason-data.js, and nobody needs a
+   heads-up for those.
+
+   Past this is the offseason, which has no next week at all — the
+   sentinel check at the call site catches that separately. */
+const LAST_SCHEDULED_WEEK = 19;
 
 /* ------------------------------------------------------------
    MESSAGE
@@ -218,7 +227,11 @@ async function main() {
     console.log("  --force: posting anyway.");
   }
 
-  /* ---- what's next week? ---- */
+  /* ---- what's next week? ----
+     Catches BOTH sentinels, and deliberately by type rather than by
+     name: "PRESEASON" has no week before it and "OFFSEASON" has none
+     after it, and a third sentinel added later is handled here
+     without anyone remembering to come back. */
   if (typeof week !== "number") {
     console.log(`  currentWeek is "${week}" — no next week to preview. Posting nothing.\n`);
     return;

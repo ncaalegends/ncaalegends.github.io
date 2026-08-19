@@ -907,6 +907,22 @@ main {
 /* Coach vs. coach — the games that actually matter to the league. */
 .game-card.is-league { border-left-color: var(--gold); }
 
+/* A championship, bowl or playoff round. The footer carries the
+   game's own name instead of the week, and the title is set in the
+   mono face so "Rose Bowl" reads as a proper noun rather than as the
+   same grey caption every other card ends with.
+
+   Deliberately no second accent colour: .is-league already owns the
+   left edge and a postseason game is almost always a league game, so
+   a competing border would only ever fight with it. */
+.game-card.is-postseason .gc-foot span:first-child {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
 .game-card.is-live {
   border-left-color: var(--crimson);
   box-shadow: inset 0 0 0 1px rgba(224, 38, 58, 0.35);
@@ -1787,6 +1803,18 @@ main {
 .cm-ach-conf { background: #9fe1cb; color: #04342c; }
 .cm-ach-cfp  { background: #b5d4f4; color: #042c53; }
 
+/* The years, inside the chip and after a hairline. Inherits the
+   chip's ink at reduced opacity rather than taking a colour of its
+   own, so one rule works on all three backgrounds and no fourth
+   value has to be kept in contrast with them. */
+.cm-ach-yrs {
+  margin-left: 6px;
+  padding-left: 6px;
+  border-left: 1px solid currentColor;
+  opacity: 0.72;
+  font-weight: 400;
+}
+
 /* --- stat grid ---
    1px gap over a lined background draws the hairlines, so no
    per-tile borders to keep aligned. */
@@ -2247,6 +2275,17 @@ main {
   color: var(--chalk);
   text-transform: uppercase;
   font-size: 0.85rem;
+}
+
+/* On a postseason row the first cell holds the game's NAME rather
+   than "Week 17", and a bowl name is much longer than a week number.
+   Wrapping is allowed and the type drops, so "National Championship"
+   fits the column instead of pushing the whole row wide. */
+.team-sched-row.is-postseason .tsr-week {
+  white-space: normal;
+  font-size: 0.7rem;
+  line-height: 1.2;
+  color: var(--gold);
 }
 
 .tsr-loc {

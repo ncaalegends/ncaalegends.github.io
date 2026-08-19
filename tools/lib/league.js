@@ -395,18 +395,48 @@ function bowlWeekWarning(data, week) {
   );
 }
 
+/* The two non-numeric values `currentWeek` can hold — the gaps either
+   side of a season. Advancing INTO the offseason is a real advance
+   with a real announcement, so --week has to accept the word; nothing
+   else does, and "PRESEASON" is deliberately not among them, because
+   the preseason is reached by the rollover rather than by advancing.
+
+   Case-insensitive on input, canonical upper-case on the way out, so
+   `--week offseason` works and still writes "OFFSEASON". */
+const SENTINELS = ["OFFSEASON"];
+
 function parseWeek(value, example = "--week 4") {
   if (value === undefined) die(`missing --week. Example: ${example}`);
+
+  const word = String(value).trim().toUpperCase();
+  if (SENTINELS.includes(word)) return word;
+
   const week = Number(value);
   if (!Number.isInteger(week) || week < 0 || week > FINAL_WEEK) {
     die(
-      `--week must be 0-${FINAL_WEEK}, got "${value}".\n` +
+      `--week must be 0-${FINAL_WEEK} or OFFSEASON, got "${value}".\n` +
         `  0-${REGULAR_FINAL_WEEK} is the regular season (${REGULAR_FINAL_WEEK} is the conference championships);\n` +
-        `  ${REGULAR_FINAL_WEEK + 1}-${FINAL_WEEK} are Bowl Weeks 1-4, one per playoff round.`
+        `  ${REGULAR_FINAL_WEEK + 1}-${FINAL_WEEK} are Bowl Weeks 1-4, one per playoff round;\n` +
+        `  OFFSEASON is the hold after the national championship, run in Discord.`
     );
   }
   return week;
 }
+
+/* The week axis position of a `currentWeek` value. Mirrors
+   seasonIndex() in script.js and exists for the same reason: the two
+   sentinels do NOT coerce alike. PRESEASON is 0 because nothing has
+   happened; OFFSEASON is FINAL_WEEK because everything has, and a 0
+   there would tell every tool the season hasn't started one advance
+   after the title game. */
+function seasonIndex(value) {
+  if (value === "PRESEASON") return 0;
+  if (value === "OFFSEASON") return FINAL_WEEK;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : 0;
+}
+
+const isSentinel = (value) => SENTINELS.includes(String(value).trim().toUpperCase());
 
 /* ------------------------------------------------------------
    CONFIG
@@ -431,6 +461,9 @@ module.exports = {
   listArchivedYears,
   loadCareer,
   parseWeek,
+  seasonIndex,
+  isSentinel,
+  SENTINELS,
   loadConfig,
   top25GateError,
   bowlWeekWarning,
@@ -451,4 +484,11 @@ module.exports = {
   parseScore: core.parseScore,
   scoreableGames: core.scoreableGames,
   editsFor: core.editsFor,
+  REGULAR_FINAL_WEEK: core.REGULAR_FINAL_WEEK,
+  FINAL_WEEK: core.FINAL_WEEK,
+  roundWeek: core.roundWeek,
+  roundLabel: core.roundLabel,
+  isKnownRound: core.isKnownRound,
+  ALL_ROUNDS: core.ALL_ROUNDS,
+  ROUND_ORDER: core.ROUND_ORDER,
 };

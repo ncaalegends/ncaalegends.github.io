@@ -225,7 +225,11 @@ async function main() {
   const data = loadData(L.paths);
   const week = data.SEASON.currentWeek;
 
-  /* Preseason has no games to be behind on. */
+  /* Neither sentinel has games to be behind on — the preseason hasn't
+     played any and the offseason has played them all. Tested by type
+     so both are covered by one check; without it the offseason bot
+     would spend weeks chasing scores for a season that ended with a
+     national championship. */
   if (typeof week !== "number") {
     console.log(`  ${L.label}: currentWeek is "${week}" — nothing to nudge.`);
     return;

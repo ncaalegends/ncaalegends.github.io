@@ -44,10 +44,12 @@
      on Main. */
   const PICKEM_LEAGUE = "3star";
 
-  /* Schedules stop at the conference championships, so 15 is the
-     last week with rows to fill from. Matches the SCORE picker's
-     range in admin.js, deliberately not the ADVANCE picker's 19. */
-  const LAST_SCHEDULED_WEEK = 15;
+  /* 19, not 15. Schedules used to stop at the conference
+     championships; they now carry the postseason games coached teams
+     played, so a bowl or a playoff round has rows to fill a poll
+     from — and a championship game is the one people most want to
+     pick. Matches the single 0-19 picker in admin.js. */
+  const LAST_SCHEDULED_WEEK = 19;
 
   let code = "";
   let kind = "dynasty";
@@ -154,7 +156,12 @@
       return;   // no chips; the text boxes still work
     }
 
-    const current = Number(league.SEASON && league.SEASON.currentWeek) || 0;
+    /* Sentinel-aware: "OFFSEASON" must land on the last bowl week,
+       not week 0. A bare Number() coercion would open the picker on
+       the season opener the week after the national championship. */
+    const raw = league.SEASON && league.SEASON.currentWeek;
+    const current =
+      raw === "OFFSEASON" ? LAST_SCHEDULED_WEEK : raw === "PRESEASON" ? 0 : Number(raw) || 0;
     const label = (w) =>
       typeof weekOptionLabel === "function" ? weekOptionLabel(w) : `Week ${w}`;
 

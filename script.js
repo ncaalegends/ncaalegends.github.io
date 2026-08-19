@@ -319,6 +319,28 @@ const CFP_ERA_WEEK = 10;
 const REGULAR_FINAL_WEEK =
   (typeof WeekCore !== "undefined" && WeekCore.REGULAR_FINAL_WEEK) || 15;
 
+/* The last week that can hold a game — Bowl Week 4, the national
+   championship. Same mirror-with-a-fallback rule as the line above. */
+const FINAL_WEEK = (typeof WeekCore !== "undefined" && WeekCore.FINAL_WEEK) || 19;
+
+/* Which week a postseason round is played in. Mirrors roundWeek() in
+   week-core.js, with the same literal fallback the two constants
+   above use — the bracket is the headline of the Top 25 tab, and it
+   shouldn't go blank because a script tag loaded out of order. */
+const ROUND_WEEK_FALLBACK = {
+  ccg: 15,
+  "bowl-w1": 16,
+  "cfp-r1": 16,
+  "bowl-w2": 17,
+  "cfp-qf": 17,
+  "cfp-sf": 18,
+  "cfp-nc": 19,
+};
+const roundWeekOf = (roundId) =>
+  typeof WeekCore !== "undefined" && WeekCore.roundWeek
+    ? WeekCore.roundWeek(roundId)
+    : ROUND_WEEK_FALLBACK[roundId] || 16;
+
 const TOP25_DATA = typeof TOP25 !== "undefined" ? TOP25 : [];
 const CFP_POLL_DATA =
   typeof CFP_POLL !== "undefined" && Array.isArray(CFP_POLL) ? CFP_POLL : [];
@@ -399,8 +421,38 @@ const latestPollWeek = () => {
    the advance flips the week — the poll and the new week reveal
    together, never before. Falls back to the latest poll at or before
    the current week, and to null (nothing published) if none qualifies. */
-const currentSeasonWeek = () =>
-  SEASON.currentWeek === "PRESEASON" ? 0 : Number(SEASON.currentWeek) || 0;
+/* ------------------------------------------------------------
+   THE TWO SENTINELS
+   ------------------------------------------------------------
+   `currentWeek` is a number 0-19, or one of two strings marking the
+   gaps on either side of a season:
+
+     "PRESEASON"  the roster is set, week 0 hasn't kicked off
+     "OFFSEASON"  the title game is played; NIL, the portal, signing
+                  day and the rest run in Discord until the rollover
+
+   THEY DO NOT COERCE THE SAME WAY, AND THIS IS THE WHOLE POINT.
+
+   Every one of these call sites used to write `Number(x) || 0`, which
+   sends BOTH strings to 0 — correct for preseason, where nothing has
+   happened, and badly wrong for the offseason, where everything has.
+   A 0 there tells the poll cap, the schedule view and the rankings
+   that the season hasn't started, one advance after the national
+   championship: polls vanish, every result stops counting as recent,
+   and the site reads as though it were August again.
+
+   So the offseason maps to FINAL_WEEK — the season, complete. One
+   helper, used everywhere, instead of the coercion repeated in seven
+   places where six of them are right by luck.
+   ------------------------------------------------------------ */
+const seasonIndex = (value) => {
+  if (value === "PRESEASON") return 0;
+  if (value === "OFFSEASON") return FINAL_WEEK;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : 0;
+};
+
+const currentSeasonWeek = () => seasonIndex(SEASON.currentWeek);
 const currentPollWeek = () => {
   const cap = currentSeasonWeek();
   const reached = pollWeeksAvailable().filter((w) => w <= cap);
@@ -691,6 +743,11 @@ function validateData() {
    WEEK HELPERS
    ------------------------------------------------------------ */
 const isPreseason = () => SEASON.currentWeek === "PRESEASON";
+const isOffseason = () => SEASON.currentWeek === "OFFSEASON";
+/* Neither sentinel is a week that can hold a game, so anything asking
+   "is there a matchup to show right now" asks this rather than testing
+   the two strings separately and forgetting one. */
+const isBetweenSeasons = () => isPreseason() || isOffseason();
 
 /* Two ways to name a week, used in different places.
 
@@ -772,6 +829,12 @@ function buildWeekGames(week) {
       away,
       stadium: entry.stadium,
       league: isLeague,
+      /* Postseason fields, absent on a regular-season row. `neutral`
+         suppresses the home/away claim; `title` names the game where
+         the week number would otherwise go. */
+      neutral: entry.neutral === true,
+      title: entry.title || "",
+      round: entry.round || null,
       ...entryScores(entry),
     });
   });
@@ -819,6 +882,22 @@ function renderJumbotron() {
       <span class="jumbo-label">CURRENT STATUS</span>
       <span class="jumbo-preseason">PRESEASON</span>`;
     sub.textContent = "Kickoff starts once Week 0 goes live";
+    return;
+  }
+
+  /* The offseason is the mirror of the preseason and gets the same
+     treatment: no week to summarise, so say what phase it is instead
+     of computing a jumbotron over an empty week.
+
+     `statusLine` carries the detail. It's hand-edited free text, so
+     the nine in-game offseason steps — NIL, players leaving, four
+     weeks of portal, signing day, training, transfers — can each be
+     named there without any of them existing as a week number. */
+  if (isOffseason()) {
+    frame.innerHTML = `
+      <span class="jumbo-label">CURRENT STATUS</span>
+      <span class="jumbo-preseason">OFFSEASON</span>`;
+    sub.textContent = SEASON.statusLine || "The season is complete";
     return;
   }
 
@@ -882,14 +961,19 @@ function gameCardHtml(g, week) {
   const homeWon = g.played && g.homeScore > g.awayScore;
   const awayWon = g.played && g.awayScore > g.homeScore;
 
+  /* A named postseason game keeps its name in the footer even after
+     it's final — "Rose Bowl" is more use than "Final", and the score
+     directly above already says the game is over. */
+  const foot = g.title || (g.played ? "Final" : weekLabel(week));
+
   return `
     <article class="game-card${g.league ? " is-league" : ""}${
     g.played ? " is-final" : " is-upcoming"
-  }">
+  }${g.round ? " is-postseason" : ""}">
       ${gameRowHtml(g.away, g.played, awayWon, g.awayScore, week)}
       ${gameRowHtml(g.home, g.played, homeWon, g.homeScore, week)}
       <div class="gc-foot">
-        <span>${g.played ? "Final" : esc(weekLabel(week))}</span>
+        <span>${esc(foot)}</span>
         ${g.league ? '<span class="wg-league-tag">League</span>' : ""}
       </div>
     </article>`;
@@ -904,6 +988,20 @@ function renderThisWeekGames() {
     tag.textContent = "PRESEASON";
     container.innerHTML =
       '<p class="sched-empty">Matchups will show up here once Week 0 kicks off.</p>';
+    return;
+  }
+
+  /* Offseason shows the season that just finished, not an empty week.
+     The national championship is the last thing that happened and the
+     most interesting thing the site has ever had on it; blanking the
+     panel for however long the offseason runs would throw that away
+     to say "nothing is scheduled". */
+  if (isOffseason()) {
+    const { rows } = buildWeekGames(FINAL_WEEK);
+    tag.textContent = "OFFSEASON";
+    container.innerHTML = rows.length
+      ? `<div class="game-grid">${rows.map((g) => gameCardHtml(g, FINAL_WEEK)).join("")}</div>`
+      : '<p class="sched-empty">The season is complete. Next season\'s schedule lands in the preseason.</p>';
     return;
   }
 
@@ -1328,24 +1426,72 @@ const cfpBowlsFor = (week) => {
 };
 
 /* The winner of a postseason game between two known teams, or null if
-   that game hasn't been played (or isn't in the file yet). Round ids
-   are the ones documented in docs/seasons-and-postseason.md. */
+   that game hasn't been played (or isn't recorded yet). Round ids are
+   the ones documented in docs/seasons-and-postseason.md.
+
+   TWO SOURCES, AND A GAME IS ONLY EVER IN ONE OF THEM.
+
+   A playoff game involving a coached team is a row on that coach's
+   own schedule, entered through the ordinary score path like every
+   other game they play. A game between two teams nobody coaches —
+   most of the bracket, most seasons — has no schedule to live on and
+   sits in postseason-data.js.
+
+   So this is a union of disjoint sets, not a reconciliation between
+   two copies: there is no precedence rule to get wrong, because the
+   two places can never both hold the same game. Schedules are asked
+   first only because that's where a coach's own result lands, and a
+   coached game is the one someone is most likely to be watching for.
+
+   The payoff is that entering a quarterfinal score on the admin page
+   advances the bracket, with no second entry step. */
 function cfpGameWinner(roundId, a, b) {
   if (!a || !b) return null;
+  const ka = rosterKeyFor(a);
+  const kb = rosterKeyFor(b);
+
+  const decide = (homeName, awayName, homeScore, awayScore) => {
+    if (homeScore == null || awayScore == null) return null;
+    if (Number(homeScore) === Number(awayScore)) return null; // no ties in the CFP
+    return Number(homeScore) > Number(awayScore) ? homeName : awayName;
+  };
+
+  /* 1. The schedules, at the week this round is played. A row only
+        counts if it names the round — two teams can meet twice in a
+        season, and "they played in week 17" is not the same claim as
+        "they played the quarterfinal". */
+  const week = roundWeekOf(roundId);
+  for (const team of SCHEDULES_RAW) {
+    const kt = rosterKeyFor(team.team);
+    if (kt !== ka && kt !== kb) continue;
+
+    for (const w of team.weeks || []) {
+      if (Number(w.week) !== week || w.round !== roundId || !w.opponent) continue;
+      const ko = rosterKeyFor(w.opponent);
+      if (!((kt === ka && ko === kb) || (kt === kb && ko === ka))) continue;
+
+      /* Scores are stored from this team's perspective regardless of
+         who is home, which is the one thing to get right here. */
+      const home = w.location === "at" ? w.opponent : team.team;
+      const homeScore = w.location === "at" ? w.opponentScore : w.teamScore;
+      const awayScore = w.location === "at" ? w.teamScore : w.opponentScore;
+      const won = decide(home, w.location === "at" ? team.team : w.opponent, homeScore, awayScore);
+      if (won) return won;
+    }
+  }
+
+  /* 2. postseason-data.js — the CPU-only games. */
   const post = typeof POSTSEASON !== "undefined" ? POSTSEASON : null;
   const round = post?.rounds?.find((r) => r.id === roundId);
   if (!round) return null;
 
-  const ka = rosterKeyFor(a);
-  const kb = rosterKeyFor(b);
   const g = (round.games || []).find((x) => {
     const kh = rosterKeyFor(x.home);
     const kw = rosterKeyFor(x.away);
     return (kh === ka && kw === kb) || (kh === kb && kw === ka);
   });
-  if (!g || g.homeScore == null || g.awayScore == null) return null;
-  if (Number(g.homeScore) === Number(g.awayScore)) return null; // no ties in the CFP
-  return Number(g.homeScore) > Number(g.awayScore) ? g.home : g.away;
+  if (!g) return null;
+  return decide(g.home, g.away, g.homeScore, g.awayScore);
 }
 
 /* One box on the tree.
@@ -1863,7 +2009,7 @@ function coachCareerFor(name) {
 function nextGameFor(coach) {
   const team = SCHEDULES.find((t) => rosterKeyFor(t.team) === rosterKeyFor(coach.team));
   if (!team) return null;
-  const from = SEASON.currentWeek === "PRESEASON" ? 0 : Number(SEASON.currentWeek) || 0;
+  const from = currentSeasonWeek();
   const upcoming = (team.weeks || [])
     .filter((w) => Number(w.week) >= from && w.opponent && w.teamScore == null)
     .sort((a, b) => Number(a.week) - Number(b.week))[0];
@@ -1880,6 +2026,19 @@ function nextGameFor(coach) {
   };
 }
 
+/* The years behind a chip. A dynasty runs 8-10 seasons, so "2
+   CONFERENCE" eventually stops being the interesting half — WHEN is
+   what a roster card is for. Rendered as a separate span so the count
+   stays legible at a glance and the years read as the footnote they
+   are.
+
+   Empty when no year is known, rather than printing a stray
+   separator — see the null note in computeAchievements. */
+function achYears(list) {
+  if (!list || !list.length) return "";
+  return `<span class="cm-ach-yrs">${esc(list.join(", "))}</span>`;
+}
+
 function achievementsHtml(a) {
   if (!a) return ""; // no trophies -> no row at all, not an empty one
   const chips = [];
@@ -1887,16 +2046,18 @@ function achievementsHtml(a) {
     chips.push(
       `<span class="cm-ach cm-ach-nat">${"&#9733;".repeat(Math.min(a.natTitles, 5))} ${
         a.natTitles
-      } NATIONAL</span>`
+      } NATIONAL${achYears(a.titleYears)}</span>`
     );
   if (a.confTitles)
     chips.push(
       `<span class="cm-ach cm-ach-conf">${"&#9733;".repeat(Math.min(a.confTitles, 5))} ${
         a.confTitles
-      } CONFERENCE</span>`
+      } CONFERENCE${achYears(a.confYears)}</span>`
     );
   if (a.cfpAppearances)
-    chips.push(`<span class="cm-ach cm-ach-cfp">${a.cfpAppearances} CFP APPS</span>`);
+    chips.push(
+      `<span class="cm-ach cm-ach-cfp">${a.cfpAppearances} CFP APPS${achYears(a.cfpYears)}</span>`
+    );
   return `<div class="cm-achievements">${chips.join("")}</div>`;
 }
 
@@ -2216,13 +2377,20 @@ function populateWeekSelect() {
   const sel = document.getElementById("week-select");
   if (!sel) return;
 
+  /* 0-19. The four bowl weeks are pickable because coached teams now
+     have schedule rows in them — a playoff or bowl game is on the
+     coach's own schedule, so the week has something to show. */
   sel.innerHTML = Array.from(
-    { length: 16 },
+    { length: FINAL_WEEK + 1 },
     (_, w) => `<option value="${w}">${esc(weekLabel(w))}</option>`
   ).join("");
 
   // Open on the week the league is actually playing, not a fixed week 1.
-  sel.value = String(isPreseason() ? 0 : SEASON.currentWeek);
+  /* Opens on the week the league is playing. Preseason opens on week
+     0 (nothing has happened) and the offseason on the last bowl week
+     (everything has) — which is exactly what seasonIndex() encodes,
+     so the picker doesn't restate the rule. */
+  sel.value = String(currentSeasonWeek());
   sel.addEventListener("change", renderWeeklyGames);
 }
 
@@ -2322,12 +2490,21 @@ function renderTeamSchedule() {
         else { resultCls = "tie"; resultLetter = "T"; }
       }
 
-      const isCurrent = !isPreseason() && w.week === SEASON.currentWeek;
+      /* No week is "current" between seasons — highlighting the last
+         bowl week all offseason would read as a game about to be
+         played rather than one long finished. */
+      const isCurrent = !isBetweenSeasons() && w.week === SEASON.currentWeek;
+
+      /* A neutral-site game has no home team, so "AT" would be a
+         claim about a stadium neither side owns. The score still
+         reads from this team's perspective either way — only the
+         two letters change. */
+      const loc = w.neutral ? "VS" : w.location === "vs" ? "VS" : "AT";
 
       return `
-        <div class="team-sched-row${isCurrent ? " is-current" : ""}">
-          <span class="tsr-week">${esc(weekNum(w.week))}</span>
-          <span class="tsr-loc">${w.location === "vs" ? "VS" : "AT"}</span>
+        <div class="team-sched-row${isCurrent ? " is-current" : ""}${w.round ? " is-postseason" : ""}">
+          <span class="tsr-week">${esc(w.title || weekNum(w.week))}</span>
+          <span class="tsr-loc">${loc}</span>
           <span class="tsr-opp">
             <span class="tsr-opp-name">${rankBadgeHtml(w.opponent, badgeWeekFor(played, w.week))}${esc(w.opponent)}</span>
             ${
@@ -2449,8 +2626,12 @@ function tickerSegments() {
     return segs;
   }
 
-  const week = SEASON.currentWeek;
-  segs.push(seg(weekLabel(week)));
+  /* seasonIndex(), not SEASON.currentWeek — in the offseason this has
+     to be a number for the loop below, and it has to be FINAL_WEEK so
+     the ticker carries the bowl results rather than stopping at the
+     regular season. */
+  const week = currentSeasonWeek();
+  segs.push(seg(isOffseason() ? SEASON.statusLine || "OFFSEASON" : weekLabel(week)));
 
   // Latest finals, league games first.
   const finals = [];
@@ -2568,6 +2749,8 @@ function renderFooter() {
     // Just the dynasty you're in and the current week.
     const phase = isPreseason()
       ? "PRESEASON"
+      : isOffseason()
+      ? "OFFSEASON"
       : weekLabel(SEASON.currentWeek).toUpperCase();
 
     const segs = [INFO.name.toUpperCase()];

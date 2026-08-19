@@ -14,6 +14,40 @@
      { week, note }                          — bye / Army-Navy /
        conference championship weeks with no fixed opponent yet
 
+   THE POSTSEASON LIVES HERE TOO — weeks 15-19.
+
+   A conference championship, a bowl or a CFP round that a COACHED
+   team played is an ordinary row on that team's schedule, with three
+   optional extra fields:
+
+     neutral: true      no true home team. home/away still decide
+                        which score is which; the row renders "VS" at
+                        the named stadium rather than claiming "AT".
+     title: "Rose Bowl" the game's own name. Replaces the week number
+                        in the schedule row and the card footer.
+     round: "cfp-qf"    the machine-readable round id. One of:
+                        ccg, bowl-w1, bowl-w2,
+                        cfp-r1, cfp-qf, cfp-sf, cfp-nc
+
+   `round` IS LOAD-BEARING AND `title` IS NOT. Conference titles, CFP
+   appearances and national championships on the roster cards are
+   derived by matching `round`; a bowl game with a title and no round
+   renders correctly and earns nothing. The round is never inferred
+   from the title, because a sponsor renaming a bowl would silently
+   stop counting it.
+
+     { week: 17, opponent: "Miami", location: "vs", neutral: true,
+       stadium: "AT&T Stadium", title: "Cotton Bowl", round: "cfp-qf",
+       teamScore: 31, opponentScore: 24 }
+
+   Weeks 16-19 are the game's Bowl Weeks 1-4. A team only has a row
+   for a week it actually played, so most teams stop at 15 and a
+   team with a first-round bye has no week 16 row at all.
+
+   A game between two teams NOBODY coaches — most of the CFP bracket
+   — does not belong here. It has no coach's schedule to live on and
+   goes in postseason-data.js instead.
+
    SCORES: once a week's games are final, add teamScore and
    opponentScore to that entry (that TEAM's own perspective —
    teamScore is this team's points, opponentScore is the other
