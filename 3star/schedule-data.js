@@ -260,7 +260,7 @@ const TEAM_SCHEDULES = [
       { week: 9, opponent: "UCF", location: "at", teamScore: 28, opponentScore: 56 },
       { week: 10, opponent: "Iowa State", location: "vs", teamScore: 45, opponentScore: 14 },
       { week: 11, opponent: "BYU", location: "at", teamScore: 16, opponentScore: 34 },
-      { week: 12, opponent: "Texas Tech", location: "vs" },
+      { week: 12, opponent: "Texas Tech", location: "vs", teamScore: 31, opponentScore: 14 },
       { week: 13, opponent: "Houston", location: "at" },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, note: "Big 12 Championship" },
