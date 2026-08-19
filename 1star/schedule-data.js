@@ -269,7 +269,7 @@ const TEAM_SCHEDULES = [
       { week: 10, opponent: "Sam Houston", location: "vs", teamScore: 24, opponentScore: 28 },
       { week: 11, opponent: "Delaware", location: "at", teamScore: 24, opponentScore: 31 },
       { week: 12, opponent: "New Mexico State", location: "at", teamScore: 19, opponentScore: 27 },
-      { week: 13, opponent: "Missouri State", location: "vs" },
+      { week: 13, opponent: "Missouri State", location: "vs", teamScore: 37, opponentScore: 21 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, note: "CUSA Championship" },
     ],
