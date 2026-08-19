@@ -179,7 +179,7 @@ const TEAM_SCHEDULES = [
       { week: 10, note: "BYE" },
       { week: 11, opponent: "Bowling Green", location: "at", teamScore: 38, opponentScore: 0 },
       { week: 12, opponent: "Miami University", location: "vs", teamScore: 24, opponentScore: 7 },
-      { week: 13, opponent: "Eastern Michigan", location: "at" },
+      { week: 13, opponent: "Eastern Michigan", location: "at", teamScore: 31, opponentScore: 17 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, note: "MAC Championship" },
     ],
