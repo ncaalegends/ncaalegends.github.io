@@ -431,7 +431,7 @@ const TEAM_SCHEDULES = [
       { week: 7, opponent: "California", location: "at", stadium: "California Memorial Stadium", teamScore: 23, opponentScore: 38 },
       { week: 8, note: "BYE" },
       { week: 9, opponent: "Virginia", location: "vs", stadium: "Allegacy Federal Credit Union Stadium", teamScore: 34, opponentScore: 31 },
-      { week: 10, opponent: "FCS Southeast", location: "vs", stadium: "Allegacy Federal Credit Union Stadium" },
+      { week: 10, opponent: "FCS Southeast", location: "vs", stadium: "Allegacy Federal Credit Union Stadium", teamScore: 55, opponentScore: 0 },
       { week: 11, opponent: "SMU", location: "at", stadium: "Gerald J. Ford Stadium" },
       { week: 12, opponent: "Georgia Tech", location: "at", stadium: "Bobby Dodd Stadium" },
       { week: 13, opponent: "Duke", location: "vs", stadium: "Allegacy Federal Credit Union Stadium" },
