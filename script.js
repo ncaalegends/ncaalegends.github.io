@@ -2075,6 +2075,55 @@ function statTile(label, value, tone) {
     </div>`;
 }
 
+/* PF / PA read as either season-long totals or per-game averages.
+   One mode drives both tiles — comparing a total against an average
+   is meaningless, so they are never split. The choice is remembered
+   for the session so a reader who thinks in averages doesn't have to
+   re-set it on every card they open. */
+let PF_PA_MODE = "total"; // "total" | "avg"
+
+/* Each tile is its own button so either one flips the pair, and both
+   carry aria-pressed for the same reason: to a screen reader they are
+   two controls reporting one state. */
+function pfPaTileHtml(which, c) {
+  const avg = PF_PA_MODE === "avg";
+  const raw = which === "pf" ? c.pf : c.pa;
+  /* Same floor as avg margin: one game is a result, not an average.
+     Totals have no such threshold — a single game's points ARE the
+     total. */
+  const enough = c.playedGames >= MIN_GAMES_FOR_AVERAGES;
+  let value = null;
+  if (c.playedGames && (!avg || enough)) {
+    value = avg ? (raw / c.playedGames).toFixed(1) : raw.toLocaleString();
+  }
+  const empty = value == null;
+  const label = `${avg ? "Avg" : "Total"} ${which.toUpperCase()}`;
+  return `
+    <button type="button" class="cm-stat cm-stat-toggle" data-stat-toggle="${which}"
+            aria-pressed="${avg}"
+            title="Show ${avg ? "totals" : "per-game averages"}">
+      <span class="cm-stat-label">${esc(label)}<span class="cm-stat-swap" aria-hidden="true">&#8646;</span></span>
+      <span class="cm-stat-value${empty ? " is-empty" : ""}">${
+        empty ? "&ndash;" : esc(value)
+      }</span>
+    </button>`;
+}
+
+/* Swaps the two tiles in place rather than re-rendering the card:
+   the modal scroll position and any open focus stay exactly where
+   the reader left them. */
+function refreshPfPaTiles() {
+  const body = document.getElementById("coach-modal-body");
+  if (!body || !MODAL_OPENER_KEY) return;
+  const coach = ROSTER.find((r) => personKey(r.name) === MODAL_OPENER_KEY);
+  if (!coach) return;
+  const c = coachCareerFor(coach.name);
+  ["pf", "pa"].forEach((which) => {
+    const el = body.querySelector(`[data-stat-toggle="${which}"]`);
+    if (el) el.outerHTML = pfPaTileHtml(which, c);
+  });
+}
+
 function h2hRowHtml(o) {
   const last = o.meetings.find((m) => m.played);
   const next = o.meetings.filter((m) => !m.played).sort((a, b) => a.sortKey - b.sortKey)[0];
@@ -2233,8 +2282,8 @@ function coachModalHtml(coach, view) {
       ${statTile("Power rank", c.rank ? `#${c.rank.rank}` : null, "gold")}
       ${statTile("Avg margin", margin, c.avgMargin > 0 ? "win" : c.avgMargin < 0 ? "loss" : "")}
       ${statTile("Streak", c.streak ? c.streak.label : null, c.streak && c.streak.win ? "win" : "loss")}
-      ${statTile("Total PF", c.playedGames ? c.pf.toLocaleString() : null)}
-      ${statTile("Total PA", c.playedGames ? c.pa.toLocaleString() : null)}
+      ${pfPaTileHtml("pf", c)}
+      ${pfPaTileHtml("pa", c)}
       ${statTile("L5", c.rank ? c.rank.l5 : null)}
       ${statTile("Seasons", c.seasons || null)}
     </div>
@@ -2334,7 +2383,21 @@ function setupCoachModal() {
        itself, never on its contents — which is why the body sits in a
        wrapper div. Without the wrapper every click would close it. */
     if (e.target === dlg) closeCoachModal();
-    if (e.target.closest && e.target.closest(".cm-close")) closeCoachModal();
+    if (!e.target.closest) return;
+    if (e.target.closest(".cm-close")) closeCoachModal();
+
+    /* PF/PA total <-> average. The tiles are swapped out by the
+       refresh, so focus is put back on the equivalent control by
+       name — otherwise a keyboard reader is dropped to the top of
+       the dialog every time they flip it. */
+    const swap = e.target.closest("[data-stat-toggle]");
+    if (swap) {
+      const which = swap.dataset.statToggle;
+      PF_PA_MODE = PF_PA_MODE === "avg" ? "total" : "avg";
+      refreshPfPaTiles();
+      const back = dlg.querySelector(`[data-stat-toggle="${which}"]`);
+      if (back) back.focus();
+    }
   });
 
   dlg.addEventListener("close", () => {
