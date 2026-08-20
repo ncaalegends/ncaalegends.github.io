@@ -237,7 +237,7 @@ const TEAM_SCHEDULES = [
       { week: 10, opponent: "Rutgers", location: "vs", teamScore: 48, opponentScore: 16 },
       { week: 11, opponent: "Maryland", location: "at", teamScore: 25, opponentScore: 28 },
       { week: 12, opponent: "Purdue", location: "at", teamScore: 45, opponentScore: 24 },
-      { week: 13, opponent: "Minnesota", location: "vs" },
+      { week: 13, opponent: "Minnesota", location: "vs", teamScore: 29, opponentScore: 13 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, note: "Big Ten Championship" },
     ],
