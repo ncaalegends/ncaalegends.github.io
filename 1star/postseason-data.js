@@ -42,5 +42,24 @@
    Empty is a valid state and the normal one until December.
    ============================================================ */
 const POSTSEASON = {
-  rounds: [],
+  rounds: [
+    /* Week 15 conference championships, transcribed from the
+       national Scores/Schedules screen 2026-08-20. Not yet played
+       (kickoff time only, no result).
+
+       Sun Belt (Dillon) and MAC (North Shore/New Glarus) both have a
+       1-star coached team in their title game, so those two live as
+       ordinary rows on those teams' own schedules in
+       schedule-data.js instead — see that file's header. The CUSA
+       title game is New Mexico State vs Delaware, neither of which
+       any 1-star coach plays, so it goes here.
+
+       Neutral site (no confirmed host stadium for this game in the
+       engine); home/away below is arbitrary since neither score is
+       in yet. */
+    { id: "ccg", label: "Conference Championships", games: [
+      { home: "Delaware", away: "New Mexico State", title: "C-USA Championship",
+        neutral: true },
+    ]},
+  ],
 };

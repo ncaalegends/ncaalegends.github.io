@@ -106,7 +106,7 @@ const TEAM_SCHEDULES = [
       { week: 12, opponent: "Southern Mississippi", location: "at", teamScore: 34, opponentScore: 30 },
       { week: 13, opponent: "Appalachian State", location: "vs", teamScore: 9, opponentScore: 24, sim: true },
       { week: 14, note: "Army-Navy Week" },
-      { week: 15, note: "Sun Belt Championship" },
+      { week: 15, note: "BYE" },
     ],
   },
   {
@@ -135,7 +135,7 @@ const TEAM_SCHEDULES = [
       { week: 12, opponent: "UL Monroe", location: "vs", teamScore: 56, opponentScore: 24 },
       { week: 13, opponent: "Baldwin Wallace", location: "at", teamScore: 24, opponentScore: 9, sim: true },
       { week: 14, note: "Army-Navy Week" },
-      { week: 15, note: "Sun Belt Championship" },
+      { week: 15, note: "BYE" },
     ],
   },
   {
@@ -157,7 +157,7 @@ const TEAM_SCHEDULES = [
       { week: 12, opponent: "Troy", location: "at", teamScore: 37, opponentScore: 35 },
       { week: 13, opponent: "Louisiana Tech", location: "vs", teamScore: 27, opponentScore: 13 },
       { week: 14, note: "Army-Navy Week" },
-      { week: 15, note: "Sun Belt Championship" },
+      { week: 15, opponent: "Arkansas State", location: "vs", neutral: true, title: "Sun Belt Championship", round: "ccg" },
     ],
   },
 
@@ -181,7 +181,7 @@ const TEAM_SCHEDULES = [
       { week: 12, opponent: "Miami University", location: "vs", teamScore: 24, opponentScore: 7 },
       { week: 13, opponent: "Eastern Michigan", location: "at", teamScore: 31, opponentScore: 17 },
       { week: 14, note: "Army-Navy Week" },
-      { week: 15, note: "MAC Championship" },
+      { week: 15, note: "BYE" },
     ],
   },
   {
@@ -203,7 +203,7 @@ const TEAM_SCHEDULES = [
       { week: 12, opponent: "Ohio", location: "at", teamScore: 36, opponentScore: 29 },
       { week: 13, opponent: "Central Michigan", location: "vs", teamScore: 31, opponentScore: 24 },
       { week: 14, note: "Army-Navy Week" },
-      { week: 15, note: "MAC Championship" },
+      { week: 15, opponent: "North Shore", location: "vs", neutral: true, title: "MAC Championship", round: "ccg" },
     ],
   },
   {
@@ -225,7 +225,7 @@ const TEAM_SCHEDULES = [
       { week: 12, opponent: "UMass", location: "at", teamScore: 41, opponentScore: 20 },
       { week: 13, opponent: "Buffalo", location: "vs", teamScore: 41, opponentScore: 7 },
       { week: 14, note: "Army-Navy Week" },
-      { week: 15, note: "MAC Championship" },
+      { week: 15, opponent: "New Glarus", location: "at", neutral: true, title: "MAC Championship", round: "ccg" },
     ],
   },
 
@@ -249,7 +249,7 @@ const TEAM_SCHEDULES = [
       { week: 12, note: "BYE" },
       { week: 13, opponent: "Kennesaw State", location: "at", teamScore: 27, opponentScore: 17 },
       { week: 14, note: "Army-Navy Week" },
-      { week: 15, note: "CUSA Championship" },
+      { week: 15, note: "BYE" },
     ],
   },
   {
@@ -271,7 +271,7 @@ const TEAM_SCHEDULES = [
       { week: 12, opponent: "New Mexico State", location: "at", teamScore: 19, opponentScore: 27 },
       { week: 13, opponent: "Missouri State", location: "vs", teamScore: 37, opponentScore: 21 },
       { week: 14, note: "Army-Navy Week" },
-      { week: 15, note: "CUSA Championship" },
+      { week: 15, note: "BYE" },
     ],
   },
   {
@@ -293,7 +293,7 @@ const TEAM_SCHEDULES = [
       { week: 12, opponent: "Middle Tennessee", location: "at", teamScore: 23, opponentScore: 33 },
       { week: 13, note: "BYE" },
       { week: 14, note: "Army-Navy Week" },
-      { week: 15, note: "CUSA Championship" },
+      { week: 15, note: "BYE" },
     ],
   },
 ];
