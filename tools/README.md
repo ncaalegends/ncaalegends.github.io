@@ -606,13 +606,21 @@ judgement stays here. It won't commit, won't advance, and won't pass
 ## cfp.js
 
 Writes a week's CFP Top 25 and projected 12-team bracket into
-`cfp-data.js`.
+`cfp-data.js`, and from Bowl Week 1 writes playoff results into
+`postseason-data.js`.
 
 ```
 node tools/cfp.js --week 10 --poll poll.txt --bracket bracket.txt
 node tools/cfp.js --week 11 --poll poll.txt
-node tools/cfp.js --week 14 --bracket bracket.txt --final
+node tools/cfp.js --week 15 --bracket bracket.txt --final
+node tools/cfp.js --week 16 --results results.txt
 ```
+
+**Two modes, split by week.** 10–15 is transcription: the poll and the
+bracket, published weekly. 16–19 is results, and nothing else — the
+field settled at week 15 and a bowl week never writes another
+`CFP_BRACKET` block, because four identical copies of a field that
+stopped changing in December is noise rather than history.
 
 **The season has two halves.** Weeks 0–9 the game shows the AP Top 25
 and `top25.js` writes it. From week 10 it shows the CFP Top 25 plus a
@@ -750,25 +758,114 @@ The advance gate for weeks 16-19 asks for one thing: a **settled**
 bracket, meaning one entered with `--final`. Advancing into the first
 round on a projection would publish a field the games are about to
 contradict. It does **not** gate on results — `postseason-data.js` has
-no writer yet, so that would be a wall with no door — and warns instead:
+no gate on it — a bracket screenshot that arrives an hour after the
+advance loses nothing, because it carries the whole bracket — and warns
+instead:
 
 ```
 NOTE: CFP First Round: 3 of 4 results are in postseason-data.js.
       The bracket will show the next round's slots empty until the rest are entered.
 ```
 
+### Results input (weeks 16-19)
+
+One line per game. The round is spelled out in full, both teams are
+named, both scores are given:
+
+```
+cfp-r1: Oklahoma 31, Boise State 17
+cfp-qf: Miami 24, LSU 21
+```
+
+**Deliberately not the seed format.** A seed line ends in a record —
+`12 Boise State 9-2` — and a record and a score are the same regex
+shape. A results line that resembled one would read `31-17` as a
+record, or `9-2` as a score, and produce a bracket that looked
+plausible and was wrong. Teams by name rather than by seed for the same
+reason: a mis-read seed number attaches a score to the wrong school.
+
+**It writes CPU games only.** A game involving a coached team belongs
+to that coach's schedule and arrives through `scores.js` or the admin
+page like every other game they play; writing a second copy here is how
+the two start disagreeing. But the screenshot has that score in hand,
+so instead of ignoring it the tool compares:
+
+| | |
+|---|---|
+| schedule agrees | counted, listed, nothing written |
+| schedule disagrees | reported, nothing written — one of them was misread |
+| not entered yet | reported as outstanding |
+
+**The pairing check is the reason this is a tool and not a text
+editor.** The bracket's shape is fixed — 5v12 / 6v11 / 7v10 / 8v9
+feeding 4 / 1 / 3 / 2 — so first-round matchups are derivable from the
+settled field, and every later round from the winners before it,
+including winners already recorded in the file. A game between two
+teams who could not have met is refused. That matters because of how it
+fails otherwise: a wrong matchup doesn't error on the site, the bracket
+just quietly stops advancing past that slot.
+
+**Re-running is expected.** The in-game bracket shows every completed
+round every time, so each upload re-verifies the whole playoff for
+free, a missed week backfills itself, and running the same file twice
+writes nothing. A result that differs from one already recorded stops
+the run; `--force` is only for correcting a score you transcribed wrong
+earlier.
+
 ### How the bracket fills in
 
-It doesn't, from here. Results come from `postseason-data.js`: the
-bracket advances a slot by looking for a played game between two known
-teams in the `cfp-r1`, `cfp-qf`, `cfp-sf` and `cfp-nc` rounds. Those
-four ids are load-bearing — rename one and the bracket quietly stops
+The bracket advances a slot by looking for a played game between two
+known teams in the `cfp-r1`, `cfp-qf`, `cfp-sf` and `cfp-nc` rounds —
+in the coach's schedule rows first, then in `postseason-data.js`. Those
+four ids are load-bearing: rename one and the bracket quietly stops
 filling past that round. A winner carries its seed, record and star
 forward, so a team looks the same in the title game as it did in the
 first round.
 
 Same renderer draws the week-10 projection and the finished bracket;
-there is no separate "results" mode to keep in sync.
+there is no separate display mode to keep in sync.
+
+## rollover.js
+
+Archives a finished season and resets the folder for the next one.
+Once per league per year, at the end of the offseason hold.
+
+```
+node tools/rollover.js --league main --dry-run
+node tools/rollover.js --league main
+```
+
+**The order is the whole safety property.** It copies the five data
+files into `seasons/<year>/`, verifies the archive loads on its own,
+and only then touches anything live. A season's roster is part of its
+history — who coached which school in 2026 is the only way to render a
+2026 meeting correctly once someone changes teams — so editing the
+roster before archiving produces an archive that records coaches at
+schools they moved to a year later. Silently, permanently, with nothing
+to notice. Roster changes happen *after* this runs, against a folder
+that is already next season.
+
+It refuses outright if `seasons/<year>/` exists. Everything else is a
+warning you can pass with `--force`: an unfinished playoff or a
+`currentWeek` that isn't `"OFFSEASON"` is worth saying, but the
+commissioner knows things this script doesn't.
+
+**What carries forward:** the roster, whole, and the team and
+conference on each schedule. This is an online dynasty and coaches stay
+with their team; a coach changing schools is an exception handled by
+hand afterwards, not an annual migration.
+
+**What's cleared:** every team's `weeks` array (next season's opponents
+are a fresh in-game draw), the polls, the bracket and the postseason.
+
+**Departures become permanent.** `departedAfterWeek: N` is per-season
+and freezes into the archive, but the coach is still gone — so it's
+rewritten as `active: false`, which is the existing flag for exactly
+that state. No new vocabulary, and reinstating someone is still what
+the file already says it is: delete the flag.
+
+It deletes nothing. The archive is a copy and every live file it
+rewrites is in git, so a rollover you didn't mean is a revert.
 
 ## find-tools.cmd
 

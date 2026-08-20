@@ -19,8 +19,45 @@
    USAGE
      node tools/cfp.js --week 10 --poll poll.txt --bracket bracket.txt
      node tools/cfp.js --week 11 --poll poll.txt            (poll only)
-     node tools/cfp.js --week 14 --bracket bracket.txt --final
+     node tools/cfp.js --week 15 --bracket bracket.txt --final
      node tools/cfp.js --week 10 --poll p.txt --bracket b.txt --dry-run
+     node tools/cfp.js --week 16 --results results.txt      (bowl weeks)
+
+   TWO MODES, SPLIT BY WEEK
+     10-15  transcription — the weekly CFP poll and bracket
+     16-19  results — the scored bracket, and nothing else
+
+   The bowl weeks used to be refused outright, on the grounds that
+   there was nothing left to transcribe once the field settled. That
+   was true of the FIELD and false of the screenshot: the in-game
+   bracket carries scores, and shows every completed round every
+   time. So a bowl week takes --results and writes no CFP_BRACKET
+   block — four identical copies of a field that settled in December
+   would be noise, not history.
+
+   RESULTS INPUT — one line per game, round spelled out in full
+
+     cfp-r1: Oklahoma 31, Boise State 17
+     cfp-qf: Miami 24, LSU 21
+
+   Not the seed format, deliberately: a record ("9-2") and a score
+   ("31-17") are the same shape, so a results line that looked like a
+   seed line would read one as the other and produce a bracket that
+   was plausible and wrong. Teams by name rather than seed, for the
+   same reason — a mis-read seed number attaches a score to the wrong
+   school.
+
+   WHAT IT WRITES, AND WHAT IT REFUSES TO
+   A game involving a COACHED team belongs to that coach's schedule
+   and arrives through the ordinary score path. This mode never
+   writes one. It does compare it — the screenshot has the score in
+   hand — and reports agree / disagree / not-yet-entered. Only
+   CPU-vs-CPU games are written, to postseason-data.js.
+
+   Because the screenshot carries the whole bracket, re-running is
+   safe and expected: identical results are silent, missing ones are
+   written, and a DIFFERENCE stops the run. --force is only for
+   correcting a score you transcribed wrong earlier.
 
    POLL INPUT — 25 lines, exactly what top25.js takes
 
@@ -64,9 +101,10 @@
 
    FLAGS
      --league SLUG   main | 3star | 1star. Defaults to main.
-     --week N        the week this is for, 10-15. Required.
-     --poll PATH     the 25 CFP Top 25 lines.
-     --bracket PATH  the 12 seed lines.
+     --week N        the week this is for, 10-19. Required.
+     --poll PATH     the 25 CFP Top 25 lines.       (weeks 10-15)
+     --bracket PATH  the 12 seed lines.             (weeks 10-15)
+     --results PATH  the scored bracket.            (weeks 16-19)
      --final         this bracket is settled, not projected. Use it
                      on the bracket entered after the conference
                      championship games.
@@ -74,8 +112,9 @@
      --allow-new     accept team names the league has never seen.
      --force         overwrite a week that already exists.
 
-   At least one of --poll / --bracket is required. Most weeks you'll
-   pass both, because both screenshots come off the same screen.
+   In weeks 10-15 at least one of --poll / --bracket is required, and
+   most weeks you'll pass both, because both screenshots come off the
+   same screen. In weeks 16-19 only --results is accepted.
 
    THE FROZEN-HISTORY RULE, AGAIN
    A CFP week is history exactly the way an AP week is: the "#N"
@@ -95,12 +134,25 @@ const path = require("path");
    poll ends, and Node can share the constant. script.js can't — it's
    a browser file with no module system — so its copy is the one place
    the number appears twice. */
-const { parseArgs, die, resolveLeague, loadData, CFP_ERA_WEEK } = require("./lib/league");
+const {
+  parseArgs,
+  die,
+  resolveLeague,
+  loadData,
+  CFP_ERA_WEEK,
+  FINAL_WEEK,
+  roundLabel,
+} = require("./lib/league");
 const { parseLines, checkStructure, checkNames } = require("./top25");
 
 const POLL_SIZE = 25;
 const FIELD_SIZE = 12;
 const MAX_WEEK = 15;
+
+/* "Bowl Week 2 (CFP Quarterfinals)" for a bowl week, "Week 12" for a
+   transcription week. weekLabel() from week-core already knows the
+   bowl-week naming; this just keeps the plain weeks short. */
+const weekName = (w) => (w > MAX_WEEK ? require("../week-core").weekLabel(w) : `Week ${w}`);
 
 /* ------------------------------------------------------------
    READING THE BRACKET
@@ -267,6 +319,407 @@ function bracketDiagram(rows) {
   out.push("");
   out.push(`   Semifinals: [4/5/12] v [1/8/9]   and   [3/6/11] v [2/7/10]`);
   return out;
+}
+
+/* ============================================================
+   RESULTS — reading scores off the bracket screenshot
+   ------------------------------------------------------------
+   From Bowl Week 1 the bracket screenshot carries SCORES, and it
+   shows the WHOLE bracket every time, not just the newest round.
+   Those two facts are what this mode is built on:
+
+     - every upload re-verifies every completed round, free
+     - a missed week isn't a gap; the next upload backfills it
+     - re-running the same file writes nothing, because every
+       result in it is already recorded and identical
+
+   THE LINE FORMAT IS DELIBERATELY NOT THE SEED FORMAT.
+
+   A seed line ends in a record — "12 Boise State 9-2" — and a
+   record and a score are the same regex shape: \d{1,2}-\d{1,2}.
+   A results format that resembled it would silently read 31-17 as
+   a record, or 9-2 as a score, and produce a bracket that looked
+   plausible and was wrong.
+
+   So a result names both teams and both scores, comma-separated,
+   with the round spelled out in full:
+
+     cfp-r1: Oklahoma 31, Boise State 17
+     cfp-qf: Miami 24, LSU 21
+
+   Teams by NAME, not by seed: a mis-read seed number would attach
+   a score to the wrong school, and the name is what's printed on
+   the box anyway. The full round id ("cfp-qf", not "qf") is used
+   because "qf:" already means something else in a bracket file —
+   the bowl-name directive — and two meanings for one prefix is
+   how a paste into the wrong file becomes a silent no-op.
+   ------------------------------------------------------------ */
+const RESULT_ROUNDS = ["cfp-r1", "cfp-qf", "cfp-sf", "cfp-nc"];
+
+function parseResultLines(text) {
+  const rows = [];
+  const problems = [];
+
+  String(text)
+    .split("\n")
+    .forEach((raw, i) => {
+      const lineNo = i + 1;
+      const line = raw.replace(/\s+/g, " ").trim();
+      if (!line || line.startsWith("#") || line.startsWith("//")) return;
+
+      const m = line.match(
+        /^(cfp-r1|cfp-qf|cfp-sf|cfp-nc)\s*:\s*(.+?)\s+(\d{1,3})\s*,\s*(.+?)\s+(\d{1,3})\s*$/i
+      );
+      if (!m) {
+        problems.push(
+          `line ${lineNo}: couldn't read "${raw.trim()}"\n` +
+            `      expected: ROUND: TEAM SCORE, TEAM SCORE\n` +
+            `      e.g.      cfp-r1: Oklahoma 31, Boise State 17`
+        );
+        return;
+      }
+
+      const [, roundRaw, aTeam, aScore, bTeam, bScore] = m;
+      const a = aTeam.trim();
+      const b = bTeam.trim();
+
+      if (a.includes('"') || b.includes('"')) {
+        problems.push(`line ${lineNo}: team name contains a quote character`);
+        return;
+      }
+      if (Number(aScore) === Number(bScore)) {
+        /* College football has no ties, so equal scores are always a
+           misread digit rather than a real result — and a tie would
+           leave the bracket unable to advance that slot at all. */
+        problems.push(
+          `line ${lineNo}: ${a} ${aScore}, ${b} ${bScore} — a tie. ` +
+            `College football has no ties, so one of those numbers was misread.`
+        );
+        return;
+      }
+
+      rows.push({
+        round: roundRaw.toLowerCase(),
+        home: a,
+        away: b,
+        homeScore: Number(aScore),
+        awayScore: Number(bScore),
+        lineNo,
+      });
+    });
+
+  return { rows, problems };
+}
+
+/* ------------------------------------------------------------
+   THE PAIRING CHECK — the reason this tool is worth having
+   ------------------------------------------------------------
+   The 12-team bracket's shape is fixed: 5v12 / 6v11 / 7v10 / 8v9,
+   feeding seeds 4 / 1 / 3 / 2. So given the settled field, the
+   first-round matchups are DERIVABLE, and each later round's
+   matchups are derivable from the winners of the one before.
+
+   That means a mis-transcribed result can be refused rather than
+   written. It matters because of how this fails otherwise: the four
+   cfp-* round ids are load-bearing, and a game between two teams who
+   never met doesn't error — the bracket just quietly stops advancing
+   past that slot, in the one panel everybody is looking at.
+
+   Rounds are checked in order so winners accumulate. Crucially the
+   accumulation starts from what is ALREADY RECORDED, not just from
+   this upload: uploading only the semifinals is normal, and without
+   the stored quarterfinals there would be no way to know who was
+   supposed to be playing — so every later round would be waved
+   through unchecked, which is exactly when a mis-read matters most.
+
+   Where a feeding result genuinely isn't known anywhere the check is
+   SKIPPED rather than failed. Backfilling out of order is legitimate;
+   refusing it would be the tool inventing a rule the season doesn't
+   have.
+   ------------------------------------------------------------ */
+function checkResultPairings(rows, seeds, stored) {
+  const problems = [];
+  const notes = [];
+  if (!seeds || !seeds.length) {
+    notes.push(
+      "no settled bracket in cfp-data.js, so matchups can't be checked against the field.\n" +
+        "      Enter the final bracket first: --week 15 --bracket b.txt --final"
+    );
+    return { problems, notes };
+  }
+
+  const bySeed = new Map(seeds.map((s) => [Number(s.seed), s.team]));
+  const key = (n) => String(n || "").trim().toLowerCase();
+  const seedOf = new Map([...bySeed].map(([s, t]) => [key(t), s]));
+
+  /* A team not in the field can't have played a playoff game at all,
+     and this catches it before any pairing arithmetic. */
+  rows.forEach((r) => {
+    [r.home, r.away].forEach((t) => {
+      if (!seedOf.has(key(t))) {
+        problems.push(`line ${r.lineNo}: "${t}" isn't one of the twelve seeds in the settled bracket`);
+      }
+    });
+  });
+  if (problems.length) return { problems, notes };
+
+  /* Already-recorded results join the rows being checked. They carry
+     no lineNo, which is what marks them as not-this-upload: they can
+     supply a winner but can never themselves be reported as a
+     problem. Re-litigating history on every upload would turn one bad
+     row into an error that never clears.
+
+     A STORED GAME THE UPLOAD ALSO CONTAINS IS DROPPED, not added
+     alongside. The bracket screenshot re-asserts every completed
+     round, so on a normal re-upload every stored game has a matching
+     row — counting both would report each of them as a team playing
+     twice in a round, and the most ordinary run of this tool would
+     fail. The uploaded row wins because it's the one with a line
+     number to point at. */
+  const pairKey = (r) => [r.round, key(r.home), key(r.away)].sort().join("::");
+  const uploaded = new Set(rows.map(pairKey));
+  const all = [
+    ...(stored || []).filter((s) => !uploaded.has(pairKey(s))).map((s) => ({ ...s, lineNo: null })),
+    ...rows,
+  ];
+
+  const winnerOf = new Map(); // "round|gameIndex" -> seed
+
+  const pairFor = (round, i) => {
+    if (round === "cfp-r1") return R1_PAIRS[i];
+    if (round === "cfp-qf") {
+      const w = winnerOf.get(`cfp-r1|${i}`);
+      return w === undefined ? null : [BYE_FOR_R1[i], w];
+    }
+    if (round === "cfp-sf") {
+      const a = winnerOf.get(`cfp-qf|${i * 2}`);
+      const b = winnerOf.get(`cfp-qf|${i * 2 + 1}`);
+      return a === undefined || b === undefined ? null : [a, b];
+    }
+    const a = winnerOf.get("cfp-sf|0");
+    const b = winnerOf.get("cfp-sf|1");
+    return a === undefined || b === undefined ? null : [a, b];
+  };
+
+  const GAMES = { "cfp-r1": 4, "cfp-qf": 4, "cfp-sf": 2, "cfp-nc": 1 };
+
+  RESULT_ROUNDS.forEach((round) => {
+    const inRound = all.filter((r) => r.round === round);
+
+    /* A team can play at most once per round. This is the invariant
+       that makes "round + team" a usable identity everywhere else,
+       so it's enforced rather than assumed. Only flagged when one of
+       the two is from this upload — a duplicate already sitting in the
+       file is not something this run introduced. */
+    const seenTeam = new Map();
+    inRound.forEach((r) => {
+      [r.home, r.away].forEach((t) => {
+        const k = key(t);
+        const prev = seenTeam.get(k);
+        if (prev !== undefined) {
+          if (r.lineNo != null) {
+            problems.push(
+              `line ${r.lineNo}: ${t} already has a ${round} game — ` +
+                `a team plays at most one game per round`
+            );
+          }
+        } else seenTeam.set(k, r.lineNo);
+      });
+    });
+
+    const verified = new Set();
+
+    for (let i = 0; i < GAMES[round]; i++) {
+      const want = pairFor(round, i);
+      if (!want) continue; // feeding result unknown anywhere — can't check this slot
+
+      const [x, y] = want.map((s) => key(bySeed.get(s)));
+      const match = inRound.find((r) => {
+        const h = key(r.home);
+        const a = key(r.away);
+        return (h === x && a === y) || (h === y && a === x);
+      });
+      if (!match) continue; // this slot hasn't been played or entered
+
+      const winnerName = match.homeScore > match.awayScore ? match.home : match.away;
+      winnerOf.set(`${round}|${i}`, seedOf.get(key(winnerName)));
+      verified.add(match);
+    }
+
+    /* Anything left over is a game between two teams the bracket says
+       could not have met in that round. Reported only for rows in this
+       upload, and only when the round's matchups were actually
+       derivable — otherwise "couldn't check" would read as "wrong". */
+    const derivable = pairFor(round, 0) !== null;
+    inRound
+      .filter((r) => r.lineNo != null && !verified.has(r) && derivable)
+      .forEach((r) =>
+        problems.push(
+          `line ${r.lineNo}: ${r.home} vs ${r.away} isn't a ${round} matchup this bracket can produce`
+        )
+      );
+  });
+
+  return { problems, notes };
+}
+
+/* The settled field — the bracket the postseason was actually seeded
+   from. Latest `projected: false` block wins; there should only ever
+   be one, but taking the newest is the same rule everything else in
+   this file uses. */
+function settledField(data) {
+  const settled = (data.CFP_BRACKET || [])
+    .filter((b) => b.projected === false)
+    .sort((a, b) => Number(a.week) - Number(b.week));
+  return settled.length ? settled[settled.length - 1].seeds || [] : [];
+}
+
+/* ------------------------------------------------------------
+   WHERE EACH RESULT BELONGS
+   ------------------------------------------------------------
+   One rule, and it decides everything below:
+
+     a game involving at least one COACHED team is a row on that
+     team's schedule; a game between two uncoached teams lives in
+     postseason-data.js
+
+   So this mode does NOT write a coached team's playoff game. That
+   result belongs to the coach, arrives through the ordinary score
+   path they've used all season, and writing a second copy here is
+   how the two start disagreeing.
+
+   But the screenshot contains it either way — so instead of
+   ignoring it, compare. The data is already in hand, the check is
+   free, and it catches a transposed digit in the panel everyone is
+   looking at:
+
+     agrees          counted, silent
+     disagrees       reported, nothing written
+     not entered yet reported as outstanding
+
+   This is what auditScheduleSides() does for the regular season,
+   arriving in the postseason by a different route.
+   ------------------------------------------------------------ */
+function classifyResults(rows, data) {
+  const core = require("../week-core");
+  const R = core.makeResolver(data);
+  const key = (n) => String(n || "").trim().toLowerCase();
+
+  const cpu = [];
+  const agree = [];
+  const disagree = [];
+  const outstanding = [];
+
+  rows.forEach((r) => {
+    const coached = R.isLeagueTeam(r.home) || R.isLeagueTeam(r.away);
+    if (!coached) {
+      cpu.push(r);
+      return;
+    }
+
+    /* Find the schedule row. Scoped by round, not by week: two teams
+       can meet twice in a season, and "they played in week 17" is a
+       different claim from "they played the quarterfinal". */
+    const week = core.roundWeek(r.round);
+    let found = null;
+    (data.TEAM_SCHEDULES || []).forEach((t) => {
+      const kt = key(t.team);
+      if (kt !== key(r.home) && kt !== key(r.away)) return;
+      (t.weeks || []).forEach((w) => {
+        if (Number(w.week) !== week || w.round !== r.round || !w.opponent) return;
+        const ko = key(w.opponent);
+        const other = kt === key(r.home) ? key(r.away) : key(r.home);
+        if (ko !== other) return;
+        found = { team: t.team, entry: w };
+      });
+    });
+
+    if (!found || found.entry.teamScore == null || found.entry.opponentScore == null) {
+      outstanding.push(r);
+      return;
+    }
+
+    /* The schedule stores scores from ITS team's perspective. Line
+       them up with the screenshot's two named teams before comparing,
+       or a home/away flip reads as a disagreement. */
+    const ours = key(found.team) === key(r.home) ? r.homeScore : r.awayScore;
+    const theirs = key(found.team) === key(r.home) ? r.awayScore : r.homeScore;
+
+    if (Number(found.entry.teamScore) === ours && Number(found.entry.opponentScore) === theirs) {
+      agree.push(r);
+    } else {
+      disagree.push({
+        ...r,
+        schedule: `${found.team} ${found.entry.teamScore}-${found.entry.opponentScore}`,
+        screenshot: `${found.team} ${ours}-${theirs}`,
+      });
+    }
+  });
+
+  return { cpu, agree, disagree, outstanding };
+}
+
+/* ------------------------------------------------------------
+   WRITING postseason-data.js
+   ------------------------------------------------------------
+   REGENERATED WHOLE, not spliced. Every other writer in tools/ does
+   surgical line editing, because every other file it writes is one a
+   human also maintains — schedule-data.js has hand-formatting and
+   comments between the rows that have to survive.
+
+   postseason-data.js is different: below its header the entire body
+   is machine-owned, and after this change nothing hand-edits it.
+   Rewriting `const POSTSEASON = ...` from the parsed value means no
+   nested-array splice logic, no ordering bugs, and ROUND_ORDER
+   applied on every write instead of only when someone remembers.
+
+   The header comment above the declaration is preserved byte for
+   byte — that's the part a person reads.
+   ------------------------------------------------------------ */
+function renderPostseason(rounds) {
+  const core = require("../week-core");
+  const ordered = [...rounds].sort((a, b) => core.roundRank(a.id) - core.roundRank(b.id));
+
+  if (!ordered.length) return "const POSTSEASON = {\n  rounds: [],\n};\n";
+
+  const lines = ["const POSTSEASON = {", "  rounds: ["];
+  ordered.forEach((round) => {
+    lines.push(`    { id: ${JSON.stringify(round.id)}, label: ${JSON.stringify(round.label)}, games: [`);
+    (round.games || []).forEach((g) => {
+      const bits = [
+        `home: ${JSON.stringify(g.home)}`,
+        `away: ${JSON.stringify(g.away)}`,
+      ];
+      if (g.title) bits.push(`title: ${JSON.stringify(g.title)}`);
+      if (g.neutral) bits.push(`neutral: true`);
+      if (g.stadium) bits.push(`stadium: ${JSON.stringify(g.stadium)}`);
+      if (g.homeScore != null) bits.push(`homeScore: ${Number(g.homeScore)}`);
+      if (g.awayScore != null) bits.push(`awayScore: ${Number(g.awayScore)}`);
+      lines.push(`      { ${bits.join(", ")} },`);
+    });
+    lines.push("    ]},");
+  });
+  lines.push("  ],");
+  lines.push("};");
+  return lines.join("\n") + "\n";
+}
+
+function writePostseason(file, rounds) {
+  const src = fs.readFileSync(file, "utf8");
+
+  /* ANCHORED TO THE START OF A LINE. The file's header comment
+     contains a worked example that also reads "const POSTSEASON = {",
+     indented inside the comment — a plain indexOf finds THAT one,
+     truncates the file mid-comment and writes something that doesn't
+     parse. The real declaration is the only one in column zero. */
+  const m = /^const POSTSEASON\b/m.exec(src);
+  if (!m) {
+    die(
+      `${file} has no top-level "const POSTSEASON" declaration — refusing to guess\n` +
+        `  where the header ends and the data begins.`
+    );
+  }
+  fs.writeFileSync(file, src.slice(0, m.index) + renderPostseason(rounds), "utf8");
 }
 
 /* ------------------------------------------------------------
@@ -511,29 +964,264 @@ function main() {
     die(`missing --week. Example: node tools/cfp.js --week 10 --poll poll.txt --bracket bracket.txt`);
   }
   const week = Number(args.week);
-  if (!Number.isInteger(week) || week < CFP_ERA_WEEK || week > MAX_WEEK) {
-    /* Two different mistakes, two different answers. Below 10 is the
-       AP era and there's another script for it. Above 15 is a bowl
-       week, where there is nothing to transcribe at all: the poll
-       freezes at the seeding poll and the bracket is already final,
-       so the only thing that changes is results. */
+
+  /* TWO WEEK RANGES, because there are two things this script does.
+
+     10-15 is the transcription era: the poll and the bracket are
+     published weekly and both get entered.
+
+     16-19 is the bowl weeks, and the older comment here said there
+     was "nothing to transcribe" in them. That was true when the
+     bracket screenshot showed only who had advanced. It shows SCORES,
+     so there is exactly one thing to transcribe — the results — and
+     --results is the only flag accepted up there.
+
+     The FIELD still doesn't change after week 15, which is why a bowl
+     week never writes a CFP_BRACKET block: four identical copies of a
+     field that settled in December is not history, it's noise. */
+  if (!Number.isInteger(week) || week < CFP_ERA_WEEK || week > FINAL_WEEK) {
     die(
-      week > MAX_WEEK && Number.isInteger(week)
-        ? `week ${week} is a bowl week — there is no poll or bracket to enter.\n` +
-            `  The CFP Top 25 freezes at the Week ${MAX_WEEK} seeding poll and the bracket is\n` +
-            `  already final by then. Playoff RESULTS go in ${league.dir}/postseason-data.js,\n` +
-            `  and the bracket fills itself in from those.`
-        : `--week must be ${CFP_ERA_WEEK}-${MAX_WEEK}, got "${args.week}".\n` +
-            `  Weeks 0-${CFP_ERA_WEEK - 1} are the AP poll — use tools/top25.js for those.`
+      `--week must be ${CFP_ERA_WEEK}-${FINAL_WEEK}, got "${args.week}".\n` +
+        `  ${CFP_ERA_WEEK}-${MAX_WEEK}  the CFP poll and bracket (--poll / --bracket)\n` +
+        `  ${MAX_WEEK + 1}-${FINAL_WEEK}  the bowl weeks — results only (--results)\n` +
+        `  Weeks 0-${CFP_ERA_WEEK - 1} are the AP poll; use tools/top25.js for those.`
     );
   }
 
-  if (!args.poll && !args.bracket) {
-    die(`nothing to do. Pass --poll poll.txt, --bracket bracket.txt, or both.`);
+  const bowlWeek = week > MAX_WEEK;
+
+  if (bowlWeek && (args.poll || args.bracket)) {
+    die(
+      `week ${week} is a bowl week — there is no new poll or bracket to enter.\n` +
+        `  The CFP Top 25 freezes at the Week ${MAX_WEEK} seeding poll, and the field settled\n` +
+        `  when you entered that bracket with --final. What changes now is results:\n\n` +
+        `    node tools/cfp.js --league ${league.slug} --week ${week} --results results.txt\n`
+    );
+  }
+
+  if (!bowlWeek && args.results) {
+    die(
+      `--results is for the bowl weeks (${MAX_WEEK + 1}-${FINAL_WEEK}), not week ${week}.\n` +
+        `  Conference championship results are ordinary schedule rows — enter them with\n` +
+        `  tools/scores.js --week ${MAX_WEEK}, or from the admin page.`
+    );
+  }
+
+  if (!args.poll && !args.bracket && !args.results) {
+    die(
+      bowlWeek
+        ? `nothing to do. Pass --results results.txt.`
+        : `nothing to do. Pass --poll poll.txt, --bracket bracket.txt, or both.`
+    );
   }
 
   const data = loadData(league.paths);
   const known = knownTeamNames(data);
+
+  /* ==========================================================
+     RESULTS MODE — bowl weeks only, and it returns from here.
+     Nothing below this block runs for a bowl week: there is no
+     poll to render, no bracket to insert, and no frozen-history
+     clash to check, because the file it writes is a record of
+     games rather than of a week.
+     ========================================================== */
+  if (args.results) {
+    const { rows, problems: parseProblems } = parseResultLines(readInput(args.results, "results"));
+    if (parseProblems.length) {
+      reportProblems(
+        week,
+        "results",
+        parseProblems,
+        `  Every line must be  ROUND: TEAM SCORE, TEAM SCORE\n` +
+          `  Rounds are cfp-r1, cfp-qf, cfp-sf, cfp-nc. Blank lines and # comments are ignored.`
+      );
+    }
+    if (!rows.length) die(`no results found in ${args.results}.`);
+
+    const { typos, novel } = checkNames(
+      rows.flatMap((r) => [{ team: r.home, rank: r.lineNo }, { team: r.away, rank: r.lineNo }]),
+      known
+    );
+    if ((typos.length || novel.length) && !allowNew) {
+      reportProblems(
+        week,
+        "results",
+        [
+          ...typos.map((t) => `line ${t.rank}: "${t.team}" — did you mean "${t.suggestion}"?`),
+          ...novel.map((t) => `line ${t.rank}: "${t.team}" — never seen in this league`),
+        ],
+        `  Fix any misspellings and run again, or --allow-new if a name really is right.`
+      );
+    }
+
+    const field = settledField(data);
+
+    /* Already-recorded playoff games, flattened to the same shape the
+       parser produces, so the pairing check can derive winners from
+       the file as well as from this upload. */
+    const storedResults = ((data.POSTSEASON || {}).rounds || [])
+      .filter((r) => RESULT_ROUNDS.includes(r.id))
+      .flatMap((r) =>
+        (r.games || [])
+          .filter((g) => g.homeScore != null && g.awayScore != null)
+          .map((g) => ({
+            round: r.id,
+            home: g.home,
+            away: g.away,
+            homeScore: Number(g.homeScore),
+            awayScore: Number(g.awayScore),
+          }))
+      );
+
+    const { problems: pairProblems, notes: pairNotes } = checkResultPairings(
+      rows,
+      field,
+      storedResults
+    );
+    if (pairProblems.length) {
+      reportProblems(
+        week,
+        "results",
+        pairProblems,
+        `  The bracket's shape is fixed — 5v12 / 6v11 / 7v10 / 8v9 feeding 4 / 1 / 3 / 2 —\n` +
+          `  so the matchups are derivable and these can't have happened as written.\n` +
+          `  Re-read the screenshot. A wrong pairing doesn't error on the site; the bracket\n` +
+          `  just quietly stops advancing past that slot.`
+      );
+    }
+
+    const { cpu, agree, disagree, outstanding } = classifyResults(rows, data);
+
+    console.log(`\n  ${league.label} — ${weekName(week)} results\n`);
+    pairNotes.forEach((n) => console.log(`  NOTE: ${n}\n`));
+
+    /* --- merge into what's already recorded --- */
+    const existing = JSON.parse(JSON.stringify((data.POSTSEASON || {}).rounds || []));
+    const roundFor = (id) => {
+      let r = existing.find((x) => x.id === id);
+      if (!r) {
+        r = { id, label: roundLabel(id), games: [] };
+        existing.push(r);
+      }
+      return r;
+    };
+    const key = (n) => String(n || "").trim().toLowerCase();
+
+    const added = [];
+    const same = [];
+    const conflict = [];
+
+    cpu.forEach((r) => {
+      const round = roundFor(r.round);
+      const g = (round.games || []).find(
+        (x) =>
+          (key(x.home) === key(r.home) && key(x.away) === key(r.away)) ||
+          (key(x.home) === key(r.away) && key(x.away) === key(r.home))
+      );
+
+      if (!g) {
+        round.games.push({
+          home: r.home,
+          away: r.away,
+          neutral: true,
+          homeScore: r.homeScore,
+          awayScore: r.awayScore,
+        });
+        added.push(r);
+        return;
+      }
+
+      /* Line the stored game up with the screenshot's two names — the
+         file may have recorded the same game with the sides swapped. */
+      const flipped = key(g.home) === key(r.away);
+      const storedHome = flipped ? g.awayScore : g.homeScore;
+      const storedAway = flipped ? g.homeScore : g.awayScore;
+
+      if (storedHome == null || storedAway == null) {
+        g.homeScore = flipped ? r.awayScore : r.homeScore;
+        g.awayScore = flipped ? r.homeScore : r.awayScore;
+        added.push(r);
+      } else if (Number(storedHome) === r.homeScore && Number(storedAway) === r.awayScore) {
+        same.push(r);
+      } else if (force) {
+        g.homeScore = flipped ? r.awayScore : r.homeScore;
+        g.awayScore = flipped ? r.homeScore : r.awayScore;
+        conflict.push({ ...r, stored: `${storedHome}-${storedAway}`, forced: true });
+      } else {
+        conflict.push({ ...r, stored: `${storedHome}-${storedAway}` });
+      }
+    });
+
+    const report = (label, list, fmt) => {
+      if (!list.length) return;
+      console.log(`  ${label}`);
+      list.forEach((r) => console.log(`    ${fmt(r)}`));
+      console.log("");
+    };
+
+    const line = (r) => `${r.round}  ${r.home} ${r.homeScore}, ${r.away} ${r.awayScore}`;
+
+    report("CPU games written", added, line);
+    report("CPU games already recorded, unchanged", same, line);
+    report("Coached games — schedule agrees", agree, line);
+    report(
+      "Coached games — NOT ENTERED YET (nothing written; they're the coach's to submit)",
+      outstanding,
+      line
+    );
+
+    if (disagree.length) {
+      console.log(`  COACHED GAMES THAT DISAGREE WITH THE SCHEDULE — nothing written for these:`);
+      disagree.forEach((r) =>
+        console.log(`    ${r.round}  schedule says ${r.schedule}, screenshot says ${r.screenshot}`)
+      );
+      console.log(
+        `\n  One of the two was misread. Fix whichever is wrong — the schedule row via\n` +
+          `  tools/scores.js, or the screenshot line — and run this again.\n`
+      );
+    }
+
+    if (conflict.length) {
+      const forced = conflict.filter((c) => c.forced);
+      const blocked = conflict.filter((c) => !c.forced);
+      if (forced.length) {
+        console.log(`  --force: overwrote ${forced.length} recorded result(s):`);
+        forced.forEach((r) => console.log(`    ${r.round}  was ${r.stored}, now ${r.homeScore}-${r.awayScore}`));
+        console.log("");
+      }
+      if (blocked.length) {
+        console.log(`  ALREADY RECORDED WITH A DIFFERENT SCORE — nothing written:`);
+        blocked.forEach((r) =>
+          console.log(`    ${r.round}  ${r.home} vs ${r.away}: recorded ${r.stored}, screenshot ${r.homeScore}-${r.awayScore}`)
+        );
+        console.log(
+          `\n  The bracket screenshot shows every completed round, so this file re-asserts\n` +
+            `  results it has already written — normally they match exactly. A difference is\n` +
+            `  a transcription error or the wrong league. If you're correcting one you got\n` +
+            `  wrong earlier, re-run with --force.\n`
+        );
+        if (!dryRun) process.exit(1);
+      }
+    }
+
+    if (dryRun) {
+      console.log(`  --dry-run: nothing written. postseason-data.js would become:\n`);
+      console.log(renderPostseason(existing).replace(/^/gm, "  "));
+      return;
+    }
+
+    if (!added.length && !conflict.filter((c) => c.forced).length) {
+      console.log(`  Nothing to write — every result in this file was already recorded.\n`);
+      return;
+    }
+
+    writePostseason(league.paths.postseason, existing);
+    console.log(`  Written to ${league.dir}/postseason-data.js.\n`);
+    console.log(`  Next:`);
+    console.log(`    1. Check the bracket — node tools/serve.js`);
+    console.log(`    2. git add -A && git commit -m "${league.label}: ${weekName(week)} results" && git push\n`);
+    return;
+  }
 
   /* --- already-entered check, before anything is parsed --- */
   const existingPoll = (data.CFP_POLL || []).find((p) => Number(p.week) === week);
@@ -782,4 +1470,11 @@ module.exports = {
   R1_PAIRS,
   BYE_FOR_R1,
   CFP_ERA_WEEK,
+  parseResultLines,
+  checkResultPairings,
+  classifyResults,
+  settledField,
+  renderPostseason,
+  writePostseason,
+  RESULT_ROUNDS,
 };
