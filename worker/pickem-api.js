@@ -513,7 +513,17 @@ async function handleVote(body, env) {
    anyone to mistranslate.
    ============================================================ */
 async function postPollMessage(poll, env) {
+  /* The role ping lives in `content`, not the embed: Discord does
+     not fire a notification for a mention that only appears inside
+     an embed. allowed_mentions names the role explicitly so the
+     post can never ping @everyone or a stray user, whatever ends
+     up in a team label or note. If the role id isn't configured,
+     the poll still posts — just without the ping. */
   const payload = {
+    content: env.THREE_STAR_ROLE_ID ? `<@&${env.THREE_STAR_ROLE_ID}>` : undefined,
+    allowed_mentions: env.THREE_STAR_ROLE_ID
+      ? { parse: [], roles: [env.THREE_STAR_ROLE_ID] }
+      : { parse: [] },
     embeds: [{
       title: poll.kind === "dynasty" ? "Dynasty pick'em" : "Pick'em",
       description:
