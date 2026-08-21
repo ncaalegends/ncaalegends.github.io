@@ -107,18 +107,23 @@
     const arrivalWeek = (c) =>
       c.joinedAtWeek != null ? Number(c.joinedAtWeek) : -Infinity;
 
-    /* Team key -> the window in which that team is a league team. A
-       coach whose `team` carries slash alternates contributes every
-       one of them.
+    /* Team key -> the windows in which that team is a league team,
+       one per coach who has held it. A coach whose `team` carries
+       slash alternates contributes every one of them.
 
-       On a collision the window WIDENS in both directions: the later
-       cutoff wins so a team handed from a departing coach to an active
-       one stays live, and the earlier arrival wins for the same
-       reason read backwards. Two coaches sharing a team key is always
-       a handover, and a handover should leave no dead week in the
-       middle. */
-    const teamCutoff = new Map();
-    const teamArrival = new Map();
+       A LIST, NOT A MERGED RANGE. A team can change hands inside one
+       season — Woogity left Alabama after week 4, Trick whitey took
+       it over in week 11 — and the weeks in between belong to nobody.
+       Collapsing the two coaches into one widened interval would hand
+       week 6 to whichever of them the merge kept, turning Miles's CPU
+       win over an unmanned Alabama into a head-to-head result against
+       a coach who had already quit. So each holder keeps their own
+       [from, until] and a week counts if it falls inside ANY of them.
+
+       Windows that abut or overlap still leave no dead week, which
+       was the point of the older merging rule; this is that rule
+       minus the invented middle. */
+    const teamWindows = new Map();
     ALL_COACHES.forEach((c) => {
       const until = departureWeek(c);
       const from = arrivalWeek(c);
@@ -127,10 +132,8 @@
         .forEach((part) => {
           const k = normalize(part);
           if (!k) return;
-          const prevUntil = teamCutoff.has(k) ? teamCutoff.get(k) : -Infinity;
-          teamCutoff.set(k, Math.max(prevUntil, until));
-          const prevFrom = teamArrival.has(k) ? teamArrival.get(k) : Infinity;
-          teamArrival.set(k, Math.min(prevFrom, from));
+          if (!teamWindows.has(k)) teamWindows.set(k, []);
+          teamWindows.get(k).push({ from, until, coach: c });
         });
     });
 
@@ -156,29 +159,37 @@
        A team no coach has ever claimed isn't in the map at all, so it
        is neither a league team nor an inactive one — a plain CPU
        opponent, as before. */
-    const isLeagueTeam = (n, week) => {
-      const key = rosterKeyFor(n);
-      const until = teamCutoff.get(key);
-      if (until === undefined) return false;
+    const holderAt = (n, week) => {
+      const wins = teamWindows.get(rosterKeyFor(n));
+      if (!wins) return undefined;
       const w = week === undefined ? Infinity : week;
-      return w >= teamArrival.get(key) && w <= until;
-    };
-    const isInactiveTeam = (n, week) => {
-      const key = rosterKeyFor(n);
-      const until = teamCutoff.get(key);
-      if (until === undefined) return false;
-      const w = week === undefined ? Infinity : week;
-      return w < teamArrival.get(key) || w > until;
+      return wins.find((x) => w >= x.from && w <= x.until);
     };
 
-    const entryFor = (n) => {
+    const isLeagueTeam = (n, week) => !!holderAt(n, week);
+    const isInactiveTeam = (n, week) =>
+      teamWindows.has(rosterKeyFor(n)) && !holderAt(n, week);
+
+    /* `week` matters here for exactly one reason: a team that changed
+       hands mid-season has two roster entries, and the week decides
+       which coach's name goes on the game. Omitting it asks who holds
+       the team today, which is what a roster card or a By Team header
+       wants. The fallback keeps a played row from losing its coach
+       chip when the week falls in a gap between holders — that game's
+       opponent was CPU, but the name and colour still have to render.
+       `active: false` coaches stay unresolvable, as they always were. */
+    const entryFor = (n, week) => {
       const key = rosterKeyFor(n);
-      return RESOLVABLE.find((c) =>
+      const matches = RESOLVABLE.filter((c) =>
         String(c.team).split("/").some((part) => normalize(part) === key)
       );
+      if (matches.length < 2) return matches[0];
+      const held = holderAt(n, week);
+      if (held && matches.includes(held.coach)) return held.coach;
+      return matches[0];
     };
 
-    const coachFor = (n) => (entryFor(n) || {}).name || "";
+    const coachFor = (n, week) => (entryFor(n, week) || {}).name || "";
 
     /* Schedule-file team name for a name typed by a human.
        TEAM_SCHEDULES is keyed by the in-game name, but a
@@ -239,7 +250,7 @@
       if (entry.note || !entry.opponent) {
         notes.push({
           team: t.team,
-          coach: R.coachFor(t.team),
+          coach: R.coachFor(t.team, week),
           note: entry.note || "No game listed",
         });
         return;
@@ -256,8 +267,8 @@
           league.set(pairKey, {
             home,
             away,
-            homeCoach: R.coachFor(home),
-            awayCoach: R.coachFor(away),
+            homeCoach: R.coachFor(home, week),
+            awayCoach: R.coachFor(away, week),
             stadium: entry.stadium || "",
             /* POSTSEASON FIELDS, all optional and all absent on a
                regular-season row.
@@ -311,7 +322,7 @@
       } else {
         cpu.push({
           team: t.team,
-          coach: R.coachFor(t.team),
+          coach: R.coachFor(t.team, week),
           opponent: entry.opponent,
           location: entry.location,
           stadium: entry.stadium || "",
@@ -848,7 +859,7 @@
           const y = year == null ? 0 : year;
           if (y >= c.teamYear) {
             c.teamYear = y;
-            const entry = R.entryFor(s.myTeam);
+            const entry = R.entryFor(s.myTeam, m.week);
             c.team = (entry && entry.team) || s.myTeam;
           }
 
@@ -875,7 +886,7 @@
              close. entryFor() returns undefined for a CPU-era or
              unaliased name, so the schedule spelling stays the
              fallback rather than blanking the row. */
-          const oppEntry = R.entryFor(s.opp);
+          const oppEntry = R.entryFor(s.opp, m.week);
 
           c.games.push({
             year: year == null ? 0 : year,

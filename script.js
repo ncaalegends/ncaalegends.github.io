@@ -84,37 +84,43 @@ const INACTIVE_TEAM_KEYS = new Set(
   ROSTER_RAW.filter((c) => !isActiveCoach(c)).flatMap(_teamKeys)
 );
 
-/* Left mid-season -> team key -> last week they count as a league
-   team. Read by isLeagueTeam below. */
-const DEPARTED_TEAM_UNTIL = new Map();
-ROSTER_RAW.filter((c) => isActiveCoach(c) && hasDeparted(c)).forEach((c) => {
+/* Team key -> the windows in which that team is a league team, one
+   per coach who has held it. `[from, until]` closed on both ends:
+   `active: false` is [-Inf, -1] (no week qualifies), a mid-season
+   departure ends at its `departedAfterWeek`, a mid-season arrival
+   starts at its `joinedAtWeek`, and an ordinary coach is
+   [-Inf, Inf] and needs no flag.
+
+   A LIST, NOT A MERGED RANGE, because a team can change hands inside
+   one season and the weeks in between belong to nobody: Woogity left
+   Alabama after week 4 and Trick whitey took it over in week 11, so
+   weeks 5-10 were CPU and Miles's Week 6 win over Alabama must stay a
+   CPU win. A week counts if it falls inside ANY window. Windows that
+   abut still leave no dead week.
+
+   week-core.js makeResolver owns the authoritative version of this
+   rule; this mirrors it. */
+const TEAM_WINDOWS = new Map();
+ROSTER_RAW.forEach((c) => {
+  const until = !isActiveCoach(c) ? -1 : hasDeparted(c) ? Number(c.departedAfterWeek) : Infinity;
+  const from = c.joinedAtWeek != null ? Number(c.joinedAtWeek) : -Infinity;
   _teamKeys(c).forEach((k) => {
-    if (k) DEPARTED_TEAM_UNTIL.set(k, Number(c.departedAfterWeek));
+    if (!k) return;
+    if (!TEAM_WINDOWS.has(k)) TEAM_WINDOWS.set(k, []);
+    TEAM_WINDOWS.get(k).push({ from, until, coach: c });
   });
 });
 
-/* Joined mid-season -> team key -> FIRST week they count as a league
-   team. The mirror of DEPARTED_TEAM_UNTIL, and it exists for the
-   same reason: the games before they arrived were played against a
-   CPU version of their school and have to keep reading that way.
-
-   Unlike a departure, an arrival does NOT take the coach off the
-   roster grid — they are in the league now, they just aren't in
-   last month's results. So this map is consulted by isLeagueTeam
-   alone and deliberately touches neither ROSTER nor SCHEDULES: the
-   new coach gets their card, their dropdown entry and their upcoming
-   fixtures on day one. week-core.js makeResolver owns the
-   authoritative version of this rule. */
-const ARRIVED_TEAM_FROM = new Map();
-ROSTER_RAW.filter((c) => isActiveCoach(c) && c.joinedAtWeek != null).forEach(
-  (c) => {
-    _teamKeys(c).forEach((k) => {
-      if (!k) return;
-      const prev = ARRIVED_TEAM_FROM.has(k) ? ARRIVED_TEAM_FROM.get(k) : Infinity;
-      ARRIVED_TEAM_FROM.set(k, Math.min(prev, Number(c.joinedAtWeek)));
-    });
-  }
-);
+/* Which coach held this team in this week, if any. `week` omitted
+   means "today", which is what the roster grid and the dropdown ask.
+   Undefined for a CPU school, for a week in a gap between holders,
+   and for a departed team's later weeks. */
+function _holderAt(teamKey, week) {
+  const wins = TEAM_WINDOWS.get(teamKey);
+  if (!wins) return undefined;
+  const w = week === undefined ? Infinity : week;
+  return wins.find((x) => w >= x.from && w <= x.until);
+}
 
 /* ROSTER         the league as it stands now — cards, dropdown, live row
    ROSTER_HISTORY everyone whose games still count — name/colour lookups
@@ -122,11 +128,17 @@ ROSTER_RAW.filter((c) => isActiveCoach(c) && c.joinedAtWeek != null).forEach(
                   goes, because their remaining weeks won't be played */
 const ROSTER = ROSTER_RAW.filter((c) => isActiveCoach(c) && !hasDeparted(c));
 const ROSTER_HISTORY = ROSTER_RAW.filter(isActiveCoach);
-const SCHEDULES = SCHEDULES_RAW.filter(
-  (t) =>
-    !INACTIVE_TEAM_KEYS.has(_inactiveKey(t.team)) &&
-    !DEPARTED_TEAM_UNTIL.has(_inactiveKey(t.team))
-);
+/* A schedule block is worth rendering when someone holds the team
+   TODAY. That drops an `active: false` coach's block and a departed
+   coach's block, whose remaining weeks won't be played — and keeps a
+   block whose team has since been handed to somebody new, which is
+   the case a plain "has this team ever been departed" test got
+   wrong. A school no coach has ever held has no windows at all and
+   was never in SCHEDULES_RAW's way to begin with. */
+const SCHEDULES = SCHEDULES_RAW.filter((t) => {
+  const key = _inactiveKey(t.team);
+  return !TEAM_WINDOWS.has(key) || !!_holderAt(key);
+});
 
 /* ------------------------------------------------------------
    TEAM NAME RESOLUTION
@@ -137,22 +149,11 @@ const SCHEDULES = SCHEDULES_RAW.filter(
      undecided roster entry  "Wake Forest / Oklahoma State"
 
    normalize() collapses case and spacing. rosterKeyFor() maps a
-   schedule name through the alias table. ROSTER_KEYS holds every
-   name the league occupies, with slash entries counted on both
+   schedule name through the alias table. Both feed TEAM_WINDOWS
+   above, which is keyed the same way and splits slash entries on both
    sides, so an undecided coach still gets league games tagged.
    ------------------------------------------------------------ */
 const normalize = (s) => String(s ?? "").trim().toLowerCase();
-
-// Every name a roster team answers to, slash entries split out.
-const ROSTER_KEYS = new Set();
-ROSTER.forEach((c) => {
-  String(c.team)
-    .split("/")
-    .forEach((part) => {
-      const k = normalize(part);
-      if (k) ROSTER_KEYS.add(k);
-    });
-});
 
 // Schedule name -> roster name, via the alias table when needed.
 function rosterKeyFor(scheduleName) {
@@ -173,20 +174,15 @@ function rosterKeyFor(scheduleName) {
    a specific row should pass its week. Omitting it asks about the
    league today, which is what the roster grid and the dropdown want.
 
-   Note the order: the arrival check runs BEFORE the ROSTER_KEYS
-   short-circuit. A coach who joined mid-season is a perfectly
-   ordinary member of ROSTER, so the old early `return true` would
-   have handed them every one of their team's earlier CPU games as
-   head-to-head. */
+   There is no ROSTER_KEYS short-circuit any more, deliberately. A
+   coach who joined mid-season is a perfectly ordinary member of
+   ROSTER, so an early `return true` on roster membership would hand
+   them every one of their team's earlier CPU games as head-to-head —
+   and a team held by a departed coach AND a current one would answer
+   "yes" for the dead weeks in between. The window is the whole
+   answer. */
 function isLeagueTeam(scheduleName, week) {
-  const key = rosterKeyFor(scheduleName);
-  if (ARRIVED_TEAM_FROM.has(key)) {
-    const w = week === undefined ? Infinity : week;
-    if (w < ARRIVED_TEAM_FROM.get(key)) return false;
-  }
-  if (ROSTER_KEYS.has(key)) return true;
-  if (!DEPARTED_TEAM_UNTIL.has(key)) return false;
-  return week !== undefined && week <= DEPARTED_TEAM_UNTIL.get(key);
+  return !!_holderAt(rosterKeyFor(scheduleName), week);
 }
 
 // Teams that have actually submitted a schedule. Used only for
@@ -194,21 +190,34 @@ function isLeagueTeam(scheduleName, week) {
 const KNOWN_SCHEDULE_TEAMS = new Set(SCHEDULES.map((t) => t.team));
 
 /* ROSTER_HISTORY, not ROSTER: a departed coach's played games still
-   carry their name and colour. */
-function rosterEntryFor(scheduleName) {
+   carry their name and colour.
+
+   `week` matters for exactly one reason — a team that changed hands
+   mid-season has two roster entries, and the week decides which
+   coach's name goes on the row. Omitting it asks who holds the team
+   today, which is what a roster card, a poll row and a By Team header
+   want. When the week falls in a gap between holders the first entry
+   is the fallback, so a played row never loses its chip; the row is
+   tagged CPU by isLeagueTeam either way, which is the part that
+   decides whether the name is shown at all. */
+function rosterEntryFor(scheduleName, week) {
   const key = rosterKeyFor(scheduleName);
-  return ROSTER_HISTORY.find((c) =>
+  const matches = ROSTER_HISTORY.filter((c) =>
     String(c.team).split("/").some((part) => normalize(part) === key)
   );
+  if (matches.length < 2) return matches[0];
+  const held = _holderAt(key, week);
+  if (held && matches.includes(held.coach)) return held.coach;
+  return matches[0];
 }
 
-function coachFor(scheduleName) {
-  return rosterEntryFor(scheduleName)?.name || "";
+function coachFor(scheduleName, week) {
+  return rosterEntryFor(scheduleName, week)?.name || "";
 }
 
 // Falls back to gold for anyone without a color set.
-function colorFor(scheduleName) {
-  return safeHex(rosterEntryFor(scheduleName)?.color);
+function colorFor(scheduleName, week) {
+  return safeHex(rosterEntryFor(scheduleName, week)?.color);
 }
 
 /* ------------------------------------------------------------
@@ -2021,7 +2030,7 @@ function nextGameFor(coach) {
     /* A departed coach's school is a CPU opponent by the time anyone
        is looking at an upcoming week, so it gets no coach name. */
     coach: isLeagueTeam(upcoming.opponent, Number(upcoming.week))
-      ? coachFor(upcoming.opponent)
+      ? coachFor(upcoming.opponent, Number(upcoming.week))
       : "",
   };
 }
@@ -2542,7 +2551,7 @@ function renderTeamSchedule() {
          opponent in weeks 0-4 and is CPU from week 5 on, so the rows
          above and below the departure read differently on purpose. */
       const isLeague = isLeagueTeam(w.opponent, Number(w.week));
-      const oppCoach = isLeague ? coachFor(w.opponent) : "";
+      const oppCoach = isLeague ? coachFor(w.opponent, Number(w.week)) : "";
       const played = w.teamScore != null && w.opponentScore != null;
 
       let resultCls = "";

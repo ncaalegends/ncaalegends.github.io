@@ -236,3 +236,72 @@ Two harness notes for whoever writes the next test: `const` declared
 inside `eval()` is scoped to that eval, so the data files and the
 assertions have to be evaluated as one string; and `people.js` has to
 be in the bundle or `script.js` dies on `personKey`.
+
+---
+
+## 6. Handovers — the case both flags together
+
+**2026, main, Alabama.** Woogity left after Week 4
+(`departedAfterWeek: 4`). Trick whitey took the school over in Week 11
+(`joinedAtWeek: 11`). Both entries name the same team, which is a case
+neither flag was written for and which the resolvers got wrong in two
+different ways.
+
+**What was broken.**
+
+- `week-core.js` merged the two coaches into ONE widened interval —
+  `teamCutoff` took the later cutoff and `teamArrival` the earlier
+  arrival, on the reasoning that "a handover should leave no dead week
+  in the middle". Here the dead week is real: nobody held Alabama in
+  Weeks 5-10. The merge would have turned Miles's Week 6 CPU win over
+  an unmanned Alabama into a head-to-head result against a coach who
+  had already quit.
+- `entryFor` returned the FIRST roster entry matching the team, with
+  no week in scope, so every one of Trick whitey's games would have
+  rendered under Woogity's name.
+- `script.js` was worse in both directions. `ARRIVED_TEAM_FROM`
+  collected only coaches carrying `joinedAtWeek`, so Alabama's arrival
+  read as Week 11 flat and Woogity's Weeks 0-4 stopped being league
+  games. And `SCHEDULES` dropped any team key present in
+  `DEPARTED_TEAM_UNTIL`, so Alabama's schedule block stayed off the
+  site even though somebody was playing it again.
+
+**What replaced it.** One `TEAM_WINDOWS` map in each file: team key ->
+a LIST of `[from, until]` windows, one per coach who has held the team,
+never merged. A week counts if it falls inside any window; windows that
+abut still leave no dead week, which was the whole point of the old
+merging rule, minus the invented middle. `entryFor` / `coachFor` /
+`rosterEntryFor` / `colorFor` take an optional week and use it only to
+pick between two entries on the same team — a lookup with one match
+short-circuits, so nothing that isn't a handover changes shape. A week
+in a gap between holders falls back to the first entry, so a played row
+never loses its coach chip; `isLeagueTeam` is what decides whether the
+name is shown at all. `script.js` now keeps a schedule block when
+anyone holds the team TODAY, which drops departed and `active: false`
+blocks exactly as before and keeps a handed-over one.
+
+`ROSTER_KEYS` in `script.js` is gone. It short-circuited `isLeagueTeam`
+to `true` on roster membership before the window was consulted, which
+is precisely the bug for a team with two holders.
+
+**Verification.** Snapshotted `buildWeek` for Weeks 0-15 (league
+matchups with scores and resolved coach names, CPU games, notes,
+missing), plus `computeRankings` to 6 decimal places and every
+`computeH2H` pair, for all three leagues. The resolver refactor alone,
+before the roster edit, is **byte-identical across all three**. A
+second harness ran the real `script.js` in a VM and dumped
+`isLeagueTeam` / `coachFor` for every team in every week: identical
+except Alabama.
+
+After the roster edit, main differs in exactly five lines — Alabama's
+Weeks 11, 12, 13 CPU fixtures and its Weeks 14, 15 notes, all under
+Trick whitey. Weeks 0-4 still read Woogity. Weeks 5-10 still read as no
+team at all, and Miles's Week 6 win is still a CPU win. 3-star and
+1-star are unchanged. `nudge.js` now chases Trick whitey for Alabama's
+Week 11 game; `h2h.js` still shows Woogity 0-2 with Alabama (2026).
+
+**Also done in the same pass.** Alabama's own Week 6 row was blank
+while Georgia's recorded the same game 31-10, an artifact of the school
+sitting unmanned. Backfilled as `teamScore: 10, opponentScore: 31` so
+the By Team page agrees with itself. Weeks 5, 7, 8 and 10 stay blank —
+those opponents are CPU and no score exists anywhere to copy.
