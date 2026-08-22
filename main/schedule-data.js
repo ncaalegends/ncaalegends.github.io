@@ -571,7 +571,7 @@ const TEAM_SCHEDULES = [
       { week: 8, opponent: "Texas A&M", location: "vs", stadium: "Saban Field at Bryant-Denny Stadium", teamScore: 48, opponentScore: 26 },
       { week: 9, note: "BYE" },
       { week: 10, opponent: "LSU", location: "at", stadium: "Tiger Stadium", teamScore: 16, opponentScore: 49 },
-      { week: 11, opponent: "Vanderbilt", location: "at", stadium: "FirstBank Stadium" },
+      { week: 11, opponent: "Vanderbilt", location: "at", stadium: "FirstBank Stadium", teamScore: 45, opponentScore: 3 },
       { week: 12, opponent: "FCS Southeast", location: "vs", stadium: "Saban Field at Bryant-Denny Stadium" },
       { week: 13, opponent: "Auburn", location: "vs", stadium: "Saban Field at Bryant-Denny Stadium" },
       { week: 14, note: "Army-Navy Week" },
