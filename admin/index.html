@@ -92,6 +92,40 @@
   margin: 0 0 4px;
 }
 
+.vac-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+  flex-wrap: wrap;
+}
+.vac-row:first-child { border-top: none; }
+.vac-row-who { font-weight: 600; min-width: 130px; }
+.vac-row-when {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--steel);
+}
+.vac-row-now {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+/* --steel, not --steel-dim: dim is a border colour, not a text
+   colour. See the note beside it in style.css. */
+.vac-row-where {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--steel);
+  opacity: 0.8;
+}
+.vac-row .btn { margin-left: auto; }
+
 .panel .hint {
   color: var(--steel);
   font-size: 13px;
@@ -632,6 +666,32 @@ details.entered .entered-body .game:first-child { border-top: 1px solid var(--li
       <div id="advance-msg"></div>
     </section>
 
+    <!-- ============ VACATIONS ============
+         DELIBERATELY NOT SCOPED TO THE LEAGUE PICKER ABOVE, and the
+         only panel in this zone that isn't. A vacation is a fact
+         about a person, not about a dynasty — Salzy plays in two of
+         them and when he's away he's away from both — so there is
+         one list for all three and the chips say which leagues each
+         entry actually reaches. See the header of /vacations.js.
+
+         Coaches add their own at /vacation/ with no code at all.
+         This panel exists for the other half: taking one back off
+         when a trip is cancelled or somebody picked the wrong name.
+         That needs a code, which is why removal lives here and
+         nowhere else. -->
+    <section class="panel" id="vacation-panel">
+      <h2>Vacations</h2>
+      <p class="hint">
+        All three dynasties. Coaches add their own at
+        <a href="../vacation/">/vacation/</a> — this is where one gets
+        removed. A coach changing their dates should just resubmit;
+        overlapping dates replace the old set on their own.
+      </p>
+
+      <div id="vacation-list"></div>
+      <div id="vacation-msg"></div>
+    </section>
+
     </div><!-- /mode-league -->
 
     <!-- ============ PICK'EM ============
@@ -747,6 +807,9 @@ details.entered .entered-body .game:first-child { border-top: 1px solid var(--li
      isn't; keep them in this order. -->
 <script src="../score-core.js"></script>
 <script src="../deadline.js"></script>
+<!-- The vacation rules — active/upcoming and the wording of a date
+     range. Same file the site page and the nudge use. -->
+<script src="../vacation-core.js"></script>
 <script src="admin.js"></script>
 <!-- After admin.js: it calls PickEm.onSignIn() once a code is
      accepted. pickem.js talks to a different Worker and checks the

@@ -262,6 +262,42 @@ to be awake isn't a reminder.
 It gets `tools/config.json` from the `DISCORD_CONFIG` repo secret, the
 same way `league-update.yml` does. Nothing else to set up.
 
+### Vacations
+
+The nudge also reads `/vacations.js`, the central vacation tracker that
+replaced the Google Form. Two things appear, and only when somebody on
+*this* league's roster is away today:
+
+- a **⛱ beside their name** in the still-to-play list, which is the line
+  a commissioner is actually reading when deciding whether an unplayed
+  game is a no-show or a force win, and
+- an **`On Vacation` section** at the bottom, naming them and saying
+  when they're back.
+
+**They are named, not tagged.** The game is still unplayed and the list
+still has to be complete — a missing row would read as "already played"
+— but a coach on vacation appears as bold plain text rather than a
+mention, so the morning post doesn't ping them. A mention is a demand,
+and sending one every day to somebody who has already told the league
+they're away is how a reminder bot gets muted, which breaks it for the
+twenty people it *was* aimed at. Nothing has to be removed from
+`allowed_mentions` to make that work: a name that was never written as
+`<@id>` can't notify anyone.
+
+**Nothing about leagues is stored on a vacation.** The tracker is one
+flat list of people and dates, because a vacation is a fact about a
+human — Salzy plays in the 1-star and the 3-star, and when he's away
+he's away from both. Which nudges mention it is worked out here, by
+`activeForRoster()` in `/vacation-core.js`, from that league's own
+`COACHES` array. So a coach submits once, it lands in every dynasty they
+play in and none they don't, and there is nothing to keep in sync.
+
+Coaches add their own at **`/vacation/`** on the site — no code, same as
+the old form — which posts to the Worker's open `/vacation` route and
+comes back through `apply.js` like any other submission. Removing one
+needs a commissioner code. The full write path is documented in the
+header of `/vacations.js`.
+
 ### The two silences
 
 Both are deliberate, and both exist so the bot stays worth reading:

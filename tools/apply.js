@@ -53,7 +53,17 @@ const {
   buildWeek,
   weekLabel,
   top25GateError,
+  loadVacations,
+  writeVacations,
+  allRosterNames,
+  leaguesForCoach,
 } = require("./lib/league");
+
+/* The vacation rules — active/upcoming, the sanity checks on a
+   submitted range, and the append-or-correct merge. Same file the
+   site and tools/nudge.js read them from, so a range the page
+   accepted can't be one this rejects. */
+const Vac = require("../vacation-core");
 const { applyScores, scoreableGames } = require("./scores");
 const { resolveEntries, ScoreError } = require("../score-core");
 const { updateSeason, buildMessage, post, webhookUrl } = require("./advance");
@@ -136,15 +146,92 @@ function requireSafeText(value, field) {
   return v;
 }
 
+/* ------------------------------------------------------------
+   VACATION SUBMISSIONS
+   ------------------------------------------------------------
+   The only action that can arrive from someone with no access
+   code — the vacation page is open, exactly as the Google Form it
+   replaces was. Two things make that safe enough to be worth the
+   convenience:
+
+   The name is checked against the union of all three rosters, so
+   the endpoint can't be used to write arbitrary text into a file
+   the site loads. And nothing here can DELETE: `remove` is
+   refused for a self-service submission and only reaches this
+   file from the admin page, behind a code.
+
+   The worst a stranger who finds the endpoint can do is claim a
+   real coach is on holiday, which is visible on the site within a
+   minute, in the daily nudge the next morning, and undoable by any
+   commissioner. That's a good trade for not making 32 people
+   remember a code to say they're going away for the weekend.
+   ------------------------------------------------------------ */
+function validateVacation(payload) {
+  const actor = requireSafeText(payload.actor || "unknown", "actor");
+
+  const op = payload.op === undefined ? "add" : payload.op;
+  if (op !== "add" && op !== "remove") {
+    bad(`vacation op must be "add" or "remove", got ${JSON.stringify(payload.op)}`);
+  }
+  if (op === "remove" && payload.selfService === true) {
+    /* The Worker hardcodes op:"add" on the open route, so this can
+       only fire if that ever changes. Belt and braces: a deletion
+       must carry a code, and this file is where that is true
+       regardless of how the payload got here. */
+    bad("removing a vacation needs a commissioner code");
+  }
+
+  const coach = requireString(payload.coach, "coach", 40);
+  const start = requireString(payload.start, "start", 10);
+  const end = requireString(payload.end, "end", 10);
+
+  /* Removing is checked more loosely than adding, on purpose. An
+     entry that's already over, or one for a coach who has since left
+     the league, must still be removable — otherwise a mistake becomes
+     permanent the moment either of those is true. */
+  const known = allRosterNames();
+
+  const problem =
+    op === "add"
+      ? Vac.validate({ coach, start, end }, { known })
+      : Vac.isDay(start) && Vac.isDay(end)
+      ? null
+      : "dates must be YYYY-MM-DD";
+  if (problem) bad(problem);
+
+  /* Store the ROSTER'S spelling, not the submitted one. Matching is
+     case-insensitive everywhere, so "salzy" would work fine — but it
+     would be rendered on the site as "salzy" next to a roster card
+     that says "Salzy", which looks like two people. Only `add` needs
+     this: a removal is matched, not stored. */
+  const canonical = known.find((n) => Vac.key(n) === Vac.key(coach));
+
+  return {
+    action: "vacation",
+    op,
+    coach: op === "add" && canonical ? canonical : coach,
+    start,
+    end,
+    actor,
+  };
+}
+
 function validate(payload) {
   if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
     bad("expected a JSON object");
   }
 
   const action = payload.action;
-  if (action !== "scores" && action !== "advance") {
-    bad(`unknown action "${action}" — expected "scores" or "advance"`);
+  if (action !== "scores" && action !== "advance" && action !== "vacation") {
+    bad(`unknown action "${action}" — expected "scores", "advance" or "vacation"`);
   }
+
+  /* A VACATION HAS NO LEAGUE AND NO WEEK, so it branches out before
+     either is required. That isn't a special case being carved out —
+     it's the design: a vacation is a fact about a person, and which
+     dynasties it applies to is derived from the rosters at read time
+     rather than submitted. See the header of /vacations.js. */
+  if (action === "vacation") return validateVacation(payload);
 
   const league = payload.league;
   const permitted = leaguesForAction(action);
@@ -355,6 +442,68 @@ async function doAdvance(p, L) {
 }
 
 /* ------------------------------------------------------------
+   VACATION — write it to /vacations.js
+   ------------------------------------------------------------
+   Adding is append-or-correct, not blind append: an identical
+   submission is a no-op (people double-tap Submit), and an
+   overlapping one from the same coach replaces the range it
+   overlaps, which is the "back a day early" edit. Both rules live
+   in vacation-core's mergeInto() so the site can describe the
+   outcome before the submission is sent.
+
+   Every write also prunes entries more than six months past their
+   end date, so the file stays a tracker rather than a diary and
+   there is no second job to remember.
+   ------------------------------------------------------------ */
+function doVacation(p) {
+  const day = Vac.today();
+  const current = loadVacations();
+
+  const res =
+    p.op === "add"
+      ? Vac.mergeInto(current, { coach: p.coach, start: p.start, end: p.end }, day)
+      : Vac.removeFrom(current, { coach: p.coach, start: p.start, end: p.end });
+
+  const range = Vac.formatRange({ start: p.start, end: p.end });
+
+  if (!res.changed) {
+    console.log(
+      p.op === "add"
+        ? `\n  ${p.coach} was already down as away ${range}. Nothing to write.\n`
+        : `\n  No vacation on file for ${p.coach} ${range}. Nothing to remove.\n`
+    );
+    return { changed: false };
+  }
+
+  const before = res.list.length;
+  const list = Vac.prune(res.list, day);
+  const dropped = before - list.length;
+
+  writeVacations(list);
+
+  /* Which dynasties this actually touches — derived from the rosters,
+     never submitted. This is the line that makes the Actions log
+     useful: it says out loud that a Salzy vacation is a 1-star and
+     3-star fact and not a main one. */
+  const leagues = leaguesForCoach(p.coach);
+  const where = leagues.length ? leagues.map((L) => L.label).join(", ") : "no current roster";
+
+  const verb = p.op === "add" ? (res.replaced ? "updated" : "added") : "removed";
+  console.log(`\n  Vacation ${verb}: ${p.coach}, ${range} — affects ${where}.`);
+  if (res.replaced) {
+    console.log(`  Replaced an overlapping entry (${Vac.formatRange(res.replaced)}).`);
+  }
+  if (dropped) console.log(`  Pruned ${dropped} entr${dropped === 1 ? "y" : "ies"} older than six months.`);
+  console.log(`  vacations.js updated — ${list.length} on file.\n`);
+
+  return {
+    changed: true,
+    commit: `Vacation: ${p.coach} ${range} ${verb} (via ${p.actor})`,
+    summary: `${p.coach} ${verb} — ${range}. Affects ${where}.`,
+  };
+}
+
+/* ------------------------------------------------------------
    DISCORD ANNOUNCEMENT (web path)
    ------------------------------------------------------------
    Builds and posts the week announcement using advance.js's exact
@@ -456,6 +605,14 @@ async function main() {
   }
 
   const p = validate(raw);
+
+  /* A vacation has no league to resolve, so it is answered before
+     resolveLeague() is reached at all. */
+  if (p.action === "vacation") {
+    emit(doVacation(p));
+    return;
+  }
+
   const L = resolveLeague(p.league);
 
   const result = p.action === "scores" ? doScores(p, L) : await doAdvance(p, L);

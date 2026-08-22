@@ -2841,8 +2841,12 @@ function renderFooter() {
       { label: "Discord", url: safeUrl(links.discord) },
       { label: "Rules", url: safeUrl(links.rules) },
       /* Vacation Tracker. Same on every league, so it's a literal
-         here rather than per-league data. */
-      { label: "Vacation Tracker", url: "https://forms.gle/DSGCUREcdYovX6pi9" },
+         here rather than per-league data — and now that it lives on
+         the site rather than in a Google Form, it's an internal link
+         resolved from the site root the same way the admin link
+         below is. One page serves all three dynasties on purpose: a
+         vacation is a fact about a person, not about a league. */
+      { label: "Vacation Tracker", url: `${siteRoot()}vacation/`, internal: true },
       /* Commissioner sign-in. Always shown, on every league — it's a
          login wall, not a back door, so a coach clicking it just
          finds a box they have no code for. Not run through safeUrl()

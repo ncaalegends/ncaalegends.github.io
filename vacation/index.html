@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vacation Tracker — NCAA Legends</title>
+<meta name="description" content="Who's away, across all three NCAA Legends dynasties. Submit your dates so your opponent and the commissioners know before the deadline passes.">
+
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="NCAA Legends">
+<meta property="og:title" content="Vacation Tracker — NCAA Legends">
+<meta property="og:description" content="Who's away, across all three dynasties. Submit your dates in ten seconds.">
+<meta property="og:url" content="https://ncaalegends.github.io/vacation/">
+<meta property="og:image" content="https://ncaalegends.github.io/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Vacation Tracker — NCAA Legends">
+<meta name="twitter:description" content="Who's away, across all three dynasties.">
+<meta name="twitter:image" content="https://ncaalegends.github.io/og-image.png">
+<link rel="canonical" href="https://ncaalegends.github.io/vacation/">
+<meta name="theme-color" content="#060b16">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css">
+
+<!-- SITE_LEAGUES (the three dynasties and their accents) and the
+     name-matching rules that decide two roster entries are the same
+     person. -->
+<script src="../people.js"></script>
+<!-- The vacation rules themselves: what counts as active, what
+     counts as a valid submission, how a range is worded. The same
+     file tools/nudge.js and tools/apply.js read them from, so this
+     page can't promise something the runner will refuse. -->
+<script src="../vacation-core.js"></script>
+<!-- The tracker itself. A plain const, as every data file on this
+     site is. -->
+<script src="../vacations.js"></script>
+</head>
+<body data-league="main">
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<main id="main" class="picker-page">
+
+  <div class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-stripe"></div>
+    <p class="hero-eyebrow">NCAA LEGENDS</p>
+    <h1 class="hero-title">VACATION <span>TRACKER</span></h1>
+    <p class="hero-sub">ALL THREE DYNASTIES</p>
+  </div>
+
+  <p class="vac-intro">
+    Going away? Put your dates in below. Your opponents see it here, and it
+    goes out in the next morning's reminder in every dynasty you play in —
+    so a missed deadline reads as a holiday and not a no-show.
+  </p>
+
+  <section class="vac-section" aria-labelledby="vac-now-h">
+    <h2 class="vac-h" id="vac-now-h">Away right now</h2>
+    <div id="vac-now" class="vac-list">
+      <p class="sched-empty">Loading&hellip;</p>
+    </div>
+  </section>
+
+  <section class="vac-section" aria-labelledby="vac-soon-h">
+    <h2 class="vac-h" id="vac-soon-h">Coming up</h2>
+    <div id="vac-soon" class="vac-list">
+      <p class="sched-empty">Loading&hellip;</p>
+    </div>
+  </section>
+
+  <section class="vac-section" aria-labelledby="vac-add-h">
+    <h2 class="vac-h" id="vac-add-h">Add yours</h2>
+
+    <form class="vac-form" id="vac-form" novalidate>
+      <div class="vac-field">
+        <label for="vac-coach">Your name</label>
+        <!-- A DROPDOWN, NOT A TEXT BOX. The form this replaces took
+             free text, and a misspelling was indistinguishable from
+             a real coach right up until the reminder failed to
+             mention somebody. Built from the three live rosters. -->
+        <select id="vac-coach" name="coach" required>
+          <option value="">Loading rosters&hellip;</option>
+        </select>
+        <p class="vac-hint" id="vac-where">&nbsp;</p>
+      </div>
+
+      <div class="vac-dates">
+        <div class="vac-field">
+          <label for="vac-start">First day away</label>
+          <input type="date" id="vac-start" name="start" required>
+        </div>
+        <div class="vac-field">
+          <label for="vac-end">Last day away</label>
+          <input type="date" id="vac-end" name="end" required>
+          <p class="vac-hint">Inclusive — the day you get back is the day after this.</p>
+        </div>
+      </div>
+
+      <button type="submit" class="vac-submit" id="vac-submit">Submit</button>
+
+      <p class="vac-status" id="vac-status" role="status" aria-live="polite"></p>
+    </form>
+
+    <p class="vac-note">
+      Anyone can add a vacation here, the same as the old form — no code,
+      no sign-in. Only a commissioner can remove one. Changed your mind
+      about the dates? Submit the new ones and they replace the old set.
+    </p>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-status">NCAA LEGENDS · THREE ONLINE DYNASTIES</div>
+  <div class="footer-links">
+    <a href="../">Leagues</a>
+    <span class="fs-sep">&middot;</span>
+    <a href="../admin/">Commissioner tools</a>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   VACATION PAGE
+   ------------------------------------------------------------
+   Reads /vacations.js (already loaded above) and the three
+   league-data.js files, and answers two questions: who is away,
+   and which dynasties does each of them play in.
+
+   NOTHING ABOUT LEAGUES IS STORED ON A VACATION. The chips beside
+   each name are worked out here by matching against each league's
+   own COACHES array — the same derivation tools/nudge.js does when
+   it decides which channels hear about it. That's the whole design:
+   Salzy submits once and it lands in the 1-star and the 3-star,
+   with nothing to keep in sync and nothing to get wrong.
+
+   The league files are plain top-level `const` declarations meant
+   for a <script> tag. Fetching the text and running it inside a
+   Function body gives each one its own scope, which is what makes
+   it safe to load all three despite every file declaring
+   identically-named constants. Same trick as the landing page.
+   ============================================================ */
+
+/* The Cloudflare Worker that fronts the repo — the same one the
+   admin page posts scores to. Its /vacation route is the one that
+   takes no access code; see the block comment beside
+   VACATION_LIMIT in worker/admin-api.js for why that's safe. */
+const ADMIN_API = "https://ncaa-legends-admin.westfall-105.workers.dev/";
+
+const V = VacationCore;
+const TODAY = V.today();
+
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g,
+  (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+const $ = (id) => document.getElementById(id);
+
+/* slug -> { label, accent, roster } once the files land. */
+const leagues = new Map();
+
+async function loadLeague(meta) {
+  const res = await fetch(`../${meta.dir}/league-data.js`, { cache: "no-cache" });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const src = await res.text();
+  const { COACHES } = new Function(`${src}\nreturn { COACHES };`)();
+  return COACHES || [];
+}
+
+/* Which dynasties this person is on the roster of, right now.
+   Anyone already off the roster grid — stepped away, or quit
+   mid-season — is skipped by rosterNames(), for the same reason
+   they're skipped in the landing page's coach count: they have no
+   games to be away from. */
+function chipsFor(name) {
+  const out = [];
+  for (const [, L] of leagues) {
+    if (L.names.has(V.key(name))) out.push(L);
+  }
+  return out;
+}
+
+function chipHtml(L) {
+  return `<span class="vac-chip" style="--team:${L.accent}">${esc(L.short)}</span>`;
+}
+
+function cardHtml(v, kind) {
+  const chips = chipsFor(v.coach);
+  const left = V.daysRemaining(v, TODAY);
+
+  /* A name on the tracker who isn't on any roster is a real thing
+     to surface rather than hide: it means somebody left the league
+     with a vacation still on file, or a name was hand-edited into
+     the data file wrong. Saying so beats rendering a card with a
+     blank space where the dynasties should be. */
+  const where = chips.length
+    ? chips.map(chipHtml).join("")
+    : `<span class="vac-chip vac-chip-none">not on a roster</span>`;
+
+  const when =
+    kind === "now"
+      ? `back <strong>${esc(V.backOn(v))}</strong>`
+      : `starts <strong>${esc(V.dayName(v.start))} ${esc(V.shortDate(v.start))}</strong>`;
+
+  const tail =
+    kind === "now"
+      ? left === 0
+        ? "last day"
+        : `${left} more day${left === 1 ? "" : "s"}`
+      : `${V.daysBetween(TODAY, v.start)} days away`;
+
+  return `
+    <article class="vac-card${kind === "now" ? " vac-card-now" : ""}">
+      <div class="vac-card-main">
+        <span class="vac-name">${esc(v.coach)}</span>
+        <span class="vac-chips">${where}</span>
+      </div>
+      <div class="vac-card-when">
+        <span class="vac-range">${esc(V.formatRange(v))}</span>
+        <span class="vac-back">${when}</span>
+      </div>
+      <span class="vac-tail">${esc(tail)}</span>
+    </article>`;
+}
+
+function renderLists() {
+  const now = V.active(VACATIONS, TODAY);
+  const soon = V.upcoming(VACATIONS, TODAY);
+
+  $("vac-now").innerHTML = now.length
+    ? now.map((v) => cardHtml(v, "now")).join("")
+    : `<p class="sched-empty">Nobody's away. Everyone's on the clock.</p>`;
+
+  $("vac-soon").innerHTML = soon.length
+    ? soon.map((v) => cardHtml(v, "soon")).join("")
+    : `<p class="sched-empty">Nothing on the calendar yet.</p>`;
+}
+
+/* ------------------------------------------------------------
+   THE NAME LIST
+   ------------------------------------------------------------
+   One entry per PERSON, not per roster spot — 32 people fill 48
+   roster spots across the three leagues. Deduped on the same key
+   people.js uses, and shown with the spelling from the first
+   league they appear in, which is the spelling the rosters already
+   show them under.
+   ------------------------------------------------------------ */
+function fillNames() {
+  const seen = new Map(); // key -> display name
+  for (const [, L] of leagues) {
+    for (const name of L.display) {
+      if (!seen.has(V.key(name))) seen.set(V.key(name), name);
+    }
+  }
+
+  const names = [...seen.values()].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
+
+  const sel = $("vac-coach");
+  sel.innerHTML =
+    `<option value="">Pick your name&hellip;</option>` +
+    names.map((n) => `<option value="${esc(n)}">${esc(n)}</option>`).join("");
+}
+
+/* A small confirmation that the right person was picked, and a
+   quiet demonstration of the thing people get wrong about this
+   tracker: you submit once, it covers every dynasty you're in. */
+function showWhere() {
+  const name = $("vac-coach").value;
+  const el = $("vac-where");
+  if (!name) {
+    el.innerHTML = "&nbsp;";
+    return;
+  }
+  const chips = chipsFor(name);
+  el.textContent = chips.length
+    ? `Covers ${chips.map((L) => L.label).join(" and ")} — one submission, every dynasty you're in.`
+    : "That name isn't on a roster right now — a commissioner will need to sort this out.";
+}
+
+/* ------------------------------------------------------------
+   SUBMIT
+   ------------------------------------------------------------
+   Validated here with the identical function the runner uses, so
+   a range this page accepts is one tools/apply.js will accept, and
+   the wording of a refusal is the same on both sides.
+   ------------------------------------------------------------ */
+function knownNames() {
+  const out = [];
+  for (const [, L] of leagues) out.push(...L.display);
+  return out;
+}
+
+function say(msg, kind) {
+  const el = $("vac-status");
+  el.textContent = msg;
+  el.className = `vac-status${kind ? ` vac-${kind}` : ""}`;
+}
+
+async function submit(e) {
+  e.preventDefault();
+
+  const entry = {
+    coach: $("vac-coach").value,
+    start: $("vac-start").value,
+    end: $("vac-end").value,
+  };
+
+  const problem = V.validate(entry, { known: knownNames(), today: TODAY });
+  if (problem) {
+    say(problem, "bad");
+    return;
+  }
+
+  const btn = $("vac-submit");
+  btn.disabled = true;
+  say("Sending…");
+
+  try {
+    const res = await fetch(new URL("vacation", ADMIN_API), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ payload: entry }),
+    });
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      say(data.error || `Something went wrong (${res.status}).`, "bad");
+      btn.disabled = false;
+      return;
+    }
+
+    /* The write happens in a GitHub Actions run, so it is not
+       instant and this page will not show it on a refresh for a
+       minute or so. Saying so is the difference between "it
+       worked" and somebody submitting it four more times. */
+    say(
+      `Got it — ${entry.coach}, ${V.formatRange(entry)}. It'll show up on this page in a minute or two, ` +
+        `and in tomorrow morning's reminder.`,
+      "good"
+    );
+    $("vac-form").reset();
+    showWhere();
+  } catch (err) {
+    say("Couldn't reach the server. Check your connection and try again.", "bad");
+    btn.disabled = false;
+  }
+}
+
+/* ------------------------------------------------------------
+   INIT
+   ------------------------------------------------------------ */
+(async function init() {
+  /* Dates can't start in the past — a vacation that's already over
+     is refused by vacation-core anyway, and the browser's own date
+     picker is a friendlier place to learn that than a red box. */
+  $("vac-start").min = TODAY;
+  $("vac-end").min = TODAY;
+  $("vac-start").addEventListener("change", () => {
+    $("vac-end").min = $("vac-start").value || TODAY;
+    if ($("vac-end").value && $("vac-end").value < $("vac-start").value) {
+      $("vac-end").value = $("vac-start").value;
+    }
+  });
+  $("vac-coach").addEventListener("change", showWhere);
+  $("vac-form").addEventListener("submit", submit);
+
+  /* Settled, not all — one league's data file failing to load must
+     not blank the whole page. The tracker still renders; that
+     league's chips are simply missing. */
+  const results = await Promise.allSettled(SITE_LEAGUES.map(loadLeague));
+
+  SITE_LEAGUES.forEach((meta, i) => {
+    const r = results[i];
+    if (r.status === "rejected") {
+      console.warn(`[vacation] ${meta.dir} roster failed to load:`, r.reason);
+      return;
+    }
+    const display = V.rosterNames(r.value);
+    leagues.set(meta.dir, {
+      label: meta.label,
+      short: meta.label.replace(/ Dynasty$/, ""),
+      accent: meta.accent,
+      display,
+      names: new Set(display.map(V.key)),
+    });
+  });
+
+  fillNames();
+  renderLists();
+})();
+</script>
+</body>
+</html>

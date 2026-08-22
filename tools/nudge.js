@@ -35,6 +35,25 @@
    the check can't answer and deliberately fails OPEN — it posts.
    A missed nudge is invisible; a duplicate is merely mildly annoying.
 
+   WHO IS ON VACATION
+   It also reads /vacations.js and adds an "On Vacation" section —
+   but only when somebody on THIS league's roster is away today, so
+   on a normal morning the message looks exactly as it always has.
+   The same people get a ⛱ beside their name in the list above, which
+   is the line a commissioner is reading when they decide whether an
+   unplayed game is a no-show or a force win.
+
+   Vacations are stored per PERSON with no league on them, and which
+   dynasties one applies to is worked out here from that league's
+   COACHES array. So a coach who plays in two leagues submits once
+   and appears in both nudges, and never in a league he isn't in.
+   A coach on vacation is NOT tagged. They still appear in the list
+   with a ⛱ beside their name — the game is still unplayed and the
+   list has to be complete — but as plain text rather than a ping.
+   Chasing someone who has already said they're away is how a
+   reminder bot gets muted, and a muted bot stops working for the
+   twenty people it was aimed at.
+
    Reads the same data files, uses the same roster matching, the same
    webhook resolution and the same mention allowlist as advance.js.
    Writes nothing, commits nothing, and touches the network only for
@@ -52,7 +71,17 @@ const {
   buildWeek,
   weekLabel,
   loadConfig,
+  loadVacations,
 } = require("./lib/league");
+
+/* THE VACATION TRACKER. /vacations.js is one flat list for all
+   three dynasties — a vacation is a fact about a person, not a
+   league — and activeForRoster() is what turns that into "who in
+   THIS league is away today" by asking this league's own COACHES
+   array. Salzy plays in the 1-star and the 3-star, so his trip
+   appears in both of those nudges and in neither main one, with
+   nothing league-shaped ever having been submitted. */
+const Vac = require("../vacation-core");
 
 /* One implementation of "name -> ping", shared with the advance
    announcement. See the note beside its export in advance.js. */
@@ -94,9 +123,36 @@ function outstanding(wk) {
    handful of people who still owe a game. Blasting the role would
    notify the 20 coaches who already played, every few days, which is
    exactly how a reminder gets muted. */
-function buildNudge(data, week, out, cfg, siteUrl) {
+function buildNudge(data, week, out, cfg, siteUrl, away) {
   const label = weekLabel(week);
   const M = makeMentioner(cfg);
+  const onVacation = away || [];
+
+  /* ------------------------------------------------------------
+     HOW A COACH APPEARS IN THE LIST
+     ------------------------------------------------------------
+     Everyone still gets listed — the game is unplayed either way and
+     the list has to be complete, or a missing row reads as "already
+     played". What changes for someone on vacation is that they are
+     NAMED rather than TAGGED.
+
+     WHY NO PING. A mention is a demand: play your game. Sending that
+     every morning to someone who has already told the league they're
+     away is how a reminder bot gets muted, and a muted bot doesn't
+     work for the twenty people it was aimed at either. They still
+     appear, with a ⛱ so their opponent and the commissioners can see
+     exactly why the game is outstanding — which is the information
+     anyone actually needed from that row.
+
+     Bold plain text, not a mention, so it reads the same as the
+     no-Discord-ID fallback below and nothing in the message shifts
+     shape. Nothing needs removing from allowed_mentions: a name that
+     was never written as <@id> can't notify anybody.
+     ------------------------------------------------------------ */
+  const who = (coach, team) => {
+    if (Vac.awayNow(onVacation, coach)) return `**${coach}** ⛱`;
+    return M.forCoach(coach) || team;
+  };
   const nextAdvance = data.SEASON.nextAdvance;
   const total = out.h2h.length + out.cpu.length;
 
@@ -110,25 +166,37 @@ function buildNudge(data, week, out, cfg, siteUrl) {
   const h2hBody = out.h2h
     .map(
       (m) =>
-        `• ${M.forCoach(m.awayCoach) || m.away} *(${m.away})*` +
-        `  at  ${M.forCoach(m.homeCoach) || m.home} *(${m.home})*`
+        `• ${who(m.awayCoach, m.away)} *(${m.away})*` +
+        `  at  ${who(m.homeCoach, m.home)} *(${m.home})*`
     )
     .join("\n");
 
   const cpuBody = out.cpu
     .map(
       (g) =>
-        `• ${M.forCoach(g.coach) || g.team} *(${g.team})* ` +
+        `• ${who(g.coach, g.team)} *(${g.team})* ` +
         `${g.location === "at" ? "at" : "vs"} ${g.opponent}`
     )
     .join("\n");
 
+  /* Names, not mentions — same rule as the lists above, for the
+     same reason. This block exists to explain a gap to everyone
+     else, not to chase the person it names. */
+  const vacationBody = onVacation
+    .map((v) => `• **${v.coach}** — back ${Vac.backOn(v)}`)
+    .join("\n");
+
   const section = (title, body) => (body ? `\n\n__**${title}**__\n${body}` : "");
 
+  /* Rendered ONLY when somebody in this league is actually away.
+     A standing "On Vacation: nobody" line every morning is the
+     fastest way to teach a channel to stop reading past the first
+     paragraph. Silence is the normal state. */
   let content =
     head +
     section(`H2H Still To Play (${out.h2h.length})`, h2hBody) +
-    section(`CPU Still To Play (${out.cpu.length})`, cpuBody);
+    section(`CPU Still To Play (${out.cpu.length})`, cpuBody) +
+    section(`On Vacation (${onVacation.length})`, vacationBody);
 
   /* The outstanding list is by definition a subset of the week, and a
      full week fits comfortably, so this ceiling should never be hit.
@@ -260,8 +328,17 @@ async function main() {
     if (age === null) console.log("  Could not date the advance from git history — posting anyway.");
   }
 
+  /* Whoever on THIS roster is away today. Derived from the shared
+     list plus this league's COACHES — nothing about leagues is
+     stored on a vacation, so this can never disagree with the site.
+     Read-only, like everything else this tool does. */
+  const away = Vac.activeForRoster(loadVacations(), data.COACHES, Vac.today());
+  if (away.length) {
+    console.log(`  on vacation: ${away.map((v) => `${v.coach} (back ${Vac.backOn(v)})`).join(", ")}`);
+  }
+
   const cfg = loadConfig();
-  const built = buildNudge(data, week, out, cfg, L.siteUrl);
+  const built = buildNudge(data, week, out, cfg, L.siteUrl, away);
 
   if (built.missingMentions.length) {
     console.log(

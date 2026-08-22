@@ -3015,3 +3015,267 @@ button:focus-visible, a:focus-visible {
   text-transform: uppercase;
   color: var(--steel-dim);
 }
+
+/* ============================================================
+   VACATION TRACKER  (/vacation/)
+   ------------------------------------------------------------
+   One page, so everything here is prefixed .vac-. It leans on the
+   picker page's shell (.picker-page, .hero) rather than inventing
+   a second layout, and on the same panel/clip idiom as the roster
+   and schedule cards so the page reads as part of the site rather
+   than as a form bolted onto it.
+
+   The accent stays gold. This is the one page that belongs to all
+   three dynasties at once — a vacation is a fact about a person,
+   not about a league — so colouring it in any league's accent
+   would be saying something untrue.
+   ============================================================ */
+.vac-intro {
+  max-width: 62ch;
+  margin: 28px auto 0;
+  text-align: center;
+  color: var(--steel);
+  font-size: 0.95rem;
+}
+
+.vac-section { margin-top: 44px; }
+
+.vac-h {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin: 0 0 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line-gold);
+}
+
+.vac-list {
+  display: grid;
+  gap: 10px;
+}
+
+/* ------------------------------------------------------------
+   A PERSON, AND WHEN THEY'RE BACK
+   ------------------------------------------------------------
+   Three columns on a wide screen, stacked on a phone. The middle
+   column is the one people came for, so it is the one that keeps
+   its emphasis at every width.
+   ------------------------------------------------------------ */
+.vac-card {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 18px;
+  background: var(--navy-panel);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--steel-dim);
+  clip-path: polygon(var(--cut) 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%, 0 var(--cut));
+}
+
+/* Away RIGHT NOW is the actionable state — it's the one a
+   commissioner is checking against an unplayed game — so it gets
+   the accent edge and the upcoming ones stay quiet. */
+.vac-card-now {
+  border-left-color: var(--gold);
+  background: linear-gradient(90deg, var(--gold-dim), var(--navy-panel) 220px);
+}
+
+.vac-card-main {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.vac-name {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--chalk);
+}
+
+.vac-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* Which dynasties this person plays in. Derived from the rosters
+   at render time, never stored on the vacation — see the header of
+   /vacations.js. */
+.vac-chip {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--team);
+  border: 1px solid color-mix(in srgb, var(--team) 40%, transparent);
+  background: color-mix(in srgb, var(--team) 12%, transparent);
+  padding: 2px 7px;
+}
+
+.vac-chip-none {
+  --team: var(--steel);
+  font-style: italic;
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+.vac-card-when {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  text-align: right;
+}
+
+.vac-range {
+  font-family: var(--font-mono);
+  font-size: 0.86rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--chalk);
+}
+
+.vac-back {
+  font-size: 0.78rem;
+  color: var(--steel);
+}
+.vac-back strong { color: var(--gold); font-weight: 600; }
+
+/* --steel, not --steel-dim, even though this is the quietest thing
+   on the card. The note at the top of this file is explicit: dim is
+   2.4:1 and is for borders and backgrounds only, never text. */
+.vac-tail {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--steel);
+  opacity: 0.75;
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------
+   THE FORM
+   ------------------------------------------------------------ */
+.vac-form {
+  display: grid;
+  gap: 18px;
+  max-width: 560px;
+  padding: 22px;
+  background: var(--navy-panel);
+  border: 1px solid var(--line);
+  clip-path: polygon(var(--cut) 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%, 0 var(--cut));
+}
+
+.vac-field { display: grid; gap: 6px; }
+
+.vac-field label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--steel);
+}
+
+.vac-field select,
+.vac-field input {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: var(--chalk);
+  background: var(--navy);
+  border: 1px solid var(--steel-dim);
+  padding: 10px 12px;
+  width: 100%;
+  /* Safari refuses to style a date input's own chrome, and the
+     default one is white-on-white against this background. */
+  color-scheme: dark;
+}
+
+.vac-field select:focus-visible,
+.vac-field input:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 1px;
+  border-color: var(--gold);
+}
+
+.vac-dates {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  align-items: start;
+}
+
+.vac-hint {
+  margin: 0;
+  font-size: 0.76rem;
+  color: var(--steel);
+  min-height: 1.1em;
+}
+
+.vac-submit {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--navy-deep);
+  background: var(--gold);
+  border: none;
+  padding: 12px 20px;
+  cursor: pointer;
+  justify-self: start;
+  transition: background var(--leave);
+}
+
+.vac-submit:hover:not(:disabled) {
+  background: var(--gold-bright);
+  transition: background var(--arrive);
+}
+
+.vac-submit:disabled { opacity: 0.5; cursor: default; }
+
+.vac-status {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--steel);
+  min-height: 1.2em;
+}
+
+/* Nothing to say yet — collapse rather than reserve a line, which
+   otherwise leaves a visible dead band under the button for the
+   entire time the form is untouched. Once there IS a message the
+   min-height above stops the panel jumping as it changes. */
+.vac-status:empty {
+  display: none;
+}
+.vac-status.vac-bad  { color: var(--crimson); }
+.vac-status.vac-good { color: var(--win); }
+
+.vac-note {
+  max-width: 560px;
+  margin: 14px 0 0;
+  font-size: 0.8rem;
+  color: var(--steel);
+}
+
+@media (max-width: 620px) {
+  .vac-card {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .vac-card-when {
+    align-items: flex-start;
+    text-align: left;
+  }
+  .vac-dates { grid-template-columns: 1fr; }
+}

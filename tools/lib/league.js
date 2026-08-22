@@ -29,6 +29,10 @@ const vm = require("vm");
 /* The pure half — no fs, no vm, safe in a browser. See the header
    comment in that file for why it sits at the repo root. */
 const core = require("../../week-core");
+
+/* The pure half of the vacation tracker, at the root for the same
+   reason week-core is — the site loads it with a <script> tag. */
+const vac = require("../../vacation-core");
 const { REGULAR_FINAL_WEEK, FINAL_WEEK, BOWL_ROUND_FOR_WEEK, BOWL_ROUND_LABEL } = core;
 
 const ROOT = path.resolve(__dirname, "..", "..");
@@ -450,6 +454,100 @@ function loadConfig() {
   }
 }
 
+/* ------------------------------------------------------------
+   VACATIONS
+   ------------------------------------------------------------
+   /vacations.js is the central vacation tracker — one flat list
+   for all three dynasties, because a vacation is a fact about a
+   person and not about a league. The pure half of the logic (is
+   this range active, is this submission sane, which roster does
+   this person appear on) lives in /vacation-core.js, where the
+   site can reach it too. What's here is the Node-only half:
+   reading the file off disk and writing it back.
+
+   Same vm trick as loadData() and for the same reason — the file
+   is a plain top-level `const` meant for a <script> tag, and it
+   stays that way so the site can load it without a build step.
+   ------------------------------------------------------------ */
+const VACATIONS_FILE = path.join(ROOT, "vacations.js");
+
+function loadVacations() {
+  if (!fs.existsSync(VACATIONS_FILE)) return [];
+  const ctx = {};
+  vm.createContext(ctx);
+  const src = fs.readFileSync(VACATIONS_FILE, "utf8").replace(/^const /gm, "var ");
+  try {
+    vm.runInContext(src, ctx, { filename: "vacations.js" });
+  } catch (e) {
+    die(`could not parse vacations.js — ${e.message}`);
+  }
+  return ctx.VACATIONS || [];
+}
+
+/* Rewrites just the array literal, leaving the file's header
+   comment — which is the documentation for the format — exactly
+   where it is. Same approach as updateSeason() in advance.js:
+   surgical replacement of a known region beats regenerating a
+   file whose comments are worth more than its data.
+
+   Values are written through JSON.stringify so nothing submitted
+   from the internet can break out of a string literal and become
+   code in a file the site loads with a <script> tag. That is the
+   single most important line in this function. */
+function writeVacations(list) {
+  const src = fs.readFileSync(VACATIONS_FILE, "utf8");
+
+  const rows = list.map((v) => {
+    const f = (k, val) => `${k}: ${JSON.stringify(String(val))}`;
+    return (
+      "  { " +
+      [f("coach", v.coach), f("start", v.start), f("end", v.end), f("added", v.added || "")].join(", ") +
+      " },"
+    );
+  });
+
+  const body = rows.length ? `\n${rows.join("\n")}\n` : "\n";
+  const next = src.replace(/const VACATIONS = \[[\s\S]*?\n\];/, `const VACATIONS = [${body}];`);
+
+  if (next === src) die("could not find the VACATIONS array in vacations.js — was it hand-edited into a different shape?");
+  fs.writeFileSync(VACATIONS_FILE, next, "utf8");
+}
+
+/* ------------------------------------------------------------
+   WHO IS ON A ROSTER ANYWHERE
+   ------------------------------------------------------------
+   The union of every league's COACHES names, which is what turns
+   the vacation form's name field from free text into a closed set.
+   The Google Form this replaces accepted anything typed into it,
+   and a misspelling was indistinguishable from a real coach right
+   up until the nudge failed to mention somebody.
+
+   Reads the live rosters every time rather than caching a list,
+   so a coach who joined this morning can submit this afternoon.
+   ------------------------------------------------------------ */
+function allRosterNames() {
+  const out = [];
+  for (const slug of Object.keys(LEAGUES)) {
+    const data = loadData(resolveLeague(slug).paths);
+    for (const name of vac.rosterNames(data.COACHES)) out.push(name);
+  }
+  return out;
+}
+
+/* Which dynasties a person actually plays in — derived, never
+   stored. Used for the commit message and the run summary, so an
+   Actions log says "affects 1-Star, 3-Star" rather than leaving
+   you to work it out. */
+function leaguesForCoach(name) {
+  const out = [];
+  for (const slug of Object.keys(LEAGUES)) {
+    const L = resolveLeague(slug);
+    const data = loadData(L.paths);
+    if (vac.rosterNames(data.COACHES).some((n) => vac.key(n) === vac.key(name))) out.push(L);
+  }
+  return out;
+}
+
 module.exports = {
   ROOT,
   SITE_ROOT,
@@ -465,6 +563,11 @@ module.exports = {
   isSentinel,
   SENTINELS,
   loadConfig,
+  VACATIONS_FILE,
+  loadVacations,
+  writeVacations,
+  allRosterNames,
+  leaguesForCoach,
   top25GateError,
   bowlWeekWarning,
   CFP_ERA_WEEK,

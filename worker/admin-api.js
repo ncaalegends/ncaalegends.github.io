@@ -23,6 +23,11 @@
      POST /submit   { code, payload: { action, league, week, ... } }
        -> { ok: true, queued: true }
 
+     POST /vacation { payload: { coach, start, end } }
+       -> { ok: true, queued: true }
+       NO CODE. The one open route — see the block comment beside
+       VACATION_LIMIT below.
+
    The page calls /whoami at sign-in so it knows which leagues to
    offer. /submit re-checks everything /whoami checked — the reply
    from the first call is not a credential and is never trusted.
@@ -69,6 +74,43 @@ const ADVANCE_LEAGUES = ["1star", "3star", "main"];
 const ALLOWED_LEAGUES = [...new Set([...SCORE_LEAGUES, ...ADVANCE_LEAGUES])];
 
 const MIN_CODE_LENGTH = 16;
+
+/* ------------------------------------------------------------
+   THE ONE OPEN DOOR
+   ------------------------------------------------------------
+   /vacation takes a submission with NO access code. Everything
+   else on this Worker requires one, so this is worth being
+   explicit about.
+
+   The vacation page replaces a Google Form that anyone with the
+   link could fill in, and the point of moving it here was to make
+   the answers readable by the site and the daily nudge — not to
+   make 32 people find a code before they can say they're away for
+   the weekend. A tracker people can't be bothered to update is
+   worse than no tracker.
+
+   What keeps that safe is what the endpoint can and can't do.
+   It can only ADD, and only for a name that already appears on one
+   of the three rosters — tools/apply.js checks the submitted name
+   against the union of every league's COACHES array and rejects
+   anything else, so this cannot be used to write arbitrary text
+   into a file the site loads. Deleting requires a code and goes
+   through /submit like every other admin action.
+
+   The worst outcome is therefore someone claiming a real coach is
+   on holiday. That shows on the site within a minute, in the next
+   morning's nudge, and any commissioner can undo it. If it ever
+   does become a nuisance, the fix is to move the route behind a
+   shared league password rather than to give everyone a code.
+   ------------------------------------------------------------ */
+const VACATION_LIMIT = 4;
+const VACATION_WINDOW_MS = 10 * 60_000;
+
+/* A vacation is at most 45 days — matches MAX_DAYS in
+   /vacation-core.js, which is the authoritative copy and re-checks
+   this on the runner. Duplicated here only to reject an obviously
+   silly range without spending an Actions run on it. */
+const VACATION_MAX_DAYS = 45;
 
 /* Belt and braces with tools/apply.js, which enforces the same
    ceilings server-side. These are here so an oversized payload is
@@ -129,6 +171,27 @@ function rateLimited(ip) {
 
   rec.count++;
   return rec.count > LIMIT;
+}
+
+/* The open route gets its own, much tighter budget. The main
+   limiter above exists to slow down code guessing; this one exists
+   because every accepted submission spends a GitHub Actions run,
+   and four holidays in ten minutes is already generous. Same
+   per-isolate caveat applies — see the note above. */
+const vacationAttempts = new Map();
+
+function vacationRateLimited(ip) {
+  const now = Date.now();
+  const rec = vacationAttempts.get(ip);
+
+  if (!rec || now > rec.resetAt) {
+    vacationAttempts.set(ip, { count: 1, resetAt: now + VACATION_WINDOW_MS });
+    if (vacationAttempts.size > 5000) vacationAttempts.clear();
+    return false;
+  }
+
+  rec.count++;
+  return rec.count > VACATION_LIMIT;
 }
 
 /* ------------------------------------------------------------
@@ -222,10 +285,50 @@ async function identify(env, submitted) {
    the actual schedule; this is the cheap pass that avoids
    dispatching something obviously wrong.
    ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   VACATION SHAPE
+   ------------------------------------------------------------
+   Format only, as everywhere else here — /vacation-core.js on the
+   runner is what actually decides whether a range is acceptable,
+   and tools/apply.js is what checks the name against the rosters.
+   This exists so a mistyped date doesn't cost an Actions run.
+
+   Dates are plain "YYYY-MM-DD" days and are compared as strings,
+   never parsed into a moment in time. See the header of
+   /vacation-core.js for why that is the whole timezone story.
+   ------------------------------------------------------------ */
+function checkVacation(payload) {
+  if (!payload || typeof payload !== "object") return "missing payload";
+
+  const op = payload.op === undefined ? "add" : payload.op;
+  if (op !== "add" && op !== "remove") return "unknown vacation op";
+
+  const coach = typeof payload.coach === "string" ? payload.coach.trim() : "";
+  if (!coach) return "pick your name";
+  if (coach.length > 40) return "that name is too long";
+
+  const day = /^\d{4}-\d{2}-\d{2}$/;
+  if (!day.test(payload.start || "")) return "start date must be a date";
+  if (!day.test(payload.end || "")) return "end date must be a date";
+  if (payload.end < payload.start) return "the end date is before the start date";
+
+  const span = Math.round((Date.parse(`${payload.end}T00:00:00Z`) - Date.parse(`${payload.start}T00:00:00Z`)) / 86400000) + 1;
+  if (!Number.isFinite(span)) return "those dates don't make sense";
+  if (span > VACATION_MAX_DAYS) return `that's ${span} days — talk to a commissioner instead`;
+
+  return null;
+}
+
 function checkPayload(payload, who) {
   if (!payload || typeof payload !== "object") return "missing payload";
 
   const { action, league, week } = payload;
+
+  /* A vacation has no league and no week to check, and a code that
+     covers any league may edit it — including removing one, which
+     the open route can't do. Answered before the league checks
+     below rather than threaded through them. */
+  if (action === "vacation") return checkVacation(payload);
 
   if (action !== "scores" && action !== "advance") return "unknown action";
   if (!ALLOWED_LEAGUES.includes(league)) return "unknown league";
@@ -362,6 +465,44 @@ export default {
       body = JSON.parse(raw);
     } catch (e) {
       return json({ error: "Malformed request" }, 400, cors);
+    }
+
+    /* THE OPEN ROUTE, handled before identify() is ever called —
+       it takes no code, so there is nobody to identify. See the
+       block comment beside VACATION_LIMIT for why this one door is
+       unlocked and what stops it mattering. */
+    if (route === "/vacation") {
+      if (vacationRateLimited(ip)) {
+        return json({ error: "That's a lot of holidays. Try again in a few minutes." }, 429, cors);
+      }
+
+      const problem = checkVacation(body.payload);
+      if (problem) return json({ error: problem }, 400, cors);
+
+      /* op is HARDCODED, not taken from the request. An open
+         endpoint that could delete would be a different thing
+         entirely, and this is the line that makes sure it isn't
+         one. `selfService` tells apply.js the same story a second
+         time, so the rule survives someone editing this file
+         without reading it. */
+      const payload = {
+        action: "vacation",
+        op: "add",
+        coach: String(body.payload.coach).trim(),
+        start: body.payload.start,
+        end: body.payload.end,
+        selfService: true,
+        actor: `${String(body.payload.coach).trim()} (self-service)`,
+      };
+
+      try {
+        await dispatch(env, payload);
+      } catch (e) {
+        console.error("[admin-api] vacation dispatch failed:", e.message);
+        return json({ error: "Couldn't reach GitHub. Try again shortly." }, 502, cors);
+      }
+
+      return json({ ok: true, queued: true }, 200, cors);
     }
 
     let who;

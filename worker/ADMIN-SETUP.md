@@ -247,6 +247,40 @@ That asymmetry is the one rough edge in this design. If it happens
 more than rarely, the fix is a status endpoint the page can poll —
 worth doing then, not worth building on spec.
 
+## The vacation route — the one door with no lock
+
+`POST /vacation` takes no access code. It is the only route on this
+Worker that doesn't, so it's worth knowing why.
+
+It backs `/vacation/` on the site, which replaced a Google Form that
+anyone with the link could fill in. The point of moving it into the repo
+was to make the answers readable by the site and the daily nudge — not
+to make thirty-odd people find a code before they can say they're away
+for a weekend. A tracker nobody can be bothered to update is worse than
+no tracker.
+
+What keeps it safe is what it can and can't do:
+
+- **It can only add.** `op` is hardcoded to `"add"` in the handler and
+  `apply.js` refuses a removal that came in self-service, so the same
+  rule is enforced twice, in two files.
+- **It can only name a real coach.** `apply.js` checks the submitted
+  name against the union of all three leagues' `COACHES` arrays. It
+  cannot be used to write arbitrary text into a file the site loads.
+- **It has its own rate limit** — four in ten minutes per IP, separate
+  from the code-guessing limiter, because every accepted submission
+  spends an Actions run.
+
+So the worst a stranger who finds the endpoint can do is claim a real
+coach is on holiday. That shows on the site within a minute, in the next
+morning's nudge, and any commissioner can remove it. If it ever becomes
+a nuisance, put the route behind one shared league password rather than
+issuing everybody a code.
+
+Commissioners remove a vacation through the normal `/submit` route with
+their own code, so a deletion is attributable in the commit history the
+same way a score is.
+
 ## Revoking access
 
 Remove the person's entry from `ACCESS_CODES` and redeploy. Takes

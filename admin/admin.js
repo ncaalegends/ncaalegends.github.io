@@ -228,6 +228,13 @@ $("signin-form").addEventListener("submit", async (e) => {
        pickem.js decide whether there's a tab to show. Absent or
        unauthorised, nothing happens and this page is unchanged. */
     if (window.PickEm) PickEm.onSignIn(code);
+
+    /* Not awaited. The vacation list is the least important thing on
+       this page and it reads three roster files to draw its chips;
+       blocking sign-in on that would make the whole page feel slower
+       to somebody who came here to enter one score. It fills itself
+       in a moment later, and says so if it can't. */
+    renderVacations();
   } catch (err) {
     message($("signin-msg"), "error", err.message);
   } finally {
@@ -253,6 +260,8 @@ $("signout-btn").addEventListener("click", () => {
   message($("signin-msg"), "");
   message($("scores-msg"), "");
   message($("advance-msg"), "");
+  message($("vacation-msg"), "");
+  $("vacation-list").innerHTML = "";
   if (window.PickEm) PickEm.onSignOut();
 });
 
@@ -1164,6 +1173,141 @@ $("advance-yes").addEventListener("click", async () => {
   } catch (err) {
     message(msg, "error", err.message);
   } finally {
+    btn.disabled = false;
+  }
+});
+
+
+/* ============================================================
+   VACATIONS
+   ------------------------------------------------------------
+   The one panel on this page that isn't scoped to the league
+   picker, because a vacation isn't scoped to a league. /vacations.js
+   is a flat list of people and dates; which dynasties an entry
+   reaches is DERIVED by matching the name against each league's own
+   COACHES array, here and in tools/nudge.js and on /vacation/, from
+   the same function in /vacation-core.js. Nothing league-shaped is
+   ever stored, so nothing can drift.
+
+   Coaches add their own at /vacation/ with no code. This panel is
+   only the other direction — taking one back off — which needs a
+   code and therefore can only happen here. A coach who merely wants
+   to CHANGE their dates should resubmit on the public page:
+   overlapping dates replace the old set on their own, so a
+   commissioner doesn't have to be in the loop for the common edit.
+   ============================================================ */
+const VACATION_FILE = "../vacations.js";
+
+/* Roster names per league, so an entry can be labelled with the
+   dynasties it actually reaches. Fetched once per sign-in — the
+   rosters don't change while somebody is entering scores. */
+let vacationRosters = null;
+
+async function loadVacationRosters() {
+  if (vacationRosters) return vacationRosters;
+
+  const leagues = typeof SITE_LEAGUES !== "undefined" ? SITE_LEAGUES : [];
+  const results = await Promise.allSettled(
+    leagues.map(async (meta) => {
+      const src = await fetchText(`../${meta.dir}/league-data.js`, false);
+      const { COACHES } = new Function(`${src}\nreturn { COACHES };`)();
+      return { meta, coaches: COACHES || [] };
+    })
+  );
+
+  vacationRosters = results
+    .filter((r) => r.status === "fulfilled")
+    .map((r) => ({
+      label: r.value.meta.label.replace(/ Dynasty$/, ""),
+      names: new Set(VacationCore.rosterNames(r.value.coaches).map(VacationCore.key)),
+    }));
+
+  return vacationRosters;
+}
+
+async function loadVacationList() {
+  /* Cache-busted, like every other read this page does of a file it
+     may have just changed. Without it a removal looks like it didn't
+     take, because the CDN keeps handing back the old list. */
+  const src = await fetchText(VACATION_FILE, true);
+  const { VACATIONS } = new Function(`${src}\nreturn { VACATIONS };`)();
+  return VacationCore.normalise(VACATIONS || []);
+}
+
+function vacationRowHtml(v, day, rosters) {
+  const now = VacationCore.isActive(v, day);
+  const where = rosters.filter((r) => r.names.has(VacationCore.key(v.coach))).map((r) => r.label);
+
+  return `
+    <div class="vac-row">
+      <span class="vac-row-who">${esc(v.coach)}</span>
+      <span class="vac-row-when">${esc(VacationCore.formatRange(v))}</span>
+      ${now ? `<span class="vac-row-now">away now · back ${esc(VacationCore.backOn(v))}</span>` : ""}
+      <span class="vac-row-where">${esc(where.length ? where.join(" · ") : "not on a roster")}</span>
+      <button class="btn btn-quiet" type="button" data-vac-remove
+              data-coach="${esc(v.coach)}" data-start="${esc(v.start)}" data-end="${esc(v.end)}"
+              style="padding:6px 12px;font-size:12px;">Remove</button>
+    </div>`;
+}
+
+async function renderVacations() {
+  const host = $("vacation-list");
+  if (!host) return;
+  host.innerHTML = `<p class="hint">Loading&hellip;</p>`;
+
+  try {
+    const [list, rosters] = await Promise.all([loadVacationList(), loadVacationRosters()]);
+    const day = VacationCore.today();
+
+    /* Anything already over is hidden rather than listed. A finished
+       vacation affects nothing and there is nothing to decide about
+       it; the file keeps it for six months so the history is there
+       if a force win is ever questioned, but this panel is a list of
+       things a commissioner might still want to act on. */
+    const live = list.filter((v) => !VacationCore.isPast(v, day));
+
+    host.innerHTML = live.length
+      ? live.map((v) => vacationRowHtml(v, day, rosters)).join("")
+      : `<p class="hint">Nobody has a vacation on file.</p>`;
+  } catch (err) {
+    host.innerHTML = "";
+    message($("vacation-msg"), "error", `Couldn't load the vacation list — ${err.message}`);
+  }
+}
+
+/* Delegated, because the rows are replaced wholesale on every
+   render and per-row listeners would leak with them. */
+$("vacation-list").addEventListener("click", async (e) => {
+  const btn = e.target.closest("[data-vac-remove]");
+  if (!btn) return;
+
+  const entry = {
+    coach: btn.dataset.coach,
+    start: btn.dataset.start,
+    end: btn.dataset.end,
+  };
+
+  const msg = $("vacation-msg");
+  btn.disabled = true;
+  message(msg, "warn", `Removing ${entry.coach}, ${VacationCore.formatRange(entry)}…`);
+
+  try {
+    await api("/submit", {
+      code: accessCode,
+      payload: { action: "vacation", op: "remove", ...entry },
+    });
+
+    /* The write is a GitHub Actions run, so the file this page reads
+       won't have changed yet. Say what happened and re-read shortly,
+       rather than optimistically dropping the row and leaving the
+       page disagreeing with the repo if the run fails. */
+    message(msg, "warn", "Sent. Waiting for the site to publish…");
+    setTimeout(async () => {
+      await renderVacations();
+      message(msg, "ok", `Removed ${entry.coach}, ${VacationCore.formatRange(entry)}.`);
+    }, 45000);
+  } catch (err) {
+    message(msg, "error", err.message);
     btn.disabled = false;
   }
 });
