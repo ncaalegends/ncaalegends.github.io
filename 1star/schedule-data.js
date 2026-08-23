@@ -157,7 +157,7 @@ const TEAM_SCHEDULES = [
       { week: 12, opponent: "Troy", location: "at", teamScore: 37, opponentScore: 35 },
       { week: 13, opponent: "Louisiana Tech", location: "vs", teamScore: 27, opponentScore: 13 },
       { week: 14, note: "Army-Navy Week" },
-      { week: 15, opponent: "Arkansas State", location: "vs", neutral: true, title: "Sun Belt Championship", round: "ccg" },
+      { week: 15, opponent: "Arkansas State", location: "vs", neutral: true, title: "Sun Belt Championship", round: "ccg", teamScore: 23, opponentScore: 20 },
     ],
   },
 
