@@ -268,6 +268,7 @@ const CFP_BRACKET = [
     ],
     bowls: {
       site: "Las Vegas, NV",
+      qf: ["Cotton Bowl", "Peach Bowl", "Rose Bowl", "Fiesta Bowl"],
     },
   },
 ];
