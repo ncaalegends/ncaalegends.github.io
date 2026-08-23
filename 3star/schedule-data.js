@@ -112,7 +112,7 @@ const TEAM_SCHEDULES = [
       { week: 10, opponent: "UConn", location: "at", teamScore: 48, opponentScore: 17 },
       { week: 11, opponent: "Louisville", location: "vs", teamScore: 17, opponentScore: 34 },
       { week: 12, opponent: "Virginia", location: "at", teamScore: 21, opponentScore: 36 },
-      { week: 13, opponent: "NC State", location: "vs" },
+      { week: 13, opponent: "NC State", location: "vs", teamScore: 7, opponentScore: 26 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, note: "ACC Championship" },
     ],
