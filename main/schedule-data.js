@@ -169,7 +169,7 @@ const TEAM_SCHEDULES = [
       { week: 9, opponent: "Northwestern", location: "vs", stadium: "Autzen Stadium", teamScore: 47, opponentScore: 7 },
       { week: 10, opponent: "Ohio State", location: "at", stadium: "Ohio Stadium", teamScore: 37, opponentScore: 44 },
       { week: 11, opponent: "Michigan", location: "vs", stadium: "Autzen Stadium", teamScore: 21, opponentScore: 0 },
-      { week: 12, opponent: "Michigan State", location: "at", stadium: "Spartan Stadium" },
+      { week: 12, opponent: "Michigan State", location: "at", stadium: "Spartan Stadium", teamScore: 42, opponentScore: 6 },
       { week: 13, opponent: "Washington", location: "vs", stadium: "Autzen Stadium" },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, note: "Big Ten Championship", stadium: "Lucas Oil Stadium" },
