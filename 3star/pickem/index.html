@@ -87,14 +87,25 @@
   margin-top: 6px;
 }
 
-/* --- open poll --- */
+/* --- open polls ---
+   There can be several at once (a week of games all open together),
+   so the container is a stack and each poll gets its OWN panel. When
+   the container was the panel, every poll's badge/matchup/button
+   became siblings in one wrapping flex row and the whole block
+   scrambled — buttons beside the wrong matchups. */
+.pk-open-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 20px;
+}
+.pk-open-list[hidden] { display: none; }
+
 .pk-open {
   display: flex;
   align-items: center;
   gap: 18px;
   flex-wrap: wrap;
   padding: 16px 22px;
-  margin-top: 20px;
   border-top-color: var(--crimson);
 }
 /* [hidden] sets display:none in the UA sheet, which a class rule
@@ -426,7 +437,9 @@
     </div>
   </div>
 
-  <div class="pk-panel pk-open" id="open-poll"></div>
+  <!-- A stack, not a panel: renderOpen() puts each open poll in its
+       own .pk-panel.pk-open inside here. -->
+  <div class="pk-open-list" id="open-poll"></div>
 
   <!-- ============ RECENT RESULTS ============ -->
   <div class="pk-view" id="view-recent">
@@ -629,13 +642,17 @@
       const hrs = Math.max(0, Math.round((p.closes_at - nowSec()) / 3600));
       const when = hrs >= 1 ? `closes in ${hrs} hour${hrs === 1 ? "" : "s"}`
                             : "closes within the hour";
+      /* One panel PER poll. Without the wrapper every poll's three
+         children land in the same flex row and the block scrambles. */
       return `
-        <span class="pk-live"><span class="status-dot"></span>VOTING OPEN</span>
-        <div class="pk-open-main">
-          <div class="pk-open-match">${esc(p.a)} <span class="pk-vs">vs</span> ${esc(p.b)}</div>
-          <div class="pk-open-meta">${p.votes} vote${p.votes === 1 ? "" : "s"} cast &middot; ${when}${p.note ? " &middot; " + esc(p.note) : ""}</div>
-        </div>
-        <a class="pk-btn" href="${PICKEM_CHANNEL_URL}">Vote in Discord</a>`;
+        <div class="pk-panel pk-open">
+          <span class="pk-live"><span class="status-dot"></span>VOTING OPEN</span>
+          <div class="pk-open-main">
+            <div class="pk-open-match">${esc(p.a)} <span class="pk-vs">vs</span> ${esc(p.b)}</div>
+            <div class="pk-open-meta">${p.votes} vote${p.votes === 1 ? "" : "s"} cast &middot; ${when}${p.note ? " &middot; " + esc(p.note) : ""}</div>
+          </div>
+          <a class="pk-btn" href="${PICKEM_CHANNEL_URL}">Vote in Discord</a>
+        </div>`;
     }).join("");
   }
 

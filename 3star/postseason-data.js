@@ -42,5 +42,24 @@
    Empty is a valid state and the normal one until December.
    ============================================================ */
 const POSTSEASON = {
-  rounds: [],
+  rounds: [
+    /* WEEK 15 CONFERENCE CHAMPIONSHIPS, from the in-game
+       Scores/Schedules screen (Fri Dec 11 - Sat Dec 12).
+
+       Three of this league's four title games have at least one
+       coached team in them, so they live as ordinary week-15 rows on
+       those teams' own schedules in schedule-data.js instead:
+         ACC     Pittsburgh at Virginia Tech
+         Big Ten Wisconsin at Maryland
+         Big 12  BYU at UCF
+       The SEC title game is Tennessee-Georgia, and no 3-star coach
+       plays either team, so it goes here.
+
+       Neutral site with no confirmed host stadium in the engine;
+       home/away follows the in-game listing (left side away). */
+    { id: "ccg", label: "Conference Championships", games: [
+      { home: "Georgia", away: "Tennessee", title: "SEC Championship",
+        neutral: true },
+    ]},
+  ],
 };
