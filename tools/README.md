@@ -653,7 +653,13 @@ node tools/cfp.js --week 16 --results results.txt
 ```
 
 **Two modes, split by week.** 10–15 is transcription: the poll and the
-bracket, published weekly. 16–19 is results, and nothing else — the
+bracket, published weekly — except that week 15 is bracket-only. Week 14
+is Army-Navy and the rankings don't move off that game, so week 15's
+poll IS week 14's; the site reads it through the at-or-before fallback
+in `script.js` instead of storing a duplicate block, and the advance
+gate won't ask you for one. Pass `--poll` at week 15 only if the
+rankings actually did move — a real block always wins over the
+fallback. 16–19 is results, and nothing else — the
 field settled at week 15 and a bowl week never writes another
 `CFP_BRACKET` block, because four identical copies of a field that
 stopped changing in December is noise rather than history.
@@ -784,8 +790,8 @@ through 4 — so weeks 16, 17, 18 and 19 are the CFP first round,
 quarterfinals, semifinals and national championship.
 
 **Nothing gets transcribed in a bowl week.** The committee stops
-publishing, so the poll freezes at the week-15 seeding poll and the site
-tags it `FINAL SEEDING`; the bracket is already final by then. This
+publishing, so the poll freezes at the week-14 block — the week-15
+seeding poll — and the site tags it `FINAL SEEDING · WEEK 15`; the bracket is already final by then. This
 script refuses a week above 15 and says so. What changes is results, and
 those go in `postseason-data.js` — the bracket fills itself in from
 them, round by round.

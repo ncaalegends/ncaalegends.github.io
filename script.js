@@ -471,6 +471,7 @@ const currentPollWeek = () => {
 /* A team's rank in a given week's poll, or null when it's unranked
    (or no poll exists for that week yet). */
 function rankForWeek(teamName, week) {
+  if (week == null || !Number.isFinite(Number(week))) return null;
   const m = POLL_BY_WEEK.get(Number(week));
   if (!m) return null;
   const e = m.get(rosterKeyFor(teamName));
@@ -484,16 +485,44 @@ function rankBadgeHtml(teamName, week) {
   return r ? `<span class="rank-badge">#${r}</span>` : "";
 }
 
+/* The newest poll at or before `week`, never past the poll the site
+   is currently showing. Null when no poll qualifies — the weeks
+   before a league's first poll of the season.
+
+   NOT EVERY WEEK HAS A POLL, AND THAT IS NORMAL.
+   The in-game poll stops after the week-15 seeding rankings: the four
+   Bowl Weeks that follow are played off a bracket, not a poll, and a
+   league can also sit on a week whose poll hasn't been transcribed
+   yet. A strict week-for-week lookup renders those games with no rank
+   at all, which reads as "neither of these teams was ranked" when the
+   truth is "no new poll came out." Falling back to the most recent
+   poll that existed at the time keeps the badge honest — it is still
+   the rank the team held when the game was played — and keeps the
+   conference championships and the whole playoff from going blank.
+
+   The cap at currentPollWeek() is the same no-leaking rule
+   badgeWeekFor relies on: a poll committed ahead of the advance (the
+   advance gate requires it) must stay invisible until the season
+   reaches its week. */
+function pollWeekAtOrBefore(week) {
+  const cap = currentPollWeek();
+  if (cap == null) return null;
+  const target = Math.min(Number(week), cap);
+  const reached = pollWeeksAvailable().filter((w) => w <= target);
+  return reached.length ? reached[reached.length - 1] : null;
+}
+
 /* Which poll a schedule row should read for its opponent badge. A
    game that's been played is frozen: it shows the rank the opponent
-   held in the week it was actually played. An unplayed (future) game
-   can't know that yet, so it tracks the opponent's CURRENT rank — the
-   current week's poll — and keeps updating until the game happens.
-   "Current" is the shown poll (currentPollWeek), so a poll uploaded
-   for a week the site hasn't advanced to yet never leaks into a badge
-   early. */
+   held in the week it was actually played — or, when that week has no
+   poll of its own, the most recent one that had been released by
+   then. An unplayed (future) game can't know that yet, so it tracks
+   the opponent's CURRENT rank — the current week's poll — and keeps
+   updating until the game happens. "Current" is the shown poll
+   (currentPollWeek), so a poll uploaded for a week the site hasn't
+   advanced to yet never leaks into a badge early. */
 function badgeWeekFor(played, gameWeek) {
-  return played ? gameWeek : currentPollWeek();
+  return played ? pollWeekAtOrBefore(gameWeek) : currentPollWeek();
 }
 
 /* ------------------------------------------------------------
@@ -1330,16 +1359,40 @@ function renderTop25() {
   setText(document.getElementById("top25-title"), name);
   renderPollTabLabel();
 
-  /* Once the playoff starts, the poll stops moving: the committee's
-     last ranking is the one the bracket was seeded from and the game
-     doesn't publish another. Saying "WEEK 15" during Bowl Week 3
-     would read as stale data rather than as the final poll, which is
-     what it is. */
+  /* THE LAST POLL OF THE SEASON IS THE WEEK-15 SEEDING POLL, AND IT
+     COVERS THREE DIFFERENT-LOOKING SITUATIONS.
+
+     Week 14 is Army-Navy, and the rankings don't move off that game.
+     So week 15 never gets a block of its own \u2014 it reads week 14's,
+     through the same at-or-before fallback the schedule badges use \u2014
+     and the game publishes nothing further once the playoff starts.
+     One poll, captioned by where the SEASON is:
+
+       week 15        "WEEK 15"                  these are the
+                                                 championship-week
+                                                 rankings
+       weeks 16-19    "FINAL SEEDING \u00b7 WEEK 15"  the poll the bracket
+                                                 was built from; the
+                                                 prefix is what stops
+                                                 it reading as stale
+                                                 during Bowl Week 3
+
+     Both say 15, not the 14 the block is filed under. Numbering them
+     by the file would make the caption count BACKWARDS as the season
+     moves from championship week into the playoff, and would imply
+     the site was a week behind on an upload that is never coming.
+
+     Before week 15 the label is the poll's own week, deliberately.
+     3-star and 1-star don't gate their advances on the poll (see
+     top25GateError), so they really can sit on week 13 with week 12's
+     rankings up \u2014 and there the older number is the honest one. The
+     season's end is the single case where the gap is by design. */
+  const atSeasonEnd = currentSeasonWeek() >= REGULAR_FINAL_WEEK;
   if (label) {
     label.textContent =
       currentSeasonWeek() > REGULAR_FINAL_WEEK
-        ? `FINAL SEEDING \u00b7 WEEK ${week}`
-        : `WEEK ${week}`;
+        ? `FINAL SEEDING \u00b7 WEEK ${REGULAR_FINAL_WEEK}`
+        : `WEEK ${atSeasonEnd ? REGULAR_FINAL_WEEK : week}`;
   }
   host.classList.remove("is-empty");
   host.innerHTML = teams.map((t) => top25RowHtml(t, week)).join("");

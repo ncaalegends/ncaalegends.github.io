@@ -750,7 +750,8 @@
     /* "Last poll of the season", whichever kind it was — the
        postseason fallback below wants the most recent measurement
        that exists, not specifically an AP one. */
-    const lastApWeek = byWeek.size ? Math.max(...byWeek.keys()) : null;
+    const sortedWeeks = [...byWeek.keys()].sort((a, b) => a - b);
+    const lastApWeek = sortedWeeks.length ? sortedWeeks[sortedWeeks.length - 1] : null;
 
     // CFP_POLL: accept a single poll object or a list of them.
     let cfp = null;
@@ -776,7 +777,22 @@
         }
         return cfg.unrankedRank;
       }
-      const m = byWeek.get(Number(meeting.week));
+      /* The poll for the week the game was played — or, when that week
+         has no poll of its own, the most recent one released before
+         it. Championship week carries no in-game poll (the committee's
+         last rankings are the week-15 seeding poll), and a league can
+         sit on a week whose poll hasn't been transcribed yet. Without
+         the fallback every opponent in such a week scores as an
+         unranked cupcake, which would make BEATING a top-10 team in
+         the conference championship worth less than beating them in
+         week 12. Same rule the schedule badges use, so the poll and
+         the badges still can't disagree. */
+      const week = Number(meeting.week);
+      let m = byWeek.get(week);
+      if (!m) {
+        const prior = sortedWeeks.filter((w) => w < week);
+        if (prior.length) m = byWeek.get(prior[prior.length - 1]);
+      }
       const r = m && m.get(oppTeamKey);
       return r ? r : cfg.unrankedRank;
     };

@@ -10,13 +10,24 @@
 
    WHERE THE SEASON SWITCHES OVER
    Weeks 0-9    AP poll        -> top25-data.js
-   Weeks 10-15  CFP Top 25     -> CFP_POLL below
+   Weeks 10-14  CFP Top 25     -> CFP_POLL below
                 + projected bracket -> CFP_BRACKET below
+   Week 15      Conference championships. BRACKET ONLY — this is where
+                the projection becomes the real field. No poll block:
+                week 14 is Army-Navy, the rankings don't move off that
+                game, so week 15's poll IS week 14's and the site reads
+                it through the at-or-before fallback in script.js
+                rather than storing a duplicate. The advance gate
+                knows, and won't ask you for one.
    Weeks 16-19  Bowl Weeks 1-4, one per playoff round. NOTHING is
-                transcribed here: the poll freezes at the week-15
-                seeding poll and the bracket is already final. Only
-                results change, and they go in postseason-data.js —
-                the bracket fills itself in from them.
+                transcribed here: the poll froze at week 14 and the
+                bracket is already final. Only results change, and they
+                go in postseason-data.js — the bracket fills itself in
+                from them.
+
+   If the rankings ever DO move at week 15, add a { week: 15 } block
+   the normal way: the site prefers a real block over the fallback
+   automatically, and nothing here needs changing to allow it.
 
    That boundary lives in ONE place in the code (CFP_ERA_WEEK in
    script.js). Nothing here needs to change if the game ever moves

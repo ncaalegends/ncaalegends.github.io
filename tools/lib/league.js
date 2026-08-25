@@ -336,8 +336,25 @@ function top25GateError(data, week, league) {
     if (!cfpPolls.length && !brackets.length) return null;
 
     const missing = [];
+
+    /* CHAMPIONSHIP WEEK HAS NO POLL TO ASK FOR.
+       Week 14 is Army-Navy and the rankings don't move off that game,
+       so week 15's poll IS week 14's. The site reads it through the
+       at-or-before fallback in script.js rather than storing a
+       duplicate block, and requiring one here would block every
+       advance into the conference championships on a screenshot that
+       says exactly what last week's said.
+
+       The BRACKET is still required, and it's the whole point of the
+       week — this is where a projection becomes the real field. If the
+       poll ever DOES move at 15, cfp.js still accepts a week-15 block
+       and the site prefers it over the fallback automatically; this
+       only stops the gate from demanding one. */
+    const pollExpected = Number(week) < REGULAR_FINAL_WEEK;
     const poll = cfpPolls.find((p) => Number(p.week) === Number(week));
-    if (!poll || !Array.isArray(poll.teams) || poll.teams.length === 0) missing.push("CFP Top 25");
+    if (pollExpected && (!poll || !Array.isArray(poll.teams) || poll.teams.length === 0)) {
+      missing.push("CFP Top 25");
+    }
 
     const bracket = brackets.find((b) => Number(b.week) === Number(week));
     if (!bracket || !Array.isArray(bracket.seeds) || bracket.seeds.length === 0) {
@@ -345,12 +362,20 @@ function top25GateError(data, week, league) {
     }
 
     if (!missing.length) return null;
+
+    /* The fix line has to match what's actually missing: telling
+       someone to screenshot a poll they don't need, on the one week
+       there isn't one, is how a gate teaches people to ignore it. */
+    const fix = missing.includes("CFP Top 25")
+      ? `    node tools/cfp.js --league ${slug || "main"} --week ${week} --poll poll.txt --bracket bracket.txt`
+      : `    node tools/cfp.js --league ${slug || "main"} --week ${week} --bracket bracket.txt`;
+
     return (
       `the Week ${week} ${missing.join(" and ")} ${missing.length > 1 ? "haven't" : "hasn't"} been entered yet.\n` +
       `  From Week ${CFP_ERA_WEEK} the site shows the CFP rankings and bracket instead of the AP poll,\n` +
       `  so advancing without ${missing.length > 1 ? "them" : "it"} would publish the week with an empty playoff panel.\n` +
-      `  Screenshot the in-game CFP Top 25 and bracket, then:\n` +
-      `    node tools/cfp.js --league ${slug || "main"} --week ${week} --poll poll.txt --bracket bracket.txt`
+      `  Screenshot the in-game ${missing.join(" and ")}, then:\n` +
+      fix
     );
   }
 
