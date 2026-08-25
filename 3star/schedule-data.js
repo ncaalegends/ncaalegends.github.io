@@ -136,7 +136,7 @@ const TEAM_SCHEDULES = [
       { week: 12, opponent: "Louisville", location: "at", teamScore: 31, opponentScore: 27 },
       { week: 13, opponent: "California", location: "at", teamScore: 45, opponentScore: 24 },
       { week: 14, note: "Army-Navy Week" },
-      { week: 15, opponent: "Virginia Tech", location: "at", neutral: true, title: "ACC Championship", round: "ccg" },
+      { week: 15, opponent: "Virginia Tech", location: "at", neutral: true, title: "ACC Championship", round: "ccg", teamScore: 31, opponentScore: 10 },
     ],
   },
   {
@@ -158,7 +158,7 @@ const TEAM_SCHEDULES = [
       { week: 12, opponent: "Miami", location: "at", teamScore: 20, opponentScore: 7 },
       { week: 13, opponent: "Virginia", location: "vs", teamScore: 33, opponentScore: 28 },
       { week: 14, note: "Army-Navy Week" },
-      { week: 15, opponent: "Pittsburgh", location: "vs", neutral: true, title: "ACC Championship", round: "ccg" },
+      { week: 15, opponent: "Pittsburgh", location: "vs", neutral: true, title: "ACC Championship", round: "ccg", teamScore: 10, opponentScore: 31 },
     ],
   },
 
