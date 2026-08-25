@@ -182,7 +182,7 @@ const TEAM_SCHEDULES = [
       { week: 12, opponent: "USC", location: "at", teamScore: 56, opponentScore: 13 },
       { week: 13, opponent: "Penn State", location: "vs", teamScore: 37, opponentScore: 22 },
       { week: 14, note: "Army-Navy Week" },
-      { week: 15, opponent: "Wisconsin", location: "vs", neutral: true, title: "Big Ten Championship", round: "ccg" },
+      { week: 15, opponent: "Wisconsin", location: "vs", neutral: true, title: "Big Ten Championship", round: "ccg", teamScore: 42, opponentScore: 38, sim: true },
     ],
   },
   {
@@ -239,7 +239,7 @@ const TEAM_SCHEDULES = [
       { week: 12, opponent: "Purdue", location: "at", teamScore: 45, opponentScore: 24 },
       { week: 13, opponent: "Minnesota", location: "vs", teamScore: 29, opponentScore: 13 },
       { week: 14, note: "Army-Navy Week" },
-      { week: 15, opponent: "Maryland", location: "at", neutral: true, title: "Big Ten Championship", round: "ccg" },
+      { week: 15, opponent: "Maryland", location: "at", neutral: true, title: "Big Ten Championship", round: "ccg", teamScore: 38, opponentScore: 42, sim: true },
     ],
   },
 
