@@ -329,7 +329,7 @@ const TEAM_SCHEDULES = [
       { week: 12, opponent: "Iowa State", location: "vs", teamScore: 41, opponentScore: 10, sim: true },
       { week: 13, opponent: "Colorado", location: "at", teamScore: 45, opponentScore: 22 },
       { week: 14, note: "Army-Navy Week" },
-      { week: 15, opponent: "BYU", location: "vs", neutral: true, title: "Big 12 Championship", round: "ccg" },
+      { week: 15, opponent: "BYU", location: "vs", neutral: true, title: "Big 12 Championship", round: "ccg", teamScore: 0, opponentScore: 31 },
     ],
   },
 
