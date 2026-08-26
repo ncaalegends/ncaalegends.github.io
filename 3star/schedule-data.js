@@ -93,7 +93,7 @@ const TEAM_SCHEDULES = [
       { week: 13, opponent: "Pittsburgh", location: "vs", teamScore: 24, opponentScore: 45 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, note: "BYE" },
-      { week: 16, opponent: "Washington State", location: "at", neutral: true, title: "Holiday Bowl", round: "bowl-w1" },
+      { week: 16, opponent: "Washington State", location: "at", neutral: true, title: "Holiday Bowl", round: "bowl-w1", teamScore: 28, opponentScore: 24 },
     ],
   },
   {
@@ -299,7 +299,7 @@ const TEAM_SCHEDULES = [
       { week: 13, opponent: "UCF", location: "vs", teamScore: 22, opponentScore: 45 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, note: "BYE" },
-      { week: 16, opponent: "Virginia Tech", location: "at", neutral: true, title: "Pop-Tarts Bowl", round: "bowl-w1" },
+      { week: 16, opponent: "Virginia Tech", location: "at", neutral: true, title: "Pop-Tarts Bowl", round: "bowl-w1", teamScore: 42, opponentScore: 17 },
     ],
   },
   {
