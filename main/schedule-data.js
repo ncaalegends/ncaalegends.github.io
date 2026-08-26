@@ -500,7 +500,7 @@ const TEAM_SCHEDULES = [
       { week: 10, opponent: "Miami", location: "vs", stadium: "Notre Dame Stadium", teamScore: 24, opponentScore: 21 },
       { week: 11, opponent: "Boston College", location: "vs", stadium: "Notre Dame Stadium", teamScore: 38, opponentScore: 15 },
       { week: 12, opponent: "SMU", location: "vs", stadium: "Notre Dame Stadium", teamScore: 30, opponentScore: 28 },
-      { week: 13, opponent: "Syracuse", location: "at", stadium: "JMA Wireless Dome" },
+      { week: 13, opponent: "Syracuse", location: "at", stadium: "JMA Wireless Dome", teamScore: 40, opponentScore: 10 },
       { week: 14, note: "Army-Navy Week" },
       // Week 15 was not visible in the screenshots. Notre Dame is an
       // independent so it plays no conference championship - confirm
