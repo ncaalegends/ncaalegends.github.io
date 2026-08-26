@@ -107,6 +107,7 @@ const TEAM_SCHEDULES = [
       { week: 13, opponent: "Appalachian State", location: "vs", teamScore: 9, opponentScore: 24, sim: true },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, note: "BYE" },
+      { week: 17, opponent: "UAB", location: "at", neutral: true, title: "First Responder Bowl", round: "bowl-w2" },
     ],
   },
   {
@@ -136,6 +137,7 @@ const TEAM_SCHEDULES = [
       { week: 13, opponent: "Baldwin Wallace", location: "at", teamScore: 24, opponentScore: 9, sim: true },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, note: "BYE" },
+      { week: 16, opponent: "Patriot Tech", location: "at", neutral: true, title: "Boca Raton Bowl", round: "bowl-w1" },
     ],
   },
   {
@@ -158,6 +160,7 @@ const TEAM_SCHEDULES = [
       { week: 13, opponent: "Louisiana Tech", location: "vs", teamScore: 27, opponentScore: 13 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, opponent: "Arkansas State", location: "vs", neutral: true, title: "Sun Belt Championship", round: "ccg", teamScore: 23, opponentScore: 20 },
+      { week: 16, opponent: "Charlotte", location: "vs", neutral: true, title: "Myrtle Beach Bowl", round: "bowl-w1" },
     ],
   },
 
@@ -182,6 +185,7 @@ const TEAM_SCHEDULES = [
       { week: 13, opponent: "Eastern Michigan", location: "at", teamScore: 31, opponentScore: 17 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, note: "BYE" },
+      { week: 16, opponent: "New Mexico State", location: "at", neutral: true, title: "Cure Bowl", round: "bowl-w1" },
     ],
   },
   {
@@ -204,6 +208,7 @@ const TEAM_SCHEDULES = [
       { week: 13, opponent: "Central Michigan", location: "vs", teamScore: 31, opponentScore: 24 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, opponent: "North Shore", location: "vs", neutral: true, title: "MAC Championship", round: "ccg", teamScore: 31, opponentScore: 24 },
+      { week: 16, opponent: "Marshall", location: "at", neutral: true, title: "68 Ventures Bowl", round: "bowl-w1" },
     ],
   },
   {
@@ -226,6 +231,7 @@ const TEAM_SCHEDULES = [
       { week: 13, opponent: "Buffalo", location: "vs", teamScore: 41, opponentScore: 7 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, opponent: "New Glarus", location: "at", neutral: true, title: "MAC Championship", round: "ccg", teamScore: 24, opponentScore: 31 },
+      { week: 16, opponent: "UNLV", location: "vs", neutral: true, title: "Arizona Bowl", round: "bowl-w1" },
     ],
   },
 
@@ -250,6 +256,7 @@ const TEAM_SCHEDULES = [
       { week: 13, opponent: "Kennesaw State", location: "at", teamScore: 27, opponentScore: 17 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, note: "BYE" },
+      { week: 16, opponent: "Appalachian State", location: "vs", neutral: true, title: "Boca Raton Bowl", round: "bowl-w1" },
     ],
   },
   {
