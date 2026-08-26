@@ -52,6 +52,7 @@ const {
   loadData,
   buildWeek,
   weekLabel,
+  FINAL_WEEK,
   top25GateError,
   loadVacations,
   writeVacations,
@@ -242,9 +243,15 @@ function validate(payload) {
     );
   }
 
+  /* 0-15 is the regular season and the conference championships;
+     16-19 are Bowl Weeks 1-4. The cap used to be 15, which silently
+     made the postseason unreachable from the admin page: the Worker
+     accepts 0-19 and the page offers a bowl week, so the payload
+     passed every check up to here and then died on the runner. The
+     bound belongs to week-core, not to a number typed in twice. */
   const week = Number(payload.week);
-  if (!Number.isInteger(week) || week < 0 || week > 15) {
-    bad(`week must be a whole number 0-15, got ${JSON.stringify(payload.week)}`);
+  if (!Number.isInteger(week) || week < 0 || week > FINAL_WEEK) {
+    bad(`week must be a whole number 0-${FINAL_WEEK}, got ${JSON.stringify(payload.week)}`);
   }
 
   /* Recorded for the commit message and the Actions log. This is the
@@ -396,7 +403,11 @@ async function doAdvance(p, L) {
   const gate = top25GateError(data, p.week, L);
   if (gate) die(gate);
 
-  const status = p.status || `WEEK ${p.week}`;
+  /* weekLabel(), not `WEEK n` — a bowl week's status line reads
+     "BOWL WEEK 1 (CFP FIRST ROUND)", which is what advance.js writes
+     and what the badge on the site expects. The old fallback would
+     have published "WEEK 16". */
+  const status = p.status || weekLabel(p.week).toUpperCase();
 
   /* Carry the existing deadline over when none was given, matching
      advance.js's behaviour rather than blanking the badge. `at` is
