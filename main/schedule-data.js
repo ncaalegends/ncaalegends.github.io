@@ -82,7 +82,7 @@ const TEAM_SCHEDULES = [
       { week: 10, note: "BYE" },
       { week: 11, opponent: "Virginia", location: "at", stadium: "Scott Stadium", teamScore: 38, opponentScore: 24 },
       { week: 12, opponent: "Stanford", location: "vs", stadium: "California Memorial Stadium", teamScore: 24, opponentScore: 30 },
-      { week: 13, opponent: "Pittsburgh", location: "vs", stadium: "California Memorial Stadium" },
+      { week: 13, opponent: "Pittsburgh", location: "vs", stadium: "California Memorial Stadium", teamScore: 44, opponentScore: 10 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, note: "ACC Championship", stadium: "Bank of America Stadium" },
     ],
