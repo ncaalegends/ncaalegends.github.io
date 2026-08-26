@@ -203,7 +203,7 @@ const TEAM_SCHEDULES = [
       { week: 12, opponent: "Ohio", location: "at", teamScore: 36, opponentScore: 29 },
       { week: 13, opponent: "Central Michigan", location: "vs", teamScore: 31, opponentScore: 24 },
       { week: 14, note: "Army-Navy Week" },
-      { week: 15, opponent: "North Shore", location: "vs", neutral: true, title: "MAC Championship", round: "ccg" },
+      { week: 15, opponent: "North Shore", location: "vs", neutral: true, title: "MAC Championship", round: "ccg", teamScore: 31, opponentScore: 24 },
     ],
   },
   {
@@ -225,7 +225,7 @@ const TEAM_SCHEDULES = [
       { week: 12, opponent: "UMass", location: "at", teamScore: 41, opponentScore: 20 },
       { week: 13, opponent: "Buffalo", location: "vs", teamScore: 41, opponentScore: 7 },
       { week: 14, note: "Army-Navy Week" },
-      { week: 15, opponent: "New Glarus", location: "at", neutral: true, title: "MAC Championship", round: "ccg" },
+      { week: 15, opponent: "New Glarus", location: "at", neutral: true, title: "MAC Championship", round: "ccg", teamScore: 24, opponentScore: 31 },
     ],
   },
 
