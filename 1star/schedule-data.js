@@ -208,7 +208,7 @@ const TEAM_SCHEDULES = [
       { week: 13, opponent: "Central Michigan", location: "vs", teamScore: 31, opponentScore: 24 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, opponent: "North Shore", location: "vs", neutral: true, title: "MAC Championship", round: "ccg", teamScore: 31, opponentScore: 24 },
-      { week: 16, opponent: "Marshall", location: "at", neutral: true, title: "68 Ventures Bowl", round: "bowl-w1" },
+      { week: 16, opponent: "Marshall", location: "at", neutral: true, title: "68 Ventures Bowl", round: "bowl-w1", teamScore: 31, opponentScore: 30 },
     ],
   },
   {
@@ -231,7 +231,7 @@ const TEAM_SCHEDULES = [
       { week: 13, opponent: "Buffalo", location: "vs", teamScore: 41, opponentScore: 7 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, opponent: "New Glarus", location: "at", neutral: true, title: "MAC Championship", round: "ccg", teamScore: 24, opponentScore: 31 },
-      { week: 16, opponent: "UNLV", location: "vs", neutral: true, title: "Arizona Bowl", round: "bowl-w1" },
+      { week: 16, opponent: "UNLV", location: "vs", neutral: true, title: "Arizona Bowl", round: "bowl-w1", teamScore: 34, opponentScore: 31 },
     ],
   },
 
