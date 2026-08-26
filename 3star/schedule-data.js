@@ -345,7 +345,7 @@ const TEAM_SCHEDULES = [
       { week: 13, opponent: "Colorado", location: "at", teamScore: 45, opponentScore: 22 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, opponent: "BYU", location: "vs", neutral: true, title: "Big 12 Championship", round: "ccg", teamScore: 0, opponentScore: 31 },
-      { week: 16, opponent: "South Carolina", location: "at", neutral: true, round: "cfp-r1" },
+      { week: 16, opponent: "South Carolina", location: "at", neutral: true, round: "cfp-r1", teamScore: 17, opponentScore: 27 },
     ],
   },
 
