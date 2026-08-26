@@ -559,6 +559,12 @@ const TEAM_SCHEDULES = [
   {
     team: "Alabama",
     conference: "SEC",
+    /* Alabama has been held by two coaches this season and is unmanned
+       either side of both. Woogity played weeks 0-4, nobody held it in
+       weeks 5-10, Trick whitey took it over in week 11 and left after
+       week 12. From week 13 on it is CPU again — the Auburn and SEC
+       Championship rows below belong to no coach. See the two Alabama
+       entries in league-data.js. */
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "East Carolina", location: "vs", stadium: "Saban Field at Bryant-Denny Stadium", teamScore: 70, opponentScore: 10 },

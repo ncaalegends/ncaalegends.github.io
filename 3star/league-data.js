@@ -86,7 +86,7 @@ const COACHES = [
   { name: "Salzy",           team: "Wisconsin",          conference: "B1G", color: "#D63B45", twitch: "https://www.twitch.tv/salzy117", espnId: "275" },
   { name: "Oldarmy324",      team: "Pittsburgh",         conference: "ACC", color: "#F5C542", twitch: "https://www.twitch.tv/oldarmy324", espnId: "221" },
   { name: "Cleveland",       team: "Virginia Tech",      conference: "ACC", color: "#E8703F", twitch: "https://www.twitch.tv/buckeyefan_", espnId: "259" },
-  { name: "Trick whitey",    team: "Maryland",           conference: "B1G", color: "#FFD24D", twitch: "https://www.twitch.tv/trickwhitey44", espnId: "120" },
+  { name: "Trick whitey",    team: "Maryland",           conference: "B1G", color: "#FFD24D", twitch: "https://www.twitch.tv/trickwhitey44", espnId: "120", departedAfterWeek: 14 },  // Left the league during championship week for personal reasons — weeks 0-14 stand as real head-to-head games; Maryland is CPU from week 15 on, so Salzy's Big Ten Championship win over Maryland is a CPU game, not a head-to-head result. Also left the main dynasty (Alabama) in the same move.
   { name: "Texan_hog",       team: "North Dakota State", conference: "SEC", color: "#35B86A", twitch: "https://www.twitch.tv/texan_hog08", espnId: "2449" },
   { name: "RonRicoFSU",      team: "Colorado",           conference: "XII", color: "#CFB87C", twitch: "https://www.twitch.tv/ronricofsu", espnId: "38" },
   { name: "EHDC12",          team: "North Carolina",     conference: "ACC", color: "#7BAFD4", twitch: "https://www.twitch.tv/DCGQManOfTheYear7", espnId: "153" },

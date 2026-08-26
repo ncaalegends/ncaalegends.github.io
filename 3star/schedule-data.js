@@ -166,6 +166,14 @@ const TEAM_SCHEDULES = [
   {
     team: "Maryland",
     conference: "B1G",
+    /* Trick whitey left the league during championship week
+       (departedAfterWeek: 14 in league-data.js). Weeks 0-14 are his
+       and stay head-to-head. The Week 15 Big Ten Championship is not:
+       Maryland was CPU by then and Salzy played the CPU, so that
+       42-38 must not enter either coach's H2H record or power-poll
+       window. isLeagueTeam("Maryland", 15) returns false, which is
+       what keeps that true. The result is transcribed on both blocks
+       anyway so the By Team pages agree with each other. */
     weeks: [
       { week: 0, opponent: "Marshall", location: "vs", teamScore: 38, opponentScore: 10 },
       { week: 1, opponent: "FCS East", location: "vs", teamScore: 73, opponentScore: 3 },
