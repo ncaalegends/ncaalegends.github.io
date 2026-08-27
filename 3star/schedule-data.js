@@ -254,7 +254,7 @@ const TEAM_SCHEDULES = [
       { week: 14, note: "Army-Navy Week" },
       { week: 15, opponent: "Maryland", location: "at", neutral: true, title: "Big Ten Championship", round: "ccg", teamScore: 38, opponentScore: 42, sim: true },
       { week: 16, opponent: "Tennessee", location: "vs", neutral: true, round: "cfp-r1", teamScore: 38, opponentScore: 7 },
-      { week: 17, opponent: "Georgia", location: "at", neutral: true, title: "Cotton Bowl", round: "cfp-qf" },
+      { week: 17, opponent: "Georgia", location: "at", neutral: true, title: "Cotton Bowl", round: "cfp-qf", teamScore: 31, opponentScore: 20 },
     ],
   },
 
