@@ -185,7 +185,7 @@ const TEAM_SCHEDULES = [
       { week: 13, opponent: "Eastern Michigan", location: "at", teamScore: 31, opponentScore: 17 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, note: "BYE" },
-      { week: 16, opponent: "New Mexico State", location: "at", neutral: true, title: "Cure Bowl", round: "bowl-w1" },
+      { week: 16, opponent: "New Mexico State", location: "at", neutral: true, title: "Cure Bowl", round: "bowl-w1", teamScore: 35, opponentScore: 17 },
     ],
   },
   {
