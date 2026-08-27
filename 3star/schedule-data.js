@@ -140,7 +140,7 @@ const TEAM_SCHEDULES = [
       { week: 14, note: "Army-Navy Week" },
       { week: 15, opponent: "Virginia Tech", location: "at", neutral: true, title: "ACC Championship", round: "ccg", teamScore: 31, opponentScore: 10 },
       { week: 16, note: "CFP First Round BYE" },
-      { week: 17, opponent: "South Carolina", location: "vs", neutral: true, title: "Peach Bowl", round: "cfp-qf" },
+      { week: 17, opponent: "South Carolina", location: "vs", neutral: true, title: "Peach Bowl", round: "cfp-qf", teamScore: 27, opponentScore: 13 },
     ],
   },
   {
