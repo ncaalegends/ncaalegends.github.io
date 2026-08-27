@@ -412,7 +412,7 @@ const TEAM_SCHEDULES = [
       { week: 10, opponent: "Arizona State", location: "at", stadium: "Mountain America Stadium", teamScore: 21, opponentScore: 35 },
       { week: 11, opponent: "Houston", location: "vs", stadium: "Folsom Field", teamScore: 24, opponentScore: 20 },
       { week: 12, opponent: "Cincinnati", location: "at", stadium: "Nippert Stadium", teamScore: 27, opponentScore: 24 },
-      { week: 13, opponent: "UCF", location: "vs", stadium: "Folsom Field" },
+      { week: 13, opponent: "UCF", location: "vs", stadium: "Folsom Field", teamScore: 49, opponentScore: 31 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, note: "Big 12 Championship", stadium: "AT&T Stadium" },
     ],
