@@ -620,7 +620,12 @@ async function main() {
     ? { league: [], cpu: [], notes: [], missing: [] }
     : buildWeek(data, week);
   const label = sentinel ? "the Offseason" : weekLabel(week);
-  const statusLine = args.status || label.toUpperCase();
+  /* The hero badge, and the sentinel's own spelling is the default —
+     "THE OFFSEASON" would be the label read out loud rather than the
+     state. The scoping doc's per-step narrative ("OFFSEASON ·
+     TRANSFER PORTAL") is exactly this field with --status, which is
+     why the default stays the bare state name. */
+  const statusLine = args.status || (sentinel ? week : label.toUpperCase());
   /* `at` is what gets written, `text` is what gets shown. See
      resolveDeadline above for why an unparseable value stops here. */
   const { at: nextAdvanceAt, text: nextAdvance } = resolveDeadline(args, data);

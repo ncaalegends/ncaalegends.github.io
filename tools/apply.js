@@ -54,6 +54,7 @@ const {
   weekLabel,
   FINAL_WEEK,
   top25GateError,
+  isSentinel,
   loadVacations,
   writeVacations,
   allRosterNames,
@@ -249,9 +250,24 @@ function validate(payload) {
      accepts 0-19 and the page offers a bowl week, so the payload
      passed every check up to here and then died on the runner. The
      bound belongs to week-core, not to a number typed in twice. */
-  const week = Number(payload.week);
-  if (!Number.isInteger(week) || week < 0 || week > FINAL_WEEK) {
-    bad(`week must be a whole number 0-${FINAL_WEEK}, got ${JSON.stringify(payload.week)}`);
+  /* "OFFSEASON" is the exception, and only for an advance. It is the
+     held state after the national championship — a real advance with
+     a real announcement, but not a week, so there is nothing in it to
+     score. The sentinel list lives in lib/league.js; isSentinel() is
+     the same test parseWeek() applies to --week on the command line,
+     so the web and the CLI can't disagree about what the word means. */
+  let week;
+  if (action === "advance" && isSentinel(payload.week)) {
+    week = String(payload.week).trim().toUpperCase();
+  } else {
+    week = Number(payload.week);
+    if (!Number.isInteger(week) || week < 0 || week > FINAL_WEEK) {
+      bad(
+        `week must be a whole number 0-${FINAL_WEEK}` +
+          (action === "advance" ? ` or OFFSEASON` : ``) +
+          `, got ${JSON.stringify(payload.week)}`
+      );
+    }
   }
 
   /* Recorded for the commit message and the Actions log. This is the
@@ -313,6 +329,15 @@ function validate(payload) {
     const rawAt = payload.nextAt !== undefined ? payload.nextAt : payload.next;
     if (rawAt === undefined) {
       out.nextAt = undefined;
+    } else if (typeof rawAt === "string" && rawAt.trim() === "") {
+      /* An EXPLICIT EMPTY STRING CLEARS THE BADGE — the same
+         "deliberate clear" the CLI's --next "" performs. The offseason
+         is what it exists for: advances during the hold are announced
+         in Discord, so the site has nothing to count down to, and
+         carrying the title game's deadline forward would leave a dead
+         date on the hero for weeks. Undefined still means "carry the
+         existing one over"; the two are not the same answer. */
+      out.nextAt = "";
     } else {
       const at = requireString(rawAt, "nextAt", 40);
       const stored = Deadline.canonical(at);
@@ -400,14 +425,28 @@ async function doAdvance(p, L) {
      the local advance.js path. Passing L is what makes 3-star and
      1-star advance from the admin page without waiting on a
      screenshot. */
-  const gate = top25GateError(data, p.week, L);
-  if (gate) die(gate);
+  /* THE OFFSEASON IS NOT A WEEK, so neither the gate nor buildWeek
+     applies to it — the poll gate would demand a CFP Top 25 that
+     stopped being published in December, and buildWeek would report
+     every coach as missing an entry for a phase that has no entries
+     to miss. Same two exemptions advance.js makes on the CLI path;
+     see the sentinel branch there. */
+  const sentinel = isSentinel(p.week);
+
+  if (!sentinel) {
+    const gate = top25GateError(data, p.week, L);
+    if (gate) die(gate);
+  }
 
   /* weekLabel(), not `WEEK n` — a bowl week's status line reads
      "BOWL WEEK 1 (CFP FIRST ROUND)", which is what advance.js writes
      and what the badge on the site expects. The old fallback would
      have published "WEEK 16". */
-  const status = p.status || weekLabel(p.week).toUpperCase();
+  const label = sentinel ? "the Offseason" : weekLabel(p.week);
+  /* Bare "OFFSEASON" rather than "THE OFFSEASON" — same default the
+     CLI writes, and the field a per-step line like
+     "OFFSEASON · SIGNING DAY" is later hand-edited into. */
+  const status = p.status || (sentinel ? p.week : label.toUpperCase());
 
   /* Carry the existing deadline over when none was given, matching
      advance.js's behaviour rather than blanking the badge. `at` is
@@ -418,9 +457,11 @@ async function doAdvance(p, L) {
 
   const changed = updateSeason(L.paths.league, p.week, status, p.nextAt);
 
-  const wk = buildWeek(data, p.week);
+  const wk = sentinel
+    ? { league: [], cpu: [], notes: [], missing: [] }
+    : buildWeek(data, p.week);
   console.log(
-    `\n  ${L.label} → ${weekLabel(p.week)} by ${p.actor} — ` +
+    `\n  ${L.label} → ${label} by ${p.actor} — ` +
       `${wk.league.length} H2H, ${wk.cpu.length} CPU, ${wk.notes.length} bye/off`
   );
   if (wk.missing.length) {
@@ -435,7 +476,7 @@ async function doAdvance(p, L) {
     return { changed: false };
   }
 
-  console.log(`\n  ${L.dir}/league-data.js updated — week ${p.week}, next "${next}".\n`);
+  console.log(`\n  ${L.dir}/league-data.js updated — ${label}, next "${next}".\n`);
 
   /* Announce it in Discord — the same message a local advance.cmd run
      posts, through advance.js's buildMessage/post. The webhooks and
@@ -447,8 +488,8 @@ async function doAdvance(p, L) {
 
   return {
     changed: true,
-    commit: `${L.label}: advance to ${weekLabel(p.week)} (via ${p.actor})`,
-    summary: `Advanced to ${weekLabel(p.week)}, next deadline "${next}"${announced.note}`,
+    commit: `${L.label}: advance to ${label} (via ${p.actor})`,
+    summary: `Advanced to ${label}, next deadline "${next}"${announced.note}`,
   };
 }
 

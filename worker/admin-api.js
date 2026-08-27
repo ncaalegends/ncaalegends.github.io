@@ -355,7 +355,15 @@ function checkPayload(payload, who) {
      team played lives in that team's schedule rows like any other
      game, so weeks 16-19 have rows to write into; only CPU-vs-CPU
      games stay in postseason-data.js, and no coach submits those. */
-  if (!Number.isInteger(week) || week < 0 || week > 19) return "week must be 0-19";
+  /* "OFFSEASON" is the one non-numeric week, and only an advance may
+     carry it: it is the hold after the national championship, so
+     there is nothing there to score. Shape only — tools/lib/league.js
+     owns the canonical sentinel list and apply.js re-checks against
+     it on the runner. */
+  const offseason = action === "advance" && week === "OFFSEASON";
+  if (!offseason && (!Number.isInteger(week) || week < 0 || week > 19)) {
+    return action === "advance" ? "week must be 0-19 or OFFSEASON" : "week must be 0-19";
+  }
 
   if (action === "scores") {
     if (!Array.isArray(payload.entries) || !payload.entries.length) return "no scores submitted";

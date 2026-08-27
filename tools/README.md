@@ -86,7 +86,7 @@ as `script.js`, so what Discord says always matches what the site shows.
 
 | Flag | Meaning |
 |---|---|
-| `--week N` | Week now being played, 0–15. Required. |
+| `--week N` | Week now being played, 0–19, or `offseason`. Required. |
 | `--next "..."` | Next advance deadline, **as a date**: `2026-07-26 18:00`, or `2026-07-26` for a day with no time shown. Eastern. Carries over the existing value if omitted. `--at` is an alias. |
 | `--status "..."` | Override the hero status line. Defaults to `WEEK N`. |
 | `--dry-run` | Print the message. Change nothing, post nothing. |
@@ -95,6 +95,43 @@ as `script.js`, so what Discord says always matches what the site shows.
 
 **Always dry-run first** if you're unsure — it shows the exact matchup
 list and flags any coach missing an entry for that week.
+
+### Ending the season: `--week offseason`
+
+There is no week 20. After the national championship the league moves
+into the **offseason** — a single held state, not nine weeks — and that
+is a real advance with a real Discord announcement, so it goes through
+this tool like every other one:
+
+```
+node tools/advance.js --league 3star --week offseason --next ""
+```
+
+`--next ""` is a deliberate clear: the offseason's steps are announced
+in Discord, so the site has nothing to count down to and the deadline
+badge hides itself. Omitting `--next` carries the title game's deadline
+forward instead, which is almost never what you want here.
+
+It writes `currentWeek: "OFFSEASON"` (quoted — a bare identifier there
+would throw on every page load) and `statusLine: "OFFSEASON"`. The
+status line is free text and is where the nine in-game steps get their
+narrative for free: `--status "OFFSEASON · TRANSFER PORTAL"`, later
+`--status "OFFSEASON · SIGNING DAY"`. No second clock, no new week
+numbers.
+
+Neither gate applies: the poll gate would demand a CFP Top 25 that
+stopped being published in December, and the bowl-round warning would
+report on rounds that are all finished.
+
+**The offseason is the end of this tool's job.** What starts 2027 is
+`tools/rollover.js`, which archives the season first — see below.
+
+**From the admin page** the same advance is the last option on the
+Advance picker, labelled *Offseason*, and it is the default once the
+league reaches Bowl Week 4. The deadline field is optional there, and
+only there. It is deliberately absent from the **score** picker: the
+offseason has no schedule rows to write into. Covered by
+`tools/test-admin-offseason.js`.
 
 ### The deadline is a date now, not a sentence
 

@@ -68,6 +68,12 @@ const $ = (id) => document.getElementById(id);
    Mirrors seasonIndex() in script.js and tools/lib/league.js. Three
    copies because the browser, the site and Node don't share a module
    system; if you change one, change all three. */
+/* The one non-numeric value the advance picker can hold. Matches the
+   SENTINELS list in tools/lib/league.js — the string is what gets sent
+   and what ends up in league-data.js, so it is spelled exactly once
+   here and compared, never rebuilt. */
+const OFFSEASON = "OFFSEASON";
+
 const seasonIndex = (value) => {
   if (value === "PRESEASON") return 0;
   if (value === "OFFSEASON") return 19;
@@ -112,6 +118,11 @@ const BOWL_WEEK_NAME = {
   19: "Bowl Week 4 — National Championship",
 };
 function weekOptionLabel(w) {
+  /* The offseason is a state, not a week — the hold after the national
+     championship, while NIL, the portal and signing day run in
+     Discord. It reads as a destination in the advance picker and never
+     appears in the score picker, because it has no games. */
+  if (w === OFFSEASON) return "Offseason";
   if (w === 14) return "Week 14 — Army-Navy";
   if (w === 15) return "Week 15 — Championships";
   return BOWL_WEEK_NAME[w] || `Week ${w}`;
@@ -330,8 +341,18 @@ function refreshWeekControls() {
   $("week-select").innerHTML = weekOpts.join("");
   $("week-select").value = String(Math.min(current, 19));
 
-  $("advance-week").innerHTML = weekOpts.join("");
-  $("advance-week").value = String(Math.min(current + 1, 19));
+  /* THE ADVANCE PICKER RUNS ONE PAST THE AXIS. After the national
+     championship there is no week 20 to move to, and offering 19 —
+     the week the league is already on — made "Advance" read as a
+     no-op on the one night of the year it matters most. The offseason
+     is the real next destination: a held state, announced in Discord
+     like any other advance, that the site sits in until the rollover
+     starts the next preseason.
+
+     It is deliberately NOT in the score picker above. Scores are
+     entered against schedule rows and the offseason has none. */
+  $("advance-week").innerHTML = weekOpts.join("") + opt(OFFSEASON);
+  $("advance-week").value = current >= 19 ? OFFSEASON : String(current + 1);
 
   /* Prefill from the stored timestamp, not from the sentence — the
      sentence is generated and can't be parsed back reliably. A league
@@ -342,8 +363,14 @@ function refreshWeekControls() {
   $("advance-time").value = picker.time;
   renderDeadlinePreview();
 
+  /* Read from the raw value, not from the coerced index: the offseason
+     coerces to 19 so every week-axis question gets the right answer,
+     but saying "Currently on BOWL WEEK 4" a week after the title game
+     would be the one place that coercion shows through as a lie. */
   $("current-week").textContent =
-    `Currently on ${weekOptionLabel(current).toUpperCase()}` +
+    `Currently on ${weekOptionLabel(
+      data.SEASON.currentWeek === OFFSEASON ? OFFSEASON : current
+    ).toUpperCase()}` +
     (data.SEASON.nextAdvance ? ` · next deadline ${data.SEASON.nextAdvance}` : "");
 
   renderGames();
@@ -1045,7 +1072,13 @@ function renderDeadlinePreview() {
   el.classList.remove("bad");
 
   if (d === null) {
-    el.textContent = "Pick a date and the site will read: …";
+    /* Only the offseason may leave this blank — say so here rather
+       than letting the picker read like a field the commissioner
+       forgot to fill in. */
+    el.textContent =
+      $("advance-week").value === OFFSEASON
+        ? "Optional for the offseason — leave blank to hide the deadline badge."
+        : "Pick a date and the site will read: …";
     return;
   }
   if (d === false) {
@@ -1056,6 +1089,7 @@ function renderDeadlinePreview() {
   el.innerHTML = `The site will read: <strong>${esc(d.text)}</strong>`;
 }
 
+$("advance-week").addEventListener("change", renderDeadlinePreview);
 $("advance-date").addEventListener("input", renderDeadlinePreview);
 $("advance-time").addEventListener("input", renderDeadlinePreview);
 
@@ -1067,12 +1101,26 @@ $("advance-time").addEventListener("input", renderDeadlinePreview);
    the form rather than appearing beneath it, so the second click
    can't land on the same spot as the first.
    ------------------------------------------------------------ */
+/* The picker's value is a week number OR the offseason sentinel, and
+   the two must not be flattened: Number("OFFSEASON") is NaN, which
+   would sail through as a week and die on the runner. Everything
+   downstream branches on isOffseason() instead of coercing. */
+const advanceTarget = () => {
+  const raw = $("advance-week").value;
+  return raw === OFFSEASON ? OFFSEASON : Number(raw);
+};
+
 $("advance-btn").addEventListener("click", () => {
-  const week = Number($("advance-week").value);
+  const week = advanceTarget();
   const msg = $("advance-msg");
 
   const deadline = readDeadline();
-  if (deadline === null) {
+  /* THE OFFSEASON IS THE ONE ADVANCE WITH NO DEADLINE TO SET. Its
+     steps are announced in Discord, so the site has nothing to count
+     down to and league-data.js documents an empty deadline as the way
+     to hide the badge. A date is still allowed — some leagues like to
+     post the rollover date — but a blank one is no longer an error. */
+  if (deadline === null && week !== OFFSEASON) {
     message(msg, "error", "Pick a deadline date — it's what coaches see on the site.");
     return;
   }
@@ -1080,13 +1128,25 @@ $("advance-btn").addEventListener("click", () => {
     message(msg, "error", "That deadline isn't a valid date.");
     return;
   }
-  const next = deadline.text;
+  const next = deadline ? deadline.text : "";
 
   const current = seasonIndex(data.SEASON.currentWeek);
-  const wk = WeekCore.buildWeek(data, week);
+  const offseason = week === OFFSEASON;
+
+  /* buildWeek on the sentinel finds no entry for any team, so the
+     count sentence would read "0 head-to-head and 0 CPU game(s)" —
+     true, and misleading, because it describes a week rather than the
+     end of the season. The offseason gets its own sentence instead. */
+  const wk = offseason ? null : WeekCore.buildWeek(data, week);
 
   let warn = "";
-  if (week <= current) {
+  if (offseason) {
+    /* The only backwards move worth flagging here is entering the
+       hold before the title game has been played. */
+    if (current < 19) {
+      warn = ` The season isn't over — ${weekOptionLabel(current)} is still the current week.`;
+    }
+  } else if (week <= current) {
     warn = ` This moves the league BACKWARDS from ${weekOptionLabel(current)}.`;
   } else if (week > current + 1) {
     warn = ` This skips ${week - current - 1} week(s).`;
@@ -1094,12 +1154,22 @@ $("advance-btn").addEventListener("click", () => {
 
   message(msg, "");
   $("advance-confirm-text").innerHTML =
-    `${esc(leagueLabel($("league-select").value))} will move to ` +
-    `<span class="what">${esc(weekOptionLabel(week))}</span>, with ` +
-    `<span class="what">${wk.league.length} head-to-head</span> and ` +
-    `<span class="what">${wk.cpu.length} CPU</span> game(s).<br>` +
-    `Coaches will see the deadline <span class="what">${esc(next)}</span>.` +
-    (warn ? `<br><strong>${esc(warn.trim())}</strong>` : "");
+    offseason
+      ? `${esc(leagueLabel($("league-select").value))} will move to ` +
+        `<span class="what">the Offseason</span> — the season is complete and the ` +
+        `site holds here, showing the finished bracket, champion and final standings.<br>` +
+        `NIL, the portal and signing day are announced in Discord from here. ` +
+        `Nothing is archived by this: next season starts with a separate rollover.<br>` +
+        (next
+          ? `Coaches will see the deadline <span class="what">${esc(next)}</span>.`
+          : `No deadline will be shown — the countdown badge is hidden for the hold.`) +
+        (warn ? `<br><strong>${esc(warn.trim())}</strong>` : "")
+      : `${esc(leagueLabel($("league-select").value))} will move to ` +
+        `<span class="what">${esc(weekOptionLabel(week))}</span>, with ` +
+        `<span class="what">${wk.league.length} head-to-head</span> and ` +
+        `<span class="what">${wk.cpu.length} CPU</span> game(s).<br>` +
+        `Coaches will see the deadline <span class="what">${esc(next)}</span>.` +
+        (warn ? `<br><strong>${esc(warn.trim())}</strong>` : "");
 
   $("advance-form").classList.add("hidden");
   $("advance-confirm").classList.remove("hidden");
@@ -1113,13 +1183,13 @@ $("advance-no").addEventListener("click", () => {
 $("advance-yes").addEventListener("click", async () => {
   const btn = $("advance-yes");
   const msg = $("advance-msg");
-  const week = Number($("advance-week").value);
+  const week = advanceTarget();
 
   /* Re-read rather than trusting what step one showed. The pickers
      are still on the page behind the confirmation, and this is the
      click that actually sends. */
   const deadline = readDeadline();
-  if (!deadline) {
+  if (deadline === false || (deadline === null && week !== OFFSEASON)) {
     message(msg, "error", "The deadline stopped being valid — pick it again.");
     return;
   }
@@ -1138,7 +1208,10 @@ $("advance-yes").addEventListener("click", async () => {
            sentence from it with the same code the command-line tool
            uses, so the site and Discord can't end up describing the
            same deadline differently. */
-        nextAt: deadline.at,
+        /* "" is a deliberate clear, not a missing value — apply.js
+           reads the two differently, and the offseason wants the
+           clear. */
+        nextAt: deadline ? deadline.at : "",
         confirm: true,
       },
     });
@@ -1151,7 +1224,10 @@ $("advance-yes").addEventListener("click", async () => {
 
     const fresh = await waitForPublish(
       $("league-select").value,
-      (d) => Number(d.SEASON.currentWeek) === week,
+      (d) =>
+        week === OFFSEASON
+          ? d.SEASON.currentWeek === OFFSEASON
+          : Number(d.SEASON.currentWeek) === week,
       (secs) => message(msg, "warn", `Sent. Waiting for the site to publish… (${secs}s)`)
     );
 
@@ -1161,7 +1237,13 @@ $("advance-yes").addEventListener("click", async () => {
          the advance that just happened. */
       data = fresh;
       refreshWeekControls();
-      message(msg, "ok", `Done — the league is now on ${weekOptionLabel(week)}, live on the site.`);
+      message(
+        msg,
+        "ok",
+        week === OFFSEASON
+          ? `Done — the league is now in the Offseason, live on the site.`
+          : `Done — the league is now on ${weekOptionLabel(week)}, live on the site.`
+      );
     } else {
       message(
         msg,
