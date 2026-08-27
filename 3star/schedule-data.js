@@ -139,6 +139,8 @@ const TEAM_SCHEDULES = [
       { week: 13, opponent: "California", location: "at", teamScore: 45, opponentScore: 24 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, opponent: "Virginia Tech", location: "at", neutral: true, title: "ACC Championship", round: "ccg", teamScore: 31, opponentScore: 10 },
+      { week: 16, note: "CFP First Round BYE" },
+      { week: 17, opponent: "South Carolina", location: "vs", neutral: true, title: "Peach Bowl", round: "cfp-qf" },
     ],
   },
   {
@@ -252,6 +254,7 @@ const TEAM_SCHEDULES = [
       { week: 14, note: "Army-Navy Week" },
       { week: 15, opponent: "Maryland", location: "at", neutral: true, title: "Big Ten Championship", round: "ccg", teamScore: 38, opponentScore: 42, sim: true },
       { week: 16, opponent: "Tennessee", location: "vs", neutral: true, round: "cfp-r1", teamScore: 38, opponentScore: 7 },
+      { week: 17, opponent: "Georgia", location: "at", neutral: true, title: "Cotton Bowl", round: "cfp-qf" },
     ],
   },
 
