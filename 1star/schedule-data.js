@@ -137,7 +137,7 @@ const TEAM_SCHEDULES = [
       { week: 13, opponent: "Baldwin Wallace", location: "at", teamScore: 24, opponentScore: 9, sim: true },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, note: "BYE" },
-      { week: 16, opponent: "Patriot Tech", location: "at", neutral: true, title: "Boca Raton Bowl", round: "bowl-w1", teamScore: 42, opponentScore: 39 },
+      { week: 16, opponent: "Patriot Tech", location: "at", neutral: true, title: "Boca Raton Bowl", round: "bowl-w1", teamScore: 39, opponentScore: 42 },
     ],
   },
   {
@@ -256,7 +256,7 @@ const TEAM_SCHEDULES = [
       { week: 13, opponent: "Kennesaw State", location: "at", teamScore: 27, opponentScore: 17 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, note: "BYE" },
-      { week: 16, opponent: "Appalachian State", location: "vs", neutral: true, title: "Boca Raton Bowl", round: "bowl-w1", teamScore: 39, opponentScore: 42 },
+      { week: 16, opponent: "Appalachian State", location: "vs", neutral: true, title: "Boca Raton Bowl", round: "bowl-w1", teamScore: 42, opponentScore: 39 },
     ],
   },
   {
