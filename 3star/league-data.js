@@ -32,8 +32,8 @@ const SEASON = {
   // main/league-data.js — it governs the seasons/<year>/ archive.
   year: 2026,
 
-  currentWeek: 18,
-  statusLine: "BOWL WEEK 3 (CFP SEMIFINALS)",
+  currentWeek: 19,
+  statusLine: "BOWL WEEK 4 (NATIONAL CHAMPIONSHIP)",
   /* Entered as "Monday, August 13th" on the Week 9 advance, back
      when this was free text. The 13th is a Thursday — the date was
      right and the weekday was the typo, so the generated text says
