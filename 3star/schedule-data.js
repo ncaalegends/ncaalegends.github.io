@@ -116,7 +116,7 @@ const TEAM_SCHEDULES = [
       { week: 13, opponent: "NC State", location: "vs", teamScore: 7, opponentScore: 26 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, note: "BYE" },
-      { week: 16, opponent: "Tulane", location: "vs", neutral: true, title: "Military Bowl", round: "bowl-w1" },
+      { week: 16, opponent: "Tulane", location: "vs", neutral: true, title: "Military Bowl", round: "bowl-w1", teamScore: 37, opponentScore: 34 },
     ],
   },
   {
