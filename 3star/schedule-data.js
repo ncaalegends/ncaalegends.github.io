@@ -142,7 +142,7 @@ const TEAM_SCHEDULES = [
       { week: 16, note: "CFP First Round BYE" },
       { week: 17, opponent: "South Carolina", location: "vs", neutral: true, title: "Peach Bowl", round: "cfp-qf", teamScore: 27, opponentScore: 13 },
       { week: 18, opponent: "Oregon", location: "vs", neutral: true, title: "Sugar Bowl", round: "cfp-sf", teamScore: 16, opponentScore: 13 },
-      { week: 19, opponent: "Wisconsin", location: "vs", neutral: true, title: "National Championship", round: "cfp-nc" },
+      { week: 19, opponent: "Wisconsin", location: "vs", neutral: true, title: "National Championship", round: "cfp-nc", teamScore: 28, opponentScore: 17 },
     ],
   },
   {
@@ -258,7 +258,7 @@ const TEAM_SCHEDULES = [
       { week: 16, opponent: "Tennessee", location: "vs", neutral: true, round: "cfp-r1", teamScore: 38, opponentScore: 7 },
       { week: 17, opponent: "Georgia", location: "at", neutral: true, title: "Cotton Bowl", round: "cfp-qf", teamScore: 31, opponentScore: 20 },
       { week: 18, opponent: "Maryland", location: "at", neutral: true, title: "Orange Bowl", round: "cfp-sf", teamScore: 28, opponentScore: 14 },
-      { week: 19, opponent: "Pittsburgh", location: "at", neutral: true, title: "National Championship", round: "cfp-nc" },
+      { week: 19, opponent: "Pittsburgh", location: "at", neutral: true, title: "National Championship", round: "cfp-nc", teamScore: 17, opponentScore: 28 },
     ],
   },
 
