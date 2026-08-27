@@ -43,42 +43,16 @@
    ============================================================ */
 const POSTSEASON = {
   rounds: [
-    /* WEEK 15 CONFERENCE CHAMPIONSHIPS, from the in-game
-       Scores/Schedules screen (Fri Dec 11 - Sat Dec 12).
-
-       Three of this league's four title games have at least one
-       coached team in them, so they live as ordinary week-15 rows on
-       those teams' own schedules in schedule-data.js instead:
-         ACC     Pittsburgh at Virginia Tech
-         Big Ten Wisconsin at Maryland
-         Big 12  BYU at UCF
-       The SEC title game is Tennessee-Georgia, and no 3-star coach
-       plays either team, so it goes here.
-
-       Neutral site with no confirmed host stadium in the engine;
-       home/away follows the in-game listing (left side away). */
     { id: "ccg", label: "Conference Championships", games: [
-      { home: "Georgia", away: "Tennessee", title: "SEC Championship",
-        neutral: true },
+      { home: "Georgia", away: "Tennessee", title: "SEC Championship", neutral: true },
     ]},
-
-    /* CFP FIRST ROUND, off the bowl-week-2 bracket screen. Higher
-       seed hosts on campus, so these are true home games — no
-       `neutral`, and the bracket shows no bowl name for them.
-
-       ONLY THE TWO ALL-CPU GAMES ARE HERE. The other half of the
-       first round involves coached teams and lives on their own
-       week-16 schedule rows in schedule-data.js, where the score was
-       already entered:
-         5 Wisconsin (Salzy)        38, 12 Tennessee  7
-         7 South Carolina 27, 10 UCF (EYEDONTPULL19) 17
-       The two places never both hold the same game — see the note on
-       cfpGameWinner() in script.js. */
     { id: "cfp-r1", label: "CFP First Round", games: [
-      { home: "Oklahoma", away: "Missouri",
-        homeScore: 33, awayScore: 28 },
-      { home: "BYU", away: "Michigan",
-        homeScore: 12, awayScore: 41 },
+      { home: "Oklahoma", away: "Missouri", homeScore: 33, awayScore: 28 },
+      { home: "BYU", away: "Michigan", homeScore: 12, awayScore: 41 },
+    ]},
+    { id: "cfp-qf", label: "CFP Quarterfinals", games: [
+      { home: "Maryland", away: "Oklahoma", neutral: true, homeScore: 24, awayScore: 21 },
+      { home: "Oregon", away: "Michigan", neutral: true, homeScore: 27, awayScore: 24 },
     ]},
   ],
 };

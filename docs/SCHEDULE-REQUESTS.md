@@ -21,7 +21,9 @@ given, the return leg the following season goes to the other team.
 | Washington (texan_hog) at Clemson (temptiger) | Clemson | Leg 1 of a 2027–2028 home-and-home | Pending |
 | Clemson (temptiger) at TCU (oldarmy) | TCU | Leg 1 of a 2027–2028 home-and-home | Pending |
 | Georgia (Miles) at Clemson (temptiger) | Clemson | Leg 1 of a 2027–2028 home-and-home | Pending |
-| Alabama (TrickWhitey) at Ohio State (RekenCrew) | Ohio State | Leg 1 of a 2027–2028 home-and-home | Pending |
+| Notre Dame (brian) at TCU (oldarmy) | TCU | Leg 1 of a 2027–2028 home-and-home | Pending |
+| Ohio State (RekenCrew) at Notre Dame (brian) | Notre Dame | Leg 1 of a 2027–2028 home-and-home | Pending |
+| Oregon (Davey) at Notre Dame (brian) | Notre Dame | Leg 1 of a 2027–2028 home-and-home | Pending |
 | Cal (BlueMiniMeaniee) at UCLA (Dway) | UCLA | Leg 2 (final) of a 2026–2027 home-and-home; 2026 leg already played at Cal. No 2028 game. | Pending |
 
 ## 2028 Season
@@ -33,26 +35,34 @@ given, the return leg the following season goes to the other team.
 | Clemson (temptiger) at Washington (texan_hog) | Washington | Leg 2 of the 2027–2028 home-and-home | Pending |
 | TCU (oldarmy) at Clemson (temptiger) | Clemson | Leg 2 of the 2027–2028 home-and-home | Pending |
 | Clemson (temptiger) at Georgia (Miles) | Georgia | Leg 2 of the 2027–2028 home-and-home | Pending |
-| Ohio State (RekenCrew) at Alabama (TrickWhitey) | Alabama | Leg 2 of the 2027–2028 home-and-home | Pending |
+| TCU (oldarmy) at Notre Dame (brian) | Notre Dame | Leg 2 of the 2027–2028 home-and-home | Pending |
+| Notre Dame (brian) at Ohio State (RekenCrew) | Ohio State | Leg 2 of the 2027–2028 home-and-home | Pending |
+| Notre Dame (brian) at Oregon (Davey) | Oregon | Leg 2 of the 2027–2028 home-and-home | Pending |
 
 ## 2029 Season
 
 | Matchup | Requested site | Notes | Status |
 |---|---|---|---|
 | Oregon (Davey) at Clemson (temptiger) | Clemson | Leg 1 of a 2029–2030 home-and-home | Pending |
+| Clemson (temptiger) at Ohio State (RekenCrew) | Ohio State | Leg 1 of a 2029–2030 home-and-home | Pending |
 
 ## 2030 Season
 
 | Matchup | Requested site | Notes | Status |
 |---|---|---|---|
 | Clemson (temptiger) at Oregon (Davey) | Oregon | Leg 2 of the 2029–2030 home-and-home | Pending |
+| Ohio State (RekenCrew) at Clemson (temptiger) | Clemson | Leg 2 of the 2029–2030 home-and-home | Pending |
 
 ---
 
 > **Note — heavy loads in 2027–2028:** Clemson (temptiger) carries **three**
 > requested non-conference games each year (Washington, TCU, Georgia); TCU
-> (oldarmy) carries two (Michigan, Clemson). Confirmed intentional — check
-> against non-conference slot limits when building the schedule.
+> (oldarmy) carries **three** (Michigan, Clemson, Notre Dame), and Notre Dame
+> (brian) carries **three** (TCU, Ohio State, Oregon). Confirmed intentional —
+> check against non-conference slot limits when building the schedule.
+>
+> Home/away balance across 2027–2028: every team comes out even over the two
+> years (Notre Dame 3H/3A; Clemson and TCU 3H/3A; all others 1H/1A).
 
 ---
 
@@ -78,13 +88,25 @@ given, the return leg the following season goes to the other team.
 - 2027: at Clemson
 - 2028: at Georgia
 
-### Alabama (TrickWhitey) ↔ Ohio State (RekenCrew) — home-and-home
-- 2027: at Ohio State
-- 2028: at Alabama
+### TCU (oldarmy) ↔ Notre Dame (brian) — home-and-home
+- 2027: at TCU
+- 2028: at Notre Dame
+
+### Notre Dame (brian) ↔ Ohio State (RekenCrew) — home-and-home
+- 2027: at Notre Dame
+- 2028: at Ohio State
+
+### Notre Dame (brian) ↔ Oregon (Davey) — home-and-home
+- 2027: at Notre Dame
+- 2028: at Oregon
 
 ### Clemson (temptiger) ↔ Oregon (Davey) — home-and-home
 - 2029: at Clemson
 - 2030: at Oregon
+
+### Clemson (temptiger) ↔ Ohio State (RekenCrew) — home-and-home
+- 2029: at Ohio State
+- 2030: at Clemson
 
 ### Cal (BlueMiniMeaniee) ↔ UCLA (Dway) — home-and-home (closing out)
 - 2026: at Cal — **already played**
