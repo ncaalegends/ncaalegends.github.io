@@ -61,5 +61,24 @@ const POSTSEASON = {
       { home: "Georgia", away: "Tennessee", title: "SEC Championship",
         neutral: true },
     ]},
+
+    /* CFP FIRST ROUND, off the bowl-week-2 bracket screen. Higher
+       seed hosts on campus, so these are true home games — no
+       `neutral`, and the bracket shows no bowl name for them.
+
+       ONLY THE TWO ALL-CPU GAMES ARE HERE. The other half of the
+       first round involves coached teams and lives on their own
+       week-16 schedule rows in schedule-data.js, where the score was
+       already entered:
+         5 Wisconsin (Salzy)        38, 12 Tennessee  7
+         7 South Carolina 27, 10 UCF (EYEDONTPULL19) 17
+       The two places never both hold the same game — see the note on
+       cfpGameWinner() in script.js. */
+    { id: "cfp-r1", label: "CFP First Round", games: [
+      { home: "Oklahoma", away: "Missouri",
+        homeScore: 33, awayScore: 28 },
+      { home: "BYU", away: "Michigan",
+        homeScore: 12, awayScore: 41 },
+    ]},
   ],
 };
