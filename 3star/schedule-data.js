@@ -276,7 +276,7 @@ const TEAM_SCHEDULES = [
       { week: 13, opponent: "Houston", location: "at", teamScore: 26, opponentScore: 14 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, note: "BYE" },
-      { week: 17, opponent: "North Dakota State", location: "vs", neutral: true, title: "Texas Bowl", round: "bowl-w2" },
+      { week: 17, opponent: "North Dakota State", location: "vs", neutral: true, title: "Texas Bowl", round: "bowl-w2", teamScore: 31, opponentScore: 17 },
     ],
   },
   {
@@ -415,7 +415,7 @@ const TEAM_SCHEDULES = [
       { week: 13, opponent: "Hawai'i", location: "at", teamScore: 35, opponentScore: 21 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, note: "BYE" },
-      { week: 17, opponent: "Baylor", location: "at", neutral: true, title: "Texas Bowl", round: "bowl-w2" },
+      { week: 17, opponent: "Baylor", location: "at", neutral: true, title: "Texas Bowl", round: "bowl-w2", teamScore: 17, opponentScore: 31 },
     ],
   },
   {
