@@ -160,7 +160,7 @@ const TEAM_SCHEDULES = [
       { week: 13, opponent: "Louisiana Tech", location: "vs", teamScore: 27, opponentScore: 13 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, opponent: "Arkansas State", location: "vs", neutral: true, title: "Sun Belt Championship", round: "ccg", teamScore: 23, opponentScore: 20 },
-      { week: 16, opponent: "Charlotte", location: "vs", neutral: true, title: "Myrtle Beach Bowl", round: "bowl-w1" },
+      { week: 16, opponent: "Charlotte", location: "vs", neutral: true, title: "Myrtle Beach Bowl", round: "bowl-w1", teamScore: 31, opponentScore: 28 },
     ],
   },
 
