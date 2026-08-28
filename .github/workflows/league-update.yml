@@ -137,7 +137,26 @@ jobs:
           # -F - reads the message from stdin, so it is never parsed
           # as shell. Same reasoning as the payload above.
           printf '%s' "$COMMIT_MESSAGE" | git commit -F -
-          git push
+          # PUSH WITH A REBASE RETRY.
+          # The concurrency group above serialises two admin
+          # submissions, but it cannot serialise a human pushing from
+          # a laptop between this job's checkout and its push. When
+          # that happens the push is rejected as non-fast-forward and
+          # the whole run fails with exit 1 — the advance is applied
+          # and committed on the runner, then thrown away, and the
+          # commissioner sees "the site never updated" with no idea
+          # why. Rebase onto whatever landed and try again; the
+          # commit only touches data files, so it replays cleanly.
+          for attempt in 1 2 3 4 5; do
+            if git push; then
+              exit 0
+            fi
+            echo "push rejected (attempt $attempt) - rebasing onto origin/main"
+            git pull --rebase --no-edit origin main
+            sleep $attempt
+          done
+          echo "::error::could not push after 5 attempts - the submission was not applied"
+          exit 1
 
       - name: Report
         env:
