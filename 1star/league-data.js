@@ -36,8 +36,8 @@ const SEASON = {
   // main/league-data.js — it governs the seasons/<year>/ archive.
   year: 2026,
 
-  currentWeek: 16,
-  statusLine: "BOWL WEEK 1 (CFP FIRST ROUND)",
+  currentWeek: 17,
+  statusLine: "BOWL WEEK 2 (CFP QUARTERFINALS)",
   nextAdvanceAt: "2026-08-29",
   nextAdvance: "Saturday, August 29th",
 };
