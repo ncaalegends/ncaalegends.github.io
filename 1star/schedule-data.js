@@ -107,7 +107,7 @@ const TEAM_SCHEDULES = [
       { week: 13, opponent: "Appalachian State", location: "vs", teamScore: 9, opponentScore: 24, sim: true },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, note: "BYE" },
-      { week: 17, opponent: "UAB", location: "at", neutral: true, title: "First Responder Bowl", round: "bowl-w2" },
+      { week: 17, opponent: "UAB", location: "at", neutral: true, title: "First Responder Bowl", round: "bowl-w2", teamScore: 49, opponentScore: 27 },
     ],
   },
   {
