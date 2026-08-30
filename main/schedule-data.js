@@ -260,7 +260,7 @@ const TEAM_SCHEDULES = [
       { week: 12, opponent: "Georgia", location: "vs", stadium: "Williams-Brice Stadium", teamScore: 20, opponentScore: 37 },
       { week: 13, opponent: "Clemson", location: "at", stadium: "Clemson Memorial Stadium", teamScore: 32, opponentScore: 34 },
       { week: 14, note: "Army-Navy Week" },
-      { week: 15, opponent: "Texas", location: "at", neutral: true, stadium: "Mercedes-Benz Stadium", title: "SEC Championship", round: "ccg" },
+      { week: 15, opponent: "Texas", location: "at", neutral: true, stadium: "Mercedes-Benz Stadium", title: "SEC Championship", round: "ccg", teamScore: 7, opponentScore: 38 },
     ],
   },
   {
@@ -304,7 +304,7 @@ const TEAM_SCHEDULES = [
       { week: 12, opponent: "Arkansas", location: "vs", stadium: "Texas Memorial Stadium", teamScore: 24, opponentScore: 10 },
       { week: 13, opponent: "Texas A&M", location: "at", stadium: "Kyle Field", teamScore: 21, opponentScore: 50 },
       { week: 14, note: "Army-Navy Week" },
-      { week: 15, opponent: "South Carolina", location: "vs", neutral: true, stadium: "Mercedes-Benz Stadium", title: "SEC Championship", round: "ccg" },
+      { week: 15, opponent: "South Carolina", location: "vs", neutral: true, stadium: "Mercedes-Benz Stadium", title: "SEC Championship", round: "ccg", teamScore: 38, opponentScore: 7 },
     ],
   },
   {
