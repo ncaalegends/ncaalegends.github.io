@@ -84,7 +84,7 @@ const TEAM_SCHEDULES = [
       { week: 12, opponent: "Stanford", location: "vs", stadium: "California Memorial Stadium", teamScore: 24, opponentScore: 30 },
       { week: 13, opponent: "Pittsburgh", location: "vs", stadium: "California Memorial Stadium", teamScore: 44, opponentScore: 10 },
       { week: 14, note: "Army-Navy Week" },
-      { week: 15, opponent: "Clemson", location: "at", neutral: true, stadium: "Bank of America Stadium", title: "ACC Championship", round: "ccg" },
+      { week: 15, opponent: "Clemson", location: "at", neutral: true, stadium: "Bank of America Stadium", title: "ACC Championship", round: "ccg", teamScore: 19, opponentScore: 48 },
     ],
   },
   {
@@ -106,7 +106,7 @@ const TEAM_SCHEDULES = [
       { week: 12, opponent: "Utah", location: "vs", stadium: "Amon G. Carter Stadium", teamScore: 41, opponentScore: 3 },
       { week: 13, opponent: "Texas Tech", location: "at", stadium: "Jones Stadium", teamScore: 24, opponentScore: 14 },
       { week: 14, note: "Army-Navy Week" },
-      { week: 15, opponent: "West Virginia", location: "at", neutral: true, stadium: "AT&T Stadium", title: "Big 12 Championship", round: "ccg" },
+      { week: 15, opponent: "West Virginia", location: "at", neutral: true, stadium: "AT&T Stadium", title: "Big 12 Championship", round: "ccg", teamScore: 26, opponentScore: 48 },
     ],
   },
   {
@@ -128,7 +128,7 @@ const TEAM_SCHEDULES = [
       { week: 12, opponent: "Duke", location: "at", stadium: "Wallace Wade Stadium", teamScore: 37, opponentScore: 7 },
       { week: 13, opponent: "South Carolina", location: "vs", stadium: "Clemson Memorial Stadium", teamScore: 34, opponentScore: 32 },
       { week: 14, note: "Army-Navy Week" },
-      { week: 15, opponent: "California", location: "vs", neutral: true, stadium: "Bank of America Stadium", title: "ACC Championship", round: "ccg" },
+      { week: 15, opponent: "California", location: "vs", neutral: true, stadium: "Bank of America Stadium", title: "ACC Championship", round: "ccg", teamScore: 48, opponentScore: 19 },
     ],
   },
   {
@@ -392,7 +392,7 @@ const TEAM_SCHEDULES = [
       { week: 12, opponent: "Houston", location: "vs", stadium: "Milan Puskar Stadium", teamScore: 34, opponentScore: 31 },
       { week: 13, opponent: "Utah", location: "at", stadium: "Rice-Eccles Stadium", teamScore: 28, opponentScore: 27 },
       { week: 14, note: "Army-Navy Week" },
-      { week: 15, opponent: "TCU", location: "vs", neutral: true, stadium: "AT&T Stadium", title: "Big 12 Championship", round: "ccg" },
+      { week: 15, opponent: "TCU", location: "vs", neutral: true, stadium: "AT&T Stadium", title: "Big 12 Championship", round: "ccg", teamScore: 48, opponentScore: 26 },
     ],
   },
   {
