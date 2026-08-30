@@ -904,6 +904,79 @@ first round.
 Same renderer draws the week-10 projection and the finished bracket;
 there is no separate display mode to keep in sync.
 
+## bracket-sync.js
+
+Writes the next playoff round onto the coached teams' schedules.
+
+```
+node tools/bracket-sync.js --week 16
+node tools/bracket-sync.js --league 3star --week 17 --dry-run
+```
+
+| flag | |
+|---|---|
+| `--league SLUG` | main / 3star / 1star. Defaults to main. |
+| `--week N` | the bowl week to fill in, 16-19. Required. |
+| `--dry-run` | show the matchups and the rows. Write nothing. |
+| `--allow-projected` | derive from a bracket still marked projected. Looking only. |
+
+### What it's for
+
+A CFP game a coach plays is a row on that coach's schedule, and the
+admin page can only paint a score onto a row that already exists. So a
+missing row doesn't just look wrong — it stops the quarterfinal being
+entered, which stops the bracket advancing, which means the semifinal
+row is missing too. Adding those rows by hand was the step that got
+forgotten, and it was the worst one to forget.
+
+### What it derives, and from what
+
+Nothing here is a new fact:
+
+- the **field** is the last `CFP_BRACKET` block in `cfp-data.js`, which
+  must be `--final` (or you pass `--allow-projected` and don't write);
+- the **pairings** are arithmetic on the seed list — 5v12 / 6v11 /
+  7v10 / 8v9, winners meeting the bye seed that completes 13 — the same
+  arithmetic `script.js` does to draw the tree;
+- the **results** that decide who advances come from the same two
+  places the site reads: coached teams' schedule rows first, then
+  `postseason-data.js`.
+
+That last point is the reason this is a separate tool and not part of
+`advance.js`: it reads the identical union `cfpGameWinner()` reads, so
+the rows it writes and the bracket the site draws cannot disagree.
+
+### What it refuses to do
+
+- **Never writes a CPU-vs-CPU game.** That game has no schedule to live
+  on and belongs in `postseason-data.js` via `cfp.js --results`. The two
+  files must never hold the same game, so it reports the matchup and
+  stops.
+- **Never touches an existing row**, scored or not. Re-running is safe
+  and near-silent, which is what makes it something you can run every
+  bowl week without thinking about it.
+- **Never invents a result.** A round whose feeders aren't final yet
+  prints the matchups it knows and names what it's waiting on.
+
+### Home, away and the bowl name
+
+First round is on campus: the better seed hosts, and both rows carry
+that team's stadium — read off its own home games this season rather
+than from a table here. From the quarterfinals on every row is
+`neutral: true` with no stadium, because the fact the repo holds about
+a bowl site is its NAME, and that goes on `title` (merged forward key
+by key from the brackets, same as the site does).
+
+### The usual order in a bowl week
+
+```
+node tools/cfp.js --week 16 --results results.txt   # the CPU games
+node tools/bracket-sync.js --week 17                # next round's rows
+```
+
+Results first: a round's matchups can't be derived until the round
+before it is final.
+
 ## rollover.js
 
 Archives a finished season and resets the folder for the next one.
