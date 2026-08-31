@@ -1706,17 +1706,23 @@
      the career-record traversal and is H2H-only by construction. It
      walks the weeks itself.
 
-     THREE SOURCES, DEDUPED:
+     FOUR SOURCES, DEDUPED:
        1. league matchups on weeks carrying a `round`
        2. CPU games on weeks carrying a `round`
        3. postseason-data.js, for seasons written before the postseason
           moved into the schedules — an archived 2026 may still hold
           coached games there, and dropping them would rewrite history
+       4. the SETTLED CFP bracket, for appearances only — a first-round
+          bye has no game row until its quarterfinal opponent is known,
+          and the four teams that earned the bye are the last ones that
+          should be missing a playoff appearance in the meantime
 
      A game seen twice — in a schedule row AND in postseason-data —
      is counted once. Today that can't happen, since a game lives in
      exactly one place; the guard is for archives written under the
-     old rule and for a hand-edit that half-migrates one.
+     old rule and for a hand-edit that half-migrates one. Source 4
+     needs no guard: it adds a YEAR to a set, so a bye team that later
+     plays its quarterfinal still has exactly one appearance.
      ------------------------------------------------------------ */
   function computeAchievements(input, opts) {
     opts = opts || {};
@@ -1811,6 +1817,45 @@
         credit(g.roundId, g.homeCoach, g.away, g.scored ? g.scored.home > g.scored.away : null);
         credit(g.roundId, g.awayCoach, g.home, g.scored ? g.scored.away > g.scored.home : null);
       });
+
+      /* 4 — THE SETTLED BRACKET, for APPEARANCES ONLY.
+
+         An appearance is reaching the bracket, and the four teams
+         that reach it most convincingly are the ones that don't play
+         in the first week. A bye seed has no cfp-* row until its
+         quarterfinal opponent is known, so sources 1-3 credit every
+         team in the field EXCEPT the top four — the exact inverse of
+         what the trophy is for. This closes that window.
+
+         ONLY A `projected: false` BRACKET COUNTS. A week-10
+         projection is a forecast, and crediting a playoff appearance
+         off a forecast would hand out a trophy for being ranked in
+         November and quietly take it back in December. The field
+         becomes a fact when the championship games are played, which
+         is exactly what --final records.
+
+         APPEARANCES ONLY, and deliberately not through credit():
+         there is no opponent and no result here, so there is nothing
+         a bracket row could win. Conference titles, bowl wins and
+         national championships still require a played game. The set
+         dedupes against the game-derived credits on its own — a team
+         that appears here and then plays its quarterfinal adds the
+         same year twice and counts once.
+
+         The team must be COACHED at the time the playoff is played.
+         A school whose coach left in November is a CPU team in the
+         bracket, and CPU teams have no card to put this on. */
+      const settled = (Array.isArray(data.CFP_BRACKET) ? data.CFP_BRACKET : [])
+        .filter((b) => b && b.projected === false)
+        .pop();
+      if (settled) {
+        const playoffWeek = REGULAR_FINAL_WEEK + 1;
+        (settled.seeds || []).forEach((s) => {
+          if (!s || !s.team || !R.isLeagueTeam(s.team, playoffWeek)) return;
+          const coach = R.coachFor(s.team, playoffWeek);
+          if (coach) ensure(coach).cfpYears.add(year);
+        });
+      }
     });
 
     /* Years are sorted and KEPT, not discarded. The card shows
