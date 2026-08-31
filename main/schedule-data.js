@@ -267,7 +267,7 @@ const TEAM_SCHEDULES = [
       { week: 13, opponent: "Clemson", location: "at", stadium: "Clemson Memorial Stadium", teamScore: 32, opponentScore: 34 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, opponent: "Texas", location: "at", neutral: true, stadium: "Mercedes-Benz Stadium", title: "SEC Championship", round: "ccg", teamScore: 7, opponentScore: 38 },
-      { week: 16, opponent: "Wake Forest", location: "vs", neutral: true, title: "Gasparilla Bowl", round: "bowl-w1" },
+      { week: 16, opponent: "Wake Forest", location: "vs", neutral: true, title: "Gasparilla Bowl", round: "bowl-w1", teamScore: 23, opponentScore: 6 },
     ],
   },
   {
@@ -450,7 +450,7 @@ const TEAM_SCHEDULES = [
       { week: 13, opponent: "Duke", location: "vs", stadium: "Allegacy Federal Credit Union Stadium", teamScore: 44, opponentScore: 27 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, note: "BYE" },
-      { week: 16, opponent: "South Carolina", location: "at", neutral: true, title: "Gasparilla Bowl", round: "bowl-w1" },
+      { week: 16, opponent: "South Carolina", location: "at", neutral: true, title: "Gasparilla Bowl", round: "bowl-w1", teamScore: 6, opponentScore: 23 },
     ],
   },
   {
