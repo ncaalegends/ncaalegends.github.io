@@ -1019,6 +1019,28 @@ the file already says it is: delete the flag.
 It deletes nothing. The archive is a copy and every live file it
 rewrites is in git, so a rollover you didn't mean is a revert.
 
+**There is a button for this now.** The admin page grows an *Advance to
+Preseason* panel while a league's `currentWeek` is `"OFFSEASON"`, and
+nowhere else in the year. It reaches this same file through
+`tools/apply.js` on the Actions runner — `runRollover()` is the one
+implementation of the archive-then-reset sequence and the web path
+calls it rather than repeating it.
+
+Two differences from the command line, both deliberate:
+
+- `--force` becomes a tick-box that only exists when there is something
+  to warn about, with the same sentences `readiness()` prints here.
+- The page sends back the **year it was looking at**, and `apply.js`
+  refuses if that disagrees with `SEASON.year` on disk. That is what
+  makes a tab left open across a rollover harmless.
+
+The web path also posts a short preseason announcement to the league's
+Discord — "the season is archived, not deleted; the next one is live" —
+through the same `post()` an advance uses, and a failed post never
+costs the rollover.
+
+Regression test: `node tools/test-admin-rollover.js` (needs jsdom).
+
 ## find-tools.cmd
 
 Not something you run. `advance.cmd`, `scores.cmd` and `preview.cmd`

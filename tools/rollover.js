@@ -346,13 +346,29 @@ function emptyPostseason(file) {
 }
 
 /* ------------------------------------------------------------
-   MAIN
+   RUN IT
+   ------------------------------------------------------------
+   The whole rollover, in one callable function, because there are
+   now two front doors to it: `node tools/rollover.js` and the
+   "Advance to Preseason" button on the admin page, which reaches
+   this through tools/apply.js on the Actions runner.
+
+   Both take the identical path — archive, verify, then reset — for
+   the reason the header gives at length: the ordering IS the safety
+   property, and a second implementation of it is a second chance to
+   get it backwards. The web path differs only in where the output
+   goes (`log`) and in how `force` was obtained: a tick-box the
+   commissioner had to find and read, rather than a flag.
+
+   It returns what happened rather than printing a verdict, so the
+   caller can turn it into a Discord message, a workflow summary, or
+   the prose main() prints.
    ------------------------------------------------------------ */
-function main() {
-  const args = parseArgs(process.argv.slice(2));
-  const league = resolveLeague(args.league || "main");
-  const dryRun = args.flags.has("dry-run");
-  const force = args.flags.has("force");
+function runRollover(opts = {}) {
+  const league = opts.league;
+  const dryRun = opts.dryRun === true;
+  const force = opts.force === true;
+  const log = opts.log || console.log;
 
   const data = loadData(league.paths);
   const year = Number((data.SEASON || {}).year);
@@ -368,7 +384,7 @@ function main() {
   const dest = path.join(league.seasonsDir, String(year));
   const nextYear = year + 1;
 
-  console.log(`\n  ${league.label} — rollover ${year} -> ${nextYear}\n`);
+  log(`\n  ${league.label} — rollover ${year} -> ${nextYear}\n`);
 
   /* --- the one hard refusal --- */
   if (fs.existsSync(dest)) {
@@ -383,9 +399,9 @@ function main() {
   /* --- readiness --- */
   const notes = readiness(data, league);
   if (notes.length) {
-    console.log(`  Before going further:\n`);
-    notes.forEach((n) => console.log(`    - ${n}`));
-    console.log("");
+    log(`  Before going further:\n`);
+    notes.forEach((n) => log(`    - ${n}`));
+    log("");
     if (!force && !dryRun) {
       die(
         `not rolling over while the season looks unfinished.\n` +
@@ -396,36 +412,37 @@ function main() {
   }
 
   /* --- what will be archived --- */
-  const present = ARCHIVED_FILES.filter((f) => fs.existsSync(path.join(league.dir_abs || "", f)) || true)
-    .map((f) => ({ name: f, src: path.join(path.dirname(league.paths.league), f) }))
-    .filter((f) => fs.existsSync(f.src));
+  const dir = path.dirname(league.paths.league);
+  const present = ARCHIVED_FILES.map((f) => ({ name: f, src: path.join(dir, f) })).filter((f) =>
+    fs.existsSync(f.src)
+  );
 
-  console.log(`  Archiving ${present.length} file(s) to ${league.dir}/seasons/${year}/`);
-  present.forEach((f) => console.log(`    ${f.name}`));
-  console.log("");
+  log(`  Archiving ${present.length} file(s) to ${league.dir}/seasons/${year}/`);
+  present.forEach((f) => log(`    ${f.name}`));
+  log("");
 
   const missing = ARCHIVED_FILES.filter((f) => !present.some((p) => p.name === f));
   if (missing.length) {
-    console.log(`  Not present, so not archived: ${missing.join(", ")}`);
-    console.log(`  (an absent optional file is a normal state, not an error)\n`);
+    log(`  Not present, so not archived: ${missing.join(", ")}`);
+    log(`  (an absent optional file is a normal state, not an error)\n`);
   }
 
   if (dryRun) {
     const { departed } = resetLeagueData(league.paths.league, nextYear);
     const { cleared } = clearSchedules(league.paths.schedule);
-    console.log(`  Then the live folder would be reset:`);
-    console.log(`    league-data.js     year ${year} -> ${nextYear}, currentWeek -> "PRESEASON", deadline cleared`);
-    if (departed) console.log(`                       ${departed} departedAfterWeek -> active: false`);
-    console.log(`    schedule-data.js   ${cleared} team(s) emptied of weeks, teams and conferences kept`);
-    console.log(`    top25-data.js      emptied`);
-    console.log(`    cfp-data.js        emptied`);
-    console.log(`    postseason-data.js emptied`);
+    log(`  Then the live folder would be reset:`);
+    log(`    league-data.js     year ${year} -> ${nextYear}, currentWeek -> "PRESEASON", deadline cleared`);
+    if (departed) log(`                       ${departed} departedAfterWeek -> active: false`);
+    log(`    schedule-data.js   ${cleared} team(s) emptied of weeks, teams and conferences kept`);
+    log(`    top25-data.js      emptied`);
+    log(`    cfp-data.js        emptied`);
+    log(`    postseason-data.js emptied`);
 
-    const wouldWire = wireIndexHtml(
-      path.join(path.dirname(league.paths.league), "index.html"),
-      [...listArchivedYears(league), year]
-    );
-    console.log(
+    const wouldWire = wireIndexHtml(path.join(dir, "index.html"), [
+      ...listArchivedYears(league),
+      year,
+    ]);
+    log(
       `\n  And the site would be pointed at the archive:` +
         `\n    seasons/${year}/archive.js written (the five files above, scoped for the browser)` +
         `\n    ${league.dir}/index.html ` +
@@ -433,8 +450,17 @@ function main() {
           ? `gains ${wouldWire.added} <script> tag(s) before league-data.js`
           : `— ${wouldWire.reason}`)
     );
-    console.log(`\n  --dry-run: nothing written.\n`);
-    return;
+    log(`\n  --dry-run: nothing written.\n`);
+    return {
+      dryRun: true,
+      year,
+      nextYear,
+      dest,
+      notes,
+      files: present.map((f) => f.name),
+      departed,
+      cleared,
+    };
   }
 
   /* --- 1. ARCHIVE FIRST --- */
@@ -452,7 +478,7 @@ function main() {
     ),
     "utf8"
   );
-  console.log(`  Archived, plus archive.js for the site to load it.`);
+  log(`  Archived, plus archive.js for the site to load it.`);
 
   /* --- 2. VERIFY IT LOADS, before anything live is touched --- */
   let archived;
@@ -476,7 +502,7 @@ function main() {
         `  Nothing live has been changed. Check ${path.relative(process.cwd(), dest)}.`
     );
   }
-  console.log(`  Verified — ${coaches} coaches, ${teams} schedules, readable on its own.`);
+  log(`  Verified — ${coaches} coaches, ${teams} schedules, readable on its own.`);
 
   const years = listArchivedYears(league);
   if (!years.includes(year)) {
@@ -490,7 +516,10 @@ function main() {
   const sched = clearSchedules(league.paths.schedule);
   fs.writeFileSync(league.paths.schedule, sched.text, "utf8");
 
-  const t25 = league.paths.top25 && fs.existsSync(league.paths.top25) ? emptyArray(league.paths.top25, "TOP25") : null;
+  const t25 =
+    league.paths.top25 && fs.existsSync(league.paths.top25)
+      ? emptyArray(league.paths.top25, "TOP25")
+      : null;
   if (t25) fs.writeFileSync(league.paths.top25, t25, "utf8");
 
   if (league.paths.cfp && fs.existsSync(league.paths.cfp)) {
@@ -505,22 +534,24 @@ function main() {
     if (p) fs.writeFileSync(league.paths.postseason, p, "utf8");
   }
 
-  console.log(`\n  Live folder reset for ${nextYear}:`);
-  console.log(`    currentWeek "PRESEASON", deadline cleared`);
+  log(`\n  Live folder reset for ${nextYear}:`);
+  log(`    currentWeek "PRESEASON", deadline cleared`);
   if (reset.departed) {
-    console.log(`    ${reset.departed} departed coach(es) marked active: false`);
+    log(`    ${reset.departed} departed coach(es) marked active: false`);
   }
-  console.log(`    ${sched.cleared} schedule(s) emptied — teams and conferences kept`);
-  console.log(`    polls, bracket and postseason emptied`);
+  log(`    ${sched.cleared} schedule(s) emptied — teams and conferences kept`);
+  log(`    polls, bracket and postseason emptied`);
 
   /* --- 4. point the site at every archived season --- */
-  const indexFile = path.join(path.dirname(league.paths.league), "index.html");
+  const indexFile = path.join(dir, "index.html");
   const wired = wireIndexHtml(indexFile, listArchivedYears(league));
+  let wireWarning = "";
   if (wired.changed) {
     fs.writeFileSync(indexFile, wired.text, "utf8");
-    console.log(`    ${league.dir}/index.html now loads ${wired.added} archived season(s)`);
+    log(`    ${league.dir}/index.html now loads ${wired.added} archived season(s)`);
   } else if (wired.reason !== "already wired") {
-    console.log(
+    wireWarning = wired.reason;
+    log(
       `\n  WARNING: couldn't wire the archive into ${league.dir}/index.html — ${wired.reason}.\n` +
         `           The season is safely archived, but the site won't show its career\n` +
         `           history until this tag is added by hand, before league-data.js:\n` +
@@ -529,27 +560,60 @@ function main() {
   }
 
   /* --- 5. the career record still works --- */
+  let careerYears = [];
   try {
-    const career = loadCareer(league);
-    console.log(
-      `\n  Career record spans ${career.length} season(s): ` +
-        career.map((s) => s.year ?? "?").join(", ")
-    );
+    careerYears = loadCareer(league).map((s) => s.year ?? "?");
+    log(`\n  Career record spans ${careerYears.length} season(s): ${careerYears.join(", ")}`);
   } catch (e) {
-    console.log(`\n  WARNING: loadCareer() failed after the rollover — ${e.message}`);
+    log(`\n  WARNING: loadCareer() failed after the rollover — ${e.message}`);
   }
 
+  return {
+    dryRun: false,
+    year,
+    nextYear,
+    dest,
+    notes,
+    files: present.map((f) => f.name),
+    coaches,
+    teams,
+    departed: reset.departed,
+    cleared: sched.cleared,
+    wired: wired.changed ? wired.added : 0,
+    wireWarning,
+    careerYears,
+  };
+}
+
+/* ------------------------------------------------------------
+   MAIN — the command-line front door
+   ------------------------------------------------------------ */
+function main() {
+  const args = parseArgs(process.argv.slice(2));
+  const league = resolveLeague(args.league || "main");
+
+  const r = runRollover({
+    league,
+    dryRun: args.flags.has("dry-run"),
+    force: args.flags.has("force"),
+  });
+
+  if (r.dryRun) return;
+
   console.log(`\n  Next, in this order:`);
-  console.log(`    1. Roster changes for ${nextYear} — schools, arrivals, anyone not returning.`);
-  console.log(`       The archive is already written, so edits now can't corrupt ${year}.`);
-  console.log(`    2. Transcribe ${nextYear} schedules into schedule-data.js.`);
+  console.log(`    1. Roster changes for ${r.nextYear} — schools, arrivals, anyone not returning.`);
+  console.log(`       The archive is already written, so edits now can't corrupt ${r.year}.`);
+  console.log(`    2. Transcribe ${r.nextYear} schedules into schedule-data.js.`);
   console.log(`    3. node tools/h2h.js --league ${league.slug} --check`);
-  console.log(`    4. git add -A && git commit -m "${league.label}: roll over to ${nextYear}" && git push\n`);
+  console.log(
+    `    4. git add -A && git commit -m "${league.label}: roll over to ${r.nextYear}" && git push\n`
+  );
 }
 
 if (require.main === module) main();
 
 module.exports = {
+  runRollover,
   resetLeagueData,
   clearSchedules,
   emptyArray,
@@ -557,4 +621,5 @@ module.exports = {
   readiness,
   renderArchiveLoader,
   wireIndexHtml,
+  ARCHIVED_FILES,
 };

@@ -271,6 +271,8 @@ $("signout-btn").addEventListener("click", () => {
   message($("signin-msg"), "");
   message($("scores-msg"), "");
   message($("advance-msg"), "");
+  message($("rollover-msg"), "");
+  $("rollover-panel").classList.add("hidden");
   message($("vacation-msg"), "");
   $("vacation-list").innerHTML = "";
   if (window.PickEm) PickEm.onSignOut();
@@ -374,6 +376,11 @@ function refreshWeekControls() {
     (data.SEASON.nextAdvance ? ` · next deadline ${data.SEASON.nextAdvance}` : "");
 
   renderGames();
+
+  /* Not awaited: it fetches postseason-data.js to work out what to
+     warn about, and nothing else on this page waits on that. The
+     panel stays hidden until it resolves, which is the right default. */
+  renderRollover();
 }
 
 /* Both of these drop any optimistic paint. The pending set is keyed
@@ -1250,6 +1257,261 @@ $("advance-yes").addEventListener("click", async () => {
         "warn",
         `Sent, but the site still hasn't updated after 3 minutes.\n` +
           `Reload this page in a few minutes to check before advancing again.`
+      );
+    }
+  } catch (err) {
+    message(msg, "error", err.message);
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+
+/* ============================================================
+   ADVANCE TO PRESEASON — the rollover
+   ------------------------------------------------------------
+   The once-a-year button. It archives the finished season into
+   <league>/seasons/<year>/ and starts the next one, and it is the
+   only control on this page whose effect is not a week's worth of
+   data that a later submission corrects.
+
+   THREE THINGS KEEP IT OUT OF THE WAY UNTIL IT IS WANTED:
+
+     1. The panel is hidden unless this league's currentWeek is the
+        literal string "OFFSEASON". You cannot reach it without
+        having already ended the season with the advance above, so
+        for eleven months of the year it does not exist.
+
+     2. The readiness notes below are the same sentences
+        readiness() prints in tools/rollover.js, computed from the
+        same published files. When there are any, the button is
+        replaced by a tick-box: this is the web's --force, and it
+        is deliberately not a checkbox that is always there, because
+        one that is always there is one nobody reads.
+
+     3. The confirmation names the destination folder, the year
+        being archived and the year being started, and says what
+        happens to departed coaches — everything §4.8 of
+        docs/SCOPING-offseason-and-season-rollover.md asks for.
+
+   Everything real happens in tools/rollover.js on the Actions
+   runner. This file decides nothing: it shows what that tool is
+   about to do, and sends the year it was looking at so a tab left
+   open since before a rollover can't archive a season twice.
+   ============================================================ */
+const ROLLOVER_LEAGUES = ["1star", "3star", "main"];
+const PRESEASON = "PRESEASON";
+
+/* Readiness needs postseason-data.js, which loadLeagueData() doesn't
+   fetch — the scores tab has no use for it. Pulled on its own here so
+   the notes shown match the ones the runner will compute rather than
+   guessing from the schedules alone. A league with no such file is a
+   legitimate state, not an error, so a failed fetch reads as "no
+   postseason recorded" and the note stands. */
+async function loadPostseason(slug) {
+  try {
+    const src = await fetchText(`../${slug}/postseason-data.js`);
+    return new Function(`
+      ${src}
+      return typeof POSTSEASON !== "undefined" ? POSTSEASON : null;
+    `)();
+  } catch (e) {
+    return null;
+  }
+}
+
+/* A mirror of readiness() in tools/rollover.js. Kept in step by hand,
+   like seasonIndex() is in three places — the browser and Node don't
+   share a module system. If the two ever disagree the runner wins:
+   it refuses, and this only ever asks. */
+function rolloverNotes(season, schedules, postseason) {
+  const notes = [];
+  const week = season.currentWeek;
+
+  if (week !== OFFSEASON) {
+    notes.push(
+      week === PRESEASON
+        ? `This league is already in the preseason — it looks like it has rolled over.`
+        : `The league is on ${weekOptionLabel(seasonIndex(week))}, not in the offseason.`
+    );
+  }
+
+  const rounds = (postseason && postseason.rounds) || [];
+  const nc = rounds.find((r) => r.id === "cfp-nc");
+  const ncPlayed = ((nc && nc.games) || []).some(
+    (g) => g.homeScore != null && g.awayScore != null
+  );
+  const ncInSchedule = (schedules || []).some((t) =>
+    (t.weeks || []).some(
+      (w) => w.round === "cfp-nc" && w.teamScore != null && w.opponentScore != null
+    )
+  );
+  if (!ncPlayed && !ncInSchedule) {
+    notes.push(
+      `No national championship result is recorded, in postseason-data.js or in any ` +
+        `schedule. That is normal for a league with nobody in the playoff, and a sign the ` +
+        `season isn't finished for one that had somebody in it.`
+    );
+  }
+
+  return notes;
+}
+
+/* What the panel currently believes, so the click handlers don't
+   recompute it and can't disagree with what was on screen. */
+let rolloverState = null;
+
+async function renderRollover() {
+  const panel = $("rollover-panel");
+  const slug = $("league-select").value;
+  const season = (data && data.SEASON) || {};
+
+  const eligible = ROLLOVER_LEAGUES.includes(slug) && season.currentWeek === OFFSEASON;
+
+  /* Always reset to the closed state first. Switching leagues while a
+     confirmation is open must not leave it open over a different
+     dynasty's data — the same reason switchLeague() resets the
+     advance confirmation. */
+  $("rollover-confirm").classList.add("hidden");
+  $("rollover-form").classList.remove("hidden");
+  message($("rollover-msg"), "");
+  panel.classList.toggle("hidden", !eligible);
+  rolloverState = null;
+  if (!eligible) return;
+
+  const year = Number(season.year);
+  const nextYear = year + 1;
+
+  $("rollover-hint").innerHTML =
+    `The offseason hold is over. This archives <strong>${esc(String(year))}</strong> to ` +
+    `<code>${esc(slug)}/seasons/${esc(String(year))}/</code> — roster, schedules, polls, ` +
+    `bracket and postseason — and starts <strong>${esc(String(nextYear))}</strong> with an ` +
+    `empty schedule. Nothing is deleted, and the archive is read-only afterwards.`;
+
+  const postseason = await loadPostseason(slug);
+
+  /* The league may have been switched while that fetch was in flight.
+     Re-check before painting anything from it. */
+  if ($("league-select").value !== slug) return;
+
+  const notes = rolloverNotes(season, data.TEAM_SCHEDULES, postseason);
+  rolloverState = { slug, year, nextYear, notes };
+
+  const box = $("rollover-notes");
+  if (!notes.length) {
+    box.innerHTML = "";
+    $("rollover-btn").disabled = false;
+    return;
+  }
+
+  box.innerHTML =
+    `<div class="ro-notes"><strong>Before you do:</strong><ul>` +
+    notes.map((n) => `<li>${esc(n)}</li>`).join("") +
+    `</ul></div>` +
+    `<label class="ro-ack"><input type="checkbox" id="rollover-ack">` +
+    `<span>I've read the above and want to archive ${esc(String(year))} anyway.</span></label>`;
+
+  /* The button stays disabled until the box is ticked. The tick-box
+     is created fresh each render, so the listener goes on here rather
+     than at load. */
+  $("rollover-btn").disabled = true;
+  $("rollover-ack").addEventListener("change", (e) => {
+    $("rollover-btn").disabled = !e.target.checked;
+  });
+}
+
+$("rollover-btn").addEventListener("click", () => {
+  /* Belt and braces with the `disabled` attribute. A disabled button
+     ignores a real click, but the state that disables it is the
+     unticked acknowledgement, and this is the one control on the page
+     where "the guard was only visual" would be expensive. */
+  if ($("rollover-btn").disabled) return;
+  if (!rolloverState) return;
+  const { year, nextYear, notes } = rolloverState;
+  const label = leagueLabel($("league-select").value);
+
+  message($("rollover-msg"), "");
+  $("rollover-confirm-text").innerHTML =
+    `<span class="what">${esc(label)}</span> will archive the ` +
+    `<span class="what">${esc(String(year))}</span> season to ` +
+    `<span class="what">${esc(rolloverState.slug)}/seasons/${esc(String(year))}/</span> — ` +
+    `roster, schedules, polls, bracket and postseason — and start ` +
+    `<span class="what">${esc(String(nextYear))}</span> with an empty schedule.<br>` +
+    `Coaches carry forward with their teams. Anyone who left mid-season is marked ` +
+    `inactive rather than carried into ${esc(String(nextYear))}.<br>` +
+    `<strong>Nothing is deleted</strong> — the archive is a copy, every file rewritten is in ` +
+    `git, and the site keeps showing ${esc(String(year))} in career records and trophies.` +
+    (notes.length
+      ? `<br><strong>Going ahead despite ${notes.length} warning(s) above.</strong>`
+      : "");
+
+  $("rollover-form").classList.add("hidden");
+  $("rollover-confirm").classList.remove("hidden");
+});
+
+$("rollover-no").addEventListener("click", () => {
+  $("rollover-confirm").classList.add("hidden");
+  $("rollover-form").classList.remove("hidden");
+});
+
+$("rollover-yes").addEventListener("click", async () => {
+  const btn = $("rollover-yes");
+  const msg = $("rollover-msg");
+  if (!rolloverState) return;
+  const { slug, year, nextYear, notes } = rolloverState;
+
+  btn.disabled = true;
+  message(msg, "warn", "Archiving…");
+
+  try {
+    await api("/submit", {
+      code: accessCode,
+      payload: {
+        action: "rollover",
+        league: slug,
+        /* The year this page was looking at. apply.js compares it
+           with SEASON.year on disk and refuses a mismatch, which is
+           what makes a stale tab harmless. */
+        year,
+        /* The web's --force. False when there was nothing to warn
+           about; true only because a tick-box was found and read. */
+        force: notes.length > 0,
+        confirm: true,
+      },
+    });
+
+    $("rollover-confirm").classList.add("hidden");
+    $("rollover-form").classList.remove("hidden");
+
+    message(msg, "warn", "Sent. Waiting for the site to publish…");
+    scrollToMessage(msg);
+
+    /* A rollover rewrites more files than an advance does, so the
+       check is both halves of the new state: the year has moved on
+       AND the season reads PRESEASON. Either alone could be a
+       half-published deploy. */
+    const fresh = await waitForPublish(
+      slug,
+      (d) => d.SEASON.currentWeek === PRESEASON && Number(d.SEASON.year) === nextYear,
+      (secs) => message(msg, "warn", `Sent. Waiting for the site to publish… (${secs}s)`)
+    );
+
+    if (fresh) {
+      data = fresh;
+      refreshWeekControls();
+      message(
+        msg,
+        "ok",
+        `Done — ${year} is archived and ${nextYear} is live. Next: roster changes for ` +
+          `${nextYear}, then transcribe the schedules.`
+      );
+    } else {
+      message(
+        msg,
+        "warn",
+        "Sent, but the site still hasn't updated after 3 minutes.\n" +
+          "Check the Actions run before trying again — a rollover refuses to run twice, " +
+          "so nothing is at risk either way."
       );
     }
   } catch (err) {

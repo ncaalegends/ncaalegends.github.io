@@ -520,6 +520,44 @@ details.entered .entered-body .game:first-child { border-top: 1px solid var(--li
 .confirm-box p { margin: 0 0 14px; color: var(--chalk); font-size: 15px; line-height: 1.55; }
 .confirm-box .what { font-family: var(--font-mono); color: var(--gold-bright); }
 
+/* THE ROLLOVER PANEL IS RED DOWN ITS EDGE, and it is the only panel
+   on the page that is. Every other action here is a week's worth of
+   data that a second submission corrects; this one writes a permanent
+   archive and empties the live season behind it. The colour is the
+   first thing that says so, before any of the words do. */
+.rollover-panel { border-left-color: var(--crimson); }
+.rollover-panel h2 { color: var(--crimson); }
+
+/* The readiness notes rollover.js would print on the command line,
+   shown here instead — same sentences, same purpose: say what looks
+   unfinished before doing the thing that only happens once. */
+.ro-notes {
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  background: rgba(242,193,78,0.10);
+  border-left: 3px solid var(--gold);
+  color: #ffe6a8;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.ro-notes ul { margin: 6px 0 0; padding-left: 18px; }
+.ro-notes li { margin: 4px 0; }
+
+/* The acknowledgement. Only appears when there ARE notes — a season
+   that ended tidily needs no tick-box, and one that is always there
+   is one nobody reads. */
+.ro-ack {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin: 0 0 16px;
+  color: var(--chalk);
+  font-size: 14px;
+  line-height: 1.5;
+  cursor: pointer;
+}
+.ro-ack input { margin-top: 3px; flex: none; }
+
 .week-strip {
   display: flex;
   align-items: center;
@@ -664,6 +702,46 @@ details.entered .entered-body .game:first-child { border-top: 1px solid var(--li
       </div>
 
       <div id="advance-msg"></div>
+    </section>
+
+    <!-- ============ ADVANCE TO PRESEASON ============
+         The rollover. Hidden unless this league's currentWeek is the
+         string "OFFSEASON", which is why it is invisible for eleven
+         months of the year and why it can't be reached by anyone who
+         hasn't already ended the season with the advance above.
+
+         WHY IT ISN'T THE LAST OPTION ON THE ADVANCE PICKER, which is
+         where it looks like it belongs: an advance moves the league
+         along the week axis and is undone by advancing again. This
+         copies five files into seasons/<year>/, verifies the copy
+         loads, and then empties the live folder — polls, bracket,
+         postseason and all 24 schedules. Both of those cannot be the
+         same button, and a dropdown entry that quietly meant "and
+         also archive the year" is exactly the kind of thing this
+         codebase keeps refusing to build.
+
+         Nothing is deleted. The archive is a copy and every file it
+         rewrites is in git, so a rollover nobody meant is a revert.
+         The confirmation says so because it is true — see the header
+         of tools/rollover.js. -->
+    <section class="panel rollover-panel hidden" id="rollover-panel">
+      <h2>Advance to preseason</h2>
+      <p class="hint" id="rollover-hint"></p>
+
+      <div id="rollover-form">
+        <div id="rollover-notes"></div>
+        <button class="btn btn-danger" type="button" id="rollover-btn">Advance to preseason&hellip;</button>
+      </div>
+
+      <div id="rollover-confirm" class="confirm-box hidden">
+        <p id="rollover-confirm-text"></p>
+        <div class="btn-row">
+          <button class="btn btn-danger" type="button" id="rollover-yes">Yes, archive and roll over</button>
+          <button class="btn btn-quiet" type="button" id="rollover-no">Cancel</button>
+        </div>
+      </div>
+
+      <div id="rollover-msg"></div>
     </section>
 
     <!-- ============ VACATIONS ============

@@ -55,3 +55,37 @@ Semifinal/championship bowl names can't be added to `cfp-data.js` in a bowl
 week for the same reason. The `title` on the schedule row is where they land.
 
 As always: the tools edit files and stop. Don't commit or push.
+
+## The rollover (end of the offseason hold)
+
+Ending a season is **Advance to Preseason** on the admin page. It only
+appears while that league's `currentWeek` is `"OFFSEASON"`, so getting
+there is two steps, in this order:
+
+1. Advance to *Offseason* on the advance picker — the hold. Deadline
+   fields may be left blank; that hides the countdown badge, which is
+   what you want while the nine in-game steps run in Discord.
+2. Advance to Preseason — archives the year into
+   `<league>/seasons/<year>/` and starts the next one.
+
+Both run through `tools/apply.js` on the Actions runner, same as an
+advance. `tools/rollover.js --dry-run` shows exactly what step 2 will
+do without writing anything, and is worth running first.
+
+**Roster edits happen after the archive, never before.** The archive
+freezes who coached which school that year; editing first produces an
+archive that is quietly wrong and never errors. The tool enforces the
+order — it archives, verifies the archive loads, and only then touches
+a live file — so the rule you have to keep is just "don't hand-edit
+league-data.js during the hold".
+
+Coaches carry forward whole. Anyone with `departedAfterWeek: N` is
+rewritten as `active: false`; reinstating them later is deleting that
+flag.
+
+If the season looks unfinished — no national championship recorded,
+say — the page shows the warning and makes you tick a box. That is the
+web's `--force`. For a Group-of-5 league with nobody in the playoff
+that warning is expected and fine.
+
+As always: the tools edit files and stop. Don't commit or push.

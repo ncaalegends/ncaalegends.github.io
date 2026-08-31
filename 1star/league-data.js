@@ -30,16 +30,28 @@
    the badge starts showing one.
 
    Set both to "" to hide the badge entirely.
+
+   THE HOLD (2026-08-31). The bowls are played and the league is in
+   the offseason: `currentWeek: "OFFSEASON"`, which seasonIndex()
+   reads as week 19 — everything has happened — and both deadline
+   fields cleared, because the nine in-game offseason steps are
+   announced in Discord and the site has nothing to count down to.
+   `statusLine` is free text and is the place a per-step line like
+   "OFFSEASON \u00b7 SIGNING DAY" goes if it's wanted.
+
+   The hold ends at Advance to Preseason on the admin page, which
+   archives 2026 into 1star/seasons/2026/ and starts 2027. See
+   docs/SCOPING-offseason-and-season-rollover.md.
    ------------------------------------------------------------ */
 const SEASON = {
   // In-game year for this season's data. See the long note in
   // main/league-data.js — it governs the seasons/<year>/ archive.
   year: 2026,
 
-  currentWeek: 18,
-  statusLine: "BOWL WEEK 3 (CFP SEMIFINALS)",
-  nextAdvanceAt: "2026-08-29T22:00:00-04:00",
-  nextAdvance: "Saturday, August 29th - 10:00 PM EDT",
+  currentWeek: "OFFSEASON",
+  statusLine: "OFFSEASON",
+  nextAdvanceAt: "",
+  nextAdvance: "",
 };
 
 /* ------------------------------------------------------------

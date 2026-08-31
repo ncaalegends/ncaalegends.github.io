@@ -68,7 +68,14 @@ const {
 const Vac = require("../vacation-core");
 const { applyScores, scoreableGames } = require("./scores");
 const { resolveEntries, ScoreError } = require("../score-core");
-const { updateSeason, buildMessage, post, webhookUrl } = require("./advance");
+const { updateSeason, buildMessage, post, webhookUrl, makeMentioner } = require("./advance");
+
+/* The rollover itself — archive, verify, reset — lives in
+   tools/rollover.js and is called, never reimplemented. Its header
+   explains at length why the archive-then-reset ORDER is the whole
+   safety property; a second copy of that sequence here would be a
+   second chance to get it backwards. */
+const { runRollover } = require("./rollover");
 
 /* Read tools/config.json (which on the Actions runner IS the
    DISCORD_CONFIG secret, written there by the workflow) WITHOUT the
@@ -103,12 +110,24 @@ function loadDiscordConfig() {
 const SCORE_LEAGUES = ["1star", "3star", "main"];
 const ADVANCE_LEAGUES = ["1star", "3star", "main"];
 
+/* Which leagues may be ROLLED OVER from the web — the once-a-year
+   action that archives a finished season and starts the next one.
+   Its own list rather than a reuse of ADVANCE_LEAGUES: an ordinary
+   advance rewrites four fields, and this writes a permanent archive,
+   so "may advance" and "may end the season" are worth being separate
+   answers even while they hold the same three leagues. */
+const ROLLOVER_LEAGUES = ["1star", "3star", "main"];
+
 /* Everything the web path can reach at all — the union, used only
    for the "is this even a web league" check and error text. */
-const ALLOWED_LEAGUES = [...new Set([...SCORE_LEAGUES, ...ADVANCE_LEAGUES])];
+const ALLOWED_LEAGUES = [
+  ...new Set([...SCORE_LEAGUES, ...ADVANCE_LEAGUES, ...ROLLOVER_LEAGUES]),
+];
 
 function leaguesForAction(action) {
-  return action === "advance" ? ADVANCE_LEAGUES : SCORE_LEAGUES;
+  if (action === "advance") return ADVANCE_LEAGUES;
+  if (action === "rollover") return ROLLOVER_LEAGUES;
+  return SCORE_LEAGUES;
 }
 
 const MAX_ENTRIES = 40; // a 16-team league has at most ~16 games/week
@@ -224,8 +243,15 @@ function validate(payload) {
   }
 
   const action = payload.action;
-  if (action !== "scores" && action !== "advance" && action !== "vacation") {
-    bad(`unknown action "${action}" — expected "scores", "advance" or "vacation"`);
+  if (
+    action !== "scores" &&
+    action !== "advance" &&
+    action !== "vacation" &&
+    action !== "rollover"
+  ) {
+    bad(
+      `unknown action "${action}" — expected "scores", "advance", "rollover" or "vacation"`
+    );
   }
 
   /* A VACATION HAS NO LEAGUE AND NO WEEK, so it branches out before
@@ -236,6 +262,49 @@ function validate(payload) {
   if (action === "vacation") return validateVacation(payload);
 
   const league = payload.league;
+  const permittedForLeague = leaguesForAction(action);
+
+  /* A ROLLOVER HAS A LEAGUE BUT NO WEEK. It doesn't move the season
+     along the axis, it ends the axis: 2026 is copied into
+     seasons/2026/ and the live folder starts again at "PRESEASON".
+     So it branches out above the week checks, the same way a vacation
+     branches out above the league checks. */
+  if (action === "rollover") {
+    if (!permittedForLeague.includes(league)) {
+      bad(`league "${league}" cannot be rolled over this way. Allowed: ${permittedForLeague.join(", ")}`);
+    }
+    if (payload.confirm !== true) {
+      bad("rollover requires an explicit confirmation");
+    }
+
+    /* THE YEAR IS SENT BACK, AND IT IS A LOCK, NOT A LABEL. The admin
+       page reads SEASON.year out of the published league-data.js and
+       returns it here; if the two disagree, the page was looking at a
+       different season than the one on disk — a stale tab, or a
+       rollover that already ran — and the submission is refused rather
+       than archiving a year nobody meant. This is the one field that
+       makes a double-click on a once-a-year button safe. */
+    const year = payload.year;
+    if (!Number.isInteger(year) || year < 2000 || year > 2200) {
+      bad(`rollover year must be a whole year like 2026, got ${JSON.stringify(payload.year)}`);
+    }
+
+    /* The web equivalent of --force. rollover.js prints its readiness
+       notes and refuses without it; the admin page shows the same
+       notes and makes the commissioner tick a box, so an unfinished
+       season can still be archived deliberately and never by accident. */
+    if (payload.force !== undefined && typeof payload.force !== "boolean") {
+      bad("rollover force must be true or false");
+    }
+
+    return {
+      action,
+      league,
+      year,
+      force: payload.force === true,
+      actor: requireSafeText(payload.actor || "unknown", "actor"),
+    };
+  }
   const permitted = leaguesForAction(action);
   if (!permitted.includes(league)) {
     bad(
@@ -494,6 +563,116 @@ async function doAdvance(p, L) {
 }
 
 /* ------------------------------------------------------------
+   ROLLOVER — end the season, start the next one
+   ------------------------------------------------------------
+   The web front door to tools/rollover.js. Everything that matters
+   happens in there; this function's whole job is to check that the
+   season on disk is the season the commissioner was looking at, hand
+   the work over, and turn the result into a commit message and a
+   Discord post.
+
+   IT IS NOT AN ADVANCE and deliberately shares none of its code. An
+   advance rewrites four fields in league-data.js and can be undone by
+   advancing again. This copies five files into seasons/<year>/,
+   verifies the copy loads on its own, and only then empties the live
+   folder — polls, bracket, postseason and every schedule week. It is
+   recoverable, but by `git revert`, not by pressing the button again.
+
+   NOTHING IS DELETED, here or in rollover.js. That claim is the one
+   the confirmation on the admin page makes to the commissioner, so it
+   is worth being able to check it against this file.
+   ------------------------------------------------------------ */
+async function doRollover(p, L) {
+  const data = loadData(L.paths);
+  const onDisk = Number((data.SEASON || {}).year);
+
+  /* The stale-tab guard. See the note beside `year` in validate():
+     the page sends back the year it read, and a mismatch means the
+     two are not looking at the same season. Refusing is the only safe
+     answer — the alternative is archiving whatever happens to be in
+     the folder under a label the commissioner never saw. */
+  if (onDisk !== p.year) {
+    die(
+      `${L.dir}/league-data.js is on ${onDisk}, but the submission asked to archive ${p.year}.\n` +
+        `  Reload the admin page and look again before rolling over — this usually means the\n` +
+        `  rollover has already run, or the page has been open since before it did.`
+    );
+  }
+
+  /* runRollover() die()s on anything it won't do — an existing
+     archive, an archive that doesn't load, an unfinished season with
+     no acknowledgement — and a die() here fails the workflow run,
+     which is exactly right: a rollover that half-happened must be
+     loud. It never gets as far as touching a live file unless the
+     archive is already written and verified. */
+  const r = runRollover({ league: L, force: p.force, log: (m) => console.log(m) });
+
+  console.log(`\n  ${L.label} rolled over by ${p.actor}.`);
+  if (r.notes.length) {
+    console.log(`  Acknowledged before running:`);
+    r.notes.forEach((n) => console.log(`    - ${n}`));
+  }
+
+  const announced = await announcePreseason(p, L, r);
+
+  const detail =
+    `${r.year} archived to ${L.dir}/seasons/${r.year}/ (${r.files.length} files + archive.js). ` +
+    `${L.dir} is now ${r.nextYear} PRESEASON — ${r.cleared} schedule(s) emptied` +
+    (r.departed ? `, ${r.departed} departed coach(es) marked inactive` : ``) +
+    `.` +
+    (r.wireWarning ? ` WARNING: index.html not wired — ${r.wireWarning}.` : ``) +
+    announced.note;
+
+  return {
+    changed: true,
+    commit: `${L.label}: archive ${r.year} and roll over to ${r.nextYear} (via ${p.actor})`,
+    summary: detail,
+  };
+}
+
+/* The preseason post. Short on purpose — an advance announcement
+   exists to tell people which games to play, and there are none yet.
+   This one says the season is over, that its record is still on the
+   site, and that the next one has started. Same non-fatal contract as
+   announce() above: the archive is on disk and must never be lost to
+   a Discord outage. */
+async function announcePreseason(p, L, r) {
+  const cfg = loadDiscordConfig();
+  const url = cfg ? webhookUrl(cfg, L.slug) : "";
+
+  if (!url) {
+    console.log(
+      `  no Discord webhook for "${L.slug}" on the runner — rolled over without announcing.`
+    );
+    return { note: " — NOT announced (no webhook on runner)" };
+  }
+
+  const M = makeMentioner(cfg, L.slug);
+  const content = [
+    M.role,
+    `**${r.year} is in the books — the ${r.nextYear} preseason is live.**`,
+    ``,
+    `The season is archived, not deleted: the final standings, the polls, the bracket and ` +
+      `every result stay on the site, and career records and head-to-head run across it.`,
+    `Rosters carry forward. ${r.nextYear} schedules go up as they're transcribed.`,
+    ``,
+    L.siteUrl,
+  ]
+    .filter((line) => line !== undefined)
+    .join("\n");
+
+  try {
+    await post(url, { content, allowed_mentions: M.allowed() });
+    console.log("  posted the preseason announcement to Discord.");
+    return { note: " \u00b7 announced in Discord" };
+  } catch (e) {
+    console.error(`  WARNING: preseason announcement FAILED — ${e.message}`);
+    console.error("  The rollover still stands; re-post by hand.");
+    return { note: " \u00b7 Discord announcement FAILED (see Actions log)" };
+  }
+}
+
+/* ------------------------------------------------------------
    VACATION — write it to /vacations.js
    ------------------------------------------------------------
    Adding is append-or-correct, not blind append: an identical
@@ -667,7 +846,12 @@ async function main() {
 
   const L = resolveLeague(p.league);
 
-  const result = p.action === "scores" ? doScores(p, L) : await doAdvance(p, L);
+  const result =
+    p.action === "scores"
+      ? doScores(p, L)
+      : p.action === "rollover"
+      ? await doRollover(p, L)
+      : await doAdvance(p, L);
   emit(result);
 }
 
@@ -675,4 +859,4 @@ if (require.main === module) {
   main().catch((e) => die(e.stack || e.message));
 }
 
-module.exports = { validate, ALLOWED_LEAGUES };
+module.exports = { validate, ALLOWED_LEAGUES, ROLLOVER_LEAGUES };

@@ -112,6 +112,18 @@ back. This depends on the `DISCORD_CONFIG` secret being set (step 4a
 below); without it an advance still updates the site but posts
 nothing.
 
+**A code that can advance a league can also roll it over** — the
+once-a-year *Advance to Preseason* action that archives the finished
+season into `<league>/seasons/<year>/` and starts the next one. There
+is no separate grant for it, and there deliberately isn't a way to
+reach it early: the panel only appears while that league's
+`currentWeek` is `"OFFSEASON"`, which someone has to have advanced it
+to first. It posts a short preseason message to the same webhook.
+
+If you ever do want it to be a separate grant, the split is already
+there — `ROLLOVER_LEAGUES` in `worker/admin-api.js` and
+`tools/apply.js` is its own list, not a reuse of `ADVANCE_LEAGUES`.
+
 ### If you'd rather do it by hand
 
 The format is just an object keyed by code:
