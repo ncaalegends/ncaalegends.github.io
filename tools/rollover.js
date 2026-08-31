@@ -149,6 +149,7 @@ ${body
       TOP25: typeof TOP25 !== "undefined" ? TOP25 : [],
       POSTSEASON: typeof POSTSEASON !== "undefined" ? POSTSEASON : null,
       CFP_POLL: typeof CFP_POLL !== "undefined" ? CFP_POLL : null,
+      CFP_BRACKET: typeof CFP_BRACKET !== "undefined" ? CFP_BRACKET : null,
     };
   })();
 

@@ -1100,6 +1100,13 @@ const RANKING_DATA = {
   TOP25: TOP25_DATA,
   POSTSEASON: typeof POSTSEASON !== "undefined" ? POSTSEASON : null,
   CFP_POLL: typeof CFP_POLL !== "undefined" ? CFP_POLL : null,
+  /* The BRACKET, not only the poll. computeAchievements() credits a
+     playoff appearance to every team in a settled bracket, which is
+     the only thing that covers a first-round bye before its
+     quarterfinal opponent is known. Omitting it here doesn't error —
+     it silently drops the top four seeds' appearance, which is the
+     hardest kind of bug to see. */
+  CFP_BRACKET: typeof CFP_BRACKET !== "undefined" ? CFP_BRACKET : null,
 };
 
 /* THE CAREER — every season the page has loaded, oldest first.
