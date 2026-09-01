@@ -42,5 +42,9 @@
    Empty is a valid state and the normal one until December.
    ============================================================ */
 const POSTSEASON = {
-  rounds: [],
+  rounds: [
+    { id: "cfp-r1", label: "CFP First Round", games: [
+      { home: "LSU", away: "UNLV", neutral: true, homeScore: 31, awayScore: 6 },
+    ]},
+  ],
 };

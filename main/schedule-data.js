@@ -109,6 +109,7 @@ const TEAM_SCHEDULES = [
       { week: 14, note: "Army-Navy Week" },
       { week: 15, opponent: "West Virginia", location: "at", neutral: true, stadium: "AT&T Stadium", title: "Big 12 Championship", round: "ccg", teamScore: 26, opponentScore: 48 },
       { week: 16, opponent: "Washington", location: "vs", stadium: "Amon G. Carter Stadium", round: "cfp-r1", teamScore: 20, opponentScore: 17 },
+      { week: 17, opponent: "Oregon", location: "at", neutral: true, title: "Rose Bowl", round: "cfp-qf" },
     ],
   },
   {
@@ -131,6 +132,7 @@ const TEAM_SCHEDULES = [
       { week: 13, opponent: "South Carolina", location: "vs", stadium: "Clemson Memorial Stadium", teamScore: 34, opponentScore: 32 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, opponent: "California", location: "vs", neutral: true, stadium: "Bank of America Stadium", title: "ACC Championship", round: "ccg", teamScore: 48, opponentScore: 19 },
+      { week: 17, opponent: "West Virginia", location: "vs", neutral: true, title: "Peach Bowl", round: "cfp-qf" },
     ],
   },
   {
@@ -176,6 +178,7 @@ const TEAM_SCHEDULES = [
       { week: 13, opponent: "Washington", location: "vs", stadium: "Autzen Stadium", teamScore: 24, opponentScore: 14 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, note: "BYE" },
+      { week: 17, opponent: "TCU", location: "vs", neutral: true, title: "Rose Bowl", round: "cfp-qf" },
     ],
   },
   {
@@ -314,6 +317,7 @@ const TEAM_SCHEDULES = [
       { week: 14, note: "Army-Navy Week" },
       { week: 15, opponent: "South Carolina", location: "vs", neutral: true, stadium: "Mercedes-Benz Stadium", title: "SEC Championship", round: "ccg", teamScore: 38, opponentScore: 7 },
       { week: 16, opponent: "Michigan", location: "vs", stadium: "Texas Memorial Stadium", round: "cfp-r1", teamScore: 35, opponentScore: 10 },
+      { week: 17, opponent: "Notre Dame", location: "at", neutral: true, title: "Fiesta Bowl", round: "cfp-qf" },
     ],
   },
   {
@@ -359,6 +363,7 @@ const TEAM_SCHEDULES = [
       { week: 13, opponent: "Georgia Tech", location: "vs", stadium: "Sanford Stadium", teamScore: 41, opponentScore: 7 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, note: "BYE" },
+      { week: 17, opponent: "LSU", location: "vs", neutral: true, title: "Cotton Bowl", round: "cfp-qf" },
     ],
   },
   {
@@ -405,6 +410,7 @@ const TEAM_SCHEDULES = [
       { week: 14, note: "Army-Navy Week" },
       { week: 15, opponent: "TCU", location: "vs", neutral: true, stadium: "AT&T Stadium", title: "Big 12 Championship", round: "ccg", teamScore: 48, opponentScore: 26 },
       { week: 16, opponent: "Ohio State", location: "vs", stadium: "Milan Puskar Stadium", round: "cfp-r1", teamScore: 31, opponentScore: 29 },
+      { week: 17, opponent: "Clemson", location: "at", neutral: true, title: "Peach Bowl", round: "cfp-qf" },
     ],
   },
   {
@@ -521,6 +527,7 @@ const TEAM_SCHEDULES = [
       // independent so it plays no conference championship - confirm
       // whether the game shows OPEN here and adjust if needed.
       { week: 15, note: "No conference championship (Independent)" },
+      { week: 17, opponent: "Texas", location: "vs", neutral: true, title: "Fiesta Bowl", round: "cfp-qf" },
     ],
   },
   {
