@@ -317,7 +317,7 @@ const TEAM_SCHEDULES = [
       { week: 14, note: "Army-Navy Week" },
       { week: 15, opponent: "South Carolina", location: "vs", neutral: true, stadium: "Mercedes-Benz Stadium", title: "SEC Championship", round: "ccg", teamScore: 38, opponentScore: 7 },
       { week: 16, opponent: "Michigan", location: "vs", stadium: "Texas Memorial Stadium", round: "cfp-r1", teamScore: 35, opponentScore: 10 },
-      { week: 17, opponent: "Notre Dame", location: "at", neutral: true, title: "Fiesta Bowl", round: "cfp-qf" },
+      { week: 17, opponent: "Notre Dame", location: "at", neutral: true, title: "Fiesta Bowl", round: "cfp-qf", teamScore: 24, opponentScore: 0 },
     ],
   },
   {
@@ -527,7 +527,7 @@ const TEAM_SCHEDULES = [
       // independent so it plays no conference championship - confirm
       // whether the game shows OPEN here and adjust if needed.
       { week: 15, note: "No conference championship (Independent)" },
-      { week: 17, opponent: "Texas", location: "vs", neutral: true, title: "Fiesta Bowl", round: "cfp-qf" },
+      { week: 17, opponent: "Texas", location: "vs", neutral: true, title: "Fiesta Bowl", round: "cfp-qf", teamScore: 0, opponentScore: 24 },
     ],
   },
   {
