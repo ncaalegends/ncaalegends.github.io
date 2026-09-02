@@ -77,23 +77,78 @@ const TEAM_SCHEDULES = [
     team: "California",
     conference: "ACC",
     weeks: [
+      { week: 0, opponent: "Boise State", location: "vs" },
+      { week: 1, opponent: "UCF", location: "at" },
+      { week: 2, note: "BYE" },
+      { week: 3, opponent: "Baylor", location: "vs" },
+      { week: 4, note: "BYE" },
+      { week: 5, opponent: "Wake Forest", location: "vs" },
+      { week: 6, opponent: "SMU", location: "vs" },
+      { week: 7, opponent: "Pittsburgh", location: "vs" },
+      { week: 8, opponent: "Florida State", location: "vs" },
+      { week: 9, opponent: "Boston College", location: "at" },
+      { week: 10, opponent: "North Carolina", location: "at" },
+      { week: 11, opponent: "Louisville", location: "at" },
+      { week: 12, opponent: "Stanford", location: "at" },
+      { week: 13, opponent: "Miami", location: "vs" },
+      { week: 14, note: "Army-Navy Week" },
+      { week: 15, note: "BYE" },
     ],
   },
   {
     team: "North Carolina",
     conference: "ACC",
     weeks: [
+      { week: 0, note: "BYE" },
+      { week: 1, opponent: "Vanderbilt", location: "vs" },
+      { week: 2, opponent: "Purdue", location: "vs" },
+      { week: 3, opponent: "Wake Forest", location: "vs" },
+      { week: 4, opponent: "UConn", location: "vs" },
+      { week: 5, note: "BYE" },
+      { week: 6, opponent: "Virginia", location: "vs" },
+      { week: 7, opponent: "Virginia Tech", location: "at" },
+      { week: 8, opponent: "Stanford", location: "at" },
+      { week: 9, opponent: "Louisville", location: "at" },
+      { week: 10, opponent: "California", location: "vs" },
+      { week: 11, opponent: "Duke", location: "vs" },
+      { week: 12, opponent: "SMU", location: "at" },
+      { week: 13, opponent: "NC State", location: "at" },
+      { week: 14, note: "Army-Navy Week" },
+      { week: 15, note: "BYE" },
     ],
   },
   {
     team: "Pittsburgh",
     conference: "ACC",
     weeks: [
+      { week: 0, note: "BYE" },
+      { week: 1, opponent: "Temple", location: "vs" },
+      /* Aer Lingus-style neutral opener in Dublin. Pitt is the listed
+         home side ("VS" in game), but there's no true home team, so
+         the row carries neutral + the venue. Cross-check with Salzy's
+         Wisconsin block when it comes in. */
+      { week: 2, opponent: "Wisconsin", location: "vs", neutral: true,
+        stadium: "Dublin Stadium" },
+      { week: 3, opponent: "Georgia Tech", location: "at" },
+      { week: 4, opponent: "Florida State", location: "at" },
+      { week: 5, note: "BYE" },
+      { week: 6, opponent: "Syracuse", location: "at" },
+      { week: 7, opponent: "California", location: "at" },
+      { week: 8, opponent: "Duke", location: "at" },
+      { week: 9, opponent: "Penn State", location: "vs" },
+      { week: 10, opponent: "Virginia Tech", location: "vs" },
+      { week: 11, opponent: "SMU", location: "vs" },
+      { week: 12, opponent: "Miami", location: "vs" },
+      { week: 13, opponent: "Boston College", location: "vs" },
+      { week: 14, note: "Army-Navy Week" },
+      { week: 15, note: "BYE" },
     ],
   },
   {
     team: "Virginia Tech",
     conference: "ACC",
+    /* No 2027 schedule: Cleveland is inactive, so this team is CPU
+       all season and no screenshot is taken for it. */
     weeks: [
     ],
   },
@@ -110,32 +165,105 @@ const TEAM_SCHEDULES = [
        window. isLeagueTeam("Maryland", 15) returns false, which is
        what keeps that true. The result is transcribed on both blocks
        anyway so the By Team pages agree with each other. */
+    /* No 2027 schedule: Trick whitey is inactive, so this team is CPU
+       all season and no screenshot is taken for it. */
     weeks: [
+    ],
+  },
+  {
+    team: "North Dakota State",
+    conference: "B1G",
+    /* Moved from the SEC to the B1G for 2027, matching the in-game
+       schedule screen ("7th in Big Ten Division 1") and league-data.js. */
+    weeks: [
+      { week: 0, opponent: "Bowling Green", location: "vs" },
+      { week: 1, opponent: "James Madison", location: "at" },
+      { week: 2, opponent: "Sac State", location: "vs" },
+      { week: 3, note: "BYE" },
+      { week: 4, opponent: "Oregon", location: "at" },
+      { week: 5, opponent: "Penn State", location: "vs" },
+      { week: 6, opponent: "Indiana", location: "vs" },
+      { week: 7, opponent: "Minnesota", location: "at" },
+      { week: 8, opponent: "Washington", location: "vs" },
+      { week: 9, opponent: "Illinois", location: "vs" },
+      { week: 10, note: "BYE" },
+      { week: 11, opponent: "Nebraska", location: "at" },
+      { week: 12, opponent: "UTEP", location: "vs" },
+      { week: 13, opponent: "USC", location: "at" },
+      { week: 14, note: "Army-Navy Week" },
+      { week: 15, note: "BYE" },
+    ],
+  },
+  {
+    team: "Oregon State",
+    conference: "B1G",
+    weeks: [
+      { week: 0, note: "BYE" },
+      { week: 1, opponent: "Washington St.", location: "vs" },
+      { week: 2, opponent: "New Mexico", location: "vs" },
+      { week: 3, opponent: "Penn State", location: "vs" },
+      { week: 4, opponent: "San Diego St.", location: "at" },
+      { week: 5, note: "BYE" },
+      { week: 6, opponent: "Washington", location: "vs" },
+      { week: 7, opponent: "Illinois", location: "vs" },
+      { week: 8, opponent: "Nebraska", location: "at" },
+      { week: 9, opponent: "USC", location: "vs" },
+      { week: 10, opponent: "Michigan", location: "at" },
+      { week: 11, opponent: "West Virginia", location: "vs" },
+      { week: 12, opponent: "Iowa", location: "at" },
+      { week: 13, opponent: "Minnesota", location: "at" },
+      { week: 14, note: "Army-Navy Week" },
+      { week: 15, note: "BYE" },
     ],
   },
   {
     team: "Rutgers",
     conference: "B1G",
-    /* Weeks 1-10 were played by the CPU — the spot was held but
-       unplayed until Miles took it over at Week 11 (joinedAtWeek in
-       league-data.js). The results are transcribed anyway so his
-       schedule page isn't half empty and the site can show the record
-       he inherited.
-
-       They are recorded here as CPU results and must stay that way.
-       The Week 7 loss at Maryland is the one to watch: Trick whitey's
-       block already carries it as 45-19 and the two entries agree,
-       but it is NOT a head-to-head game and it must not enter either
-       coach's H2H record or power-poll window. isLeagueTeam("Rutgers",
-       7) returns false, which is what keeps that true. Same for the
-       Week 10 loss at Wisconsin, 48-16 on Salzy's block. */
+    /* Miles has the spot for all of 2027 — the mid-season handover and
+       the CPU weeks it created belong to 2026 and live in
+       seasons/2026/. */
     weeks: [
+      { week: 0, note: "BYE" },
+      { week: 1, opponent: "Akron", location: "vs" },
+      { week: 2, opponent: "Boston College", location: "vs" },
+      { week: 3, opponent: "App St.", location: "at" },
+      { week: 4, opponent: "Northwestern", location: "vs" },
+      { week: 5, opponent: "FCS Southeast", location: "vs" },
+      { week: 6, opponent: "Ohio State", location: "at" },
+      { week: 7, opponent: "Purdue", location: "vs" },
+      { week: 8, note: "BYE" },
+      { week: 9, opponent: "Maryland", location: "at" },
+      { week: 10, opponent: "Wisconsin", location: "vs" },
+      { week: 11, opponent: "Iowa", location: "vs" },
+      { week: 12, opponent: "Indiana", location: "at" },
+      { week: 13, opponent: "UCLA", location: "at" },
+      { week: 14, note: "Army-Navy Week" },
+      { week: 15, note: "BYE" },
     ],
   },
   {
     team: "Wisconsin",
     conference: "B1G",
     weeks: [
+      { week: 0, opponent: "W. Michigan", location: "vs" },
+      { week: 1, opponent: "Northwestern", location: "at" },
+      /* The Dublin neutral opener. Pittsburgh is the listed home side
+         on both blocks, so this one reads "at" here and "vs" there. */
+      { week: 2, opponent: "Pittsburgh", location: "at", neutral: true,
+        stadium: "Dublin Stadium" },
+      { week: 3, opponent: "Colorado State", location: "vs" },
+      { week: 4, opponent: "Ohio State", location: "vs" },
+      { week: 5, opponent: "Boise State", location: "vs" },
+      { week: 6, opponent: "Purdue", location: "at" },
+      { week: 7, opponent: "Maryland", location: "vs" },
+      { week: 8, opponent: "Iowa", location: "vs" },
+      { week: 9, note: "BYE" },
+      { week: 10, opponent: "Rutgers", location: "at" },
+      { week: 11, opponent: "Indiana", location: "vs" },
+      { week: 12, note: "BYE" },
+      { week: 13, opponent: "Oregon", location: "at" },
+      { week: 14, note: "Army-Navy Week" },
+      { week: 15, note: "BYE" },
     ],
   },
 
@@ -144,24 +272,88 @@ const TEAM_SCHEDULES = [
     team: "Baylor",
     conference: "XII",
     weeks: [
+      { week: 0, opponent: "SMU", location: "vs" },
+      { week: 1, opponent: "Iowa State", location: "vs" },
+      { week: 2, opponent: "Oregon", location: "vs" },
+      { week: 3, opponent: "California", location: "at" },
+      { week: 4, opponent: "West Virginia", location: "vs" },
+      { week: 5, note: "BYE" },
+      { week: 6, opponent: "Texas Tech", location: "at" },
+      { week: 7, note: "BYE" },
+      { week: 8, opponent: "North Texas", location: "vs" },
+      { week: 9, opponent: "Kansas", location: "vs" },
+      { week: 10, opponent: "BYU", location: "at" },
+      { week: 11, opponent: "TCU", location: "at" },
+      { week: 12, opponent: "Houston", location: "vs" },
+      { week: 13, opponent: "Kansas State", location: "at" },
+      { week: 14, note: "Army-Navy Week" },
+      { week: 15, note: "BYE" },
     ],
   },
   {
     team: "Colorado",
     conference: "XII",
     weeks: [
+      { week: 0, note: "BYE" },
+      { week: 1, opponent: "Texas Tech", location: "at" },
+      { week: 2, opponent: "Michigan", location: "vs" },
+      { week: 3, opponent: "NIU", location: "vs" },
+      { week: 4, opponent: "Kansas", location: "vs" },
+      { week: 5, opponent: "West Virginia", location: "at" },
+      { week: 6, opponent: "San Diego St.", location: "at" },
+      { week: 7, opponent: "Houston", location: "vs" },
+      { week: 8, opponent: "Arizona State", location: "at" },
+      { week: 9, opponent: "Cincinnati", location: "vs" },
+      { week: 10, note: "BYE" },
+      { week: 11, opponent: "North Texas", location: "vs" },
+      { week: 12, opponent: "Iowa State", location: "at" },
+      { week: 13, opponent: "Oklahoma State", location: "vs" },
+      { week: 14, note: "Army-Navy Week" },
+      { week: 15, note: "BYE" },
     ],
   },
   {
     team: "Iowa State",
     conference: "XII",
     weeks: [
+      { week: 0, note: "BYE" },
+      { week: 1, opponent: "Baylor", location: "at" },
+      { week: 2, opponent: "Iowa", location: "vs" },
+      { week: 3, opponent: "Tennessee", location: "vs" },
+      { week: 4, opponent: "Arizona", location: "vs" },
+      { week: 5, opponent: "Oklahoma State", location: "at" },
+      { week: 6, note: "BYE" },
+      { week: 7, opponent: "Utah", location: "at" },
+      { week: 8, opponent: "Kansas State", location: "vs" },
+      { week: 9, opponent: "Indiana", location: "at" },
+      { week: 10, opponent: "Texas Tech", location: "vs" },
+      { week: 11, opponent: "Kansas", location: "at" },
+      { week: 12, opponent: "Colorado", location: "vs" },
+      { week: 13, opponent: "BYU", location: "vs" },
+      { week: 14, note: "Army-Navy Week" },
+      { week: 15, note: "BYE" },
     ],
   },
   {
-    team: "UCF",
+    team: "Oklahoma State",
     conference: "XII",
     weeks: [
+      { week: 0, note: "BYE" },
+      { week: 1, opponent: "Arizona State", location: "at" },
+      { week: 2, opponent: "Kansas", location: "vs" },
+      { week: 3, opponent: "Texas A&M", location: "vs" },
+      { week: 4, note: "BYE" },
+      { week: 5, opponent: "Iowa State", location: "vs" },
+      { week: 6, opponent: "Kansas State", location: "at" },
+      { week: 7, opponent: "West Virginia", location: "vs" },
+      { week: 8, opponent: "Tulsa", location: "vs" },
+      { week: 9, opponent: "Houston", location: "vs" },
+      { week: 10, opponent: "TCU", location: "at" },
+      { week: 11, opponent: "Charlotte", location: "at" },
+      { week: 12, opponent: "BYU", location: "vs" },
+      { week: 13, opponent: "Colorado", location: "at" },
+      { week: 14, note: "Army-Navy Week" },
+      { week: 15, note: "BYE" },
     ],
   },
 
@@ -170,24 +362,83 @@ const TEAM_SCHEDULES = [
     team: "Charlotte",
     conference: "SEC",
     weeks: [
+      { week: 0, opponent: "Buffalo", location: "vs" },
+      { week: 1, opponent: "Ole Miss", location: "at" },
+      { week: 2, opponent: "Kentucky", location: "at" },
+      { week: 3, opponent: "Florida", location: "at" },
+      { week: 4, opponent: "East Carolina", location: "vs" },
+      { week: 5, opponent: "App St.", location: "vs" },
+      { week: 6, opponent: "LSU", location: "at" },
+      { week: 7, note: "BYE" },
+      { week: 8, opponent: "UCF", location: "vs" },
+      { week: 9, opponent: "Tennessee", location: "vs" },
+      { week: 10, opponent: "Georgia", location: "vs" },
+      /* Charlotte hosts. The screenshot of this row was taken before
+         the sides were settled and showed it at Boone Pickens;
+         RekenCrew's block already has it as "at Charlotte", so the
+         two agree. Venue filled in from Charlotte's other home games. */
+      { week: 11, opponent: "Oklahoma State", location: "vs",
+        stadium: "Jerry Richardson Stadium" },
+      { week: 12, opponent: "Arkansas", location: "vs" },
+      { week: 13, note: "BYE" },
+      { week: 14, note: "Army-Navy Week" },
+      { week: 15, note: "BYE" },
     ],
   },
   {
     team: "James Madison",
     conference: "SEC",
     weeks: [
-    ],
-  },
-  {
-    team: "North Dakota State",
-    conference: "SEC",
-    weeks: [
+      { week: 0, opponent: "UConn", location: "vs" },
+      /* Listed in game as "NDSU"; expanded to the roster spelling so
+         the head-to-head with Texan_hog resolves. */
+      { week: 1, opponent: "North Dakota State", location: "vs" },
+      { week: 2, opponent: "Vanderbilt", location: "at" },
+      { week: 3, opponent: "C. Carolina", location: "vs" },
+      { week: 4, note: "BYE" },
+      { week: 5, opponent: "Florida", location: "at" },
+      { week: 6, opponent: "Kentucky", location: "vs" },
+      { week: 7, opponent: "Georgia", location: "vs" },
+      { week: 8, opponent: "Tennessee", location: "vs" },
+      { week: 9, opponent: "Arkansas", location: "vs" },
+      { week: 10, opponent: "Northwestern", location: "at" },
+      { week: 11, opponent: "LSU", location: "at" },
+      { week: 12, opponent: "Oklahoma", location: "at" },
+      { week: 13, note: "BYE" },
+      { week: 14, note: "Army-Navy Week" },
+      { week: 15, note: "BYE" },
     ],
   },
   {
     team: "North Texas",
     conference: "SEC",
+    /* No 2027 schedule: DiabeticSnail22 is inactive, so this team is CPU
+       all season and no screenshot is taken for it. */
     weeks: [
+    ],
+  },
+  {
+    team: "UCF",
+    conference: "SEC",
+    /* Moved from the XII to the SEC for 2027, matching the in-game
+       schedule screen ("2nd in SEC Division 1") and league-data.js. */
+    weeks: [
+      { week: 0, opponent: "UAB", location: "vs" },
+      { week: 1, opponent: "California", location: "vs" },
+      { week: 2, note: "BYE" },
+      { week: 3, opponent: "East Carolina", location: "at" },
+      { week: 4, opponent: "Georgia", location: "vs" },
+      { week: 5, opponent: "Tennessee", location: "vs" },
+      { week: 6, note: "BYE" },
+      { week: 7, opponent: "Texas A&M", location: "vs" },
+      { week: 8, opponent: "Charlotte", location: "at" },
+      { week: 9, opponent: "Ole Miss", location: "at" },
+      { week: 10, opponent: "Clemson", location: "vs" },
+      { week: 11, opponent: "Alabama", location: "at" },
+      { week: 12, opponent: "Kentucky", location: "vs" },
+      { week: 13, opponent: "LSU", location: "at" },
+      { week: 14, note: "Army-Navy Week" },
+      { week: 15, note: "BYE" },
     ],
   },
 ];
