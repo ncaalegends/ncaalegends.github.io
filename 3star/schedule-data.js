@@ -176,7 +176,7 @@ const TEAM_SCHEDULES = [
     /* Moved from the SEC to the B1G for 2027, matching the in-game
        schedule screen ("7th in Big Ten Division 1") and league-data.js. */
     weeks: [
-      { week: 0, opponent: "Bowling Green", location: "vs" },
+      { week: 0, opponent: "Bowling Green", location: "vs", teamScore: 42, opponentScore: 14 },
       { week: 1, opponent: "James Madison", location: "at" },
       { week: 2, opponent: "Sac State", location: "vs" },
       { week: 3, note: "BYE" },
@@ -272,7 +272,7 @@ const TEAM_SCHEDULES = [
     team: "Baylor",
     conference: "XII",
     weeks: [
-      { week: 0, opponent: "SMU", location: "vs" },
+      { week: 0, opponent: "SMU", location: "vs", teamScore: 44, opponentScore: 31 },
       { week: 1, opponent: "Iowa State", location: "vs" },
       { week: 2, opponent: "Oregon", location: "vs" },
       { week: 3, opponent: "California", location: "at" },
