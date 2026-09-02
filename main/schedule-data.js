@@ -132,7 +132,7 @@ const TEAM_SCHEDULES = [
       { week: 13, opponent: "South Carolina", location: "vs", stadium: "Clemson Memorial Stadium", teamScore: 34, opponentScore: 32 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, opponent: "California", location: "vs", neutral: true, stadium: "Bank of America Stadium", title: "ACC Championship", round: "ccg", teamScore: 48, opponentScore: 19 },
-      { week: 17, opponent: "West Virginia", location: "vs", neutral: true, title: "Peach Bowl", round: "cfp-qf" },
+      { week: 17, opponent: "West Virginia", location: "vs", neutral: true, title: "Peach Bowl", round: "cfp-qf", teamScore: 45, opponentScore: 31 },
     ],
   },
   {
@@ -410,7 +410,7 @@ const TEAM_SCHEDULES = [
       { week: 14, note: "Army-Navy Week" },
       { week: 15, opponent: "TCU", location: "vs", neutral: true, stadium: "AT&T Stadium", title: "Big 12 Championship", round: "ccg", teamScore: 48, opponentScore: 26 },
       { week: 16, opponent: "Ohio State", location: "vs", stadium: "Milan Puskar Stadium", round: "cfp-r1", teamScore: 31, opponentScore: 29 },
-      { week: 17, opponent: "Clemson", location: "at", neutral: true, title: "Peach Bowl", round: "cfp-qf" },
+      { week: 17, opponent: "Clemson", location: "at", neutral: true, title: "Peach Bowl", round: "cfp-qf", teamScore: 31, opponentScore: 45 },
     ],
   },
   {
