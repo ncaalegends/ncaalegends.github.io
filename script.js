@@ -1208,6 +1208,38 @@ const RANKINGS_HEAD_HTML =
   '<span class="ph-l5">L5</span><span></span>' +
   '<span class="ph-score">Score</span></li>';
 
+/* THE WINDOW SPANS SEASONS, SO THE POLL MUST OUTLIVE ONE.
+
+   The poll is a coach's last N head-to-head games regardless of the
+   year they were played in — that is the whole point of computing it
+   over CAREER rather than over the current season. But both callers
+   used to key off latestH2HWeek(RANKING_DATA), which reads the CURRENT
+   season only, and bail when it came back null. That is exactly what a
+   rollover produces: fresh, empty schedules. The rankings vanished on
+   the day the archive existed to hold them up, and came back at week 0
+   as if the coaches had no history.
+
+   -1 is the answer, and not a new idea: it is the same value the trend
+   arrows already pass to reach "every archived season whole, nothing
+   from the current one". Null still means null when there is no archive
+   either — a brand-new league genuinely has no poll to show. */
+function pollThroughWeek() {
+  const week = WeekCore.latestH2HWeek(RANKING_DATA);
+  if (week != null) return week;
+  return CAREER.length > 1 ? -1 : null;
+}
+
+/* The year the newest games in the window come from, for the caption
+   in a season that hasn't kicked off. Reads the last CAREER entry that
+   isn't the empty current season. */
+function lastPlayedYear() {
+  for (let i = CAREER.length - 2; i >= 0; i--) {
+    const y = (CAREER[i].SEASON || {}).year;
+    if (y != null) return y;
+  }
+  return null;
+}
+
 function renderRankings() {
   const fullList = document.getElementById("full-rankings");
   const previewList = document.getElementById("rankings-preview");
@@ -1219,7 +1251,7 @@ function renderRankings() {
   /* The week label still comes from the CURRENT season — it's a "where
      are we now" caption. The poll itself is computed over CAREER, so a
      coach's window can reach back into archived seasons. */
-  const week = engineReady ? WeekCore.latestH2HWeek(RANKING_DATA) : null;
+  const week = engineReady ? pollThroughWeek() : null;
   const rows =
     engineReady && week != null
       ? WeekCore.computeRankings(CAREER, { ...RANKING_OPTS, throughWeek: week })
@@ -1248,7 +1280,14 @@ function renderRankings() {
       : [];
   const prevRankByKey = new Map(prev.map((r) => [r.key, r.rank]));
 
-  if (label) label.textContent = `WEEK ${week} POLL`;
+  /* A negative week is the carry-over: the season has no games yet, so
+     "WEEK -1 POLL" would be nonsense and "WEEK 0 POLL" would be a claim
+     about games nobody has played. Name the year the window's newest
+     games came from instead. */
+  if (label) {
+    const carried = week < 0 ? lastPlayedYear() : null;
+    label.textContent = carried != null ? `THROUGH ${carried}` : `WEEK ${week} POLL`;
+  }
   if (fullList) {
     fullList.classList.remove("is-empty");
     fullList.innerHTML =
@@ -2001,7 +2040,10 @@ function careerData() {
     ranks: new Map(),
   };
   if (ready) {
-    const week = WeekCore.latestH2HWeek(RANKING_DATA);
+    /* Same carry-over as the rankings tab — a coach card in the
+       preseason should still show the rank they finished on, not a
+       blank where their number was. */
+    const week = pollThroughWeek();
     const rows =
       week != null
         ? WeekCore.computeRankings(CAREER, { ...RANKING_OPTS, throughWeek: week })
@@ -2256,17 +2298,24 @@ function h2hRowHtml(o) {
    (year, then sortKey) is what puts a title game after week 15, and
    a naive sort on week would undo that. */
 function powerGameRowHtml(g) {
-  /* Same rule as the H2H rows: a year is shown on anything that
-     isn't from the season being played. The window spans seasons by
-     design, so an unstamped "Wk 5" from two years ago is exactly the
-     misreading this prevents. */
+  /* A year is shown on anything that isn't from the season being
+     played. The window spans seasons by design, so an unstamped
+     "Wk 5" from two years ago is exactly the misreading this
+     prevents — and in a preseason the whole window is last year's,
+     which is when an unstamped row is most misleading of all.
+
+     THE FULL YEAR, LEADING. This used to trail as "Wk 5 '26", which
+     reads as part of the week at a glance and asks the eye to expand
+     an apostrophe into a season. "2026 Wk 5" sorts the way it reads
+     and can't be mistaken for a 2027 game. The H2H rows on the other
+     half of this card still use the short trailing form; they are a
+     career list where every row is a different year, not a window
+     that straddles one boundary. */
   const thisYear = SEASON.year ?? null;
   const stamp =
-    g.year != null && thisYear != null && g.year !== thisYear
-      ? ` &rsquo;${String(g.year).slice(-2)}`
-      : "";
+    g.year != null && thisYear != null && g.year !== thisYear ? `${g.year} ` : "";
   const when =
-    g.phase === "postseason" ? `${esc(g.label)}${stamp}` : `Wk ${g.week}${stamp}`;
+    g.phase === "postseason" ? `${stamp}${esc(g.label)}` : `${stamp}Wk ${g.week}`;
 
   /* Neutral sites are neither home nor away, and calling a title game
      "at" its opponent would misdescribe it — the same distinction the
