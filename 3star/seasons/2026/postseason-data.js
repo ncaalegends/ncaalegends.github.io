@@ -42,5 +42,17 @@
    Empty is a valid state and the normal one until December.
    ============================================================ */
 const POSTSEASON = {
-  rounds: [],
+  rounds: [
+    { id: "ccg", label: "Conference Championships", games: [
+      { home: "Georgia", away: "Tennessee", title: "SEC Championship", neutral: true },
+    ]},
+    { id: "cfp-r1", label: "CFP First Round", games: [
+      { home: "Oklahoma", away: "Missouri", homeScore: 33, awayScore: 28 },
+      { home: "BYU", away: "Michigan", homeScore: 12, awayScore: 41 },
+    ]},
+    { id: "cfp-qf", label: "CFP Quarterfinals", games: [
+      { home: "Maryland", away: "Oklahoma", neutral: true, homeScore: 24, awayScore: 21 },
+      { home: "Oregon", away: "Michigan", neutral: true, homeScore: 27, awayScore: 24 },
+    ]},
+  ],
 };
