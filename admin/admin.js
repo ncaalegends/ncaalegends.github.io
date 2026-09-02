@@ -73,9 +73,16 @@ const $ = (id) => document.getElementById(id);
    and what ends up in league-data.js, so it is spelled exactly once
    here and compared, never rebuilt. */
 const OFFSEASON = "OFFSEASON";
+/* The other sentinel. It is never a destination in the advance
+   picker — the rollover is the only way in — but it IS a state the
+   page has to render from, and it does not coerce like a week:
+   seasonIndex() sends it to 0 because nothing has happened yet. Every
+   place that reads position off that 0 has to check the raw value
+   first, exactly as the offseason does at the other end. */
+const PRESEASON = "PRESEASON";
 
 const seasonIndex = (value) => {
-  if (value === "PRESEASON") return 0;
+  if (value === PRESEASON) return 0;
   if (value === "OFFSEASON") return 19;
   const n = Number(value);
   return Number.isFinite(n) ? n : 0;
@@ -123,6 +130,7 @@ function weekOptionLabel(w) {
      Discord. It reads as a destination in the advance picker and never
      appears in the score picker, because it has no games. */
   if (w === OFFSEASON) return "Offseason";
+  if (w === PRESEASON) return "Preseason";
   if (w === 14) return "Week 14 — Army-Navy";
   if (w === 15) return "Week 15 — Championships";
   return BOWL_WEEK_NAME[w] || `Week ${w}`;
@@ -354,7 +362,17 @@ function refreshWeekControls() {
      It is deliberately NOT in the score picker above. Scores are
      entered against schedule rows and the offseason has none. */
   $("advance-week").innerHTML = weekOpts.join("") + opt(OFFSEASON);
-  $("advance-week").value = current >= 19 ? OFFSEASON : String(current + 1);
+  /* Default to the NEXT destination, and the preseason's next
+     destination is Week 0, not Week 1. Read from the raw value: the
+     preseason coerces to 0, so current + 1 would offer Week 1 and
+     skip the opener — the same class of error the offseason's
+     coercion causes at the other end of the axis. */
+  $("advance-week").value =
+    data.SEASON.currentWeek === PRESEASON
+      ? "0"
+      : current >= 19
+        ? OFFSEASON
+        : String(current + 1);
 
   /* Prefill from the stored timestamp, not from the sentence — the
      sentence is generated and can't be parsed back reliably. A league
@@ -365,13 +383,18 @@ function refreshWeekControls() {
   $("advance-time").value = picker.time;
   renderDeadlinePreview();
 
-  /* Read from the raw value, not from the coerced index: the offseason
-     coerces to 19 so every week-axis question gets the right answer,
-     but saying "Currently on BOWL WEEK 4" a week after the title game
-     would be the one place that coercion shows through as a lie. */
+  /* Read from the raw value, not from the coerced index. Both
+     sentinels coerce so every week-axis question gets the right
+     answer, and this line is where that coercion would show through
+     as a lie in both directions: "Currently on BOWL WEEK 4" a week
+     after the title game, and "Currently on WEEK 0" for a league
+     that has only just rolled over and hasn't kicked off. */
   $("current-week").textContent =
     `Currently on ${weekOptionLabel(
-      data.SEASON.currentWeek === OFFSEASON ? OFFSEASON : current
+      data.SEASON.currentWeek === OFFSEASON ||
+        data.SEASON.currentWeek === PRESEASON
+        ? data.SEASON.currentWeek
+        : current
     ).toUpperCase()}` +
     (data.SEASON.nextAdvance ? ` · next deadline ${data.SEASON.nextAdvance}` : "");
 
@@ -1139,6 +1162,12 @@ $("advance-btn").addEventListener("click", () => {
 
   const current = seasonIndex(data.SEASON.currentWeek);
   const offseason = week === OFFSEASON;
+  /* The preseason sits BEFORE week 0, but coerces to 0 like the
+     opener itself. Comparing against that 0 called the first advance
+     of the year a move backwards. -1 is the honest position for the
+     comparisons below, and it makes the skip count right too:
+     preseason to Week 3 skips three weeks, not two. */
+  const from = data.SEASON.currentWeek === PRESEASON ? -1 : current;
 
   /* buildWeek on the sentinel finds no entry for any team, so the
      count sentence would read "0 head-to-head and 0 CPU game(s)" —
@@ -1153,10 +1182,10 @@ $("advance-btn").addEventListener("click", () => {
     if (current < 19) {
       warn = ` The season isn't over — ${weekOptionLabel(current)} is still the current week.`;
     }
-  } else if (week <= current) {
+  } else if (week <= from) {
     warn = ` This moves the league BACKWARDS from ${weekOptionLabel(current)}.`;
-  } else if (week > current + 1) {
-    warn = ` This skips ${week - current - 1} week(s).`;
+  } else if (week > from + 1) {
+    warn = ` This skips ${week - from - 1} week(s).`;
   }
 
   message(msg, "");
@@ -1300,7 +1329,6 @@ $("advance-yes").addEventListener("click", async () => {
    open since before a rollover can't archive a season twice.
    ============================================================ */
 const ROLLOVER_LEAGUES = ["1star", "3star", "main"];
-const PRESEASON = "PRESEASON";
 
 /* Readiness needs postseason-data.js, which loadLeagueData() doesn't
    fetch — the scores tab has no use for it. Pulled on its own here so
