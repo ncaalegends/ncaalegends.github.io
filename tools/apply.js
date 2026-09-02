@@ -631,11 +631,20 @@ async function doRollover(p, L) {
 }
 
 /* The preseason post. Short on purpose — an advance announcement
-   exists to tell people which games to play, and there are none yet.
-   This one says the season is over, that its record is still on the
-   site, and that the next one has started. Same non-fatal contract as
-   announce() above: the archive is on disk and must never be lost to
-   a Discord outage. */
+   exists to tell people what to do next, and there are no games to
+   play yet. So it leads with the thing there IS to do (recruiting)
+   and names the advance people are waiting on (Week 0).
+
+   IT SAYS NOTHING ABOUT THE ARCHIVE ON PURPOSE. The finished season's
+   files move to seasons/<year>/, but no page renders them: a visitor
+   can reach last year only through the power-rankings window and the
+   coach cards' career numbers. Standings, the bracket and the Top 25
+   weeks are the live season's alone. So a line pointing people at
+   "last season, still on the site" would be sending them somewhere
+   that doesn't exist yet. Add it back when a history view does.
+
+   Same non-fatal contract as announce() above: the archive is on disk
+   and must never be lost to a Discord outage. */
 async function announcePreseason(p, L, r) {
   const cfg = loadDiscordConfig();
   const url = cfg ? webhookUrl(cfg, L.slug) : "";
@@ -650,11 +659,10 @@ async function announcePreseason(p, L, r) {
   const M = makeMentioner(cfg, L.slug);
   const content = [
     M.role,
-    `**${r.year} is in the books — the ${r.nextYear} preseason is live.**`,
+    `**We've advanced to the ${r.nextYear} preseason.**`,
     ``,
-    `The season is archived, not deleted: the final standings, the polls, the bracket and ` +
-      `every result stay on the site, and career records and head-to-head run across it.`,
-    `Rosters carry forward. ${r.nextYear} schedules go up as they're transcribed.`,
+    `Build your recruiting board and get your staff set. Week 0 is the next advance — ` +
+      `that's when the season kicks off, so keep an eye out for it.`,
     ``,
     L.siteUrl,
   ]
