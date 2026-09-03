@@ -55,6 +55,7 @@ const {
   FINAL_WEEK,
   top25GateError,
   isSentinel,
+  seasonIndex,
   loadVacations,
   writeVacations,
   allRosterNames,
@@ -76,6 +77,60 @@ const { updateSeason, buildMessage, post, webhookUrl, makeMentioner } = require(
    safety property; a second copy of that sequence here would be a
    second chance to get it backwards. */
 const { runRollover } = require("./rollover");
+
+/* The next playoff round's schedule rows — see tools/bracket-sync.js.
+   Called, never reimplemented, for the same reason as the rollover:
+   the pairing arithmetic and the two-source winner lookup already
+   exist in one place and have to keep agreeing with the bracket the
+   site draws. */
+const { syncRound, syncSummary, BracketSyncError, ROUND_FOR_WEEK } = require("./bracket-sync");
+
+/* ------------------------------------------------------------
+   THE BOWL-WEEK ROWS
+   ------------------------------------------------------------
+   A playoff game between two coached teams only becomes enterable
+   once it exists as a row on both coaches' schedules, and until this
+   ran on the web path, nothing created those rows unless someone
+   remembered to run bracket-sync.js from a laptop. When they didn't,
+   the postseason stalled in the least obvious way available: the
+   admin page offered no games to score, so the round couldn't be
+   recorded, so the bracket couldn't advance, so the round after it
+   had no rows either.
+
+   So every web advance INTO a bowl week now derives that round, and
+   every score entered during one re-derives the current round — which
+   is what catches a result that lands after the advance rather than
+   before it. Re-running is silent by design (bracket-sync never
+   touches a row that exists), so calling it on every pass costs
+   nothing and removes the "did anyone remember?" question entirely.
+
+   NOTHING HERE MAY FAIL AN ADVANCE. By the time this is reached the
+   season file is written and the announcement is about to go out; a
+   bracket that can't be read yet — still projected, not entered,
+   half a round short — is a warning in the Actions log and a row
+   someone adds by hand, never a lost advance. That is why syncRound
+   throws where the CLI would exit.
+   ------------------------------------------------------------ */
+function syncBracketRows(L, week) {
+  const w = seasonIndex(week);
+  if (!ROUND_FOR_WEEK[w]) return null; // not a bowl week — nothing to derive
+
+  let result;
+  try {
+    result = syncRound({ L, week: w });
+  } catch (e) {
+    if (!(e instanceof BracketSyncError)) throw e;
+    console.error(`\n  WARNING: could not derive the ${weekLabel(w).toLowerCase()} matchups — ${e.message}`);
+    console.error(
+      "  The submission still stands. Add the rows by hand once the bracket is readable:\n" +
+        `    node tools/bracket-sync.js --league ${L.slug} --week ${w}`
+    );
+    return null;
+  }
+
+  result.lines.forEach((l) => console.log(l ? "  " + l : ""));
+  return result;
+}
 
 /* Read tools/config.json (which on the Actions runner IS the
    DISCORD_CONFIG secret, written there by the workflow) WITHOUT the
@@ -478,15 +533,25 @@ function doScores(p, L) {
   result.write();
   console.log(`\n  ${L.dir}/schedule-data.js updated — ${result.applied.length} entries.\n`);
 
+  /* A score can complete a playoff round AFTER the advance into the
+     next one has already happened — the last quarterfinal reported a
+     day late is the ordinary case, not a strange one. So re-derive
+     the round the league is currently in, which is a no-op every
+     other time and the thing that unsticks the postseason on the
+     occasion it isn't. The week just scored is deliberately not what
+     is derived: its rows are what these scores landed on. */
+  const synced = syncBracketRows(L, data.SEASON && data.SEASON.currentWeek);
+  const syncNote = syncSummary(synced);
+
   return {
     changed: true,
     commit: `${L.label}: ${weekLabel(p.week)} scores (via ${p.actor})`,
-    summary: answered.join("; "),
+    summary: answered.join("; ") + (syncNote ? ` · ${syncNote}` : ""),
   };
 }
 
 async function doAdvance(p, L) {
-  const data = loadData(L.paths);
+  let data = loadData(L.paths);
 
   /* Block advancing into a week whose Top 25 isn't transcribed yet.
      Main only, and a no-op for a league that hasn't started a poll —
@@ -526,6 +591,15 @@ async function doAdvance(p, L) {
 
   const changed = updateSeason(L.paths.league, p.week, status, p.nextAt);
 
+  /* The next playoff round's rows, BEFORE the week is built — the
+     announcement's whole job is to tell four coaches who they play,
+     and rows written after buildWeek would be rows nobody is told
+     about until the following advance. A no-op outside weeks 16-19
+     and on any bowl week whose rows are already there. */
+  const synced = sentinel ? null : syncBracketRows(L, p.week);
+  if (synced && synced.written.length) data = loadData(L.paths);
+  const syncNote = syncSummary(synced);
+
   const wk = sentinel
     ? { league: [], cpu: [], notes: [], missing: [] }
     : buildWeek(data, p.week);
@@ -538,9 +612,23 @@ async function doAdvance(p, L) {
   }
 
   if (!changed) {
-    /* The file already said this — a re-run. Don't re-post: the commit
-       step is skipped on no-change, and a spurious second announcement
-       is worse than silence. */
+    /* The file already said this — a re-run. Don't re-post: a spurious
+       second announcement is worse than silence.
+
+       The rows are the exception. Re-submitting the advance is the
+       obvious thing to do when a bowl week's matchups never appeared,
+       and it used to be the one thing that couldn't help: no change to
+       league-data.js meant changed=false meant the workflow skipped
+       the commit and threw the rows away. So a sync that wrote
+       something is a change worth committing on its own, quietly. */
+    if (synced && synced.written.length) {
+      console.log(`\n  ${L.dir}/league-data.js already said that — committing the bracket rows only.\n`);
+      return {
+        changed: true,
+        commit: `${L.label}: ${label} matchups (via ${p.actor})`,
+        summary: syncNote,
+      };
+    }
     console.log(`\n  ${L.dir}/league-data.js already said that. Nothing to write, nothing posted.\n`);
     return { changed: false };
   }
@@ -558,7 +646,9 @@ async function doAdvance(p, L) {
   return {
     changed: true,
     commit: `${L.label}: advance to ${label} (via ${p.actor})`,
-    summary: `Advanced to ${label}, next deadline "${next}"${announced.note}`,
+    summary:
+      `Advanced to ${label}, next deadline "${next}"${announced.note}` +
+      (syncNote ? ` · ${syncNote}` : ""),
   };
 }
 

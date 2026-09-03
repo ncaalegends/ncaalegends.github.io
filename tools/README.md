@@ -967,6 +967,31 @@ than from a table here. From the quarterfinals on every row is
 a bowl site is its NAME, and that goes on `title` (merged forward key
 by key from the brackets, same as the site does).
 
+### The web advance runs this for you
+
+Since the semifinals of 2026 this is wired into `apply.js`, so every
+league gets it without anyone remembering:
+
+- an **advance into weeks 16-19** derives that round before the Discord
+  announcement is built, so the message names the matchups;
+- a **score entered while the league is in a bowl week** re-derives the
+  round it is currently in, which is what catches the result that lands
+  after the advance rather than before it;
+- re-submitting an advance that changed nothing still commits rows the
+  sync wrote — resubmitting is the obvious fix when a round's matchups
+  never appeared, and it now works.
+
+Re-running writes nothing when the rows exist, so both hooks are silent
+on every pass but the one that matters. A bracket it can't read — still
+projected, not entered, a round short — is a **warning in the Actions
+log, never a failed advance**: the season file is written by the time
+the sync is asked, so nothing in `bracket-sync.js` may exit the process.
+That is why `syncRound()` throws `BracketSyncError` and the CLI, not the
+library, is what calls `die()`.
+
+Running it by hand is still fine and still the way to fill a round in
+early, or to check with `--dry-run` before a screenshot goes in.
+
 ### The usual order in a bowl week
 
 ```
@@ -975,7 +1000,9 @@ node tools/bracket-sync.js --week 17                # next round's rows
 ```
 
 Results first: a round's matchups can't be derived until the round
-before it is final.
+before it is final. The CPU-only games have no automatic path — a web
+advance can write a coached team's row, but a CPU-vs-CPU playoff game
+belongs in `postseason-data.js` and still arrives through `cfp.js`.
 
 ## rollover.js
 

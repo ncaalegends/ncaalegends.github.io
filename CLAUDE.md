@@ -17,6 +17,16 @@ final (week 15/16 onward), two files get updated, not one:
    node tools/bracket-sync.js --league <slug> --week N
    ```
 
+   **A web advance now runs this itself, for every league.** Advancing
+   into weeks 16-19 from the admin page derives that round before the
+   Discord announcement is built, and a score entered during a bowl week
+   re-derives the round the league is in — which is what catches a result
+   that lands after the advance. So this is normally a check, not a
+   chore. Run it by hand when you want the rows early, or when the
+   Actions log warned it couldn't read the bracket (still projected, or
+   not entered yet — that warns and lets the advance stand, it never
+   fails it).
+
    It derives the round from the final `CFP_BRACKET` and the results already
    recorded — the same union the site's own bracket reads — and writes only the
    rows a coached team needs. It never writes a CPU-vs-CPU game, never touches

@@ -76,16 +76,30 @@ const BYE_FOR_R1 = [4, 1, 3, 2];
 
 const ROUND_FOR_WEEK = { 16: "cfp-r1", 17: "cfp-qf", 18: "cfp-sf", 19: "cfp-nc" };
 
+/* Raised by anything in here that can't derive the round: a bracket
+   that is missing, still projected, or the wrong size. The CLI turns
+   it into die(); tools/apply.js logs it and lets the submission
+   stand. Nothing in this file may exit the process — see syncRound().
+   ------------------------------------------------------------ */
+class BracketSyncError extends Error {}
+
 /* ------------------------------------------------------------
    THE BRACKET
    ------------------------------------------------------------ */
+/* Throws rather than exits — see syncRound() below. Every refusal in
+   here is a refusal to DERIVE, and the web path has an advance
+   already written to disk by the time it asks, so a hard exit would
+   strand it: applied on the runner, never committed, invisible on the
+   site. The CLI turns these back into die() with the same words. */
 function finalBracket(data, opts) {
   const list = Array.isArray(data.CFP_BRACKET) ? data.CFP_BRACKET : [];
-  if (!list.length) die("no CFP_BRACKET in cfp-data.js — nothing to sync from.");
+  if (!list.length) {
+    throw new BracketSyncError("no CFP_BRACKET in cfp-data.js — nothing to sync from.");
+  }
 
   const b = list[list.length - 1];
   if (b.projected && !opts.allowProjected) {
-    die(
+    throw new BracketSyncError(
       `the newest bracket (week ${b.week}) is still marked projected.\n` +
         `  The field isn't settled, so the matchups under it aren't either. Enter the\n` +
         `  post-championship bracket first:\n` +
@@ -94,7 +108,9 @@ function finalBracket(data, opts) {
     );
   }
   if (!Array.isArray(b.seeds) || b.seeds.length !== 12) {
-    die(`the week ${b.week} bracket has ${(b.seeds || []).length} seeds, expected 12.`);
+    throw new BracketSyncError(
+      `the week ${b.week} bracket has ${(b.seeds || []).length} seeds, expected 12.`
+    );
   }
   return b;
 }
@@ -311,23 +327,36 @@ function insertRows(src, rows) {
 /* ------------------------------------------------------------
    MAIN
    ------------------------------------------------------------ */
-function main() {
-  const args = parseArgs(process.argv.slice(2));
-  const dryRun = args.flags.has("dry-run");
-  const L = resolveLeague(args.league || "main");
-  const data = loadData(L.paths);
+
+/* ------------------------------------------------------------
+   THE ROUND, AS A LIBRARY CALL
+   ------------------------------------------------------------
+   Everything above derives the round; this assembles it, writes the
+   rows, and REPORTS rather than prints. The CLI below prints what
+   comes back, and tools/apply.js — the web advance — logs the same
+   lines into the Actions log. One derivation, two front doors.
+
+   It throws BracketSyncError instead of calling die(), because the
+   web path must never be killed by a bracket it couldn't read: an
+   advance that is already written to disk has to finish and commit.
+   The CLI turns the throw straight back into die() and the message
+   is unchanged.
+   ------------------------------------------------------------ */
+function syncRound(opts) {
+  const L = opts.L;
+  const week = Number(opts.week);
+  const dryRun = !!opts.dryRun;
+  const data = opts.data || loadData(L.paths);
   const R = makeResolver(data);
 
-  const week = Number(args.week);
-  if (!Number.isInteger(week) || week <= REGULAR_FINAL_WEEK || week > FINAL_WEEK) {
-    die(
-      `--week must be a bowl week, ${REGULAR_FINAL_WEEK + 1}-${FINAL_WEEK}.\n` +
-        `  Weeks up to ${REGULAR_FINAL_WEEK} are the regular season; their schedules are already written.`
+  const roundId = ROUND_FOR_WEEK[week];
+  if (!roundId) {
+    throw new BracketSyncError(
+      `week ${week} is not a bowl week — nothing to derive.`
     );
   }
 
-  const roundId = ROUND_FOR_WEEK[week];
-  const bracket = finalBracket(data, { allowProjected: args.flags.has("allow-projected") });
+  const bracket = finalBracket(data, { allowProjected: !!opts.allowProjected });
   const winnerOf = makeWinnerLookup(data, R);
   const bowls = bowlsFor(data);
 
@@ -343,10 +372,13 @@ function main() {
     return bowls.nc || "National Championship";
   };
 
-  console.log("");
-  console.log(`  ${L.label} — ${weekLabel(week)}`);
-  console.log(`  Field: the week ${bracket.week} bracket${bracket.projected ? "  (PROJECTED — NOT FINAL)" : ""}.`);
-  console.log("");
+  const lines = [];
+  lines.push("");
+  lines.push(`${L.label} — ${weekLabel(week)}`);
+  lines.push(
+    `Field: the week ${bracket.week} bracket${bracket.projected ? "  (PROJECTED — NOT FINAL)" : ""}.`
+  );
+  lines.push("");
 
   const games = matchupsFor(roundId, bracket, winnerOf);
   const rows = [];
@@ -371,7 +403,7 @@ function main() {
   games.forEach((g) => {
     const [a, b] = g.teams;
     const t = titleFor(g.index);
-    console.log(`   ${label(a).padEnd(32)} vs  ${label(b).padEnd(32)}${t ? "  " + t : ""}`);
+    lines.push(` ${label(a).padEnd(32)} vs  ${label(b).padEnd(32)}${t ? "  " + t : ""}`);
 
     if (!a || !b) {
       waiting.push(g);
@@ -413,48 +445,117 @@ function main() {
     });
   });
 
-  console.log("");
+  lines.push("");
 
   waiting.forEach((g) => {
     const pending = (g.waitingOn || []).filter(Boolean).join(" / ");
-    console.log(`  Waiting on a result${pending ? `: ${pending}` : ""}.`);
+    lines.push(`Waiting on a result${pending ? `: ${pending}` : ""}.`);
   });
 
   cpuOnly.forEach(([a, b]) => {
-    console.log(`  CPU vs CPU — ${a} vs ${b}. Not written here; that one goes in`);
-    console.log(`    postseason-data.js:  node tools/cfp.js --week ${week} --results results.txt`);
+    lines.push(`CPU vs CPU — ${a} vs ${b}. Not written here; that one goes in`);
+    lines.push(`  postseason-data.js:  node tools/cfp.js --week ${week} --results results.txt`);
   });
 
-  already.forEach((s) => console.log(`  Already on the schedule — ${s}. Left alone.`));
+  already.forEach((s) => lines.push(`Already on the schedule — ${s}. Left alone.`));
+
+  const result = {
+    league: L.slug,
+    week,
+    roundId,
+    bracket,
+    games,
+    rows,
+    waiting,
+    cpuOnly,
+    already,
+    written: [],
+    lines,
+  };
 
   if (!rows.length) {
-    console.log("\n  Nothing to write.\n");
-    return;
+    lines.push("");
+    lines.push("Nothing to write.");
+    lines.push("");
+    return result;
   }
 
-  console.log(`\n  ${rows.length} row${rows.length === 1 ? "" : "s"} to add:\n`);
-  rows.forEach((r) => console.log(`    ${r.team.padEnd(16)} ${r.text}`));
+  lines.push("");
+  lines.push(`${rows.length} row${rows.length === 1 ? "" : "s"} to add:`);
+  lines.push("");
+  rows.forEach((r) => lines.push(`  ${r.team.padEnd(16)} ${r.text}`));
 
   const file = L.paths.schedule;
-  const result = insertRows(fs.readFileSync(file, "utf8"), rows);
+  const inserted = insertRows(fs.readFileSync(file, "utf8"), rows);
 
-  if (result.written.length !== rows.length) {
-    const missed = rows.filter((r) => !result.written.includes(r));
-    die(
+  if (inserted.written.length !== rows.length) {
+    const missed = rows.filter((r) => !inserted.written.includes(r));
+    throw new BracketSyncError(
       `couldn't find the schedule block for: ${missed.map((r) => r.team).join(", ")}.\n` +
         `  Nothing was written. Check the team name matches schedule-data.js exactly.`
     );
   }
 
   if (dryRun) {
-    console.log("\n  --dry-run: nothing written.\n");
-    return;
+    lines.push("");
+    lines.push("--dry-run: nothing written.");
+    lines.push("");
+    return result;
   }
 
-  fs.writeFileSync(file, result.text, "utf8");
-  console.log(`\n  Written to ${L.dir}/schedule-data.js.`);
-  console.log("  Scores go in the normal way once the games are played:");
-  console.log(`    node tools/scores.js --week ${week}\n`);
+  fs.writeFileSync(file, inserted.text, "utf8");
+  result.written = inserted.written;
+  lines.push("");
+  lines.push(`Written to ${L.dir}/schedule-data.js.`);
+  lines.push("Scores go in the normal way once the games are played:");
+  lines.push(`  node tools/scores.js --week ${week}`);
+  lines.push("");
+  return result;
 }
 
-main();
+/* A one-line summary of what a sync did, for a run summary or a
+   commit trailer. Empty string when it did nothing, so a caller can
+   append it unconditionally. */
+function syncSummary(r) {
+  if (!r || !r.written.length) return "";
+  const what = r.written.map((x) => x.team).join(", ");
+  return `${r.written.length} ${r.roundId} row${r.written.length === 1 ? "" : "s"} added (${what})`;
+}
+
+/* ------------------------------------------------------------
+   MAIN
+   ------------------------------------------------------------ */
+function main() {
+  const args = parseArgs(process.argv.slice(2));
+  const L = resolveLeague(args.league || "main");
+
+  const week = Number(args.week);
+  if (!Number.isInteger(week) || week <= REGULAR_FINAL_WEEK || week > FINAL_WEEK) {
+    die(
+      `--week must be a bowl week, ${REGULAR_FINAL_WEEK + 1}-${FINAL_WEEK}.\n` +
+        `  Weeks up to ${REGULAR_FINAL_WEEK} are the regular season; their schedules are already written.`
+    );
+  }
+
+  let result;
+  try {
+    result = syncRound({
+      L,
+      week,
+      dryRun: args.flags.has("dry-run"),
+      allowProjected: args.flags.has("allow-projected"),
+    });
+  } catch (e) {
+    if (e instanceof BracketSyncError) die(e.message);
+    throw e;
+  }
+
+  /* The two-space left margin every tool in here prints with. It
+     lives at the edge rather than in the report, so the same lines
+     can be re-indented into an Actions log without unpicking it. */
+  result.lines.forEach((l) => console.log(l ? "  " + l : ""));
+}
+
+if (require.main === module) main();
+
+module.exports = { syncRound, syncSummary, BracketSyncError, ROUND_FOR_WEEK };
