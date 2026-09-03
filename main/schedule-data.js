@@ -133,7 +133,7 @@ const TEAM_SCHEDULES = [
       { week: 14, note: "Army-Navy Week" },
       { week: 15, opponent: "California", location: "vs", neutral: true, stadium: "Bank of America Stadium", title: "ACC Championship", round: "ccg", teamScore: 48, opponentScore: 19 },
       { week: 17, opponent: "West Virginia", location: "vs", neutral: true, title: "Peach Bowl", round: "cfp-qf", teamScore: 45, opponentScore: 31 },
-      { week: 18, opponent: "Georgia", location: "vs", neutral: true, round: "cfp-sf" },
+      { week: 18, opponent: "Georgia", location: "vs", neutral: true, round: "cfp-sf", teamScore: 45, opponentScore: 20 },
     ],
   },
   {
@@ -180,7 +180,7 @@ const TEAM_SCHEDULES = [
       { week: 14, note: "Army-Navy Week" },
       { week: 15, note: "BYE" },
       { week: 17, opponent: "TCU", location: "vs", neutral: true, title: "Rose Bowl", round: "cfp-qf", teamScore: 18, opponentScore: 17 },
-      { week: 18, opponent: "Texas", location: "vs", neutral: true, round: "cfp-sf" },
+      { week: 18, opponent: "Texas", location: "vs", neutral: true, round: "cfp-sf", teamScore: 39, opponentScore: 41 },
     ],
   },
   {
@@ -320,7 +320,7 @@ const TEAM_SCHEDULES = [
       { week: 15, opponent: "South Carolina", location: "vs", neutral: true, stadium: "Mercedes-Benz Stadium", title: "SEC Championship", round: "ccg", teamScore: 38, opponentScore: 7 },
       { week: 16, opponent: "Michigan", location: "vs", stadium: "Texas Memorial Stadium", round: "cfp-r1", teamScore: 35, opponentScore: 10 },
       { week: 17, opponent: "Notre Dame", location: "at", neutral: true, title: "Fiesta Bowl", round: "cfp-qf", teamScore: 24, opponentScore: 0 },
-      { week: 18, opponent: "Oregon", location: "at", neutral: true, round: "cfp-sf" },
+      { week: 18, opponent: "Oregon", location: "at", neutral: true, round: "cfp-sf", teamScore: 41, opponentScore: 39 },
     ],
   },
   {
@@ -367,7 +367,7 @@ const TEAM_SCHEDULES = [
       { week: 14, note: "Army-Navy Week" },
       { week: 15, note: "BYE" },
       { week: 17, opponent: "LSU", location: "vs", neutral: true, title: "Cotton Bowl", round: "cfp-qf", teamScore: 37, opponentScore: 24 },
-      { week: 18, opponent: "Clemson", location: "at", neutral: true, round: "cfp-sf" },
+      { week: 18, opponent: "Clemson", location: "at", neutral: true, round: "cfp-sf", teamScore: 20, opponentScore: 45 },
     ],
   },
   {
