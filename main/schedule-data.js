@@ -345,7 +345,7 @@ const TEAM_SCHEDULES = [
       { week: 13, opponent: "UCLA", location: "at", stadium: "Rose Bowl Stadium", teamScore: 35, opponentScore: 28 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, note: "BYE" },
-      { week: 17, opponent: "Virginia", location: "vs", neutral: true, title: "Duke's Mayo Bowl", round: "bowl-w2" },
+      { week: 17, opponent: "Virginia", location: "vs", neutral: true, title: "Duke's Mayo Bowl", round: "bowl-w2", teamScore: 14, opponentScore: 10 },
     ],
   },
   {
