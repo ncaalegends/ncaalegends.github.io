@@ -40,10 +40,10 @@ const SEASON = {
      life as the dynasty runs. 2026 -> 2027 -> 2028 and so on. */
   year: 2026,
 
-  currentWeek: 18,
+  currentWeek: 19,
 
   // Shown in the hero. Update as the league moves through phases.
-  statusLine: "BOWL WEEK 3 (CFP SEMIFINALS)",
+  statusLine: "BOWL WEEK 4 (NATIONAL CHAMPIONSHIP)",
 
   /* ADVANCE DEADLINE — the one place real-world time appears.
      League rule: the next advance happens no later than 6:00 PM EDT

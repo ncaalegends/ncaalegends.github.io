@@ -134,6 +134,7 @@ const TEAM_SCHEDULES = [
       { week: 15, opponent: "California", location: "vs", neutral: true, stadium: "Bank of America Stadium", title: "ACC Championship", round: "ccg", teamScore: 48, opponentScore: 19 },
       { week: 17, opponent: "West Virginia", location: "vs", neutral: true, title: "Peach Bowl", round: "cfp-qf", teamScore: 45, opponentScore: 31 },
       { week: 18, opponent: "Georgia", location: "vs", neutral: true, round: "cfp-sf", teamScore: 45, opponentScore: 20 },
+      { week: 19, opponent: "Texas", location: "vs", neutral: true, title: "National Championship", round: "cfp-nc", teamScore: 35, opponentScore: 28 },
     ],
   },
   {
@@ -321,6 +322,7 @@ const TEAM_SCHEDULES = [
       { week: 16, opponent: "Michigan", location: "vs", stadium: "Texas Memorial Stadium", round: "cfp-r1", teamScore: 35, opponentScore: 10 },
       { week: 17, opponent: "Notre Dame", location: "at", neutral: true, title: "Fiesta Bowl", round: "cfp-qf", teamScore: 24, opponentScore: 0 },
       { week: 18, opponent: "Oregon", location: "at", neutral: true, round: "cfp-sf", teamScore: 41, opponentScore: 39 },
+      { week: 19, opponent: "Clemson", location: "at", neutral: true, title: "National Championship", round: "cfp-nc", teamScore: 28, opponentScore: 35 },
     ],
   },
   {
