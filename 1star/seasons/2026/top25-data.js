@@ -61,4 +61,5 @@
        team    must resolve to a roster or schedule team name
        record  the W-L string shown in the poll (e.g. "1-0")
    ============================================================ */
-const TOP25 = [];
+const TOP25 = [
+];
