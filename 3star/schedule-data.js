@@ -84,7 +84,7 @@ const TEAM_SCHEDULES = [
     conference: "ACC",
     weeks: [
       { week: 0, opponent: "Boise State", location: "vs", stadium: "California Memorial Stadium", teamScore: 52, opponentScore: 40 },
-      { week: 1, opponent: "UCF", location: "at", stadium: "Acrisure Bounce House" },
+      { week: 1, opponent: "UCF", location: "at", stadium: "Acrisure Bounce House", teamScore: 22, opponentScore: 41 },
       { week: 2, note: "BYE" },
       { week: 3, opponent: "Baylor", location: "vs", stadium: "California Memorial Stadium" },
       { week: 4, note: "BYE" },
@@ -182,7 +182,7 @@ const TEAM_SCHEDULES = [
        schedule screen ("7th in Big Ten Division 1") and league-data.js. */
     weeks: [
       { week: 0, opponent: "Bowling Green", location: "vs", teamScore: 42, opponentScore: 14, stadium: "North Dakota State Stadium" },
-      { week: 1, opponent: "James Madison", location: "at", stadium: "Bridgeforth Stadium" },
+      { week: 1, opponent: "James Madison", location: "at", stadium: "Bridgeforth Stadium", teamScore: 39, opponentScore: 38 },
       { week: 2, opponent: "Sac State", location: "vs", stadium: "North Dakota State Stadium" },
       { week: 3, note: "BYE" },
       { week: 4, opponent: "Oregon", location: "at", stadium: "Autzen Stadium" },
@@ -204,7 +204,7 @@ const TEAM_SCHEDULES = [
     conference: "B1G",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "Washington St.", location: "vs", stadium: "Reser Stadium" },
+      { week: 1, opponent: "Washington St.", location: "vs", stadium: "Reser Stadium", teamScore: 38, opponentScore: 24 },
       { week: 2, opponent: "New Mexico", location: "vs", stadium: "Reser Stadium" },
       { week: 3, opponent: "Penn State", location: "vs", stadium: "Reser Stadium" },
       { week: 4, opponent: "San Diego St.", location: "at", stadium: "Snapdragon Stadium" },
@@ -229,7 +229,7 @@ const TEAM_SCHEDULES = [
        seasons/2026/. */
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "Akron", location: "vs", stadium: "SHI Stadium" },
+      { week: 1, opponent: "Akron", location: "vs", stadium: "SHI Stadium", teamScore: 46, opponentScore: 7 },
       { week: 2, opponent: "Boston College", location: "vs", stadium: "SHI Stadium" },
       { week: 3, opponent: "App St.", location: "at", stadium: "Kidd Brewer Stadium" },
       { week: 4, opponent: "Northwestern", location: "vs", stadium: "SHI Stadium" },
@@ -343,7 +343,7 @@ const TEAM_SCHEDULES = [
     conference: "XII",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "Arizona State", location: "at", stadium: "Mountain America Stadium" },
+      { week: 1, opponent: "Arizona State", location: "at", stadium: "Mountain America Stadium", teamScore: 28, opponentScore: 10 },
       { week: 2, opponent: "Kansas", location: "vs", stadium: "Boone Pickens Stadium" },
       { week: 3, opponent: "Texas A&M", location: "vs", stadium: "Boone Pickens Stadium" },
       { week: 4, note: "BYE" },
@@ -395,7 +395,7 @@ const TEAM_SCHEDULES = [
       { week: 0, opponent: "UConn", location: "vs", stadium: "Bridgeforth Stadium", teamScore: 24, opponentScore: 21 },
       /* Listed in game as "NDSU"; expanded to the roster spelling so
          the head-to-head with Texan_hog resolves. */
-      { week: 1, opponent: "North Dakota State", location: "vs", stadium: "Bridgeforth Stadium" },
+      { week: 1, opponent: "North Dakota State", location: "vs", stadium: "Bridgeforth Stadium", teamScore: 38, opponentScore: 39 },
       { week: 2, opponent: "Vanderbilt", location: "at", stadium: "FirstBank Stadium" },
       { week: 3, opponent: "C. Carolina", location: "vs", stadium: "Bridgeforth Stadium" },
       { week: 4, note: "BYE" },
@@ -427,7 +427,7 @@ const TEAM_SCHEDULES = [
        schedule screen ("2nd in SEC Division 1") and league-data.js. */
     weeks: [
       { week: 0, opponent: "UAB", location: "vs", stadium: "Acrisure Bounce House" },
-      { week: 1, opponent: "California", location: "vs", stadium: "Acrisure Bounce House" },
+      { week: 1, opponent: "California", location: "vs", stadium: "Acrisure Bounce House", teamScore: 41, opponentScore: 22 },
       { week: 2, note: "BYE" },
       { week: 3, opponent: "East Carolina", location: "at", stadium: "Dowdy-Ficklen Stadium" },
       { week: 4, opponent: "Georgia", location: "vs", stadium: "Acrisure Bounce House" },
