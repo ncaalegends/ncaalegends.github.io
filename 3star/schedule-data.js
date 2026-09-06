@@ -128,7 +128,7 @@ const TEAM_SCHEDULES = [
     conference: "ACC",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "Temple", location: "vs", stadium: "Acrisure Stadium" },
+      { week: 1, opponent: "Temple", location: "vs", stadium: "Acrisure Stadium", teamScore: 38, opponentScore: 7 },
       /* Aer Lingus-style neutral opener in Dublin. Pitt is the listed
          home side ("VS" in game), but there's no true home team, so
          the row carries neutral + the venue. Cross-check with Salzy's
