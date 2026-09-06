@@ -1,15 +1,24 @@
 /* ============================================================
    1-STAR DYNASTY — SCHEDULE DATA
    ------------------------------------------------------------
-   Transcribed from in-game "Team Schedule" screenshots, 2 per
-   team (weeks 0-8 and weeks 8-16), overlap deduped by hand.
-   Snapshot taken 2026-07-22, preseason. Appalachian State was
-   added 2026-07-27 from a week 2 snapshot, so its first two rows
-   already carry results while the other eight teams' do not.
+   2027 SEASON. Transcribed from in-game "Team Schedule"
+   screenshots, 2 per team (weeks 0-8 and weeks 7-"Conf Champ"),
+   overlap deduped by hand. Snapshot taken 2027 preseason, before
+   any week 0 game — no team has a week 0 opponent this year, and
+   no row carries a result yet.
 
    All 9 coaches are represented. Every user-vs-user matchup was
    cross-checked against BOTH coaches' screenshots and the
-   home/away sides agree in all cases (10 league games total).
+   home/away sides agree in all cases (9 league games total):
+   North Shore-Baldwin Wallace w1, Wawa-Westeros w1, Dillon-Patriot
+   Tech w3, New Glarus-Westeros w3, Patriot Tech-Westeros w4,
+   Minneapolis-North Shore w11, Patriot Tech-Wawa w12, New
+   Glarus-North Shore w13, Dillon-Appalachian State w13.
+
+   In-game AP ranks shown beside opponents (20 South Carolina, 17
+   Nebraska, 22 Colorado, 16 Duke, 18 Virginia, 24 Boise State, 15
+   Louisville, 11 BYU) are preseason and not carried over — the
+   site takes ranks from top25-data.js, not from schedule rows.
 
    WEEK MAPPING. The in-game table lists rows 0-14, then
    "Conf Champ", then 16. This file follows the convention the
@@ -48,7 +57,7 @@
    A game between two teams NOBODY coaches — most of the CFP bracket
    — has no coach's schedule to live on and goes in
    postseason-data.js instead.
-   In-game week 14 and "Conf Champ" both read BYE for all eight
+   In-game week 14 and "Conf Champ" both read BYE for all nine
    teams right now; they're written as the labelled weeks anyway
    so the site renders them consistently with the other leagues.
    The trailing in-game row 16 (a post-CCG bye for everyone) is
@@ -91,6 +100,22 @@ const TEAM_SCHEDULES = [
     team: "Baldwin Wallace",
     conference: "Sun Belt",
     weeks: [
+      { week: 0, note: "BYE" },
+      { week: 1, opponent: "North Shore", location: "at" },
+      { week: 2, opponent: "South Carolina", location: "at" },
+      { week: 3, opponent: "Ohio", location: "vs" },
+      { week: 4, note: "BYE" },
+      { week: 5, opponent: "Ole Miss", location: "at" },
+      { week: 6, opponent: "Southern Mississippi", location: "vs" },
+      { week: 7, opponent: "Old Dominion", location: "vs" },
+      { week: 8, opponent: "Troy", location: "at" },
+      { week: 9, opponent: "Marshall", location: "at" },
+      { week: 10, opponent: "Louisiana", location: "vs" },
+      { week: 11, opponent: "Louisiana Tech", location: "at" },
+      { week: 12, opponent: "Arkansas State", location: "vs" },
+      { week: 13, opponent: "UL Monroe", location: "at" },
+      { week: 14, note: "Army-Navy Week" },
+      { week: 15, note: "BYE" },
     ],
   },
   {
@@ -104,12 +129,44 @@ const TEAM_SCHEDULES = [
     team: "Appalachian State",
     conference: "Sun Belt",
     weeks: [
+      { week: 0, note: "BYE" },
+      { week: 1, opponent: "FCS Northwest", location: "vs" },
+      { week: 2, opponent: "Charlotte", location: "at" },
+      { week: 3, opponent: "Memphis", location: "vs" },
+      { week: 4, opponent: "Northern Illinois", location: "vs" },
+      { week: 5, opponent: "Coastal Carolina", location: "vs" },
+      { week: 6, opponent: "Georgia State", location: "at" },
+      { week: 7, opponent: "Southern Mississippi", location: "at" },
+      { week: 8, opponent: "Marshall", location: "vs" },
+      { week: 9, opponent: "Louisiana Tech", location: "vs" },
+      { week: 10, note: "BYE" },
+      { week: 11, opponent: "Old Dominion", location: "at" },
+      { week: 12, opponent: "James Madison", location: "at" },
+      { week: 13, opponent: "Dillon", location: "vs" },
+      { week: 14, note: "Army-Navy Week" },
+      { week: 15, note: "BYE" },
     ],
   },
   {
     team: "Dillon",
     conference: "Sun Belt",
     weeks: [
+      { week: 0, note: "BYE" },
+      { week: 1, opponent: "UNLV", location: "vs" },
+      { week: 2, opponent: "Nebraska", location: "vs" },
+      { week: 3, opponent: "Patriot Tech", location: "at" },
+      { week: 4, opponent: "FCS East", location: "vs" },
+      { week: 5, note: "BYE" },
+      { week: 6, opponent: "James Madison", location: "at" },
+      { week: 7, opponent: "Georgia State", location: "vs" },
+      { week: 8, opponent: "Old Dominion", location: "vs" },
+      { week: 9, opponent: "Coastal Carolina", location: "vs" },
+      { week: 10, opponent: "Troy", location: "at" },
+      { week: 11, opponent: "Marshall", location: "at" },
+      { week: 12, opponent: "UL Monroe", location: "vs" },
+      { week: 13, opponent: "Appalachian State", location: "at" },
+      { week: 14, note: "Army-Navy Week" },
+      { week: 15, note: "BYE" },
     ],
   },
 
@@ -118,18 +175,66 @@ const TEAM_SCHEDULES = [
     team: "Minneapolis",
     conference: "MAC",
     weeks: [
+      { week: 0, note: "BYE" },
+      { week: 1, opponent: "Minnesota", location: "vs" },
+      { week: 2, opponent: "Southern Mississippi", location: "vs" },
+      { week: 3, opponent: "Colorado", location: "at" },
+      { week: 4, opponent: "UMass", location: "vs" },
+      { week: 5, note: "BYE" },
+      { week: 6, opponent: "Toledo", location: "vs" },
+      { week: 7, opponent: "Central Michigan", location: "at" },
+      { week: 8, opponent: "Buffalo", location: "at" },
+      { week: 9, opponent: "Eastern Michigan", location: "vs" },
+      { week: 10, opponent: "Missouri", location: "at" },
+      { week: 11, opponent: "North Shore", location: "vs" },
+      { week: 12, opponent: "Miami University", location: "at" },
+      { week: 13, opponent: "Western Michigan", location: "at" },
+      { week: 14, note: "Army-Navy Week" },
+      { week: 15, note: "BYE" },
     ],
   },
   {
     team: "New Glarus",
     conference: "MAC",
     weeks: [
+      { week: 0, note: "BYE" },
+      { week: 1, opponent: "Arkansas", location: "at" },
+      { week: 2, opponent: "Duke", location: "vs" },
+      { week: 3, opponent: "Westeros", location: "at" },
+      { week: 4, opponent: "Army", location: "at" },
+      { week: 5, note: "BYE" },
+      { week: 6, opponent: "Sacramento State", location: "vs" },
+      { week: 7, opponent: "Miami University", location: "vs" },
+      { week: 8, opponent: "Bowling Green", location: "vs" },
+      { week: 9, opponent: "Western Michigan", location: "at" },
+      { week: 10, opponent: "Toledo", location: "at" },
+      { week: 11, opponent: "Ohio", location: "at" },
+      { week: 12, opponent: "Central Michigan", location: "at" },
+      { week: 13, opponent: "North Shore", location: "vs" },
+      { week: 14, note: "Army-Navy Week" },
+      { week: 15, note: "BYE" },
     ],
   },
   {
     team: "North Shore",
     conference: "MAC",
     weeks: [
+      { week: 0, note: "BYE" },
+      { week: 1, opponent: "Baldwin Wallace", location: "vs" },
+      { week: 2, opponent: "Vanderbilt", location: "at" },
+      { week: 3, opponent: "FCS Midwest", location: "vs" },
+      { week: 4, note: "BYE" },
+      { week: 5, opponent: "Virginia", location: "at" },
+      { week: 6, opponent: "Western Michigan", location: "vs" },
+      { week: 7, opponent: "Ohio", location: "vs" },
+      { week: 8, opponent: "UMass", location: "vs" },
+      { week: 9, opponent: "Bowling Green", location: "vs" },
+      { week: 10, opponent: "Sacramento State", location: "at" },
+      { week: 11, opponent: "Minneapolis", location: "at" },
+      { week: 12, opponent: "Eastern Michigan", location: "at" },
+      { week: 13, opponent: "New Glarus", location: "at" },
+      { week: 14, note: "Army-Navy Week" },
+      { week: 15, note: "BYE" },
     ],
   },
 
@@ -138,18 +243,66 @@ const TEAM_SCHEDULES = [
     team: "Patriot Tech",
     conference: "CUSA",
     weeks: [
+      { week: 0, note: "BYE" },
+      { week: 1, opponent: "Boise State", location: "at" },
+      { week: 2, opponent: "FCS Southeast", location: "vs" },
+      { week: 3, opponent: "Dillon", location: "vs" },
+      { week: 4, opponent: "Westeros", location: "vs" },
+      { week: 5, opponent: "Missouri State", location: "vs" },
+      { week: 6, opponent: "Delaware", location: "at" },
+      { week: 7, note: "BYE" },
+      { week: 8, opponent: "Middle Tennessee", location: "at" },
+      { week: 9, opponent: "Jacksonville State", location: "at" },
+      { week: 10, opponent: "Kennesaw State", location: "vs" },
+      { week: 11, opponent: "Virginia Tech", location: "at" },
+      { week: 12, opponent: "Wawa University", location: "vs" },
+      { week: 13, opponent: "New Mexico State", location: "at" },
+      { week: 14, note: "Army-Navy Week" },
+      { week: 15, note: "BYE" },
     ],
   },
   {
     team: "Wawa University",
     conference: "CUSA",
     weeks: [
+      { week: 0, note: "BYE" },
+      { week: 1, opponent: "Westeros", location: "vs" },
+      { week: 2, opponent: "Louisville", location: "at" },
+      { week: 3, opponent: "Florida Atlantic", location: "vs" },
+      { week: 4, note: "BYE" },
+      { week: 5, opponent: "FCS East", location: "vs" },
+      { week: 6, opponent: "Missouri State", location: "vs" },
+      { week: 7, opponent: "Marshall", location: "at" },
+      { week: 8, opponent: "Delaware", location: "at" },
+      { week: 9, opponent: "New Mexico State", location: "vs" },
+      { week: 10, opponent: "Middle Tennessee", location: "vs" },
+      { week: 11, opponent: "Sam Houston", location: "at" },
+      { week: 12, opponent: "Patriot Tech", location: "at" },
+      { week: 13, opponent: "Kennesaw State", location: "at" },
+      { week: 14, note: "Army-Navy Week" },
+      { week: 15, note: "BYE" },
     ],
   },
   {
     team: "Westeros",
     conference: "CUSA",
     weeks: [
+      { week: 0, note: "BYE" },
+      { week: 1, opponent: "Wawa University", location: "at" },
+      { week: 2, opponent: "FCS East", location: "vs" },
+      { week: 3, opponent: "New Glarus", location: "vs" },
+      { week: 4, opponent: "Patriot Tech", location: "at" },
+      { week: 5, opponent: "BYU", location: "at" },
+      { week: 6, opponent: "Kennesaw State", location: "at" },
+      { week: 7, opponent: "Sam Houston", location: "vs" },
+      { week: 8, opponent: "Arizona State", location: "at" },
+      { week: 9, opponent: "Delaware", location: "vs" },
+      { week: 10, opponent: "New Mexico State", location: "at" },
+      { week: 11, opponent: "Jacksonville State", location: "vs" },
+      { week: 12, opponent: "Middle Tennessee", location: "vs" },
+      { week: 13, note: "BYE" },
+      { week: 14, note: "Army-Navy Week" },
+      { week: 15, note: "BYE" },
     ],
   },
 ];
