@@ -50,8 +50,8 @@ const SEASON = {
 
   currentWeek: 1,
   statusLine: "WEEK 1",
-  nextAdvanceAt: "2026-09-09",
-  nextAdvance: "Wednesday, September 9th",
+  nextAdvanceAt: "2026-09-08T21:00:00-04:00",
+  nextAdvance: "Tuesday, September 8th - 9:00 PM EDT",
 };
 
 /* ------------------------------------------------------------
