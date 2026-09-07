@@ -130,7 +130,7 @@ const TEAM_SCHEDULES = [
     conference: "Sun Belt",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "FCS Northwest", location: "vs" },
+      { week: 1, opponent: "FCS Northwest", location: "vs", teamScore: 52, opponentScore: 0 },
       { week: 2, opponent: "Charlotte", location: "at" },
       { week: 3, opponent: "Memphis", location: "vs" },
       { week: 4, opponent: "Northern Illinois", location: "vs" },
@@ -244,7 +244,7 @@ const TEAM_SCHEDULES = [
     conference: "CUSA",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "Boise State", location: "at" },
+      { week: 1, opponent: "Boise State", location: "at", teamScore: 13, opponentScore: 27 },
       { week: 2, opponent: "FCS Southeast", location: "vs" },
       { week: 3, opponent: "Dillon", location: "vs" },
       { week: 4, opponent: "Westeros", location: "vs" },
@@ -266,7 +266,7 @@ const TEAM_SCHEDULES = [
     conference: "CUSA",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "Westeros", location: "vs" },
+      { week: 1, opponent: "Westeros", location: "vs", teamScore: 33, opponentScore: 15 },
       { week: 2, opponent: "Louisville", location: "at" },
       { week: 3, opponent: "Florida Atlantic", location: "vs" },
       { week: 4, note: "BYE" },
@@ -288,7 +288,7 @@ const TEAM_SCHEDULES = [
     conference: "CUSA",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "Wawa University", location: "at" },
+      { week: 1, opponent: "Wawa University", location: "at", teamScore: 15, opponentScore: 33 },
       { week: 2, opponent: "FCS East", location: "vs" },
       { week: 3, opponent: "New Glarus", location: "vs" },
       { week: 4, opponent: "Patriot Tech", location: "at" },
