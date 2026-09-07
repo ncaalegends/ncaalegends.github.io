@@ -106,7 +106,7 @@ const TEAM_SCHEDULES = [
     conference: "ACC",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "Vanderbilt", location: "vs", stadium: "Kenan Stadium" },
+      { week: 1, opponent: "Vanderbilt", location: "vs", stadium: "Kenan Stadium", teamScore: 28, opponentScore: 21 },
       { week: 2, opponent: "Purdue", location: "vs", stadium: "Kenan Stadium" },
       { week: 3, opponent: "Wake Forest", location: "vs", stadium: "Kenan Stadium" },
       { week: 4, opponent: "UConn", location: "vs", stadium: "Kenan Stadium" },
@@ -277,7 +277,7 @@ const TEAM_SCHEDULES = [
     conference: "XII",
     weeks: [
       { week: 0, opponent: "SMU", location: "vs", teamScore: 44, opponentScore: 31, stadium: "McLane Stadium" },
-      { week: 1, opponent: "Iowa State", location: "vs", stadium: "McLane Stadium" },
+      { week: 1, opponent: "Iowa State", location: "vs", stadium: "McLane Stadium", teamScore: 38, opponentScore: 21 },
       { week: 2, opponent: "Oregon", location: "vs", stadium: "McLane Stadium" },
       { week: 3, opponent: "California", location: "at", stadium: "California Memorial Stadium" },
       { week: 4, opponent: "West Virginia", location: "vs", stadium: "McLane Stadium" },
@@ -299,7 +299,7 @@ const TEAM_SCHEDULES = [
     conference: "XII",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "Texas Tech", location: "at", stadium: "Jones Stadium" },
+      { week: 1, opponent: "Texas Tech", location: "at", stadium: "Jones Stadium", teamScore: 52, opponentScore: 14 },
       { week: 2, opponent: "Michigan", location: "vs", stadium: "Folsom Field" },
       { week: 3, opponent: "NIU", location: "vs", stadium: "Folsom Field" },
       { week: 4, opponent: "Kansas", location: "vs", stadium: "Folsom Field" },
@@ -321,7 +321,7 @@ const TEAM_SCHEDULES = [
     conference: "XII",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "Baylor", location: "at", stadium: "McLane Stadium" },
+      { week: 1, opponent: "Baylor", location: "at", stadium: "McLane Stadium", teamScore: 21, opponentScore: 38 },
       { week: 2, opponent: "Iowa", location: "vs", stadium: "Jack Trice Stadium" },
       { week: 3, opponent: "Tennessee", location: "vs", stadium: "Jack Trice Stadium" },
       { week: 4, opponent: "Arizona", location: "vs", stadium: "Jack Trice Stadium" },
@@ -367,7 +367,7 @@ const TEAM_SCHEDULES = [
     conference: "SEC",
     weeks: [
       { week: 0, opponent: "Buffalo", location: "vs", stadium: "Jerry Richardson Stadium", teamScore: 38, opponentScore: 17 },
-      { week: 1, opponent: "Ole Miss", location: "at", stadium: "Vaught-Hemingway Stadium" },
+      { week: 1, opponent: "Ole Miss", location: "at", stadium: "Vaught-Hemingway Stadium", teamScore: 10, opponentScore: 17 },
       { week: 2, opponent: "Kentucky", location: "at", stadium: "Kroger Field" },
       { week: 3, opponent: "Florida", location: "at", stadium: "Ben Hill Griffin Stadium" },
       { week: 4, opponent: "East Carolina", location: "vs", stadium: "Jerry Richardson Stadium" },
