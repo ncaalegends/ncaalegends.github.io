@@ -101,7 +101,7 @@ const TEAM_SCHEDULES = [
     conference: "Sun Belt",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "North Shore", location: "at" },
+      { week: 1, opponent: "North Shore", location: "at", teamScore: 7, opponentScore: 14 },
       { week: 2, opponent: "South Carolina", location: "at" },
       { week: 3, opponent: "Ohio", location: "vs" },
       { week: 4, note: "BYE" },
@@ -220,7 +220,7 @@ const TEAM_SCHEDULES = [
     conference: "MAC",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "Baldwin Wallace", location: "vs" },
+      { week: 1, opponent: "Baldwin Wallace", location: "vs", teamScore: 14, opponentScore: 7 },
       { week: 2, opponent: "Vanderbilt", location: "at" },
       { week: 3, opponent: "FCS Midwest", location: "vs" },
       { week: 4, note: "BYE" },
