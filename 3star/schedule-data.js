@@ -251,7 +251,7 @@ const TEAM_SCHEDULES = [
     conference: "B1G",
     weeks: [
       { week: 0, opponent: "W. Michigan", location: "vs", teamScore: 56, opponentScore: 14, stadium: "Camp Randall Stadium" },
-      { week: 1, opponent: "Northwestern", location: "at", stadium: "Ryan Field" },
+      { week: 1, opponent: "Northwestern", location: "at", stadium: "Ryan Field", teamScore: 45, opponentScore: 17 },
       /* The Dublin neutral opener. Pittsburgh is the listed home side
          on both blocks, so this one reads "at" here and "vs" there. */
       { week: 2, opponent: "Pittsburgh", location: "at", neutral: true, stadium: "Dublin Stadium" },
