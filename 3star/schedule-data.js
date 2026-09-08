@@ -426,7 +426,7 @@ const TEAM_SCHEDULES = [
     /* Moved from the XII to the SEC for 2027, matching the in-game
        schedule screen ("2nd in SEC Division 1") and league-data.js. */
     weeks: [
-      { week: 0, opponent: "UAB", location: "vs", stadium: "Acrisure Bounce House" },
+      { week: 0, opponent: "UAB", location: "vs", stadium: "Acrisure Bounce House", teamScore: 37, opponentScore: 21 },
       { week: 1, opponent: "California", location: "vs", stadium: "Acrisure Bounce House", teamScore: 41, opponentScore: 22 },
       { week: 2, note: "BYE" },
       { week: 3, opponent: "East Carolina", location: "at", stadium: "Dowdy-Ficklen Stadium" },
