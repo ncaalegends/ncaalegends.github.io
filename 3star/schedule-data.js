@@ -278,7 +278,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, opponent: "SMU", location: "vs", teamScore: 44, opponentScore: 31, stadium: "McLane Stadium" },
       { week: 1, opponent: "Iowa State", location: "vs", stadium: "McLane Stadium", teamScore: 38, opponentScore: 21 },
-      { week: 2, opponent: "Oregon", location: "vs", stadium: "McLane Stadium" },
+      { week: 2, opponent: "Oregon", location: "vs", stadium: "McLane Stadium", teamScore: 48, opponentScore: 31 },
       { week: 3, opponent: "California", location: "at", stadium: "California Memorial Stadium" },
       { week: 4, opponent: "West Virginia", location: "vs", stadium: "McLane Stadium" },
       { week: 5, note: "BYE" },
