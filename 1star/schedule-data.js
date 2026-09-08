@@ -152,7 +152,7 @@ const TEAM_SCHEDULES = [
     conference: "Sun Belt",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "UNLV", location: "vs" },
+      { week: 1, opponent: "UNLV", location: "vs", teamScore: 30, opponentScore: 13 },
       { week: 2, opponent: "Nebraska", location: "vs" },
       { week: 3, opponent: "Patriot Tech", location: "at" },
       { week: 4, opponent: "FCS East", location: "vs" },
