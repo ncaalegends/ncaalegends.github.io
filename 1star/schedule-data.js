@@ -176,7 +176,7 @@ const TEAM_SCHEDULES = [
     conference: "MAC",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "Minnesota", location: "vs" },
+      { week: 1, opponent: "Minnesota", location: "vs", teamScore: 17, opponentScore: 10 },
       { week: 2, opponent: "Southern Mississippi", location: "vs" },
       { week: 3, opponent: "Colorado", location: "at" },
       { week: 4, opponent: "UMass", location: "vs" },
@@ -198,7 +198,7 @@ const TEAM_SCHEDULES = [
     conference: "MAC",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "Arkansas", location: "at" },
+      { week: 1, opponent: "Arkansas", location: "at", teamScore: 25, opponentScore: 24 },
       { week: 2, opponent: "Duke", location: "vs" },
       { week: 3, opponent: "Westeros", location: "at" },
       { week: 4, opponent: "Army", location: "at" },
