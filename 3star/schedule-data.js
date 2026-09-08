@@ -183,7 +183,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, opponent: "Bowling Green", location: "vs", teamScore: 42, opponentScore: 14, stadium: "North Dakota State Stadium" },
       { week: 1, opponent: "James Madison", location: "at", stadium: "Bridgeforth Stadium", teamScore: 39, opponentScore: 38 },
-      { week: 2, opponent: "Sac State", location: "vs", stadium: "North Dakota State Stadium" },
+      { week: 2, opponent: "Sac State", location: "vs", stadium: "North Dakota State Stadium", teamScore: 48, opponentScore: 7 },
       { week: 3, note: "BYE" },
       { week: 4, opponent: "Oregon", location: "at", stadium: "Autzen Stadium" },
       { week: 5, opponent: "Penn State", location: "vs", stadium: "North Dakota State Stadium" },
