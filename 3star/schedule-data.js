@@ -322,7 +322,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "Baylor", location: "at", stadium: "McLane Stadium", teamScore: 21, opponentScore: 38 },
-      { week: 2, opponent: "Iowa", location: "vs", stadium: "Jack Trice Stadium" },
+      { week: 2, opponent: "Iowa", location: "vs", stadium: "Jack Trice Stadium", teamScore: 21, opponentScore: 14 },
       { week: 3, opponent: "Tennessee", location: "vs", stadium: "Jack Trice Stadium" },
       { week: 4, opponent: "Arizona", location: "vs", stadium: "Jack Trice Stadium" },
       { week: 5, opponent: "Oklahoma State", location: "at", stadium: "Boone Pickens Stadium" },
