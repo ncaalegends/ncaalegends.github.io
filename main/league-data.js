@@ -195,7 +195,7 @@ const COACHES = [
   { name: "wacky9speedy",    team: "Miami",                        conference: "ACC", color: "#F47321", twitch: "https://www.twitch.tv/wacky9speedy", espnId: "2390" },  // UNVERIFIED — confirm via logo-check.html
   { name: "BluBus",          team: "USC",                          conference: "B1G", color: "#FFC72C", twitch: "https://www.twitch.tv/blubusbandit", espnId: "30", active: false },  // UNVERIFIED — confirm via logo-check.html // Went inactive in the 2027 preseason, before any games were played, so the whole season is CPU for USC. Delete the flag to reinstate.
   { name: "Brian52682",    team: "Notre Dame",                   conference: "IND", color: "#C99700", twitch: "https://www.twitch.tv/brian52682", espnId: "87" },   // UNVERIFIED — confirm via logo-check.html
-  { name: "Chomp",           team: "LSU",                          conference: "SEC", color: "#7B4DBF", twitch: "", espnId: "99" },  // Joined in the 2027 preseason, taking LSU — in from week 0, so no joinedAtWeek. Twitch handle pending. Accent is LSU purple lifted for readability against the navy.
+  { name: "Chomp",           team: "LSU",                          conference: "SEC", color: "#7B4DBF", twitch: "https://www.twitch.tv/big_eli42", espnId: "99" },  // Joined in the 2027 preseason, taking LSU — in from week 0, so no joinedAtWeek. Accent is LSU purple lifted for readability against the navy.
   { name: "II_PROGGY_II",    team: "Ole Miss",                     conference: "SEC", color: "#CE1126", twitch: "https://www.twitch.tv/ii_proggy_ii", espnId: "145", active: false },  // UNVERIFIED — confirm via logo-check.html // Went inactive during week 10 — weeks 0-9 stand as real games; Ole Miss is a CPU opponent from week 10 on.
 ];
 
