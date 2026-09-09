@@ -300,7 +300,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "Texas Tech", location: "at", stadium: "Jones Stadium", teamScore: 52, opponentScore: 14 },
-      { week: 2, opponent: "Michigan", location: "vs", stadium: "Folsom Field" },
+      { week: 2, opponent: "Michigan", location: "vs", stadium: "Folsom Field", teamScore: 31, opponentScore: 14 },
       { week: 3, opponent: "NIU", location: "vs", stadium: "Folsom Field" },
       { week: 4, opponent: "Kansas", location: "vs", stadium: "Folsom Field" },
       { week: 5, opponent: "West Virginia", location: "at", stadium: "Milan Puskar Stadium" },
