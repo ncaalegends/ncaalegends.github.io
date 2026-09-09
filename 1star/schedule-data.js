@@ -131,7 +131,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "FCS Northwest", location: "vs", teamScore: 52, opponentScore: 0 },
-      { week: 2, opponent: "Charlotte", location: "at" },
+      { week: 2, opponent: "Charlotte", location: "at", teamScore: 49, opponentScore: 17 },
       { week: 3, opponent: "Memphis", location: "vs" },
       { week: 4, opponent: "Northern Illinois", location: "vs" },
       { week: 5, opponent: "Coastal Carolina", location: "vs" },
@@ -153,7 +153,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "UNLV", location: "vs", teamScore: 30, opponentScore: 13 },
-      { week: 2, opponent: "Nebraska", location: "vs" },
+      { week: 2, opponent: "Nebraska", location: "vs", teamScore: 6, opponentScore: 41 },
       { week: 3, opponent: "Patriot Tech", location: "at" },
       { week: 4, opponent: "FCS East", location: "vs" },
       { week: 5, note: "BYE" },
