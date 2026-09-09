@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2027 Schedules — Proposed | NCAA Legends</title>
+<meta name="description" content="Proposed 2027 schedules for the Main dynasty, posted for member review.">
+<meta name="robots" content="noindex">
+
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#060b16">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="NCAA Legends">
+<meta property="og:title" content="2027 Schedules — Proposed">
+<meta property="og:description" content="Proposed 2027 schedules for the Main dynasty. Check your slate and flag anything wrong.">
+<meta property="og:image" content="https://ncaalegends.github.io/main/og-image.png">
+<meta property="og:url" content="https://ncaalegends.github.io/main/2027-preview.html">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   2027 SCHEDULE PREVIEW — standalone, temporary.
+   Self-contained on purpose: this page borrows the site's design
+   tokens but links no site CSS or JS, so deleting this one file
+   removes the page completely. Not linked from anywhere; share
+   the URL directly. Delete once the schedules are locked in.
+   ============================================================ */
+:root{
+  --navy-deep:#060b16;
+  --navy:#0b1526;
+  --navy-panel:#101d33;
+  --steel:#7f8ba3;
+  --steel-dim:#4d5872;
+  --chalk:#f2f4f8;
+  --gold:#f2c14e;
+  --gold-bright:#ffd873;
+  --gold-dim:rgba(242,193,78,.14);
+  --crimson:#e0263a;
+  --line:rgba(242,244,248,.09);
+  --line-gold:rgba(242,193,78,.35);
+  --team:var(--gold);
+  --font-display:'Oswald',sans-serif;
+  --font-body:'Work Sans',sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+  --cut:14px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:
+    radial-gradient(1100px 620px at 50% -12%, rgba(242,193,78,.07), transparent 62%),
+    var(--navy-deep);
+  color:var(--chalk);
+  font-family:var(--font-body);
+  font-size:15px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px 88px}
+a{color:var(--gold)}
+.skip-link{position:absolute;left:-9999px}
+.skip-link:focus{left:20px;top:12px;background:var(--gold);color:var(--navy-deep);padding:8px 14px;z-index:20}
+
+/* ---------- hero ---------- */
+.hero{padding:52px 0 30px;border-bottom:1px solid var(--line)}
+.kicker{
+  font-family:var(--font-mono);font-size:11px;font-weight:600;
+  letter-spacing:.22em;text-transform:uppercase;color:var(--gold);
+  margin:0 0 14px;
+}
+h1{
+  font-family:var(--font-display);font-weight:600;
+  font-size:clamp(38px,6vw,64px);line-height:.95;
+  letter-spacing:.01em;text-transform:uppercase;margin:0;
+  text-wrap:balance;
+}
+h1 span{color:var(--steel)}
+.stamp{
+  display:inline-block;margin-top:16px;
+  font-family:var(--font-mono);font-size:11px;font-weight:700;
+  letter-spacing:.16em;text-transform:uppercase;
+  color:var(--navy-deep);background:var(--gold);
+  padding:6px 12px;
+}
+/* ---------- callout ---------- */
+.callout{
+  margin-top:30px;padding:20px 22px;
+  background:var(--navy-panel);
+  border-left:3px solid var(--gold);
+  clip-path:polygon(0 0,calc(100% - var(--cut)) 0,100% var(--cut),100% 100%,0 100%);
+}
+.callout h2{
+  font-family:var(--font-display);font-weight:500;text-transform:uppercase;
+  letter-spacing:.09em;font-size:14px;margin:0 0 10px;color:var(--gold);
+}
+.callout p{margin:0;color:var(--steel);max-width:70ch}
+.callout b{color:var(--chalk);font-weight:600}
+
+/* ---------- controls ---------- */
+.controls{
+  display:flex;flex-wrap:wrap;gap:10px;align-items:center;
+  margin:38px 0 22px;padding-bottom:20px;border-bottom:1px solid var(--line);
+}
+.controls label{
+  font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--steel);
+}
+select{
+  font-family:var(--font-body);font-size:14px;font-weight:500;
+  background:var(--navy-panel);color:var(--chalk);
+  border:1px solid var(--steel-dim);padding:9px 12px;border-radius:0;
+}
+select:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.count{margin-left:auto;font-family:var(--font-mono);font-size:11px;color:var(--steel-dim);letter-spacing:.08em}
+
+/* ---------- section heads ---------- */
+h2.sec{
+  font-family:var(--font-display);font-weight:500;text-transform:uppercase;
+  letter-spacing:.09em;font-size:20px;margin:52px 0 6px;
+}
+p.sec{color:var(--steel);font-size:14px;margin:0 0 22px;max-width:72ch}
+
+/* ---------- team cards ---------- */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(325px,1fr));gap:16px}
+.team{
+  background:var(--navy);border:1px solid var(--line);
+  border-top:3px solid var(--team);
+  clip-path:polygon(0 0,calc(100% - var(--cut)) 0,100% var(--cut),100% 100%,0 100%);
+}
+.team > header{
+  display:flex;align-items:center;gap:12px;
+  padding:14px 16px;border-bottom:1px solid var(--line);
+  background:var(--navy-panel);
+}
+/* Light plate behind every logo — matches .team-mark on the rest of
+   the site. A lot of college marks are black or navy and would
+   vanish against this background. */
+.team .mark{
+  flex:0 0 auto;width:34px;height:34px;
+  display:inline-grid;place-items:center;
+  border-radius:50%;overflow:hidden;
+  background:rgba(242,244,248,.94);
+}
+.team .mark img{width:100%;height:100%;object-fit:contain;padding:14%}
+.team h3{
+  font-family:var(--font-display);font-weight:600;text-transform:uppercase;
+  font-size:19px;line-height:1.05;margin:0;letter-spacing:.02em;
+}
+.team .coach{
+  font-family:var(--font-mono);font-size:11px;color:var(--steel);
+  letter-spacing:.03em;display:block;margin-top:2px;
+}
+.team .conf{
+  margin-left:auto;font-family:var(--font-mono);font-size:10px;font-weight:600;
+  letter-spacing:.1em;color:var(--steel-dim);text-transform:uppercase;flex:none;
+}
+
+ol.slate{list-style:none;margin:0;padding:6px 0 8px}
+ol.slate li{
+  display:grid;grid-template-columns:26px 13px 30px 1fr;gap:0 9px;
+  align-items:baseline;padding:5px 16px;font-size:14px;
+}
+.lk{font-size:9.5px;line-height:1;color:var(--steel-dim);opacity:.85}
+.lk.free{visibility:hidden}
+ol.slate li.h2h{background:var(--gold-dim)}
+ol.slate li.rest .opp{color:var(--steel-dim);font-style:italic}
+.wk{font-family:var(--font-mono);font-size:12px;color:var(--steel-dim);font-variant-numeric:tabular-nums}
+.loc{font-family:var(--font-mono);font-size:11px;color:var(--steel);text-transform:uppercase}
+.opp{color:var(--chalk)}
+.opp b{font-weight:600}
+.opp .vs{color:var(--gold-bright);font-weight:600}
+.opp .hand{font-family:var(--font-mono);font-size:11px;color:var(--steel);font-weight:400}
+.opp .rk{font-family:var(--font-mono);font-size:11px;color:var(--gold);font-weight:600;margin-right:3px}
+.opp .site{font-family:var(--font-mono);font-size:10.5px;color:var(--steel-dim);letter-spacing:.04em}
+.team > footer{
+  border-top:1px solid var(--line);padding:10px 16px;
+  font-family:var(--font-mono);font-size:10.5px;letter-spacing:.06em;
+  color:var(--steel-dim);text-transform:uppercase;
+}
+.team > footer b{color:var(--gold);font-weight:600}
+
+footer.page{
+  margin-top:56px;padding-top:22px;border-top:1px solid var(--line);
+  font-family:var(--font-mono);font-size:11px;color:var(--steel-dim);letter-spacing:.05em;
+}
+footer.page a{color:var(--steel)}
+
+@media (max-width:560px){
+  ol.slate li{grid-template-columns:24px 12px 28px 1fr;gap:0 7px;padding:5px 13px}
+  .team > header{padding:12px 13px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<div class="wrap">
+<main id="main">
+
+<div class="hero">
+  <p class="kicker">NCAA Legends · Main Dynasty</p>
+  <h1>2027 Schedules <span>— Proposed</span></h1>
+  <p class="stamp">For review — not final</p>
+  <div class="callout">
+    <h2>Check your slate</h2>
+    <p>Read the whole thing, byes included. Highlighted rows are H2H; a padlock means the game was locked and couldn’t be changed. Flag anything wrong in Discord.</p>
+  </div>
+</div>
+
+<div class="controls">
+  <label for="jump">Jump to team</label>
+  <select id="jump">
+    <option value="">All 21 teams</option>
+  </select>
+  <span class="count" id="count"></span>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<footer class="page">
+  Proposed 2027 schedules · Main Dynasty · nothing here is final until it's in the game.<br>
+  <a href="/main/">← Back to the Main Dynasty</a>
+</footer>
+
+</main>
+</div>
+
+<script>
+/* Row shape: [week, location, opponent, coachHandleOrNull, siteNoteOrNull]
+   location "" with opponent "Open" is a bye. Ranked CPU opponents carry
+   their preseason rank in the opponent string as "(n)".              */
+const TEAMS = [
+ {t:"California",short:"Cal",c:"BlueMiniMeaniee",cf:"ACC",id:"25",k:"#FDB515",g:[
+  [0,"","Open",null,null,0],
+  [1,"at","UCLA","Dway",null,0],
+  [2,"vs","San Diego State",null,null,0],
+  [3,"vs","Air Force",null,null,0],
+  [4,"","Open",null,null,0],
+  [5,"vs","Wake Forest","brewma",null,1],
+  [6,"vs","SMU","EYEDONTPULL19",null,1],
+  [7,"vs","Pittsburgh",null,null,1],
+  [8,"vs","Florida State","ronricofsu",null,1],
+  [9,"at","Boston College",null,null,1],
+  [10,"at","North Carolina",null,null,1],
+  [11,"at","Louisville",null,null,1],
+  [12,"at","Stanford",null,null,1],
+  [13,"vs","Miami","wacky9speedy",null,1],]},
+
+ {t:"Clemson",short:"Clemson",c:"Temptiger",cf:"ACC",id:"228",k:"#F56600",g:[
+  [0,"vs","Washington","Texan_hog",null,0],
+  [1,"vs","Virginia",null,null,1],
+  [2,"vs","NC State",null,null,1],
+  [3,"at","Georgia","Miles",null,0],
+  [4,"vs","Syracuse",null,null,1],
+  [5,"vs","Louisville",null,null,1],
+  [6,"vs","Florida State","ronricofsu",null,1],
+  [7,"at","Stanford",null,null,1],
+  [8,"at","Boston College",null,null,1],
+  [9,"at","Miami","wacky9speedy",null,1],
+  [10,"","Open",null,null,0],
+  [11,"","Open",null,null,0],
+  [12,"at","Georgia Tech",null,null,1],
+  [13,"at","South Carolina","Bl00dVayN3",null,1],]},
+
+ {t:"Colorado",short:"Colorado",c:"Turt17",cf:"Big 12",id:"38",k:"#CFB87C",g:[
+  [0,"","Open",null,null,0],
+  [1,"vs","C. Michigan",null,null,0],
+  [2,"at","Oregon","Davey88",null,0],
+  [3,"vs","NIU",null,null,0],
+  [4,"at","Iowa State",null,null,1],
+  [5,"at","Houston",null,null,1],
+  [6,"at","Arizona",null,null,1],
+  [7,"at","UCF",null,null,1],
+  [8,"","Open",null,null,0],
+  [9,"vs","West Virginia","DiabeticSnail22",null,1],
+  [10,"vs","Kansas",null,null,1],
+  [11,"vs","Arizona State",null,null,1],
+  [12,"vs","TCU","Oldarmy324",null,1],
+  [13,"at","BYU (25)",null,null,1],]},
+
+ {t:"Florida State",short:"FSU",c:"ronricofsu",cf:"ACC",id:"52",k:"#CEB888",g:[
+  [0,"","Open",null,null,0],
+  [1,"vs","Nebraska (20)",null,null,0],
+  [2,"","Open",null,null,0],
+  [3,"vs","Tennessee (13)",null,null,0],
+  [4,"vs","Pittsburgh",null,null,1],
+  [5,"vs","Miami","wacky9speedy",null,1],
+  [6,"at","Clemson","Temptiger",null,1],
+  [7,"vs","Louisville (24)",null,null,1],
+  [8,"at","California","BlueMiniMeaniee",null,1],
+  [9,"at","Wake Forest","brewma",null,1],
+  [10,"vs","Georgia Tech",null,null,1],
+  [11,"at","Virginia",null,null,1],
+  [12,"vs","Duke",null,null,1],
+  [13,"at","Florida","Alex",null,1],]},
+
+ {t:"Florida",short:"Florida",c:"Alex",cf:"SEC",id:"57",k:"#FA4616",g:[
+  [0,"","Open",null,null,0],
+  [1,"vs","South Alabama",null,null,0],
+  [2,"vs","Louisville (24)",null,null,0],
+  [3,"vs","South Carolina","Bl00dVayN3",null,1],
+  [4,"at","Missouri",null,null,1],
+  [5,"vs","USF",null,null,0],
+  [6,"vs","Vanderbilt",null,null,1],
+  [7,"at","Arkansas",null,null,1],
+  [8,"at","Oklahoma","Pointdexter420",null,1],
+  [9,"vs","Alabama",null,null,1],
+  [10,"vs","Georgia","Miles","Raymond James Stadium",1],
+  [11,"at","Auburn (23)",null,null,1],
+  [12,"","Open",null,null,0],
+  [13,"vs","Florida State","ronricofsu",null,1],]},
+
+ {t:"LSU",short:"LSU",c:"Chomp",cf:"SEC",id:"99",k:"#7B4DBF",g:[
+  [0,"","Open",null,null,0],
+  [1,"vs","Houston",null,"Reliant Stadium",0],
+  [2,"vs","West Virginia","DiabeticSnail22",null,0],
+  [3,"at","Kentucky",null,null,1],
+  [4,"vs","Louisiana Tech",null,null,0],
+  [5,"vs","Nevada",null,null,0],
+  [6,"vs","Tennessee (13)",null,null,1],
+  [7,"at","Missouri",null,null,1],
+  [8,"at","Auburn (23)",null,null,1],
+  [9,"vs","Mississippi St",null,null,1],
+  [10,"vs","Texas A&M (21)",null,null,1],
+  [11,"","Open",null,null,0],
+  [12,"vs","Georgia","Miles",null,1],
+  [13,"at","Texas","Big_Ry",null,1],]},
+
+ {t:"Miami",short:"Miami",c:"wacky9speedy",cf:"ACC",id:"2390",k:"#F47321",g:[
+  [0,"","Open",null,null,0],
+  [1,"at","Utah",null,"Allegiant Stadium",0],
+  [2,"vs","Troy",null,null,0],
+  [3,"vs","New Mexico St.",null,null,0],
+  [4,"","Open",null,null,0],
+  [5,"at","Florida State","ronricofsu",null,1],
+  [6,"vs","Stanford",null,null,1],
+  [7,"vs","Syracuse",null,null,1],
+  [8,"at","Virginia Tech",null,null,1],
+  [9,"vs","Clemson","Temptiger",null,1],
+  [10,"vs","SMU","EYEDONTPULL19",null,1],
+  [11,"vs","Georgia Tech",null,null,1],
+  [12,"at","Pittsburgh",null,null,1],
+  [13,"at","California","BlueMiniMeaniee",null,1],]},
+
+ {t:"Michigan",short:"Michigan",c:"Projekt",cf:"Big Ten",id:"130",k:"#FFCB05",g:[
+  [0,"at","Texas","Big_Ry",null,0],
+  [1,"","Open",null,null,0],
+  [2,"vs","TCU","Oldarmy324",null,0],
+  [3,"vs","E. Michigan",null,null,0],
+  [4,"vs","Oregon","Davey88",null,1],
+  [5,"at","Indiana (22)",null,null,1],
+  [6,"at","Penn State",null,null,1],
+  [7,"at","UCLA","Dway",null,1],
+  [8,"vs","Rutgers",null,null,1],
+  [9,"vs","Illinois",null,null,1],
+  [10,"","Open",null,null,0],
+  [11,"at","Michigan State",null,null,1],
+  [12,"at","Iowa",null,null,1],
+  [13,"vs","Ohio State","RekenCrew",null,1],]},
+
+ {t:"Notre Dame",short:"Notre Dame",c:"Brian52682",cf:"Independent",id:"87",k:"#C99700",g:[
+  [0,"vs","Virginia Tech",null,null,0],
+  [1,"vs","Purdue",null,null,0],
+  [2,"vs","Ohio State","RekenCrew",null,0],
+  [3,"at","TCU","Oldarmy324",null,0],
+  [4,"at","Washington","Texan_hog",null,0],
+  [5,"vs","Oregon","Davey88",null,0],
+  [6,"at","Wake Forest","brewma",null,0],
+  [7,"vs","USC (17)",null,null,1],
+  [8,"","Open",null,null,0],
+  [9,"vs","Navy",null,null,1],
+  [10,"vs","New Mexico",null,null,0],
+  [11,"at","Boston College",null,null,0],
+  [12,"","Open",null,null,0],
+  [13,"at","Stanford",null,null,1],]},
+
+ {t:"Ohio State",short:"Ohio State",c:"RekenCrew",cf:"Big Ten",id:"194",k:"#CE2029",g:[
+  [0,"","Open",null,null,0],
+  [1,"vs","Bowling Green",null,null,0],
+  [2,"at","Notre Dame","Brian52682",null,0],
+  [3,"vs","Marshall",null,null,0],
+  [4,"at","Minnesota",null,null,1],
+  [5,"","Open",null,null,0],
+  [6,"vs","Nebraska (20)",null,null,1],
+  [7,"at","Oregon","Davey88",null,1],
+  [8,"vs","Michigan State",null,null,1],
+  [9,"vs","USC (17)",null,null,1],
+  [10,"vs","Purdue",null,null,1],
+  [11,"at","Rutgers",null,null,1],
+  [12,"at","Northwestern",null,null,1],
+  [13,"at","Michigan","Projekt",null,1],]},
+
+ {t:"Oklahoma",short:"Oklahoma",c:"Pointdexter420",cf:"SEC",id:"201",k:"#C8102E",g:[
+  [0,"","Open",null,null,0],
+  [1,"at","West Virginia","DiabeticSnail22",null,0],
+  [2,"at","SMU","EYEDONTPULL19",null,0],
+  [3,"vs","San Diego St.",null,null,0],
+  [4,"","Open",null,null,0],
+  [5,"at","Vanderbilt",null,null,1],
+  [6,"at","Texas","Big_Ry","Cotton Bowl",1],
+  [7,"at","Georgia","Miles",null,1],
+  [8,"vs","Florida","Alex",null,1],
+  [9,"vs","Kentucky",null,null,1],
+  [10,"vs","UTEP",null,null,0],
+  [11,"vs","Mississippi St",null,null,1],
+  [12,"vs","Arkansas",null,null,1],
+  [13,"at","Texas A&M (21)",null,null,1],]},
+
+ {t:"Oregon",short:"Oregon",c:"Davey88",cf:"Big Ten",id:"2483",k:"#FEE123",g:[
+  [0,"","Open",null,null,0],
+  [1,"vs","Iowa",null,null,1],
+  [2,"vs","Colorado","Turt17",null,0],
+  [3,"vs","Oregon State",null,null,1],
+  [4,"at","Michigan","Projekt",null,1],
+  [5,"at","Notre Dame","Brian52682",null,0],
+  [6,"","Open",null,null,0],
+  [7,"vs","Ohio State","RekenCrew",null,1],
+  [8,"vs","Purdue",null,null,1],
+  [9,"at","UCLA","Dway",null,1],
+  [10,"vs","Penn State",null,null,1],
+  [11,"at","Maryland",null,null,1],
+  [12,"at","Nebraska (20)",null,null,1],
+  [13,"at","Washington","Texan_hog",null,1],]},
+
+ {t:"SMU",short:"SMU",c:"EYEDONTPULL19",cf:"ACC",id:"2567",k:"#5A6FD1",g:[
+  [0,"","Open",null,null,0],
+  [1,"vs","South Carolina","Bl00dVayN3","Mercedes-Benz Stadium",0],
+  [2,"vs","Oklahoma","Pointdexter420",null,0],
+  [3,"vs","Virginia",null,null,1],
+  [4,"vs","Stanford",null,null,1],
+  [5,"at","Virginia Tech",null,null,1],
+  [6,"at","California","BlueMiniMeaniee",null,1],
+  [7,"","Open",null,null,0],
+  [8,"vs","W. Kentucky",null,null,0],
+  [9,"vs","Georgia Tech",null,null,1],
+  [10,"at","Miami","wacky9speedy",null,1],
+  [11,"at","Pittsburgh",null,null,1],
+  [12,"vs","North Carolina",null,null,1],
+  [13,"at","Duke",null,null,1],]},
+
+ {t:"South Carolina",short:"South Carolina",c:"Bl00dVayN3",cf:"SEC",id:"2579",k:"#A6192E",g:[
+  [0,"vs","App St.",null,null,0],
+  [1,"at","SMU","EYEDONTPULL19","Mercedes-Benz Stadium",0],
+  [2,"","Open",null,null,0],
+  [3,"at","Florida","Alex",null,1],
+  [4,"vs","UCF",null,null,0],
+  [5,"vs","Kentucky",null,null,1],
+  [6,"vs","Arkansas",null,null,1],
+  [7,"vs","Auburn (23)",null,null,1],
+  [8,"at","Georgia","Miles",null,1],
+  [9,"","Open",null,null,0],
+  [10,"at","Texas","Big_Ry",null,1],
+  [11,"vs","Tennessee (13)",null,null,1],
+  [12,"at","Mississippi St",null,null,1],
+  [13,"vs","Clemson","Temptiger",null,1],]},
+
+ {t:"TCU",short:"TCU",c:"Oldarmy324",cf:"Big 12",id:"2628",k:"#8A7FD1",g:[
+  [0,"","Open",null,null,0],
+  [1,"vs","Stanford",null,null,0],
+  [2,"at","Michigan","Projekt",null,0],
+  [3,"vs","Notre Dame","Brian52682",null,0],
+  [4,"","Open",null,null,0],
+  [5,"at","Oklahoma State",null,null,1],
+  [6,"at","Utah",null,null,1],
+  [7,"vs","Arizona State",null,null,1],
+  [8,"at","Iowa State",null,null,1],
+  [9,"at","Cincinnati",null,null,1],
+  [10,"vs","Texas Tech",null,null,1],
+  [11,"vs","Baylor",null,null,1],
+  [12,"at","Colorado","Turt17",null,1],
+  [13,"vs","Houston",null,null,1],]},
+
+ {t:"Texas",short:"Texas",c:"Big_Ry",cf:"SEC",id:"251",k:"#BF5700",g:[
+  [0,"vs","Michigan","Projekt",null,0],
+  [1,"vs","New Mexico St.",null,null,0],
+  [2,"at","Ole Miss",null,null,1],
+  [3,"at","Alabama",null,null,1],
+  [4,"at","Tennessee (13)",null,null,1],
+  [5,"at","Auburn (23)",null,null,1],
+  [6,"vs","Oklahoma","Pointdexter420","Cotton Bowl",1],
+  [7,"vs","UTEP",null,null,0],
+  [8,"vs","Rice",null,null,0],
+  [9,"","Open",null,null,0],
+  [10,"vs","South Carolina","Bl00dVayN3",null,1],
+  [11,"","Open",null,null,0],
+  [12,"vs","Missouri",null,null,1],
+  [13,"vs","LSU","Chomp",null,1],]},
+
+ {t:"UCLA",short:"UCLA",c:"Dway",cf:"Big Ten",id:"26",k:"#4B92DB",g:[
+  [0,"vs","San Diego State",null,null,0],
+  [1,"vs","California","BlueMiniMeaniee",null,0],
+  [2,"","Open",null,null,0],
+  [3,"at","Purdue",null,null,1],
+  [4,"at","Iowa",null,null,1],
+  [5,"vs","Northwestern",null,null,1],
+  [6,"vs","Fresno State",null,null,0],
+  [7,"vs","Michigan","Projekt",null,1],
+  [8,"at","Illinois",null,null,1],
+  [9,"vs","Oregon","Davey88",null,1],
+  [10,"at","Wisconsin",null,null,1],
+  [11,"","Open",null,null,0],
+  [12,"vs","Rutgers",null,null,1],
+  [13,"at","USC (17)",null,null,1],]},
+
+ {t:"Georgia",short:"Georgia",c:"Miles",cf:"SEC",id:"61",k:"#D6203A",g:[
+  [0,"","Open",null,null,0],
+  [1,"vs","UAB",null,null,0],
+  [2,"vs","Charlotte",null,null,0],
+  [3,"vs","Clemson","Temptiger",null,0],
+  [4,"","Open",null,null,0],
+  [5,"vs","Texas A&M (21)",null,null,1],
+  [6,"at","Missouri",null,null,1],
+  [7,"vs","Oklahoma","Pointdexter420",null,1],
+  [8,"vs","South Carolina","Bl00dVayN3",null,1],
+  [9,"at","Arkansas",null,null,1],
+  [10,"at","Florida","Alex","Raymond James Stadium",1],
+  [11,"vs","Vanderbilt",null,null,1],
+  [12,"at","LSU","Chomp",null,1],
+  [13,"at","Georgia Tech",null,null,1],]},
+
+ {t:"Wake Forest",short:"Wake Forest",c:"brewma",cf:"ACC",id:"154",k:"#C9A227",g:[
+  [0,"","Open",null,null,0],
+  [1,"vs","Tennessee (13)",null,"Mercedes-Benz Stadium",0],
+  [2,"at","Virginia",null,null,1],
+  [3,"at","North Carolina",null,null,1],
+  [4,"at","Duke",null,null,1],
+  [5,"at","California","BlueMiniMeaniee",null,1],
+  [6,"vs","Notre Dame","Brian52682",null,0],
+  [7,"at","Georgia Tech",null,null,1],
+  [8,"vs","Old Dominion",null,null,0],
+  [9,"vs","Florida State","ronricofsu",null,1],
+  [10,"vs","Boston College",null,null,1],
+  [11,"vs","NC State",null,null,1],
+  [12,"vs","Virginia Tech",null,null,1],
+  [13,"","Open",null,null,0],]},
+
+ {t:"West Virginia",short:"West Virginia",c:"DiabeticSnail22",cf:"Big 12",id:"277",k:"#EAAA00",g:[
+  [0,"","Open",null,null,0],
+  [1,"vs","Oklahoma","Pointdexter420",null,0],
+  [2,"at","LSU","Chomp",null,0],
+  [3,"at","Oklahoma State",null,null,1],
+  [4,"vs","Arizona State",null,null,1],
+  [5,"at","Baylor",null,null,1],
+  [6,"vs","Ohio",null,null,0],
+  [7,"","Open",null,null,0],
+  [8,"vs","UCF",null,null,1],
+  [9,"at","Colorado","Turt17",null,1],
+  [10,"vs","Iowa State",null,null,1],
+  [11,"at","Cincinnati",null,null,1],
+  [12,"vs","BYU (25)",null,null,1],
+  [13,"at","Kansas State",null,null,1],]},
+
+ {t:"Washington",short:"Washington",c:"Texan_hog",cf:"Big Ten",id:"264",k:"#7A5BB5",g:[
+  [0,"at","Clemson","Temptiger",null,0],
+  [1,"vs","Maryland",null,null,1],
+  [2,"vs","USC (17)",null,null,1],
+  [3,"vs","Washington St.",null,null,1],
+  [4,"vs","Notre Dame","Brian52682",null,0],
+  [5,"","Open",null,null,0],
+  [6,"vs","Michigan State",null,null,1],
+  [7,"","Open",null,null,0],
+  [8,"vs","Nebraska (20)",null,null,1],
+  [9,"at","Rutgers",null,null,1],
+  [10,"at","Northwestern",null,null,1],
+  [11,"at","Minnesota",null,null,1],
+  [12,"at","Penn State",null,null,1],
+  [13,"vs","Oregon","Davey88",null,1],]},
+];
+
+const LOGO = "https://a.espncdn.com/i/teamlogos/ncaa/500/";
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* Opponent name, with any "(rank)" suffix pulled out as its own chip. */
+function oppHtml(name, handle){
+  const m = /^(.*?)\s*\((\d+)\)$/.exec(name);
+  const base = m ? m[1] : name;
+  const rank = m ? `<span class="rk">#${m[2]}</span>` : "";
+  return handle
+    ? `${rank}<span class="vs">${esc(base)}</span> <span class="hand">${esc(handle)}</span>`
+    : `${rank}<b>${esc(base)}</b>`;
+}
+
+function card(x){
+  const rows = x.g.map(([w, loc, opp, handle, site, locked]) => {
+    const bye = opp === "Open";
+    return `<li class="${bye ? "rest" : handle ? "h2h" : ""}">
+      <span class="wk">${w}</span>
+      <span class="lk${locked ? "" : " free"}" title="Locked — conference game or fixed rivalry">&#128274;</span>
+      <span class="loc">${loc ? esc(loc) : "&ndash;"}</span>
+      <span class="opp">${bye ? "Open" : oppHtml(opp, handle)}${site ? ` <span class="site">· ${esc(site)}</span>` : ""}</span>
+    </li>`;
+  }).join("");
+
+  const games = x.g.filter(r => r[2] !== "Open").length;
+  const h2h = x.g.filter(r => r[3]).length;
+  const byes = x.g.filter(r => r[2] === "Open").map(r => r[0]).join(" & ");
+
+  return `<article class="team" data-team="${esc(x.t)}" style="--team:${x.k}">
+    <header>
+      <span class="mark"><img src="${LOGO}${x.id}.png" alt="" loading="lazy"
+        onerror="this.closest('.mark').remove()"></span>
+      <div>
+        <h3>${esc(x.short)}</h3>
+        <span class="coach">${esc(x.c)}</span>
+      </div>
+      <span class="conf">${esc(x.cf)}</span>
+    </header>
+    <ol class="slate">${rows}</ol>
+    <footer>${games} games · <b>${h2h} H2H</b> · byes wk ${byes}</footer>
+  </article>`;
+}
+
+const grid = document.getElementById("grid");
+grid.innerHTML = TEAMS.map(card).join("");
+
+/* ---- jump-to-team ---- */
+const jump = document.getElementById("jump");
+TEAMS.slice().sort((a, b) => a.short.localeCompare(b.short)).forEach(x => {
+  const o = document.createElement("option");
+  o.value = x.t;
+  o.textContent = `${x.short} — ${x.c}`;
+  jump.append(o);
+});
+jump.addEventListener("change", () => {
+  const v = jump.value;
+  document.querySelectorAll(".team").forEach(el => {
+    el.hidden = v ? el.dataset.team !== v : false;
+  });
+  tally();
+});
+
+function tally(){
+  const shown = [...document.querySelectorAll(".team")].filter(el => !el.hidden).length;
+  document.getElementById("count").textContent = shown === TEAMS.length
+    ? `${TEAMS.length} teams · 12 games each`
+    : `Showing ${shown} of ${TEAMS.length}`;
+}
+tally();
+</script>
+
+</body>
+</html>
