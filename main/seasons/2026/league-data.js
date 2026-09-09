@@ -38,12 +38,12 @@ const SEASON = {
      In-game year, not real-world year: the roster is EA College
      Football 27's 2026 season, and in-game years drift away from real
      life as the dynasty runs. 2026 -> 2027 -> 2028 and so on. */
-  year: 2027,
+  year: 2026,
 
-  currentWeek: "PRESEASON",
+  currentWeek: "OFFSEASON",
 
   // Shown in the hero. Update as the league moves through phases.
-  statusLine: "PRESEASON",
+  statusLine: "OFFSEASON",
 
   /* ADVANCE DEADLINE — the one place real-world time appears.
      League rule: the next advance happens no later than 6:00 PM EDT
@@ -180,8 +180,8 @@ const COACHES = [
   { name: "Texan_hog",       team: "Washington",                   conference: "B1G", color: "#7A5BB5", twitch: "https://www.twitch.tv/texan_hog08", espnId: "264" },  // UNVERIFIED — confirm via logo-check.html
   { name: "Miles",           team: "Georgia",                      conference: "SEC", color: "#D6203A", twitch: "https://www.twitch.tv/kyrvach", espnId: "61" },
   { name: "BlueMiniMeaniee", team: "Cal",                          conference: "ACC", color: "#FDB515", twitch: "https://www.twitch.tv/blueminimeaniee", espnId: "25" },
-  { name: "Woogity",         team: "Alabama",                      conference: "SEC", color: "#C7304A", twitch: "https://www.twitch.tv/kingwoogity", espnId: "333", active: false },  // Went inactive during week 5 — weeks 0-4 stand as real games; Alabama was CPU from week 5 until Trick whitey took it over in week 11 (below).
-  { name: "Trick whitey",    team: "Alabama",                      conference: "SEC", color: "#C7304A", twitch: "https://www.twitch.tv/trickwhitey44", espnId: "333", joinedAtWeek: 11, active: false },  // Took Alabama over from Woogity in week 11 and left the league after week 12 for personal reasons, so he held the school for weeks 11-12 only. Weeks 0-4 are Woogity's head-to-head games and stay his; weeks 5-10 belong to nobody and stay CPU — in particular Miles's Week 6 win over Alabama is NOT a head-to-head result — and Alabama is CPU again from week 13 on. Also left the 3-star dynasty (Maryland) after week 14 in the same move.
+  { name: "Woogity",         team: "Alabama",                      conference: "SEC", color: "#C7304A", twitch: "https://www.twitch.tv/kingwoogity", espnId: "333", departedAfterWeek: 4 },  // Went inactive during week 5 — weeks 0-4 stand as real games; Alabama was CPU from week 5 until Trick whitey took it over in week 11 (below).
+  { name: "Trick whitey",    team: "Alabama",                      conference: "SEC", color: "#C7304A", twitch: "https://www.twitch.tv/trickwhitey44", espnId: "333", joinedAtWeek: 11, departedAfterWeek: 12 },  // Took Alabama over from Woogity in week 11 and left the league after week 12 for personal reasons, so he held the school for weeks 11-12 only. Weeks 0-4 are Woogity's head-to-head games and stay his; weeks 5-10 belong to nobody and stay CPU — in particular Miles's Week 6 win over Alabama is NOT a head-to-head result — and Alabama is CPU again from week 13 on. Also left the 3-star dynasty (Maryland) after week 14 in the same move.
   { name: "Alex",            team: "Florida",                      conference: "SEC", color: "#FA4616", twitch: "https://www.twitch.tv/alexgators1", espnId: "57" },
   { name: "brewma",          team: "Wake Forest",                  conference: "ACC", color: "#C9A227", twitch: "https://www.twitch.tv/brewma2020", espnId: "154" },  // UNVERIFIED — confirm via logo-check.html
   { name: "Jake",            team: "Louisville",                   conference: "ACC", color: "#CB3B47", twitch: "", espnId: "97", active: false },  // Stepped away (playing in another dynasty) — may return. See `active` note above. Remove this flag to reinstate.
@@ -195,7 +195,7 @@ const COACHES = [
   { name: "wacky9speedy",    team: "Miami",                        conference: "ACC", color: "#F47321", twitch: "https://www.twitch.tv/wacky9speedy", espnId: "2390" },  // UNVERIFIED — confirm via logo-check.html
   { name: "BluBus",          team: "USC",                          conference: "B1G", color: "#FFC72C", twitch: "https://www.twitch.tv/blubusbandit", espnId: "30" },  // UNVERIFIED — confirm via logo-check.html
   { name: "Brian52682",    team: "Notre Dame",                   conference: "IND", color: "#C99700", twitch: "https://www.twitch.tv/brian52682", espnId: "87" },   // UNVERIFIED — confirm via logo-check.html
-  { name: "II_PROGGY_II",    team: "Ole Miss",                     conference: "SEC", color: "#CE1126", twitch: "https://www.twitch.tv/ii_proggy_ii", espnId: "145", active: false },  // UNVERIFIED — confirm via logo-check.html // Went inactive during week 10 — weeks 0-9 stand as real games; Ole Miss is a CPU opponent from week 10 on.
+  { name: "II_PROGGY_II",    team: "Ole Miss",                     conference: "SEC", color: "#CE1126", twitch: "https://www.twitch.tv/ii_proggy_ii", espnId: "145", departedAfterWeek: 9 },  // UNVERIFIED — confirm via logo-check.html // Went inactive during week 10 — weeks 0-9 stand as real games; Ole Miss is a CPU opponent from week 10 on.
 ];
 
 /* ------------------------------------------------------------
