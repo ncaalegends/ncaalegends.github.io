@@ -205,7 +205,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "Washington St.", location: "vs", stadium: "Reser Stadium", teamScore: 38, opponentScore: 24 },
-      { week: 2, opponent: "New Mexico", location: "vs", stadium: "Reser Stadium" },
+      { week: 2, opponent: "New Mexico", location: "vs", stadium: "Reser Stadium", teamScore: 38, opponentScore: 7 },
       { week: 3, opponent: "Penn State", location: "vs", stadium: "Reser Stadium" },
       { week: 4, opponent: "San Diego St.", location: "at", stadium: "Snapdragon Stadium" },
       { week: 5, note: "BYE" },
@@ -396,7 +396,7 @@ const TEAM_SCHEDULES = [
       /* Listed in game as "NDSU"; expanded to the roster spelling so
          the head-to-head with Texan_hog resolves. */
       { week: 1, opponent: "North Dakota State", location: "vs", stadium: "Bridgeforth Stadium", teamScore: 38, opponentScore: 39 },
-      { week: 2, opponent: "Vanderbilt", location: "at", stadium: "FirstBank Stadium" },
+      { week: 2, opponent: "Vanderbilt", location: "at", stadium: "FirstBank Stadium", teamScore: 21, opponentScore: 13 },
       { week: 3, opponent: "C. Carolina", location: "vs", stadium: "Bridgeforth Stadium" },
       { week: 4, note: "BYE" },
       { week: 5, opponent: "Florida", location: "at", stadium: "Ben Hill Griffin Stadium" },
