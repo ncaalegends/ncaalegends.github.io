@@ -473,7 +473,7 @@ const TEAM_SCHEDULES = [
     team: "Notre Dame",
     conference: "Independent",
     weeks: [
-      { week: 0, opponent: "Virginia Tech", location: "vs", stadium: "Notre Dame Stadium" },
+      { week: 0, opponent: "Virginia Tech", location: "vs", stadium: "Notre Dame Stadium", teamScore: 63, opponentScore: 7 },
       { week: 1, opponent: "Purdue", location: "vs", stadium: "Notre Dame Stadium" },
       { week: 2, opponent: "Ohio State", location: "vs", stadium: "Notre Dame Stadium" },
       { week: 3, opponent: "TCU", location: "at", stadium: "Amon G. Carter Stadium" },
