@@ -40,7 +40,7 @@
 
    FLAGS
      --league SLUG   main | 3star | 1star. Defaults to main.
-     --week N        the week this poll is for, 1-15. Required.
+     --week N        the week this poll is for, 0-15. Required.
      --file PATH     read the lines from a file.
      --stdin         read the lines from standard input.
      --dry-run       show the block and every check. Write nothing.
@@ -81,6 +81,24 @@ const { parseArgs, die, resolveLeague, loadData, CFP_ERA_WEEK } = require("./lib
 
 const POLL_SIZE = 25;
 const MAX_WEEK = 15;
+
+/* WEEK 0 IS A REAL WEEK, NOT THE PRESEASON.
+   This floor used to be 1, on the assumption that anything labelled
+   week 0 was a preseason poll nobody plays games under. That is not
+   how the season is modelled: league-data.js documents currentWeek as
+   "the week number (0-15) you're currently playing", main's schedule
+   carries a full week-0 slate, and those games need rank badges like
+   any other. The site reads a week-0 poll correctly end to end — the
+   week/poll helpers in script.js test `== null` rather than falsiness
+   precisely so a 0 survives — and the advance gate exempts it by hand
+   (`week < 1` returns null in top25GateError), so a week-0 poll never
+   becomes something an advance waits on.
+
+   PRESEASON and week 0 do share an index (seasonIndex maps both to 0),
+   so a week-0 poll also shows while currentWeek is "PRESEASON". That
+   is harmless here: the in-game poll doesn't move until after week 1,
+   so the preseason and week-0 polls are the same 25 rows. */
+const MIN_WEEK = 0;
 
 /* ------------------------------------------------------------
    READING THE LINES
@@ -441,8 +459,8 @@ function main() {
   /* --- week --- */
   if (args.week === undefined) die(`missing --week. Example: node tools/top25.js --week 2 --file poll.txt`);
   const week = Number(args.week);
-  if (!Number.isInteger(week) || week < 1 || week > MAX_WEEK) {
-    die(`--week must be a whole number 1-${MAX_WEEK}, got "${args.week}". There's no preseason poll.`);
+  if (!Number.isInteger(week) || week < MIN_WEEK || week > MAX_WEEK) {
+    die(`--week must be a whole number ${MIN_WEEK}-${MAX_WEEK}, got "${args.week}".`);
   }
   /* The AP poll stops existing at week 10 — the game switches to the
      CFP Top 25 and a projected bracket, which live in cfp-data.js.
