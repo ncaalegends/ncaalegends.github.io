@@ -177,7 +177,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "Minnesota", location: "vs", teamScore: 17, opponentScore: 10 },
-      { week: 2, opponent: "Southern Mississippi", location: "vs" },
+      { week: 2, opponent: "Southern Mississippi", location: "vs", teamScore: 7, opponentScore: 14 },
       { week: 3, opponent: "Colorado", location: "at" },
       { week: 4, opponent: "UMass", location: "vs" },
       { week: 5, note: "BYE" },
