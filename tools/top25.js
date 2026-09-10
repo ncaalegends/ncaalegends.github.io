@@ -363,6 +363,15 @@ function insertBlock(file, week, block) {
     die(`${path.basename(file)} doesn't contain a "const TOP25 = [" declaration — refusing to guess`);
   }
 
+  /* Empty array declared and closed on one line — "const TOP25 = [];" —
+     is a documented, supported state (see the file's own header comment)
+     for a league that hasn't had its first poll yet. The line-based scan
+     below expects the opening and closing brackets on separate lines, so
+     split this one line into that shape before scanning for the close. */
+  if (/^const TOP25 = \[\];\s*$/.test(lines[startIdx])) {
+    lines.splice(startIdx, 1, "const TOP25 = [", "];");
+  }
+
   let closeIdx = -1;
   for (let i = lines.length - 1; i > startIdx; i--) {
     if (/^\];\s*$/.test(lines[i])) {

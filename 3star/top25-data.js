@@ -61,4 +61,35 @@
        team    must resolve to a roster or schedule team name
        record  the W-L string shown in the poll (e.g. "1-0")
    ============================================================ */
-const TOP25 = [];
+const TOP25 = [
+  {
+    week: 3,
+    teams: [
+      { rank: 1, team: "Pittsburgh", record: "2-0" },
+      { rank: 2, team: "Georgia", record: "2-0" },
+      { rank: 3, team: "Ohio State", record: "2-0" },
+      { rank: 4, team: "Baylor", record: "3-0" },
+      { rank: 5, team: "Oklahoma", record: "2-0" },
+      { rank: 6, team: "UCF", record: "2-0" },
+      { rank: 7, team: "Miami", record: "2-0" },
+      { rank: 8, team: "NDSU", record: "3-0" },
+      { rank: 9, team: "Wisconsin", record: "3-1" },
+      { rank: 10, team: "Texas A&M", record: "2-1" },
+      { rank: 11, team: "BYU", record: "1-1" },
+      { rank: 12, team: "Oregon", record: "1-1" },
+      { rank: 13, team: "Notre Dame", record: "2-1" },
+      { rank: 14, team: "Maryland", record: "0-1" },
+      { rank: 15, team: "Tennessee", record: "1-1" },
+      { rank: 16, team: "Ole Miss", record: "1-1" },
+      { rank: 17, team: "Colorado", record: "2-0" },
+      { rank: 18, team: "South Carolina", record: "2-0" },
+      { rank: 19, team: "USC", record: "2-0" },
+      { rank: 20, team: "Alabama", record: "1-0" },
+      { rank: 21, team: "California", record: "1-1" },
+      { rank: 22, team: "Penn State", record: "2-0" },
+      { rank: 23, team: "Wake Forest", record: "3-0" },
+      { rank: 24, team: "Virginia Tech", record: "1-1" },
+      { rank: 25, team: "Auburn", record: "2-1" },
+    ],
+  },
+];
