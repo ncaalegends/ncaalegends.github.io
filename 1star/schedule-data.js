@@ -267,7 +267,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "Westeros", location: "vs", teamScore: 33, opponentScore: 15 },
-      { week: 2, opponent: "Louisville", location: "at" },
+      { week: 2, opponent: "Louisville", location: "at", teamScore: 34, opponentScore: 27 },
       { week: 3, opponent: "Florida Atlantic", location: "vs" },
       { week: 4, note: "BYE" },
       { week: 5, opponent: "FCS East", location: "vs" },
