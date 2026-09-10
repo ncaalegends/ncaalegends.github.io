@@ -107,7 +107,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "Vanderbilt", location: "vs", stadium: "Kenan Stadium", teamScore: 28, opponentScore: 21 },
-      { week: 2, opponent: "Purdue", location: "vs", stadium: "Kenan Stadium" },
+      { week: 2, opponent: "Purdue", location: "vs", stadium: "Kenan Stadium", teamScore: 24, opponentScore: 17 },
       { week: 3, opponent: "Wake Forest", location: "vs", stadium: "Kenan Stadium" },
       { week: 4, opponent: "UConn", location: "vs", stadium: "Kenan Stadium" },
       { week: 5, note: "BYE" },
@@ -133,7 +133,7 @@ const TEAM_SCHEDULES = [
          home side ("VS" in game), but there's no true home team, so
          the row carries neutral + the venue. Cross-check with Salzy's
          Wisconsin block when it comes in. */
-      { week: 2, opponent: "Wisconsin", location: "vs", neutral: true, stadium: "Dublin Stadium" },
+      { week: 2, opponent: "Wisconsin", location: "vs", neutral: true, stadium: "Dublin Stadium", teamScore: 31, opponentScore: 21 },
       { week: 3, opponent: "Georgia Tech", location: "at", stadium: "Bobby Dodd Stadium" },
       { week: 4, opponent: "Florida State", location: "at", stadium: "Doak Campbell Stadium" },
       { week: 5, note: "BYE" },
@@ -230,7 +230,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "Akron", location: "vs", stadium: "SHI Stadium", teamScore: 46, opponentScore: 7 },
-      { week: 2, opponent: "Boston College", location: "vs", stadium: "SHI Stadium" },
+      { week: 2, opponent: "Boston College", location: "vs", stadium: "SHI Stadium", teamScore: 38, opponentScore: 31 },
       { week: 3, opponent: "App St.", location: "at", stadium: "Kidd Brewer Stadium" },
       { week: 4, opponent: "Northwestern", location: "vs", stadium: "SHI Stadium" },
       { week: 5, opponent: "FCS Southeast", location: "vs", stadium: "SHI Stadium" },
@@ -254,7 +254,7 @@ const TEAM_SCHEDULES = [
       { week: 1, opponent: "Northwestern", location: "at", stadium: "Ryan Field", teamScore: 45, opponentScore: 17 },
       /* The Dublin neutral opener. Pittsburgh is the listed home side
          on both blocks, so this one reads "at" here and "vs" there. */
-      { week: 2, opponent: "Pittsburgh", location: "at", neutral: true, stadium: "Dublin Stadium" },
+      { week: 2, opponent: "Pittsburgh", location: "at", neutral: true, stadium: "Dublin Stadium", teamScore: 21, opponentScore: 31 },
       { week: 3, opponent: "Colorado State", location: "vs", stadium: "Camp Randall Stadium" },
       { week: 4, opponent: "Ohio State", location: "vs", stadium: "Camp Randall Stadium" },
       { week: 5, opponent: "Boise State", location: "vs", stadium: "Camp Randall Stadium" },
