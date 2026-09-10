@@ -255,7 +255,7 @@ const TEAM_SCHEDULES = [
       /* The Dublin neutral opener. Pittsburgh is the listed home side
          on both blocks, so this one reads "at" here and "vs" there. */
       { week: 2, opponent: "Pittsburgh", location: "at", neutral: true, stadium: "Dublin Stadium", teamScore: 21, opponentScore: 31 },
-      { week: 3, opponent: "Colorado State", location: "vs", stadium: "Camp Randall Stadium" },
+      { week: 3, opponent: "Colorado State", location: "vs", stadium: "Camp Randall Stadium", teamScore: 56, opponentScore: 10 },
       { week: 4, opponent: "Ohio State", location: "vs", stadium: "Camp Randall Stadium" },
       { week: 5, opponent: "Boise State", location: "vs", stadium: "Camp Randall Stadium" },
       { week: 6, opponent: "Purdue", location: "at", stadium: "Ross-Ade Stadium" },
