@@ -503,7 +503,7 @@ const TEAM_SCHEDULES = [
     team: "Oklahoma",
     conference: "SEC",
     weeks: [
-      { week: 0, opponent: "Oklahoma State", location: "vs", stadium: "Gaylord-Oklahoma Memorial" },
+      { week: 0, opponent: "Oklahoma State", location: "vs", stadium: "Gaylord-Oklahoma Memorial", teamScore: 45, opponentScore: 27 },
       { week: 1, opponent: "West Virginia", location: "at", stadium: "Milan Puskar Stadium" },
       { week: 2, opponent: "SMU", location: "at", stadium: "Gerald J. Ford Stadium" },
       { week: 3, note: "BYE" },
