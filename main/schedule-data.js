@@ -268,7 +268,7 @@ const TEAM_SCHEDULES = [
     conference: "Big Ten",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "Alabama", location: "vs", stadium: "Ohio Stadium" },
+      { week: 1, opponent: "Alabama", location: "vs", stadium: "Ohio Stadium", teamScore: 35, opponentScore: 21 },
       { week: 2, opponent: "Notre Dame", location: "at", stadium: "Notre Dame Stadium" },
       { week: 3, opponent: "Marshall", location: "vs", stadium: "Ohio Stadium" },
       { week: 4, opponent: "Minnesota", location: "at", stadium: "Huntington Bank Stadium" },
