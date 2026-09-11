@@ -429,7 +429,7 @@ const TEAM_SCHEDULES = [
       { week: 0, opponent: "UAB", location: "vs", stadium: "Acrisure Bounce House", teamScore: 37, opponentScore: 21 },
       { week: 1, opponent: "California", location: "vs", stadium: "Acrisure Bounce House", teamScore: 41, opponentScore: 22 },
       { week: 2, note: "BYE" },
-      { week: 3, opponent: "East Carolina", location: "at", stadium: "Dowdy-Ficklen Stadium" },
+      { week: 3, opponent: "East Carolina", location: "at", stadium: "Dowdy-Ficklen Stadium", teamScore: 37, opponentScore: 21 },
       { week: 4, opponent: "Georgia", location: "vs", stadium: "Acrisure Bounce House" },
       { week: 5, opponent: "Tennessee", location: "vs", stadium: "Acrisure Bounce House" },
       { week: 6, note: "BYE" },
