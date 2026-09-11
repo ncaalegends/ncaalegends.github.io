@@ -221,7 +221,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "Baldwin Wallace", location: "vs", teamScore: 14, opponentScore: 7 },
-      { week: 2, opponent: "Vanderbilt", location: "at" },
+      { week: 2, opponent: "Vanderbilt", location: "at", teamScore: 21, opponentScore: 14 },
       { week: 3, opponent: "FCS Midwest", location: "vs" },
       { week: 4, note: "BYE" },
       { week: 5, opponent: "Virginia", location: "at" },
@@ -289,7 +289,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "Wawa University", location: "at", teamScore: 15, opponentScore: 33 },
-      { week: 2, opponent: "FCS East", location: "vs" },
+      { week: 2, opponent: "FCS East", location: "vs", teamScore: 26, opponentScore: 34 },
       { week: 3, opponent: "New Glarus", location: "vs" },
       { week: 4, opponent: "Patriot Tech", location: "at" },
       { week: 5, opponent: "BYU", location: "at" },
