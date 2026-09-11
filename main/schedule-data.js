@@ -113,7 +113,7 @@ const TEAM_SCHEDULES = [
     team: "Clemson",
     conference: "ACC",
     weeks: [
-      { week: 0, opponent: "Washington", location: "vs", stadium: "Clemson Memorial Stadium" },
+      { week: 0, opponent: "Washington", location: "vs", stadium: "Clemson Memorial Stadium", teamScore: 26, opponentScore: 59 },
       { week: 1, opponent: "Virginia", location: "vs", stadium: "Clemson Memorial Stadium" },
       { week: 2, opponent: "NC State", location: "vs", stadium: "Clemson Memorial Stadium" },
       { week: 3, opponent: "Georgia", location: "at", stadium: "Sanford Stadium" },
@@ -223,7 +223,7 @@ const TEAM_SCHEDULES = [
     team: "Washington",
     conference: "Big Ten",
     weeks: [
-      { week: 0, opponent: "Clemson", location: "at", stadium: "Clemson Memorial Stadium" },
+      { week: 0, opponent: "Clemson", location: "at", stadium: "Clemson Memorial Stadium", teamScore: 59, opponentScore: 26 },
       { week: 1, opponent: "Maryland", location: "vs", stadium: "Husky Stadium" },
       { week: 2, opponent: "USC", location: "vs", stadium: "Husky Stadium" },
       { week: 3, opponent: "Washington St.", location: "vs", stadium: "Husky Stadium" },
@@ -245,7 +245,7 @@ const TEAM_SCHEDULES = [
     team: "South Carolina",
     conference: "SEC",
     weeks: [
-      { week: 0, opponent: "North Carolina", location: "vs", stadium: "Williams-Brice Stadium" },
+      { week: 0, opponent: "North Carolina", location: "vs", stadium: "Williams-Brice Stadium", teamScore: 31, opponentScore: 21 },
       { week: 1, opponent: "SMU", location: "at", neutral: true, stadium: "Mercedes-Benz Stadium" },
       { week: 2, note: "BYE" },
       { week: 3, opponent: "Florida", location: "at", stadium: "Ben Hill Griffin Stadium" },
@@ -289,7 +289,7 @@ const TEAM_SCHEDULES = [
     team: "Texas",
     conference: "SEC",
     weeks: [
-      { week: 0, opponent: "Michigan", location: "vs", stadium: "Texas Memorial Stadium" },
+      { week: 0, opponent: "Michigan", location: "vs", stadium: "Texas Memorial Stadium", teamScore: 38, opponentScore: 31 },
       { week: 1, note: "BYE" },
       { week: 2, opponent: "Ole Miss", location: "at", stadium: "Vaught-Hemingway Stadium" },
       { week: 3, opponent: "Alabama", location: "at", stadium: "Saban Field at Bryant-Denny Stadium" },
@@ -341,7 +341,7 @@ const TEAM_SCHEDULES = [
     team: "Michigan",
     conference: "Big Ten",
     weeks: [
-      { week: 0, opponent: "Texas", location: "at", stadium: "Texas Memorial Stadium" },
+      { week: 0, opponent: "Texas", location: "at", stadium: "Texas Memorial Stadium", teamScore: 31, opponentScore: 38 },
       { week: 1, note: "BYE" },
       { week: 2, opponent: "TCU", location: "vs", stadium: "Michigan Stadium" },
       { week: 3, opponent: "E. Michigan", location: "vs", stadium: "Michigan Stadium" },
