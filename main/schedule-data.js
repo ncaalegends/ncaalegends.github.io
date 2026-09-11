@@ -429,7 +429,7 @@ const TEAM_SCHEDULES = [
     team: "UCLA",
     conference: "Big Ten",
     weeks: [
-      { week: 0, opponent: "San Diego State", location: "vs", stadium: "Rose Bowl Stadium" },
+      { week: 0, opponent: "San Diego State", location: "vs", stadium: "Rose Bowl Stadium", teamScore: 35, opponentScore: 10 },
       { week: 1, opponent: "California", location: "vs", stadium: "Rose Bowl Stadium" },
       { week: 2, note: "BYE" },
       { week: 3, opponent: "Purdue", location: "at", stadium: "Ross-Ade Stadium" },
