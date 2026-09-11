@@ -136,7 +136,7 @@ const TEAM_SCHEDULES = [
     conference: "SEC",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "South Alabama", location: "vs", stadium: "Ben Hill Griffin Stadium" },
+      { week: 1, opponent: "South Alabama", location: "vs", stadium: "Ben Hill Griffin Stadium", teamScore: 41, opponentScore: 13 },
       { week: 2, opponent: "Louisville", location: "vs", stadium: "Ben Hill Griffin Stadium" },
       { week: 3, opponent: "South Carolina", location: "vs", stadium: "Ben Hill Griffin Stadium" },
       { week: 4, opponent: "Missouri", location: "at", stadium: "Faurot Field at Memorial Stadium" },
@@ -224,7 +224,7 @@ const TEAM_SCHEDULES = [
     conference: "Big Ten",
     weeks: [
       { week: 0, opponent: "Clemson", location: "at", stadium: "Clemson Memorial Stadium", teamScore: 59, opponentScore: 26 },
-      { week: 1, opponent: "Maryland", location: "vs", stadium: "Husky Stadium" },
+      { week: 1, opponent: "Maryland", location: "vs", stadium: "Husky Stadium", teamScore: 38, opponentScore: 13 },
       { week: 2, opponent: "USC", location: "vs", stadium: "Husky Stadium" },
       { week: 3, opponent: "Washington St.", location: "vs", stadium: "Husky Stadium" },
       { week: 4, opponent: "Notre Dame", location: "vs", stadium: "Husky Stadium" },
