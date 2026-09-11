@@ -64,8 +64,8 @@ const SEASON = {
      conversion in both directions and explains the Eastern rule.
 
      Set BOTH to "" to hide the countdown line entirely. */
-  nextAdvanceAt: "2026-09-12T20:00:00-04:00",
-  nextAdvance: "Saturday, September 12th - 8:00 PM EDT",
+  nextAdvanceAt: "2026-09-11T19:00:00-04:00",
+  nextAdvance: "Friday, September 11th - 7:00 PM EDT",
 };
 
 /* ------------------------------------------------------------
