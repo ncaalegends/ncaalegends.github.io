@@ -369,7 +369,7 @@ const TEAM_SCHEDULES = [
       { week: 0, opponent: "Buffalo", location: "vs", stadium: "Jerry Richardson Stadium", teamScore: 38, opponentScore: 17 },
       { week: 1, opponent: "Ole Miss", location: "at", stadium: "Vaught-Hemingway Stadium", teamScore: 10, opponentScore: 17 },
       { week: 2, opponent: "Kentucky", location: "at", stadium: "Kroger Field", teamScore: 13, opponentScore: 20 },
-      { week: 3, opponent: "Florida", location: "at", stadium: "Ben Hill Griffin Stadium" },
+      { week: 3, opponent: "Florida", location: "at", stadium: "Ben Hill Griffin Stadium", teamScore: 38, opponentScore: 36 },
       { week: 4, opponent: "East Carolina", location: "vs", stadium: "Jerry Richardson Stadium" },
       { week: 5, opponent: "App St.", location: "vs", stadium: "Jerry Richardson Stadium" },
       { week: 6, opponent: "LSU", location: "at", stadium: "Tiger Stadium" },
