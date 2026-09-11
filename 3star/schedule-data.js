@@ -206,7 +206,7 @@ const TEAM_SCHEDULES = [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "Washington St.", location: "vs", stadium: "Reser Stadium", teamScore: 38, opponentScore: 24 },
       { week: 2, opponent: "New Mexico", location: "vs", stadium: "Reser Stadium", teamScore: 38, opponentScore: 7 },
-      { week: 3, opponent: "Penn State", location: "vs", stadium: "Reser Stadium" },
+      { week: 3, opponent: "Penn State", location: "vs", stadium: "Reser Stadium", teamScore: 30, opponentScore: 31 },
       { week: 4, opponent: "San Diego St.", location: "at", stadium: "Snapdragon Stadium" },
       { week: 5, note: "BYE" },
       { week: 6, opponent: "Washington", location: "vs", stadium: "Reser Stadium" },
