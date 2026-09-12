@@ -108,7 +108,7 @@ const TEAM_SCHEDULES = [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "Vanderbilt", location: "vs", stadium: "Kenan Stadium", teamScore: 28, opponentScore: 21 },
       { week: 2, opponent: "Purdue", location: "vs", stadium: "Kenan Stadium", teamScore: 24, opponentScore: 17 },
-      { week: 3, opponent: "Wake Forest", location: "vs", stadium: "Kenan Stadium" },
+      { week: 3, opponent: "Wake Forest", location: "vs", stadium: "Kenan Stadium", teamScore: 17, opponentScore: 30 },
       { week: 4, opponent: "UConn", location: "vs", stadium: "Kenan Stadium" },
       { week: 5, note: "BYE" },
       { week: 6, opponent: "Virginia", location: "vs", stadium: "Kenan Stadium" },
@@ -397,7 +397,7 @@ const TEAM_SCHEDULES = [
          the head-to-head with Texan_hog resolves. */
       { week: 1, opponent: "North Dakota State", location: "vs", stadium: "Bridgeforth Stadium", teamScore: 38, opponentScore: 39 },
       { week: 2, opponent: "Vanderbilt", location: "at", stadium: "FirstBank Stadium", teamScore: 21, opponentScore: 13 },
-      { week: 3, opponent: "C. Carolina", location: "vs", stadium: "Bridgeforth Stadium" },
+      { week: 3, opponent: "C. Carolina", location: "vs", stadium: "Bridgeforth Stadium", teamScore: 41, opponentScore: 21 },
       { week: 4, note: "BYE" },
       { week: 5, opponent: "Florida", location: "at", stadium: "Ben Hill Griffin Stadium" },
       { week: 6, opponent: "Kentucky", location: "vs", stadium: "Bridgeforth Stadium" },
