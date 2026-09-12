@@ -256,7 +256,7 @@ const TEAM_SCHEDULES = [
          on both blocks, so this one reads "at" here and "vs" there. */
       { week: 2, opponent: "Pittsburgh", location: "at", neutral: true, stadium: "Dublin Stadium", teamScore: 21, opponentScore: 31 },
       { week: 3, opponent: "Colorado State", location: "vs", stadium: "Camp Randall Stadium", teamScore: 56, opponentScore: 10 },
-      { week: 4, opponent: "Ohio State", location: "vs", stadium: "Camp Randall Stadium" },
+      { week: 4, opponent: "Ohio State", location: "vs", stadium: "Camp Randall Stadium", teamScore: 48, opponentScore: 14 },
       { week: 5, opponent: "Boise State", location: "vs", stadium: "Camp Randall Stadium" },
       { week: 6, opponent: "Purdue", location: "at", stadium: "Ross-Ade Stadium" },
       { week: 7, opponent: "Maryland", location: "vs", stadium: "Camp Randall Stadium" },
@@ -280,7 +280,7 @@ const TEAM_SCHEDULES = [
       { week: 1, opponent: "Iowa State", location: "vs", stadium: "McLane Stadium", teamScore: 38, opponentScore: 21 },
       { week: 2, opponent: "Oregon", location: "vs", stadium: "McLane Stadium", teamScore: 48, opponentScore: 31 },
       { week: 3, opponent: "California", location: "at", stadium: "California Memorial Stadium", teamScore: 35, opponentScore: 24 },
-      { week: 4, opponent: "West Virginia", location: "vs", stadium: "McLane Stadium" },
+      { week: 4, opponent: "West Virginia", location: "vs", stadium: "McLane Stadium", teamScore: 45, opponentScore: 14 },
       { week: 5, note: "BYE" },
       { week: 6, opponent: "Texas Tech", location: "at", stadium: "Jones Stadium" },
       { week: 7, note: "BYE" },
