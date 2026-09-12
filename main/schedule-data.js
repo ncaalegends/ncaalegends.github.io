@@ -158,7 +158,7 @@ const TEAM_SCHEDULES = [
     conference: "Big Ten",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "Iowa", location: "vs", stadium: "Autzen Stadium" },
+      { week: 1, opponent: "Iowa", location: "vs", stadium: "Autzen Stadium", teamScore: 56, opponentScore: 37 },
       { week: 2, opponent: "Colorado", location: "vs", stadium: "Autzen Stadium" },
       { week: 3, opponent: "Oregon State", location: "vs", stadium: "Autzen Stadium" },
       { week: 4, opponent: "Michigan", location: "at", stadium: "Michigan Stadium" },
@@ -180,7 +180,7 @@ const TEAM_SCHEDULES = [
     conference: "ACC",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "Nebraska", location: "vs", stadium: "Doak Campbell Stadium" },
+      { week: 1, opponent: "Nebraska", location: "vs", stadium: "Doak Campbell Stadium", teamScore: 58, opponentScore: 27 },
       { week: 2, note: "BYE" },
       { week: 3, opponent: "Tennessee", location: "vs", stadium: "Doak Campbell Stadium" },
       { week: 4, opponent: "Pittsburgh", location: "vs", stadium: "Doak Campbell Stadium" },
@@ -320,7 +320,7 @@ const TEAM_SCHEDULES = [
     conference: "SEC",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "UAB", location: "vs", stadium: "Sanford Stadium" },
+      { week: 1, opponent: "UAB", location: "vs", stadium: "Sanford Stadium", teamScore: 40, opponentScore: 18 },
       { week: 2, opponent: "Charlotte", location: "vs", stadium: "Sanford Stadium" },
       { week: 3, opponent: "Clemson", location: "vs", stadium: "Sanford Stadium" },
       { week: 4, note: "BYE" },
@@ -364,7 +364,7 @@ const TEAM_SCHEDULES = [
     conference: "Big 12",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "Oklahoma", location: "vs", stadium: "Milan Puskar Stadium" },
+      { week: 1, opponent: "Oklahoma", location: "vs", stadium: "Milan Puskar Stadium", teamScore: 38, opponentScore: 14 },
       { week: 2, opponent: "LSU", location: "at", stadium: "Tiger Stadium" },
       { week: 3, opponent: "Oklahoma State", location: "at", stadium: "Boone Pickens Stadium" },
       { week: 4, opponent: "Arizona State", location: "vs", stadium: "Milan Puskar Stadium" },
@@ -386,7 +386,7 @@ const TEAM_SCHEDULES = [
     conference: "Big 12",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "Colorado State", location: "vs", stadium: "Folsom Field" },
+      { week: 1, opponent: "Colorado State", location: "vs", stadium: "Folsom Field", teamScore: 54, opponentScore: 0 },
       { week: 2, opponent: "Oregon", location: "at", stadium: "Autzen Stadium" },
       { week: 3, note: "BYE" },
       { week: 4, opponent: "Iowa State", location: "at", stadium: "Jack Trice Stadium" },
@@ -504,7 +504,7 @@ const TEAM_SCHEDULES = [
     conference: "SEC",
     weeks: [
       { week: 0, opponent: "Oklahoma State", location: "vs", stadium: "Gaylord-Oklahoma Memorial", teamScore: 45, opponentScore: 27 },
-      { week: 1, opponent: "West Virginia", location: "at", stadium: "Milan Puskar Stadium" },
+      { week: 1, opponent: "West Virginia", location: "at", stadium: "Milan Puskar Stadium", teamScore: 14, opponentScore: 38 },
       { week: 2, opponent: "SMU", location: "at", stadium: "Gerald J. Ford Stadium" },
       { week: 3, note: "BYE" },
       { week: 4, opponent: "Nebraska", location: "vs", stadium: "Gaylord-Oklahoma Memorial" },
@@ -542,7 +542,7 @@ const TEAM_SCHEDULES = [
     conference: "SEC",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "Houston", location: "vs", neutral: true, stadium: "Reliant Stadium" },
+      { week: 1, opponent: "Houston", location: "vs", neutral: true, stadium: "Reliant Stadium", teamScore: 38, opponentScore: 0 },
       { week: 2, opponent: "West Virginia", location: "vs", stadium: "Tiger Stadium" },
       { week: 3, opponent: "Kentucky", location: "at", stadium: "Kroger Field" },
       { week: 4, opponent: "Louisiana Tech", location: "vs", stadium: "Tiger Stadium" },
