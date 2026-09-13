@@ -202,7 +202,7 @@ const TEAM_SCHEDULES = [
     conference: "ACC",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "South Carolina", location: "vs", neutral: true, stadium: "Mercedes-Benz Stadium" },
+      { week: 1, opponent: "South Carolina", location: "vs", neutral: true, stadium: "Mercedes-Benz Stadium", teamScore: 28, opponentScore: 21 },
       { week: 2, opponent: "Oklahoma", location: "vs", stadium: "Gerald J. Ford Stadium" },
       { week: 3, opponent: "Virginia", location: "vs", stadium: "Gerald J. Ford Stadium" },
       { week: 4, opponent: "Stanford", location: "vs", stadium: "Gerald J. Ford Stadium" },
@@ -246,7 +246,7 @@ const TEAM_SCHEDULES = [
     conference: "SEC",
     weeks: [
       { week: 0, opponent: "North Carolina", location: "vs", stadium: "Williams-Brice Stadium", teamScore: 31, opponentScore: 21 },
-      { week: 1, opponent: "SMU", location: "at", neutral: true, stadium: "Mercedes-Benz Stadium" },
+      { week: 1, opponent: "SMU", location: "at", neutral: true, stadium: "Mercedes-Benz Stadium", teamScore: 21, opponentScore: 28 },
       { week: 2, note: "BYE" },
       { week: 3, opponent: "Florida", location: "at", stadium: "Ben Hill Griffin Stadium" },
       { week: 4, opponent: "UCF", location: "vs", stadium: "Williams-Brice Stadium" },
@@ -408,7 +408,7 @@ const TEAM_SCHEDULES = [
     conference: "ACC",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "Tennessee", location: "vs", neutral: true, stadium: "Mercedes-Benz Stadium" },
+      { week: 1, opponent: "Tennessee", location: "vs", neutral: true, stadium: "Mercedes-Benz Stadium", teamScore: 10, opponentScore: 41 },
       { week: 2, opponent: "Virginia", location: "at", stadium: "Scott Stadium" },
       { week: 3, opponent: "North Carolina", location: "at", stadium: "Kenan Stadium" },
       { week: 4, opponent: "Duke", location: "at", stadium: "Wallace Wade Stadium" },
@@ -452,7 +452,7 @@ const TEAM_SCHEDULES = [
     conference: "ACC",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "Utah", location: "at", neutral: true, stadium: "Allegiant Stadium" },
+      { week: 1, opponent: "Utah", location: "at", neutral: true, stadium: "Allegiant Stadium", teamScore: 47, opponentScore: 21 },
       { week: 2, opponent: "Troy", location: "vs", stadium: "Hard Rock Stadium" },
       { week: 3, opponent: "New Mexico St.", location: "vs", stadium: "Hard Rock Stadium" },
       { week: 4, note: "BYE" },
