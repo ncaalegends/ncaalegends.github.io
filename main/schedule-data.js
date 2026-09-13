@@ -70,7 +70,7 @@ const TEAM_SCHEDULES = [
     conference: "ACC",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "UCLA", location: "at", stadium: "Rose Bowl Stadium" },
+      { week: 1, opponent: "UCLA", location: "at", stadium: "Rose Bowl Stadium", teamScore: 34, opponentScore: 3 },
       { week: 2, opponent: "San Diego State", location: "vs", stadium: "California Memorial Stadium" },
       { week: 3, opponent: "Air Force", location: "vs", stadium: "California Memorial Stadium" },
       { week: 4, note: "BYE" },
@@ -114,7 +114,7 @@ const TEAM_SCHEDULES = [
     conference: "ACC",
     weeks: [
       { week: 0, opponent: "Washington", location: "vs", stadium: "Clemson Memorial Stadium", teamScore: 26, opponentScore: 59 },
-      { week: 1, opponent: "Virginia", location: "vs", stadium: "Clemson Memorial Stadium" },
+      { week: 1, opponent: "Virginia", location: "vs", stadium: "Clemson Memorial Stadium", teamScore: 56, opponentScore: 17 },
       { week: 2, opponent: "NC State", location: "vs", stadium: "Clemson Memorial Stadium" },
       { week: 3, opponent: "Georgia", location: "at", stadium: "Sanford Stadium" },
       { week: 4, opponent: "Syracuse", location: "vs", stadium: "Clemson Memorial Stadium" },
@@ -430,7 +430,7 @@ const TEAM_SCHEDULES = [
     conference: "Big Ten",
     weeks: [
       { week: 0, opponent: "San Diego State", location: "vs", stadium: "Rose Bowl Stadium", teamScore: 35, opponentScore: 10 },
-      { week: 1, opponent: "California", location: "vs", stadium: "Rose Bowl Stadium" },
+      { week: 1, opponent: "California", location: "vs", stadium: "Rose Bowl Stadium", teamScore: 3, opponentScore: 34 },
       { week: 2, note: "BYE" },
       { week: 3, opponent: "Purdue", location: "at", stadium: "Ross-Ade Stadium" },
       { week: 4, opponent: "Iowa", location: "at", stadium: "Kinnick Stadium" },
@@ -474,7 +474,7 @@ const TEAM_SCHEDULES = [
     conference: "Independent",
     weeks: [
       { week: 0, opponent: "Virginia Tech", location: "vs", stadium: "Notre Dame Stadium", teamScore: 63, opponentScore: 7 },
-      { week: 1, opponent: "Purdue", location: "vs", stadium: "Notre Dame Stadium" },
+      { week: 1, opponent: "Purdue", location: "vs", stadium: "Notre Dame Stadium", teamScore: 39, opponentScore: 14 },
       { week: 2, opponent: "Ohio State", location: "vs", stadium: "Notre Dame Stadium" },
       { week: 3, opponent: "TCU", location: "at", stadium: "Amon G. Carter Stadium" },
       { week: 4, opponent: "Washington", location: "at", stadium: "Husky Stadium" },
