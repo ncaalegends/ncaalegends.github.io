@@ -71,7 +71,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "UCLA", location: "at", stadium: "Rose Bowl Stadium", teamScore: 34, opponentScore: 3 },
-      { week: 2, opponent: "San Diego State", location: "vs", stadium: "California Memorial Stadium" },
+      { week: 2, opponent: "San Diego State", location: "vs", stadium: "California Memorial Stadium", teamScore: 45, opponentScore: 10 },
       { week: 3, opponent: "Air Force", location: "vs", stadium: "California Memorial Stadium" },
       { week: 4, note: "BYE" },
       { week: 5, opponent: "Wake Forest", location: "vs", stadium: "California Memorial Stadium" },
@@ -115,7 +115,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, opponent: "Washington", location: "vs", stadium: "Clemson Memorial Stadium", teamScore: 26, opponentScore: 59 },
       { week: 1, opponent: "Virginia", location: "vs", stadium: "Clemson Memorial Stadium", teamScore: 56, opponentScore: 17 },
-      { week: 2, opponent: "NC State", location: "vs", stadium: "Clemson Memorial Stadium" },
+      { week: 2, opponent: "NC State", location: "vs", stadium: "Clemson Memorial Stadium", teamScore: 59, opponentScore: 0 },
       { week: 3, opponent: "Georgia", location: "at", stadium: "Sanford Stadium" },
       { week: 4, opponent: "Syracuse", location: "vs", stadium: "Clemson Memorial Stadium" },
       { week: 5, opponent: "Louisville", location: "vs", stadium: "Clemson Memorial Stadium" },
@@ -203,7 +203,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "South Carolina", location: "vs", neutral: true, stadium: "Mercedes-Benz Stadium", teamScore: 28, opponentScore: 21 },
-      { week: 2, opponent: "Oklahoma", location: "vs", stadium: "Gerald J. Ford Stadium" },
+      { week: 2, opponent: "Oklahoma", location: "vs", stadium: "Gerald J. Ford Stadium", teamScore: 21, opponentScore: 42 },
       { week: 3, opponent: "Virginia", location: "vs", stadium: "Gerald J. Ford Stadium" },
       { week: 4, opponent: "Stanford", location: "vs", stadium: "Gerald J. Ford Stadium" },
       { week: 5, opponent: "Virginia Tech", location: "at", stadium: "Lane Stadium" },
@@ -269,7 +269,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "Alabama", location: "vs", stadium: "Ohio Stadium", teamScore: 35, opponentScore: 21 },
-      { week: 2, opponent: "Notre Dame", location: "at", stadium: "Notre Dame Stadium" },
+      { week: 2, opponent: "Notre Dame", location: "at", stadium: "Notre Dame Stadium", teamScore: 34, opponentScore: 21 },
       { week: 3, opponent: "Marshall", location: "vs", stadium: "Ohio Stadium" },
       { week: 4, opponent: "Minnesota", location: "at", stadium: "Huntington Bank Stadium" },
       { week: 5, note: "BYE" },
@@ -291,7 +291,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, opponent: "Michigan", location: "vs", stadium: "Texas Memorial Stadium", teamScore: 38, opponentScore: 31 },
       { week: 1, note: "BYE" },
-      { week: 2, opponent: "Ole Miss", location: "at", stadium: "Vaught-Hemingway Stadium" },
+      { week: 2, opponent: "Ole Miss", location: "at", stadium: "Vaught-Hemingway Stadium", teamScore: 41, opponentScore: 13 },
       { week: 3, opponent: "Alabama", location: "at", stadium: "Saban Field at Bryant-Denny Stadium" },
       { week: 4, opponent: "Tennessee", location: "at", stadium: "Neyland Stadium" },
       { week: 5, opponent: "Auburn", location: "at", stadium: "Jordan-Hare Stadium" },
@@ -365,7 +365,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "Oklahoma", location: "vs", stadium: "Milan Puskar Stadium", teamScore: 38, opponentScore: 14 },
-      { week: 2, opponent: "LSU", location: "at", stadium: "Tiger Stadium" },
+      { week: 2, opponent: "LSU", location: "at", stadium: "Tiger Stadium", teamScore: 42, opponentScore: 28 },
       { week: 3, opponent: "Oklahoma State", location: "at", stadium: "Boone Pickens Stadium" },
       { week: 4, opponent: "Arizona State", location: "vs", stadium: "Milan Puskar Stadium" },
       { week: 5, opponent: "Baylor", location: "at", stadium: "McLane Stadium" },
@@ -475,7 +475,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, opponent: "Virginia Tech", location: "vs", stadium: "Notre Dame Stadium", teamScore: 63, opponentScore: 7 },
       { week: 1, opponent: "Purdue", location: "vs", stadium: "Notre Dame Stadium", teamScore: 39, opponentScore: 14 },
-      { week: 2, opponent: "Ohio State", location: "vs", stadium: "Notre Dame Stadium" },
+      { week: 2, opponent: "Ohio State", location: "vs", stadium: "Notre Dame Stadium", teamScore: 21, opponentScore: 34 },
       { week: 3, opponent: "TCU", location: "at", stadium: "Amon G. Carter Stadium" },
       { week: 4, opponent: "Washington", location: "at", stadium: "Husky Stadium" },
       { week: 5, opponent: "Oregon", location: "vs", stadium: "Notre Dame Stadium" },
@@ -505,7 +505,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, opponent: "Oklahoma State", location: "vs", stadium: "Gaylord-Oklahoma Memorial", teamScore: 45, opponentScore: 27 },
       { week: 1, opponent: "West Virginia", location: "at", stadium: "Milan Puskar Stadium", teamScore: 14, opponentScore: 38 },
-      { week: 2, opponent: "SMU", location: "at", stadium: "Gerald J. Ford Stadium" },
+      { week: 2, opponent: "SMU", location: "at", stadium: "Gerald J. Ford Stadium", teamScore: 42, opponentScore: 21 },
       { week: 3, note: "BYE" },
       { week: 4, opponent: "Nebraska", location: "vs", stadium: "Gaylord-Oklahoma Memorial" },
       { week: 5, opponent: "Vanderbilt", location: "at", stadium: "FirstBank Stadium" },
@@ -543,7 +543,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "Houston", location: "vs", neutral: true, stadium: "Reliant Stadium", teamScore: 38, opponentScore: 0 },
-      { week: 2, opponent: "West Virginia", location: "vs", stadium: "Tiger Stadium" },
+      { week: 2, opponent: "West Virginia", location: "vs", stadium: "Tiger Stadium", teamScore: 28, opponentScore: 42 },
       { week: 3, opponent: "Kentucky", location: "at", stadium: "Kroger Field" },
       { week: 4, opponent: "Louisiana Tech", location: "vs", stadium: "Tiger Stadium" },
       { week: 5, opponent: "Nevada", location: "vs", stadium: "Tiger Stadium" },
