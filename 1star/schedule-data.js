@@ -133,7 +133,7 @@ const TEAM_SCHEDULES = [
       { week: 1, opponent: "FCS Northwest", location: "vs", teamScore: 52, opponentScore: 0 },
       { week: 2, opponent: "Charlotte", location: "at", teamScore: 49, opponentScore: 17 },
       { week: 3, opponent: "Memphis", location: "vs", teamScore: 35, opponentScore: 30 },
-      { week: 4, opponent: "Northern Illinois", location: "vs" },
+      { week: 4, opponent: "Northern Illinois", location: "vs", teamScore: 45, opponentScore: 10 },
       { week: 5, opponent: "Coastal Carolina", location: "vs" },
       { week: 6, opponent: "Georgia State", location: "at" },
       { week: 7, opponent: "Southern Mississippi", location: "at" },
