@@ -113,7 +113,7 @@ const TEAM_SCHEDULES = [
     team: "Clemson",
     conference: "ACC",
     weeks: [
-      { week: 0, opponent: "Washington", location: "vs", stadium: "Clemson Memorial Stadium", teamScore: 26, opponentScore: 59 },
+      { week: 0, opponent: "Washington", location: "vs", stadium: "Clemson Memorial Stadium", teamScore: 59, opponentScore: 26 },
       { week: 1, opponent: "Virginia", location: "vs", stadium: "Clemson Memorial Stadium", teamScore: 56, opponentScore: 17 },
       { week: 2, opponent: "NC State", location: "vs", stadium: "Clemson Memorial Stadium", teamScore: 59, opponentScore: 0 },
       { week: 3, opponent: "Georgia", location: "at", stadium: "Sanford Stadium" },
@@ -223,7 +223,7 @@ const TEAM_SCHEDULES = [
     team: "Washington",
     conference: "Big Ten",
     weeks: [
-      { week: 0, opponent: "Clemson", location: "at", stadium: "Clemson Memorial Stadium", teamScore: 59, opponentScore: 26 },
+      { week: 0, opponent: "Clemson", location: "at", stadium: "Clemson Memorial Stadium", teamScore: 26, opponentScore: 59 },
       { week: 1, opponent: "Maryland", location: "vs", stadium: "Husky Stadium", teamScore: 38, opponentScore: 13 },
       { week: 2, opponent: "USC", location: "vs", stadium: "Husky Stadium" },
       { week: 3, opponent: "Washington St.", location: "vs", stadium: "Husky Stadium" },
