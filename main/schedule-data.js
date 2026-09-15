@@ -321,7 +321,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "UAB", location: "vs", stadium: "Sanford Stadium", teamScore: 40, opponentScore: 18 },
-      { week: 2, opponent: "Charlotte", location: "vs", stadium: "Sanford Stadium" },
+      { week: 2, opponent: "Charlotte", location: "vs", stadium: "Sanford Stadium", teamScore: 56, opponentScore: 24 },
       { week: 3, opponent: "Clemson", location: "vs", stadium: "Sanford Stadium" },
       { week: 4, note: "BYE" },
       { week: 5, opponent: "Texas A&M", location: "vs", stadium: "Sanford Stadium" },
