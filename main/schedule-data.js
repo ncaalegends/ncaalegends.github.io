@@ -159,7 +159,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "Iowa", location: "vs", stadium: "Autzen Stadium", teamScore: 56, opponentScore: 37 },
-      { week: 2, opponent: "Colorado", location: "vs", stadium: "Autzen Stadium" },
+      { week: 2, opponent: "Colorado", location: "vs", stadium: "Autzen Stadium", teamScore: 42, opponentScore: 28 },
       { week: 3, opponent: "Oregon State", location: "vs", stadium: "Autzen Stadium" },
       { week: 4, opponent: "Michigan", location: "at", stadium: "Michigan Stadium" },
       { week: 5, opponent: "Notre Dame", location: "at", stadium: "Notre Dame Stadium" },
@@ -387,7 +387,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "Colorado State", location: "vs", stadium: "Folsom Field", teamScore: 54, opponentScore: 0 },
-      { week: 2, opponent: "Oregon", location: "at", stadium: "Autzen Stadium" },
+      { week: 2, opponent: "Oregon", location: "at", stadium: "Autzen Stadium", teamScore: 28, opponentScore: 42 },
       { week: 3, note: "BYE" },
       { week: 4, opponent: "Iowa State", location: "at", stadium: "Jack Trice Stadium" },
       { week: 5, opponent: "Houston", location: "at", stadium: "TDECU Stadium" },
