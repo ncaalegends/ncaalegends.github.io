@@ -93,7 +93,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, note: "BYE" },
-      { week: 2, opponent: "Michigan", location: "at", stadium: "Michigan Stadium" },
+      { week: 2, opponent: "Michigan", location: "at", stadium: "Michigan Stadium", teamScore: 33, opponentScore: 14 },
       { week: 3, opponent: "Notre Dame", location: "vs", stadium: "Amon G. Carter Stadium" },
       { week: 4, opponent: "Arkansas", location: "vs", stadium: "Amon G. Carter Stadium" },
       { week: 5, opponent: "Oklahoma State", location: "at", stadium: "Boone Pickens Stadium" },
@@ -137,7 +137,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "South Alabama", location: "vs", stadium: "Ben Hill Griffin Stadium", teamScore: 41, opponentScore: 13 },
-      { week: 2, opponent: "Louisville", location: "vs", stadium: "Ben Hill Griffin Stadium" },
+      { week: 2, opponent: "Louisville", location: "vs", stadium: "Ben Hill Griffin Stadium", teamScore: 45, opponentScore: 10 },
       { week: 3, opponent: "South Carolina", location: "vs", stadium: "Ben Hill Griffin Stadium" },
       { week: 4, opponent: "Missouri", location: "at", stadium: "Faurot Field at Memorial Stadium" },
       { week: 5, opponent: "North Carolina", location: "vs", stadium: "Ben Hill Griffin Stadium" },
@@ -225,7 +225,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, opponent: "Clemson", location: "at", stadium: "Clemson Memorial Stadium", teamScore: 26, opponentScore: 59 },
       { week: 1, opponent: "Maryland", location: "vs", stadium: "Husky Stadium", teamScore: 38, opponentScore: 13 },
-      { week: 2, opponent: "USC", location: "vs", stadium: "Husky Stadium" },
+      { week: 2, opponent: "USC", location: "vs", stadium: "Husky Stadium", teamScore: 35, opponentScore: 21 },
       { week: 3, opponent: "Washington St.", location: "vs", stadium: "Husky Stadium" },
       { week: 4, opponent: "Notre Dame", location: "vs", stadium: "Husky Stadium" },
       { week: 5, note: "BYE" },
@@ -343,7 +343,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, opponent: "Texas", location: "at", stadium: "Texas Memorial Stadium", teamScore: 31, opponentScore: 38 },
       { week: 1, note: "BYE" },
-      { week: 2, opponent: "TCU", location: "vs", stadium: "Michigan Stadium" },
+      { week: 2, opponent: "TCU", location: "vs", stadium: "Michigan Stadium", teamScore: 14, opponentScore: 33 },
       { week: 3, opponent: "E. Michigan", location: "vs", stadium: "Michigan Stadium" },
       { week: 4, opponent: "Oregon", location: "vs", stadium: "Michigan Stadium" },
       { week: 5, opponent: "Indiana", location: "at", stadium: "Memorial Stadium" },
@@ -453,7 +453,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "Utah", location: "at", neutral: true, stadium: "Allegiant Stadium", teamScore: 47, opponentScore: 21 },
-      { week: 2, opponent: "Troy", location: "vs", stadium: "Hard Rock Stadium" },
+      { week: 2, opponent: "Troy", location: "vs", stadium: "Hard Rock Stadium", teamScore: 48, opponentScore: 14 },
       { week: 3, opponent: "New Mexico St.", location: "vs", stadium: "Hard Rock Stadium" },
       { week: 4, note: "BYE" },
       { week: 5, opponent: "Florida State", location: "at", stadium: "Doak Campbell Stadium" },
