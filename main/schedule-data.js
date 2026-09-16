@@ -409,7 +409,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "Tennessee", location: "vs", neutral: true, stadium: "Mercedes-Benz Stadium", teamScore: 10, opponentScore: 41 },
-      { week: 2, opponent: "Virginia", location: "at", stadium: "Scott Stadium" },
+      { week: 2, opponent: "Virginia", location: "at", stadium: "Scott Stadium", teamScore: 31, opponentScore: 0 },
       { week: 3, opponent: "North Carolina", location: "at", stadium: "Kenan Stadium" },
       { week: 4, opponent: "Duke", location: "at", stadium: "Wallace Wade Stadium" },
       { week: 5, opponent: "California", location: "at", stadium: "California Memorial Stadium" },
