@@ -61,4 +61,35 @@
        team    must resolve to a roster or schedule team name
        record  the W-L string shown in the poll (e.g. "1-0")
    ============================================================ */
-const TOP25 = [];
+const TOP25 = [
+  {
+    week: 5,
+    teams: [
+      { rank: 1, team: "Notre Dame", record: "4-0" },
+      { rank: 2, team: "LSU", record: "4-0" },
+      { rank: 3, team: "Ohio State", record: "4-0" },
+      { rank: 4, team: "Georgia", record: "3-0" },
+      { rank: 5, team: "Indiana", record: "3-0" },
+      { rank: 6, team: "Penn State", record: "3-0" },
+      { rank: 7, team: "Miami", record: "2-1" },
+      { rank: 8, team: "Oklahoma", record: "2-1" },
+      { rank: 9, team: "South Carolina", record: "4-0" },
+      { rank: 10, team: "Nebraska", record: "3-0" },
+      { rank: 11, team: "Texas A&M", record: "2-1" },
+      { rank: 12, team: "BYU", record: "3-1" },
+      { rank: 13, team: "Tennessee", record: "4-0" },
+      { rank: 14, team: "USC", record: "4-0" },
+      { rank: 15, team: "Virginia", record: "3-2" },
+      { rank: 16, team: "Ole Miss", record: "3-1" },
+      { rank: 17, team: "Oregon", record: "2-1" },
+      { rank: 18, team: "Boise State", record: "3-1" },
+      { rank: 19, team: "Wisconsin", record: "2-2" },
+      { rank: 20, team: "Colorado", record: "2-1" },
+      { rank: 21, team: "Iowa", record: "3-1" },
+      { rank: 22, team: "Florida State", record: "1-2" },
+      { rank: 23, team: "Memphis", record: "3-1" },
+      { rank: 24, team: "Washington", record: "3-1" },
+      { rank: 25, team: "New Glarus", record: "3-1" },
+    ],
+  },
+];
