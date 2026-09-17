@@ -88,7 +88,7 @@ const TEAM_SCHEDULES = [
       { week: 2, note: "BYE" },
       { week: 3, opponent: "Baylor", location: "vs", stadium: "California Memorial Stadium", teamScore: 24, opponentScore: 35 },
       { week: 4, note: "BYE" },
-      { week: 5, opponent: "Wake Forest", location: "vs", stadium: "California Memorial Stadium" },
+      { week: 5, opponent: "Wake Forest", location: "vs", stadium: "California Memorial Stadium", teamScore: 16, opponentScore: 13 },
       { week: 6, opponent: "SMU", location: "vs", stadium: "California Memorial Stadium" },
       { week: 7, opponent: "Pittsburgh", location: "vs", stadium: "California Memorial Stadium" },
       { week: 8, opponent: "Florida State", location: "vs", stadium: "California Memorial Stadium" },
