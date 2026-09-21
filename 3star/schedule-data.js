@@ -259,7 +259,7 @@ const TEAM_SCHEDULES = [
       { week: 4, opponent: "Ohio State", location: "vs", stadium: "Camp Randall Stadium", teamScore: 48, opponentScore: 14 },
       { week: 5, opponent: "Boise State", location: "vs", stadium: "Camp Randall Stadium", teamScore: 42, opponentScore: 0 },
       { week: 6, opponent: "Purdue", location: "at", stadium: "Ross-Ade Stadium", teamScore: 56, opponentScore: 0 },
-      { week: 7, opponent: "Maryland", location: "vs", stadium: "Camp Randall Stadium" },
+      { week: 7, opponent: "Maryland", location: "vs", stadium: "Camp Randall Stadium", teamScore: 49, opponentScore: 17 },
       { week: 8, opponent: "Iowa", location: "vs", stadium: "Camp Randall Stadium" },
       { week: 9, note: "BYE" },
       { week: 10, opponent: "Rutgers", location: "at", stadium: "SHI Stadium" },
