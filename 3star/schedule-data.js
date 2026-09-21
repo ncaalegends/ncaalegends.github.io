@@ -234,7 +234,7 @@ const TEAM_SCHEDULES = [
       { week: 3, opponent: "App St.", location: "at", stadium: "Kidd Brewer Stadium", teamScore: 42, opponentScore: 31 },
       { week: 4, opponent: "Northwestern", location: "vs", stadium: "SHI Stadium", teamScore: 42, opponentScore: 28 },
       { week: 5, opponent: "FCS Southeast", location: "vs", stadium: "SHI Stadium", teamScore: 31, opponentScore: 7 },
-      { week: 6, opponent: "Ohio State", location: "at", stadium: "Ohio Stadium" },
+      { week: 6, opponent: "Ohio State", location: "at", stadium: "Ohio Stadium", teamScore: 31, opponentScore: 28 },
       { week: 7, opponent: "Purdue", location: "vs", stadium: "SHI Stadium" },
       { week: 8, note: "BYE" },
       { week: 9, opponent: "Maryland", location: "at", stadium: "SECU Stadium" },
