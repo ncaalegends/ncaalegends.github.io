@@ -546,7 +546,7 @@ const TEAM_SCHEDULES = [
       { week: 2, opponent: "West Virginia", location: "vs", stadium: "Tiger Stadium", teamScore: 28, opponentScore: 42 },
       { week: 3, opponent: "Kentucky", location: "at", stadium: "Kroger Field", teamScore: 29, opponentScore: 24 },
       { week: 4, opponent: "Louisiana Tech", location: "vs", stadium: "Tiger Stadium", teamScore: 42, opponentScore: 0 },
-      { week: 5, opponent: "Nevada", location: "vs", stadium: "Tiger Stadium" },
+      { week: 5, opponent: "Nevada", location: "vs", stadium: "Tiger Stadium", teamScore: 51, opponentScore: 7 },
       { week: 6, opponent: "Tennessee", location: "vs", stadium: "Tiger Stadium" },
       { week: 7, opponent: "Missouri", location: "at", stadium: "Faurot Field at Memorial Stadium" },
       { week: 8, opponent: "Auburn", location: "at", stadium: "Jordan-Hare Stadium" },
