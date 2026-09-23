@@ -401,7 +401,7 @@ const TEAM_SCHEDULES = [
       { week: 4, note: "BYE" },
       { week: 5, opponent: "Florida", location: "at", stadium: "Ben Hill Griffin Stadium", teamScore: 30, opponentScore: 10 },
       { week: 6, opponent: "Kentucky", location: "vs", stadium: "Bridgeforth Stadium", teamScore: 34, opponentScore: 31 },
-      { week: 7, opponent: "Georgia", location: "vs", stadium: "Bridgeforth Stadium" },
+      { week: 7, opponent: "Georgia", location: "vs", stadium: "Bridgeforth Stadium", teamScore: 38, opponentScore: 23 },
       { week: 8, opponent: "Tennessee", location: "vs", stadium: "Bridgeforth Stadium" },
       { week: 9, opponent: "Arkansas", location: "vs", stadium: "Bridgeforth Stadium" },
       { week: 10, opponent: "Northwestern", location: "at", stadium: "Ryan Field" },
