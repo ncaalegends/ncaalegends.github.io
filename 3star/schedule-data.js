@@ -433,7 +433,7 @@ const TEAM_SCHEDULES = [
       { week: 4, opponent: "Georgia", location: "vs", stadium: "Acrisure Bounce House", teamScore: 28, opponentScore: 24 },
       { week: 5, opponent: "Tennessee", location: "vs", stadium: "Acrisure Bounce House", teamScore: 21, opponentScore: 24 },
       { week: 6, note: "BYE" },
-      { week: 7, opponent: "Texas A&M", location: "vs", stadium: "Acrisure Bounce House" },
+      { week: 7, opponent: "Texas A&M", location: "vs", stadium: "Acrisure Bounce House", teamScore: 7, opponentScore: 24 },
       { week: 8, opponent: "Charlotte", location: "at", stadium: "Jerry Richardson Stadium" },
       { week: 9, opponent: "Ole Miss", location: "at", stadium: "Vaught-Hemingway Stadium" },
       { week: 10, opponent: "Clemson", location: "vs", stadium: "Acrisure Bounce House" },
