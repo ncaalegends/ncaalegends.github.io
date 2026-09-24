@@ -210,7 +210,7 @@ const TEAM_SCHEDULES = [
       { week: 4, opponent: "San Diego St.", location: "at", stadium: "Snapdragon Stadium", teamScore: 27, opponentScore: 14 },
       { week: 5, note: "BYE" },
       { week: 6, opponent: "Washington", location: "vs", stadium: "Reser Stadium", teamScore: 45, opponentScore: 14 },
-      { week: 7, opponent: "Illinois", location: "vs", stadium: "Reser Stadium" },
+      { week: 7, opponent: "Illinois", location: "vs", stadium: "Reser Stadium", teamScore: 31, opponentScore: 14 },
       { week: 8, opponent: "Nebraska", location: "at", stadium: "Memorial Stadium" },
       { week: 9, opponent: "USC", location: "vs", stadium: "Reser Stadium" },
       { week: 10, opponent: "Michigan", location: "at", stadium: "Michigan Stadium" },
