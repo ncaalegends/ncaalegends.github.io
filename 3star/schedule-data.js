@@ -112,7 +112,7 @@ const TEAM_SCHEDULES = [
       { week: 4, opponent: "UConn", location: "vs", stadium: "Kenan Stadium", teamScore: 28, opponentScore: 27 },
       { week: 5, note: "BYE" },
       { week: 6, opponent: "Virginia", location: "vs", stadium: "Kenan Stadium", teamScore: 24, opponentScore: 45 },
-      { week: 7, opponent: "Virginia Tech", location: "at", stadium: "Lane Stadium" },
+      { week: 7, opponent: "Virginia Tech", location: "at", stadium: "Lane Stadium", teamScore: 17, opponentScore: 27 },
       { week: 8, opponent: "Stanford", location: "at", stadium: "Stanford Stadium" },
       { week: 9, opponent: "Louisville", location: "at", stadium: "L&N Stadium" },
       { week: 10, opponent: "California", location: "vs", stadium: "Kenan Stadium" },
