@@ -508,7 +508,7 @@ const TEAM_SCHEDULES = [
       { week: 2, opponent: "SMU", location: "at", stadium: "Gerald J. Ford Stadium", teamScore: 42, opponentScore: 21 },
       { week: 3, note: "BYE" },
       { week: 4, opponent: "Nebraska", location: "vs", stadium: "Gaylord-Oklahoma Memorial", teamScore: 30, opponentScore: 7 },
-      { week: 5, opponent: "Vanderbilt", location: "at", stadium: "FirstBank Stadium" },
+      { week: 5, opponent: "Vanderbilt", location: "at", stadium: "FirstBank Stadium", teamScore: 38, opponentScore: 10 },
       { week: 6, opponent: "Texas", location: "at", neutral: true, stadium: "Cotton Bowl" },
       { week: 7, opponent: "Georgia", location: "at", stadium: "Sanford Stadium" },
       { week: 8, opponent: "Florida", location: "vs", stadium: "Gaylord-Oklahoma Memorial" },
