@@ -227,7 +227,7 @@ const TEAM_SCHEDULES = [
       { week: 5, opponent: "Virginia", location: "at", teamScore: 42, opponentScore: 27 },
       { week: 6, opponent: "Western Michigan", location: "vs", teamScore: 34, opponentScore: 10 },
       { week: 7, opponent: "Ohio", location: "vs", teamScore: 33, opponentScore: 21 },
-      { week: 8, opponent: "UMass", location: "vs" },
+      { week: 8, opponent: "UMass", location: "vs", teamScore: 12, opponentScore: 13 },
       { week: 9, opponent: "Bowling Green", location: "vs" },
       { week: 10, opponent: "Sacramento State", location: "at" },
       { week: 11, opponent: "Minneapolis", location: "at" },
