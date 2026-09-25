@@ -295,7 +295,7 @@ const TEAM_SCHEDULES = [
       { week: 5, opponent: "BYU", location: "at", teamScore: 18, opponentScore: 31 },
       { week: 6, opponent: "Kennesaw State", location: "at", teamScore: 7, opponentScore: 24 },
       { week: 7, opponent: "Sam Houston", location: "vs", teamScore: 36, opponentScore: 17 },
-      { week: 8, opponent: "Arizona State", location: "at" },
+      { week: 8, opponent: "Arizona State", location: "at", teamScore: 14, opponentScore: 38 },
       { week: 9, opponent: "Delaware", location: "vs" },
       { week: 10, opponent: "New Mexico State", location: "at" },
       { week: 11, opponent: "Jacksonville State", location: "vs" },
