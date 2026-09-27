@@ -225,7 +225,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, opponent: "Clemson", location: "at", stadium: "Clemson Memorial Stadium", teamScore: 26, opponentScore: 59 },
       { week: 1, opponent: "Maryland", location: "vs", stadium: "Husky Stadium", teamScore: 38, opponentScore: 13 },
-      { week: 2, opponent: "USC", location: "vs", stadium: "Husky Stadium", teamScore: 35, opponentScore: 21 },
+      { week: 2, opponent: "USC", location: "vs", stadium: "Husky Stadium", teamScore: 46, opponentScore: 44 },
       { week: 3, opponent: "Washington St.", location: "vs", stadium: "Husky Stadium", teamScore: 41, opponentScore: 24 },
       { week: 4, opponent: "Notre Dame", location: "vs", stadium: "Husky Stadium", teamScore: 27, opponentScore: 63 },
       { week: 5, note: "BYE" },
@@ -310,9 +310,25 @@ const TEAM_SCHEDULES = [
   {
     team: "USC",
     conference: "Big Ten",
-    /* Coach is inactive for 2027, so this school is a CPU opponent
-       and carries no coached schedule. */
+    /* Bl00dVayN3 takes USC over from week 7 (the Notre Dame H2H).
+       Weeks 0-6 were CPU and stay CPU results. */
     weeks: [
+      { week: 0, opponent: "UNLV", location: "vs", stadium: "Los Angeles Memorial Coliseum", teamScore: 24, opponentScore: 22 },
+      { week: 1, opponent: "Nevada", location: "vs", stadium: "Los Angeles Memorial Coliseum", teamScore: 30, opponentScore: 28 },
+      { week: 2, opponent: "Washington", location: "at", stadium: "Husky Stadium", teamScore: 44, opponentScore: 46 },
+      { week: 3, opponent: "Illinois", location: "vs", stadium: "Los Angeles Memorial Coliseum", teamScore: 24, opponentScore: 17 },
+      { week: 4, opponent: "Wisconsin", location: "vs", stadium: "Los Angeles Memorial Coliseum", teamScore: 30, opponentScore: 31 },
+      { week: 5, opponent: "Maryland", location: "at", stadium: "SECU Stadium", teamScore: 20, opponentScore: 34 },
+      { week: 6, opponent: "Minnesota", location: "vs", stadium: "Los Angeles Memorial Coliseum" },
+      { week: 7, opponent: "Notre Dame", location: "at", stadium: "Notre Dame Stadium" },
+      { week: 8, note: "BYE" },
+      { week: 9, opponent: "Ohio State", location: "at", stadium: "Ohio Stadium" },
+      { week: 10, opponent: "Iowa", location: "at", stadium: "Kinnick Stadium" },
+      { week: 11, note: "BYE" },
+      { week: 12, opponent: "Indiana", location: "vs", stadium: "Los Angeles Memorial Coliseum" },
+      { week: 13, opponent: "UCLA", location: "vs", stadium: "Los Angeles Memorial Coliseum" },
+      { week: 14, note: "Army-Navy Week" },
+      { week: 15, note: "BYE" },
     ],
   },
   {

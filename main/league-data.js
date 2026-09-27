@@ -171,7 +171,7 @@ const LEAGUE_INFO = {
    computeH2H in week-core.js.
    ------------------------------------------------------------ */
 const COACHES = [
-  { name: "Bl00dVayN3",      team: "South Carolina",               conference: "SEC", color: "#A6192E", twitch: "https://www.twitch.tv/bl00dvayn3", espnId: "2579" },
+  { name: "Bl00dVayN3",      team: "South Carolina",               conference: "SEC", color: "#A6192E", twitch: "https://www.twitch.tv/bl00dvayn3", espnId: "2579", departedAfterWeek: 6 },  // Left South Carolina after week 6 to take over USC (entry below, joinedAtWeek: 7). Weeks 0-6 stand as his; South Carolina is a CPU opponent from week 7 on.
   { name: "Temptiger",       team: "Clemson",                      conference: "ACC", color: "#F56600", twitch: "https://www.twitch.tv/temptiger", espnId: "228" },
   { name: "RekenCrew",       team: "Ohio State",                   conference: "B1G", color: "#CE2029", twitch: "https://www.twitch.tv/rekencrew", espnId: "194" },
   { name: "Turt17",          team: "Colorado",                     conference: "XII", color: "#CFB87C", twitch: "https://www.twitch.tv/turt17", espnId: "38" },
@@ -194,6 +194,7 @@ const COACHES = [
   { name: "EYEDONTPULL19",   team: "SMU",                          conference: "ACC", color: "#5A6FD1", twitch: "", espnId: "2567" },
   { name: "wacky9speedy",    team: "Miami",                        conference: "ACC", color: "#F47321", twitch: "https://www.twitch.tv/wacky9speedy", espnId: "2390" },  // UNVERIFIED — confirm via logo-check.html
   { name: "BluBus",          team: "USC",                          conference: "B1G", color: "#FFC72C", twitch: "https://www.twitch.tv/blubusbandit", espnId: "30", active: false },  // UNVERIFIED — confirm via logo-check.html // Went inactive in the 2027 preseason, before any games were played, so the whole season is CPU for USC. Delete the flag to reinstate.
+  { name: "Bl00dVayN3",      team: "USC",                          conference: "B1G", color: "#FFC72C", twitch: "https://www.twitch.tv/bl00dvayn3", espnId: "30", joinedAtWeek: 7 },  // Took USC over from week 7 (at Notre Dame, H2H vs Brian52682) after leaving South Carolina. Weeks 0-6 were CPU for USC and stay CPU. Keep this entry AFTER his South Carolina one: current identity reads the last matching roster entry.
   { name: "Brian52682",    team: "Notre Dame",                   conference: "IND", color: "#C99700", twitch: "https://www.twitch.tv/brian52682", espnId: "87" },   // UNVERIFIED — confirm via logo-check.html
   { name: "Chomp",           team: "LSU",                          conference: "SEC", color: "#7B4DBF", twitch: "https://www.twitch.tv/big_eli42", espnId: "99" },  // Joined in the 2027 preseason, taking LSU — in from week 0, so no joinedAtWeek. Accent is LSU purple lifted for readability against the navy.
   { name: "II_PROGGY_II",    team: "Ole Miss",                     conference: "SEC", color: "#CE1126", twitch: "https://www.twitch.tv/ii_proggy_ii", espnId: "145", active: false },  // UNVERIFIED — confirm via logo-check.html // Went inactive during week 10 — weeks 0-9 stand as real games; Ole Miss is a CPU opponent from week 10 on.
