@@ -48,10 +48,10 @@ const SEASON = {
   // main/league-data.js — it governs the seasons/<year>/ archive.
   year: 2027,
 
-  currentWeek: 9,
-  statusLine: "WEEK 9",
-  nextAdvanceAt: "2026-09-28",
-  nextAdvance: "Monday, September 28th",
+  currentWeek: 10,
+  statusLine: "WEEK 10",
+  nextAdvanceAt: "2026-10-01",
+  nextAdvance: "Thursday, October 1st",
 };
 
 /* ------------------------------------------------------------
