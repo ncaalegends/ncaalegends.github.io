@@ -161,7 +161,7 @@ const TEAM_SCHEDULES = [
       { week: 7, opponent: "Georgia State", location: "vs", teamScore: 34, opponentScore: 24 },
       { week: 8, opponent: "Old Dominion", location: "vs", teamScore: 24, opponentScore: 0 },
       { week: 9, opponent: "Coastal Carolina", location: "vs", teamScore: 24, opponentScore: 30 },
-      { week: 10, opponent: "Troy", location: "at" },
+      { week: 10, opponent: "Troy", location: "at", teamScore: 41, opponentScore: 14 },
       { week: 11, opponent: "Marshall", location: "at" },
       { week: 12, opponent: "UL Monroe", location: "vs" },
       { week: 13, opponent: "Appalachian State", location: "at" },
