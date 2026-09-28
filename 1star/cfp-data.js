@@ -124,6 +124,60 @@
    the main dynasty's advance to week 10+ is gated on this file
    having that week.
    ============================================================ */
-const CFP_POLL = [];
+const CFP_POLL = [
+  {
+    week: 10,
+    teams: [
+      { rank: 1, team: "Ohio State", record: "8-0" },
+      { rank: 2, team: "LSU", record: "8-1" },
+      { rank: 3, team: "BYU", record: "8-1" },
+      { rank: 4, team: "Tennessee", record: "7-1" },
+      { rank: 5, team: "Georgia", record: "6-2" },
+      { rank: 6, team: "Miami", record: "6-2" },
+      { rank: 7, team: "Texas A&M", record: "6-2" },
+      { rank: 8, team: "USC", record: "7-1" },
+      { rank: 9, team: "Washington", record: "7-1" },
+      { rank: 10, team: "Oregon", record: "6-2" },
+      { rank: 11, team: "New Glarus", record: "7-1" },
+      { rank: 12, team: "South Carolina", record: "6-2" },
+      { rank: 13, team: "Colorado", record: "6-2" },
+      { rank: 14, team: "Indiana", record: "6-2" },
+      { rank: 15, team: "Notre Dame", record: "6-2" },
+      { rank: 16, team: "Texas", record: "6-3" },
+      { rank: 17, team: "Penn State", record: "6-2" },
+      { rank: 18, team: "Iowa", record: "6-2" },
+      { rank: 19, team: "Michigan", record: "8-1" },
+      { rank: 20, team: "Louisville", record: "5-3" },
+      { rank: 21, team: "Alabama", record: "5-3" },
+      { rank: 22, team: "Boise State", record: "6-2" },
+      { rank: 23, team: "Memphis", record: "6-2" },
+      { rank: 24, team: "Houston", record: "7-2" },
+      { rank: 25, team: "Arizona", record: "6-2" },
+    ],
+  },
+];
 
-const CFP_BRACKET = [];
+const CFP_BRACKET = [
+  {
+    week: 10,
+    projected: true,
+    seeds: [
+      { seed:  1, team: "Ohio State", record: "8-0", auto: true },
+      { seed:  2, team: "LSU", record: "8-1" },
+      { seed:  3, team: "BYU", record: "8-1", auto: true },
+      { seed:  4, team: "Tennessee", record: "7-1", auto: true },
+      { seed:  5, team: "Georgia", record: "6-2" },
+      { seed:  6, team: "Miami", record: "6-2" },
+      { seed:  7, team: "Texas A&M", record: "6-2" },
+      { seed:  8, team: "USC", record: "7-1" },
+      { seed:  9, team: "Washington", record: "7-1" },
+      { seed: 10, team: "Oregon", record: "6-2" },
+      { seed: 11, team: "New Glarus", record: "7-1", auto: true },
+      { seed: 12, team: "Wake Forest", record: "6-2", auto: true },
+    ],
+    bowls: {
+      qf: ["Fiesta Bowl", "Rose Bowl", "Peach Bowl", "Sugar Bowl"],
+      site: "New Orleans, LA",
+    },
+  },
+];
