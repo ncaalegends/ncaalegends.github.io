@@ -140,7 +140,7 @@ const TEAM_SCHEDULES = [
       { week: 6, opponent: "Syracuse", location: "at", stadium: "JMA Wireless Dome", teamScore: 42, opponentScore: 10 },
       { week: 7, opponent: "California", location: "at", stadium: "California Memorial Stadium", teamScore: 29, opponentScore: 0 },
       { week: 8, opponent: "Duke", location: "at", stadium: "Wallace Wade Stadium", teamScore: 55, opponentScore: 21 },
-      { week: 9, opponent: "Penn State", location: "vs", stadium: "Acrisure Stadium" },
+      { week: 9, opponent: "Penn State", location: "vs", stadium: "Acrisure Stadium", teamScore: 46, opponentScore: 3 },
       { week: 10, opponent: "Virginia Tech", location: "vs", stadium: "Acrisure Stadium" },
       { week: 11, opponent: "SMU", location: "vs", stadium: "Acrisure Stadium" },
       { week: 12, opponent: "Miami", location: "vs", stadium: "Acrisure Stadium" },
@@ -375,7 +375,7 @@ const TEAM_SCHEDULES = [
       { week: 6, opponent: "LSU", location: "at", stadium: "Tiger Stadium", teamScore: 24, opponentScore: 14 },
       { week: 7, note: "BYE" },
       { week: 8, opponent: "UCF", location: "vs", stadium: "Jerry Richardson Stadium", teamScore: 25, opponentScore: 14, sim: true },
-      { week: 9, opponent: "Tennessee", location: "vs", stadium: "Jerry Richardson Stadium" },
+      { week: 9, opponent: "Tennessee", location: "vs", stadium: "Jerry Richardson Stadium", teamScore: 10, opponentScore: 13 },
       { week: 10, opponent: "Georgia", location: "vs", stadium: "Jerry Richardson Stadium" },
       /* Charlotte hosts. The screenshot of this row was taken before
          the sides were settled and showed it at Boone Pickens;
