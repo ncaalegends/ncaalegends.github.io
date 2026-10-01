@@ -124,6 +124,60 @@
    the main dynasty's advance to week 10+ is gated on this file
    having that week.
    ============================================================ */
-const CFP_POLL = [];
+const CFP_POLL = [
+  {
+    week: 10,
+    teams: [
+      { rank: 1, team: "Pittsburgh", record: "8-0" },
+      { rank: 2, team: "Oklahoma", record: "8-0" },
+      { rank: 3, team: "Wisconsin", record: "8-1" },
+      { rank: 4, team: "North Dakota State", record: "8-1" },
+      { rank: 5, team: "Colorado", record: "9-0" },
+      { rank: 6, team: "Baylor", record: "8-0" },
+      { rank: 7, team: "TCU", record: "8-0" },
+      { rank: 8, team: "Miami", record: "7-1" },
+      { rank: 9, team: "Notre Dame", record: "7-2" },
+      { rank: 10, team: "James Madison", record: "8-1" },
+      { rank: 11, team: "Rutgers", record: "8-0" },
+      { rank: 12, team: "Mississippi State", record: "7-1" },
+      { rank: 13, team: "South Carolina", record: "8-0" },
+      { rank: 14, team: "Texas A&M", record: "5-3" },
+      { rank: 15, team: "Tennessee", record: "6-3" },
+      { rank: 16, team: "Oklahoma State", record: "7-1" },
+      { rank: 17, team: "LSU", record: "6-2" },
+      { rank: 18, team: "Iowa State", record: "6-2" },
+      { rank: 19, team: "Louisville", record: "6-2" },
+      { rank: 20, team: "Charlotte", record: "6-3" },
+      { rank: 21, team: "Ohio State", record: "6-3" },
+      { rank: 22, team: "NC State", record: "6-2" },
+      { rank: 23, team: "Oregon State", record: "6-2" },
+      { rank: 24, team: "Wake Forest", record: "6-3" },
+      { rank: 25, team: "Oregon", record: "5-3" },
+    ],
+  },
+];
 
-const CFP_BRACKET = [];
+const CFP_BRACKET = [
+  {
+    week: 10,
+    projected: true,
+    seeds: [
+      { seed:  1, team: "Pittsburgh", record: "8-0", auto: true },
+      { seed:  2, team: "Oklahoma", record: "8-0" },
+      { seed:  3, team: "Wisconsin", record: "8-1", auto: true },
+      { seed:  4, team: "North Dakota State", record: "8-1" },
+      { seed:  5, team: "Colorado", record: "9-0", auto: true },
+      { seed:  6, team: "Baylor", record: "8-0" },
+      { seed:  7, team: "TCU", record: "8-0" },
+      { seed:  8, team: "Miami", record: "7-1" },
+      { seed:  9, team: "Notre Dame", record: "7-2", auto: true },
+      { seed: 10, team: "James Madison", record: "8-1", auto: true },
+      { seed: 11, team: "Rutgers", record: "8-0" },
+      { seed: 12, team: "Mississippi State", record: "7-1", auto: true },
+    ],
+    bowls: {
+      qf: ["Fiesta Bowl", "Peach Bowl", "Rose Bowl", "Sugar Bowl"],
+      site: "New Orleans, LA",
+    },
+  },
+];
