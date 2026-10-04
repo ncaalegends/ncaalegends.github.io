@@ -286,7 +286,7 @@ const TEAM_SCHEDULES = [
       { week: 7, note: "BYE" },
       { week: 8, opponent: "North Texas", location: "vs", stadium: "McLane Stadium", teamScore: 27, opponentScore: 24 },
       { week: 9, opponent: "Kansas", location: "vs", stadium: "McLane Stadium" },
-      { week: 10, opponent: "BYU", location: "at", stadium: "LaVell Edwards Stadium" },
+      { week: 10, opponent: "BYU", location: "at", stadium: "LaVell Edwards Stadium", teamScore: 35, opponentScore: 17 },
       { week: 11, opponent: "TCU", location: "at", stadium: "Amon G. Carter Stadium" },
       { week: 12, opponent: "Houston", location: "vs", stadium: "McLane Stadium" },
       { week: 13, opponent: "Kansas State", location: "at", stadium: "Bill Snyder Family Stadium" },
@@ -330,7 +330,7 @@ const TEAM_SCHEDULES = [
       { week: 7, opponent: "Utah", location: "at", stadium: "Rice-Eccles Stadium", teamScore: 28, opponentScore: 7 },
       { week: 8, opponent: "Kansas State", location: "vs", stadium: "Jack Trice Stadium", teamScore: 20, opponentScore: 0 },
       { week: 9, opponent: "Indiana", location: "at", stadium: "Memorial Stadium", teamScore: 16, opponentScore: 24 },
-      { week: 10, opponent: "Texas Tech", location: "vs", stadium: "Jack Trice Stadium" },
+      { week: 10, opponent: "Texas Tech", location: "vs", stadium: "Jack Trice Stadium", teamScore: 50, opponentScore: 48 },
       { week: 11, opponent: "Kansas", location: "at", stadium: "David Booth Kansas Memorial Stadium" },
       { week: 12, opponent: "Colorado", location: "vs", stadium: "Jack Trice Stadium" },
       { week: 13, opponent: "BYU", location: "vs", stadium: "Jack Trice Stadium" },
@@ -376,7 +376,7 @@ const TEAM_SCHEDULES = [
       { week: 7, note: "BYE" },
       { week: 8, opponent: "UCF", location: "vs", stadium: "Jerry Richardson Stadium", teamScore: 25, opponentScore: 14, sim: true },
       { week: 9, opponent: "Tennessee", location: "vs", stadium: "Jerry Richardson Stadium", teamScore: 10, opponentScore: 13 },
-      { week: 10, opponent: "Georgia", location: "vs", stadium: "Jerry Richardson Stadium" },
+      { week: 10, opponent: "Georgia", location: "vs", stadium: "Jerry Richardson Stadium", teamScore: 17, opponentScore: 45 },
       /* Charlotte hosts. The screenshot of this row was taken before
          the sides were settled and showed it at Boone Pickens;
          RekenCrew's block already has it as "at Charlotte", so the
