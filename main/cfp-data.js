@@ -124,6 +124,60 @@
    the main dynasty's advance to week 10+ is gated on this file
    having that week.
    ============================================================ */
-const CFP_POLL = [];
+const CFP_POLL = [
+  {
+    week: 10,
+    teams: [
+      { rank: 1, team: "Clemson", record: "10-0" },
+      { rank: 2, team: "Ohio State", record: "8-0" },
+      { rank: 3, team: "California", record: "8-0" },
+      { rank: 4, team: "Texas", record: "8-0" },
+      { rank: 5, team: "Florida", record: "9-0" },
+      { rank: 6, team: "West Virginia", record: "8-0" },
+      { rank: 7, team: "TCU", record: "8-0" },
+      { rank: 8, team: "Oregon", record: "7-1" },
+      { rank: 9, team: "Georgia", record: "6-2" },
+      { rank: 10, team: "Texas A&M", record: "7-1" },
+      { rank: 11, team: "Miami", record: "7-1" },
+      { rank: 12, team: "Notre Dame", record: "6-3" },
+      { rank: 13, team: "Tennessee", record: "6-3" },
+      { rank: 14, team: "Kansas State", record: "7-1" },
+      { rank: 15, team: "LSU", record: "7-2" },
+      { rank: 16, team: "Michigan", record: "6-3" },
+      { rank: 17, team: "Colorado", record: "6-2" },
+      { rank: 18, team: "UCLA", record: "6-3" },
+      { rank: 19, team: "USF", record: "6-2" },
+      { rank: 20, team: "Florida State", record: "5-3" },
+      { rank: 21, team: "Indiana", record: "6-2" },
+      { rank: 22, team: "Florida Atlantic", record: "6-2" },
+      { rank: 23, team: "Iowa", record: "5-3" },
+      { rank: 24, team: "Washington", record: "5-3" },
+      { rank: 25, team: "Penn State", record: "5-3" },
+    ],
+  },
+];
 
-const CFP_BRACKET = [];
+const CFP_BRACKET = [
+  {
+    week: 10,
+    projected: true,
+    seeds: [
+      { seed:  1, team: "Clemson", record: "10-0", auto: true },
+      { seed:  2, team: "Ohio State", record: "8-0", auto: true },
+      { seed:  3, team: "California", record: "8-0" },
+      { seed:  4, team: "Texas", record: "8-0" },
+      { seed:  5, team: "Florida", record: "9-0", auto: true },
+      { seed:  6, team: "West Virginia", record: "8-0" },
+      { seed:  7, team: "TCU", record: "8-0", auto: true },
+      { seed:  8, team: "Oregon", record: "7-1" },
+      { seed:  9, team: "Georgia", record: "6-2" },
+      { seed: 10, team: "Texas A&M", record: "7-1" },
+      { seed: 11, team: "Notre Dame", record: "6-3", auto: true },
+      { seed: 12, team: "USF", record: "6-2", auto: true },
+    ],
+    bowls: {
+      qf: ["Sugar Bowl", "Peach Bowl", "Fiesta Bowl", "Rose Bowl"],
+      site: "New Orleans, LA",
+    },
+  },
+];
