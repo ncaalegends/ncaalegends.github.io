@@ -231,7 +231,7 @@ const TEAM_SCHEDULES = [
       { week: 9, opponent: "Bowling Green", location: "vs", teamScore: 27, opponentScore: 30 },
       { week: 10, opponent: "Sacramento State", location: "at", teamScore: 27, opponentScore: 9 },
       { week: 11, opponent: "Minneapolis", location: "at", teamScore: 30, opponentScore: 0 },
-      { week: 12, opponent: "Eastern Michigan", location: "at" },
+      { week: 12, opponent: "Eastern Michigan", location: "at", teamScore: 38, opponentScore: 10 },
       { week: 13, opponent: "New Glarus", location: "at" },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, note: "BYE" },
