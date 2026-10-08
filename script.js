@@ -2157,7 +2157,7 @@ function achievementsHtml(a) {
     chips.push(
       `<span class="cm-ach cm-ach-nat">${"&#9733;".repeat(Math.min(a.natTitles, 5))} ${
         a.natTitles
-      } NATIONAL${achYears(a.titleYears)}</span>`
+      } NATTY${achYears(a.titleYears)}</span>`
     );
   if (a.confTitles)
     chips.push(
