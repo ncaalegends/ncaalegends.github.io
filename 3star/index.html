@@ -79,6 +79,7 @@
       <button class="tab-btn" data-tab="rankings" role="tab" aria-selected="false" aria-controls="rankings">Rankings</button>
       <button class="tab-btn" data-tab="top25" role="tab" aria-selected="false" aria-controls="top25">Top 25</button>
       <button class="tab-btn" data-tab="roster" role="tab" aria-selected="false" aria-controls="roster">Roster</button>
+        <button class="tab-btn" data-tab="history" role="tab" aria-selected="false" aria-controls="history">History</button>
       <!-- A link, not a tab: pick'em is its own page rather than a
            panel on this one. Deliberately carries no data-tab, which
            is what setupTabs() binds to — so the tab handler never
@@ -207,6 +208,17 @@
     <div class="roster-grid" id="roster-grid"></div>
   </section>
 
+  <!-- HISTORY — every played game and every poll, all seasons.
+       Built by script.js (showHistory) the first time the tab
+       opens, from history-core.js. -->
+  <section id="history" class="tab-panel" role="tabpanel" tabindex="-1">
+    <div class="section-head">
+      <h2 class="section-title">History</h2>
+      <span class="section-tag" id="history-tag"></span>
+    </div>
+    <div id="history-root"></div>
+  </section>
+
 </main>
 
 <!-- COACH CARD MODAL
@@ -237,6 +249,7 @@
 <script src="../people.js" defer></script>
 <script src="../team-colors.js" defer></script>
 <script src="../week-core.js" defer></script>
+<script src="../history-core.js" defer></script>
 <script src="../script.js" defer></script>
 </body>
 </html>

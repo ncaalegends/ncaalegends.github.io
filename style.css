@@ -3279,3 +3279,272 @@ button:focus-visible, a:focus-visible {
   }
   .vac-dates { grid-template-columns: 1fr; }
 }
+
+/* ============================================================
+   HISTORY TAB
+   ------------------------------------------------------------
+   Built from pieces the site already has: the schedule's toggle and
+   select styling, the Top 25 row, the coach-card stat tiles. The only
+   new shape is the game row — two scoreboard lines, winner (or the
+   searched team) on top.
+   ============================================================ */
+.hist-controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 12px 14px;
+  align-items: end;
+  margin-bottom: 18px;
+  padding: 14px;
+  background: var(--navy-panel);
+  border: 1px solid var(--line);
+}
+.hist-controls[hidden] { display: none; }
+
+.hist-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+.hist-field > span,
+.hist-check span {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  color: var(--steel);
+  text-transform: uppercase;
+}
+.hist-search { grid-column: 1 / -1; }
+
+.hist-field select,
+.hist-field input {
+  appearance: none;
+  width: 100%;
+  min-width: 0;
+  background: var(--navy);
+  border: 1px solid var(--line-gold);
+  color: var(--chalk);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.92rem;
+  letter-spacing: 0.02em;
+  padding: 8px 30px 8px 12px;
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+}
+.hist-field select {
+  background-image: linear-gradient(45deg, transparent 50%, var(--steel) 50%), linear-gradient(135deg, var(--steel) 50%, transparent 50%);
+  background-position: calc(100% - 17px) center, calc(100% - 11px) center;
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+  cursor: pointer;
+  text-overflow: ellipsis;
+}
+.hist-field input { font-family: var(--font-body); font-weight: 500; padding-right: 12px; }
+.hist-field input::placeholder { color: var(--steel); }
+.hist-field select:disabled { opacity: 0.45; cursor: not-allowed; }
+.hist-field select:focus-visible,
+.hist-field input:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.hist-field optgroup { color: var(--steel); font-style: normal; }
+.hist-field option { color: var(--chalk); background: var(--navy); }
+
+.hist-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  cursor: pointer;
+}
+.hist-check input { accent-color: var(--gold); width: 16px; height: 16px; margin: 0; }
+.hist-reset { justify-self: start; padding: 8px 0; }
+
+.hist-summary { margin-bottom: 14px; }
+.hist-summary:empty { display: none; }
+.hist-summary-line {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--steel);
+  margin: 0 0 10px;
+}
+.hist-summary-line strong { color: var(--chalk); font-weight: 700; }
+.hist-hint { color: var(--steel); font-style: italic; }
+.hist-stats { margin-top: 0; }
+.hist-stats-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+/* ---------- game rows ---------- */
+.hist-list { list-style: none; margin: 0; padding: 0; }
+
+.hist-game {
+  display: grid;
+  grid-template-columns: 128px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  padding: 10px 8px;
+  border-bottom: 1px solid var(--line);
+  border-left: 3px solid transparent;
+}
+/* Capped so the score sits beside the names on a wide screen
+   instead of across an empty page from them. */
+.hist-game { grid-template-columns: 128px minmax(0, 600px); justify-content: start; }
+.hist-list.has-result .hist-game { grid-template-columns: 128px minmax(0, 600px) 34px; }
+.hist-game.win { border-left-color: var(--win); }
+.hist-game.loss { border-left-color: var(--crimson); }
+.hist-game.tie { border-left-color: var(--steel-dim); }
+
+.hg-when {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.hg-year {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--steel);
+  font-variant-numeric: tabular-nums;
+}
+.hg-label {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  color: var(--chalk);
+  line-height: 1.2;
+}
+.hist-game.is-post .hg-label { color: var(--gold); }
+.hg-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 2px; }
+.hg-tags:empty { display: none; }
+.hg-tag {
+  font-family: var(--font-display);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--navy-deep);
+  background: var(--gold);
+  padding: 1px 6px;
+  text-transform: uppercase;
+}
+.hg-tag.is-quiet { color: var(--chalk); background: var(--steel-dim); }
+
+.hg-lines { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.hg-line {
+  display: grid;
+  grid-template-columns: 20px 26px minmax(0, 1fr) 34px;
+  align-items: center;
+  gap: 8px;
+  color: var(--steel);
+}
+.hg-line.won { color: var(--chalk); }
+.hg-loc {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--steel);
+  text-align: right;
+}
+.hist-logo { width: 26px; height: 26px; }
+.hist-logo .t25-mono { font-size: 0.55rem; }
+.hg-who {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+.hg-rank {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--gold);
+}
+.hg-team {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+.hg-line.won .hg-team { font-weight: 700; }
+.hg-who .t25-coach { margin-top: 0; }
+.hg-score {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.hg-result {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.1rem;
+  text-align: center;
+}
+.hg-result.win { color: var(--win); }
+.hg-result.loss { color: var(--crimson); }
+.hg-result.tie { color: var(--steel); }
+
+.hist-more {
+  display: block;
+  margin: 18px auto 0;
+  padding: 9px 22px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--gold);
+  border: 1px solid var(--line-gold);
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+}
+.hist-more:hover { background: var(--gold-dim); }
+
+/* ---------- poll timeline rows ---------- */
+.hist-poll-rows { list-style: none; margin: 0; padding: 0; }
+.hpr {
+  display: grid;
+  grid-template-columns: 150px 44px 34px minmax(0, 1fr) 48px;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border-bottom: 1px solid var(--line);
+  border-left: 3px solid transparent;
+}
+.hpr.is-coach { border-left-color: var(--gold); background: rgba(242, 244, 248, 0.04); }
+.hpr-when {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  color: var(--chalk);
+}
+.hpr-when .hg-year { margin-right: 4px; }
+.hpr-rank {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--gold);
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .hist-controls {
+    grid-template-columns: 1fr 1fr;
+    padding: 12px;
+    gap: 10px;
+  }
+  .hist-game,
+  .hist-list.has-result .hist-game {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+  }
+  .hist-list.has-result .hist-game { grid-template-columns: minmax(0, 1fr) 26px; }
+  .hist-list.has-result .hg-when { grid-column: 1 / -1; }
+  .hg-when { flex-direction: row; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .hg-tags { margin-top: 0; }
+  .hg-line { grid-template-columns: 18px 24px minmax(0, 1fr) 30px; gap: 6px; }
+  .hist-logo { width: 24px; height: 24px; }
+  .hist-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hist-stats-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .hpr { grid-template-columns: 92px 36px 28px minmax(0, 1fr); }
+  .hpr .t25-logo { width: 28px; height: 28px; }
+  .hpr .t25-record { display: none; }
+  .hpr-when { font-size: 0.72rem; }
+}

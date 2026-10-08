@@ -2431,6 +2431,7 @@ function coachModalHtml(coach, view) {
             `<a class="twitch-link" href="${esc(url)}" target="_blank" rel="noopener noreferrer">Watch on Twitch &rarr;</a>`
           : ""
       }
+      <a class="link-btn cm-history" href="#history?coach=${esc(encodeURIComponent(personKey(coach.name)))}">Full game log &rarr;</a>
     </div>`;
 }
 
@@ -2981,12 +2982,541 @@ function renderFooter() {
   }
 }
 
+/* ============================================================
+   HISTORY TAB — search every game and every poll, all seasons
+   ------------------------------------------------------------
+   The data comes from history-core.js, which flattens CAREER (the
+   archives plus the live season) into one list of played games and
+   one list of poll rows. Everything below is display and filtering.
+
+   Built lazily, the first time the tab is opened: nothing on the
+   other tabs depends on it, and it would otherwise walk every week of
+   every season on every page load.
+
+   FILTER STATE LIVES IN THE HASH — "#history?coach=alex&opp=wade" —
+   so a search can be dropped into Discord and opens to the same
+   results. Written with history.replaceState, which doesn't fire
+   hashchange, so typing in the search box doesn't re-route the page.
+   ------------------------------------------------------------ */
+let HISTORY_DATA = null;
+
+const HIST_DEFAULTS = {
+  view: "games",
+  // games
+  season: "", coach: "", team: "", opp: "", type: "", result: "", ranked: "", q: "", sort: "new",
+  // polls
+  pseason: "", pweek: "", pteam: "", pcoach: "", pcoached: "",
+};
+let HIST_STATE = { ...HIST_DEFAULTS };
+let HIST_READY = false;
+const HIST_PAGE = 100;
+let HIST_LIMIT = HIST_PAGE;
+
+function historyData() {
+  if (HISTORY_DATA) return HISTORY_DATA;
+  HISTORY_DATA =
+    typeof HistoryCore !== "undefined" && typeof WeekCore !== "undefined"
+      ? HistoryCore.buildHistory(CAREER, {
+          coachKey: typeof personKey === "function" ? personKey : undefined,
+        })
+      : { games: [], polls: [], seasons: [], coaches: [], teams: [] };
+  return HISTORY_DATA;
+}
+
+const HIST_TYPES = [
+  ["", "All games"],
+  ["regular", "Regular season"],
+  ["post", "Postseason (all)"],
+  ["ccg", "Conference championships"],
+  ["cfp", "College Football Playoff"],
+  ["bowl", "Bowl games"],
+];
+
+function histPollWeekLabel(w, kind) {
+  const base = w > REGULAR_FINAL_WEEK ? `Bowl Week ${w - REGULAR_FINAL_WEEK}` : `Week ${w}`;
+  return kind === "cfp" ? `${base} · CFP` : base;
+}
+
+function histOptions(list, selected) {
+  return list
+    .map(([v, label]) => `<option value="${esc(v)}"${String(v) === String(selected) ? " selected" : ""}>${esc(label)}</option>`)
+    .join("");
+}
+
+function histTeamOptions(h, selected, anyLabel) {
+  const coached = h.teams.filter((t) => t.coached);
+  const other = h.teams.filter((t) => !t.coached);
+  const opt = (t) => `<option value="${esc(t.key)}"${t.key === selected ? " selected" : ""}>${esc(t.name)}</option>`;
+  return `<option value="">${esc(anyLabel)}</option>
+    ${coached.length ? `<optgroup label="Coached teams">${coached.map(opt).join("")}</optgroup>` : ""}
+    ${other.length ? `<optgroup label="CPU teams">${other.map(opt).join("")}</optgroup>` : ""}`;
+}
+
+function histCoachOptions(h, selected, anyLabel) {
+  return histOptions([["", anyLabel], ...h.coaches.map((c) => [c.key, c.name])], selected);
+}
+
+/* ---------- shell: toggle + both control sets, built once ---------- */
+function renderHistoryShell() {
+  const root = document.getElementById("history-root");
+  if (!root) return;
+  const h = historyData();
+
+  if (!h.games.length && !h.polls.length) {
+    root.innerHTML = `<p class="sched-empty">No results recorded yet &mdash; history fills in as games are played.</p>`;
+    return;
+  }
+
+  const seasonsDesc = [...h.seasons].reverse();
+  const seasonOpts = [["", "All seasons"], ...seasonsDesc.map((y) => [y, String(y)])];
+
+  root.innerHTML = `
+    <div class="sched-toggle hist-toggle" role="tablist" aria-label="History view">
+      <button type="button" class="sched-toggle-btn" data-hist-view="games">Games</button>
+      <button type="button" class="sched-toggle-btn" data-hist-view="polls">Polls</button>
+    </div>
+
+    <form class="hist-controls" id="hist-games-controls" data-hist-panel="games" autocomplete="off">
+      <label class="hist-field hist-search">
+        <span>Search</span>
+        <input type="search" name="q" placeholder="Team, coach, bowl&hellip;" enterkeyhint="search">
+      </label>
+      <label class="hist-field"><span>Season</span>
+        <select name="season">${histOptions(seasonOpts, "")}</select></label>
+      <label class="hist-field"><span>Coach</span>
+        <select name="coach">${histCoachOptions(h, "", "Any coach")}</select></label>
+      <label class="hist-field"><span>Opponent</span>
+        <select name="opp">
+          <option value="">Anyone</option>
+          <option value="coach">Any coach (H2H)</option>
+          <option value="cpu">CPU teams</option>
+          <optgroup label="Specific coach">${h.coaches
+            .map((c) => `<option value="${esc(c.key)}">${esc(c.name)}</option>`)
+            .join("")}</optgroup>
+        </select></label>
+      <label class="hist-field"><span>Team</span>
+        <select name="team">${histTeamOptions(h, "", "Any team")}</select></label>
+      <label class="hist-field"><span>Game type</span>
+        <select name="type">${histOptions(HIST_TYPES, "")}</select></label>
+      <label class="hist-field"><span>Result</span>
+        <select name="result">${histOptions([["", "Any"], ["w", "Wins"], ["l", "Losses"]], "")}</select></label>
+      <label class="hist-field"><span>Sort</span>
+        <select name="sort">${histOptions(
+          [["new", "Newest first"], ["old", "Oldest first"], ["margin", "Biggest margin"], ["points", "Most points"]],
+          "new"
+        )}</select></label>
+      <label class="hist-check"><input type="checkbox" name="ranked" value="1"> <span>Ranked opponent</span></label>
+      <button type="button" class="link-btn hist-reset" data-hist-reset>Reset</button>
+    </form>
+
+    <form class="hist-controls" id="hist-polls-controls" data-hist-panel="polls" autocomplete="off">
+      <label class="hist-field"><span>Season</span>
+        <select name="pseason">${histOptions(
+          [["all", "All seasons"], ...seasonsDesc.map((y) => [y, String(y)])],
+          ""
+        )}</select></label>
+      <label class="hist-field"><span>Week</span>
+        <select name="pweek"></select></label>
+      <label class="hist-field"><span>Team</span>
+        <select name="pteam">${histTeamOptions(h, "", "Any team")}</select></label>
+      <label class="hist-field"><span>Coach</span>
+        <select name="pcoach">${histCoachOptions(h, "", "Any coach")}</select></label>
+      <label class="hist-check"><input type="checkbox" name="pcoached" value="1"> <span>Coached teams only</span></label>
+      <button type="button" class="link-btn hist-reset" data-hist-reset>Reset</button>
+    </form>
+
+    <div class="hist-summary" id="hist-summary" aria-live="polite"></div>
+    <div id="hist-results"></div>`;
+
+  root.querySelectorAll("[data-hist-view]").forEach((b) =>
+    b.addEventListener("click", () => {
+      HIST_STATE.view = b.dataset.histView;
+      HIST_LIMIT = HIST_PAGE;
+      renderHistoryResults();
+    })
+  );
+
+  root.querySelectorAll(".hist-controls").forEach((form) => {
+    form.addEventListener("submit", (e) => e.preventDefault());
+    const onChange = (e) => {
+      readHistoryControls();
+      /* A new season invalidates the chosen poll week. */
+      /* So does singling out a team or coach: that reads best as a
+         timeline across every week, not one week's row. */
+      if (e && e.target && ["pseason", "pteam", "pcoach"].includes(e.target.name)) HIST_STATE.pweek = "";
+      /* ...and across every season, unless one is picked after. */
+      if (e && e.target && ["pteam", "pcoach"].includes(e.target.name)) HIST_STATE.pseason = "";
+      HIST_LIMIT = HIST_PAGE;
+      renderHistoryResults();
+    };
+    form.addEventListener("change", onChange);
+    form.addEventListener("input", (e) => {
+      if (e.target.name === "q") onChange(e);
+    });
+  });
+
+  root.querySelectorAll("[data-hist-reset]").forEach((b) =>
+    b.addEventListener("click", () => {
+      const view = HIST_STATE.view;
+      HIST_STATE = { ...HIST_DEFAULTS, view };
+      HIST_LIMIT = HIST_PAGE;
+      renderHistoryResults();
+    })
+  );
+
+  /* Load more — delegated, the button is re-rendered with the list. */
+  root.addEventListener("click", (e) => {
+    if (e.target.closest("[data-hist-more]")) {
+      HIST_LIMIT += HIST_PAGE;
+      renderHistoryResults();
+    }
+  });
+}
+
+function readHistoryControls() {
+  const games = document.getElementById("hist-games-controls");
+  const polls = document.getElementById("hist-polls-controls");
+  const val = (form, name) => {
+    const el = form && form.elements[name];
+    if (!el) return "";
+    return el.type === "checkbox" ? (el.checked ? "1" : "") : el.value;
+  };
+  ["season", "coach", "team", "opp", "type", "result", "ranked", "q", "sort"].forEach(
+    (k) => (HIST_STATE[k] = val(games, k))
+  );
+  ["pseason", "pweek", "pteam", "pcoach", "pcoached"].forEach((k) => (HIST_STATE[k] = val(polls, k)));
+}
+
+/* Push state back into the controls (after a reset or a deep link). */
+function writeHistoryControls() {
+  const games = document.getElementById("hist-games-controls");
+  const polls = document.getElementById("hist-polls-controls");
+  const set = (form, name, v) => {
+    const el = form && form.elements[name];
+    if (!el) return;
+    if (el.type === "checkbox") el.checked = !!v;
+    else {
+      el.value = v;
+      /* A value that isn't an option (stale link) falls back to the first. */
+      if (el.tagName === "SELECT" && el.value !== String(v)) el.selectedIndex = 0;
+    }
+  };
+  ["season", "coach", "team", "opp", "type", "result", "ranked", "q", "sort"].forEach((k) =>
+    set(games, k, HIST_STATE[k])
+  );
+  ["pseason", "pteam", "pcoach", "pcoached"].forEach((k) => set(polls, k, HIST_STATE[k]));
+
+  const hasSubject = !!(HIST_STATE.coach || HIST_STATE.team);
+  if (games) {
+    games.elements.result.disabled = !hasSubject;
+    games.elements.result.closest(".hist-field").title = hasSubject ? "" : "Pick a coach or team first";
+  }
+
+  document.querySelectorAll("[data-hist-view]").forEach((b) => {
+    const on = b.dataset.histView === HIST_STATE.view;
+    b.classList.toggle("active", on);
+    b.setAttribute("aria-selected", on ? "true" : "false");
+  });
+  document.querySelectorAll("[data-hist-panel]").forEach((p) => {
+    p.hidden = p.dataset.histPanel !== HIST_STATE.view;
+  });
+}
+
+function historyQueryString() {
+  const p = new URLSearchParams();
+  Object.keys(HIST_DEFAULTS).forEach((k) => {
+    if (HIST_STATE[k] !== HIST_DEFAULTS[k] && HIST_STATE[k] !== "") p.set(k, HIST_STATE[k]);
+  });
+  return p.toString();
+}
+
+function syncHistoryHash() {
+  if (location.hash.slice(1).split(/[/?]/)[0] !== "history") return;
+  const qs = historyQueryString();
+  const next = `#history${qs ? "?" + qs : ""}`;
+  if (location.hash !== next) window.history.replaceState(null, "", next);
+}
+
+/* Called by the router whenever #history is the tab. An empty query
+   on a tab already in use keeps the current filters — clicking the
+   History tab shouldn't wipe a search you were in the middle of. */
+function showHistory(query) {
+  const fresh = !HIST_READY;
+  if (fresh) {
+    renderHistoryShell();
+    HIST_READY = true;
+  }
+  if (query || fresh) {
+    const p = new URLSearchParams(query || "");
+    HIST_STATE = { ...HIST_DEFAULTS };
+    Object.keys(HIST_DEFAULTS).forEach((k) => {
+      if (p.has(k)) HIST_STATE[k] = p.get(k);
+    });
+    HIST_LIMIT = HIST_PAGE;
+  }
+  renderHistoryResults();
+}
+
+/* ---------- results ---------- */
+function histLogoHtml(name) {
+  const src = teamLogoSrc(name);
+  const mono = monogramFor(rosterEntryFor(name)?.team || name);
+  return `<span class="t25-logo hist-logo"><span class="t25-mono">${esc(mono)}</span>${
+    src ? `<img src="${esc(src)}" alt="" loading="lazy" onerror="this.remove()">` : ""
+  }</span>`;
+}
+
+function histLineHtml(s, other, prefix) {
+  const won = s.score > other.score;
+  return `
+    <div class="hg-line${won ? " won" : ""}">
+      <span class="hg-loc">${prefix || ""}</span>
+      ${histLogoHtml(s.team)}
+      <span class="hg-who">
+        ${s.rank != null ? `<span class="hg-rank">#${esc(s.rank)}</span>` : ""}
+        <span class="hg-team">${esc(s.team)}</span>
+        ${s.coach ? `<span class="t25-coach">${esc(s.coach)}</span>` : ""}
+      </span>
+      <span class="hg-score">${esc(s.score)}</span>
+    </div>`;
+}
+
+function histGameHtml(r) {
+  const g = r.game;
+  const { me, them } = r;
+  /* "vs" / "at" from the first-listed team's side; a neutral site is
+     "vs" with the N marker, never "at". */
+  const meHome = me === g.home;
+  const loc = g.neutral ? "vs" : meHome ? "vs" : "at";
+  const d = me.score - them.score;
+  const res = r.subject ? (d > 0 ? "W" : d < 0 ? "L" : "T") : "";
+  const resCls = res === "W" ? "win" : res === "L" ? "loss" : res === "T" ? "tie" : "";
+
+  return `
+    <li class="hist-game${g.postseason ? " is-post" : ""}${resCls ? " " + resCls : ""}">
+      <div class="hg-when">
+        <span class="hg-year">${esc(g.year ?? "")}</span>
+        <span class="hg-label">${esc(g.label)}</span>
+        <span class="hg-tags">${g.h2h ? `<span class="hg-tag">H2H</span>` : ""}${
+          g.neutral ? `<span class="hg-tag is-quiet" title="Neutral site">N</span>` : ""
+        }${g.sim ? `<span class="hg-tag is-quiet" title="Force-sim / forfeit">Sim</span>` : ""}</span>
+      </div>
+      <div class="hg-lines">
+        ${histLineHtml(me, them, "")}
+        ${histLineHtml(them, me, loc)}
+      </div>
+      ${r.subject ? `<div class="hg-result ${resCls}">${res}</div>` : ""}
+    </li>`;
+}
+
+function histRecord(o) {
+  return `${o.w}-${o.l}${o.t ? `-${o.t}` : ""}`;
+}
+
+function histSubjectName() {
+  const h = historyData();
+  const coach = h.coaches.find((c) => c.key === HIST_STATE.coach);
+  const team = h.teams.find((t) => t.key === HIST_STATE.team);
+  const opp =
+    HIST_STATE.opp === "coach" ? "coaches" :
+    HIST_STATE.opp === "cpu" ? "CPU teams" :
+    (h.coaches.find((c) => c.key === HIST_STATE.opp) || {}).name || "";
+  const who = [coach && coach.name, team && team.name].filter(Boolean).join(" · ");
+  return opp ? `${who} vs ${opp}` : who;
+}
+
+function renderGamesResults(h) {
+  const S = HIST_STATE;
+  const rows = HistoryCore.filterGames(h, {
+    season: S.season, coach: S.coach, team: S.team, opp: S.opp,
+    type: S.type, result: S.result, ranked: S.ranked === "1", q: S.q,
+  });
+
+  const key = (r) => r.game.year * 100 + r.game.week;
+  if (S.sort === "old") rows.sort((a, b) => key(a) - key(b));
+  else if (S.sort === "margin")
+    rows.sort((a, b) => Math.abs(b.me.score - b.them.score) - Math.abs(a.me.score - a.them.score) || key(b) - key(a));
+  else if (S.sort === "points")
+    rows.sort((a, b) => b.me.score + b.them.score - (a.me.score + a.them.score) || key(b) - key(a));
+  else rows.sort((a, b) => key(b) - key(a));
+
+  const summary = document.getElementById("hist-summary");
+  const subject = !!(S.coach || S.team);
+
+  if (subject && rows.length) {
+    const s = HistoryCore.summarize(rows);
+    const pct = s.games ? ((s.w + s.t / 2) / s.games).toFixed(3).replace(/^0/, "") : null;
+    summary.innerHTML = `
+      <p class="hist-summary-line"><strong>${esc(histSubjectName())}</strong> &middot; ${rows.length} game${rows.length === 1 ? "" : "s"}</p>
+      <div class="cm-stats hist-stats">
+        ${statTile("Record", histRecord(s), s.w > s.l ? "win" : s.l > s.w ? "loss" : "")}
+        ${statTile("Win %", pct, "gold")}
+        ${statTile("Pts / game", (s.pf / s.games).toFixed(1))}
+        ${statTile("Opp / game", (s.pa / s.games).toFixed(1))}
+        ${statTile("vs Coaches", s.h2h.w + s.h2h.l + s.h2h.t ? histRecord(s.h2h) : null)}
+        ${statTile("vs CPU", s.cpu.w + s.cpu.l + s.cpu.t ? histRecord(s.cpu) : null)}
+        ${statTile("Postseason", s.post.w + s.post.l + s.post.t ? histRecord(s.post) : null)}
+        ${statTile("Avg margin", `${s.pf - s.pa >= 0 ? "+" : ""}${((s.pf - s.pa) / s.games).toFixed(1)}`,
+          s.pf > s.pa ? "win" : s.pf < s.pa ? "loss" : "")}
+      </div>`;
+  } else {
+    const h2h = rows.filter((r) => r.game.h2h).length;
+    summary.innerHTML = rows.length
+      ? `<p class="hist-summary-line">${rows.length} game${rows.length === 1 ? "" : "s"}${
+          h2h && h2h !== rows.length ? ` &middot; ${h2h} head-to-head` : ""
+        }${subject ? "" : ` &middot; <span class="hist-hint">pick a coach or team for records</span>`}</p>`
+      : "";
+  }
+
+  const out = document.getElementById("hist-results");
+  if (!rows.length) {
+    out.innerHTML = `<p class="sched-empty">No games match those filters.</p>`;
+    return;
+  }
+  const shown = rows.slice(0, HIST_LIMIT);
+  out.innerHTML = `
+    <ol class="hist-list${subject ? " has-result" : ""}">${shown.map(histGameHtml).join("")}</ol>
+    ${
+      rows.length > shown.length
+        ? `<button type="button" class="hist-more" data-hist-more>Show more (${rows.length - shown.length} left)</button>`
+        : ""
+    }`;
+}
+
+function renderPollsResults(h) {
+  const S = HIST_STATE;
+  const form = document.getElementById("hist-polls-controls");
+
+  /* Season defaults to the newest one with a poll; week to that
+     season's last poll. "All seasons" only makes sense across all
+     weeks, so the week picker locks to that. */
+  /* Blank means "the default" and is resolved here rather than written
+     back, so an untouched view keeps a clean URL and keeps following
+     the newest poll as the season moves on. */
+  const pollYears = [...new Set(h.polls.map((p) => p.year))].sort((a, b) => a - b);
+  const latestYear = pollYears.length ? String(pollYears[pollYears.length - 1]) : "";
+  const year = S.pseason === "all" ? "" : S.pseason || (S.pteam || S.pcoach ? "" : latestYear);
+
+  const weeks = new Map();
+  h.polls.filter((p) => String(p.year) === year).forEach((p) => weeks.set(p.week, p.kind));
+  const weekList = [...weeks.keys()].sort((a, b) => a - b);
+
+  let week = S.pweek;
+  if (!year) week = "all";
+  else if (week === "" || (week !== "all" && !weeks.has(Number(week))))
+    week = S.pteam || S.pcoach || !weekList.length ? "all" : String(weekList[weekList.length - 1]);
+
+  if (form) {
+    form.elements.pseason.value = year || "all";
+    form.elements.pweek.innerHTML = histOptions(
+      [["all", "All weeks"], ...[...weekList].reverse().map((w) => [w, histPollWeekLabel(w, weeks.get(w))])],
+      week
+    );
+    form.elements.pweek.disabled = !year;
+  }
+
+  const rows = h.polls.filter(
+    (p) =>
+      (!year || String(p.year) === year) &&
+      (week === "all" || String(p.week) === week) &&
+      (!S.pteam || normalize(p.team) === S.pteam) &&
+      (!S.pcoach || p.coachKey === S.pcoach) &&
+      (!S.pcoached || p.coach)
+  );
+
+  const summary = document.getElementById("hist-summary");
+  const out = document.getElementById("hist-results");
+
+  if (!rows.length) {
+    summary.innerHTML = "";
+    out.innerHTML = `<p class="sched-empty">No poll entries match those filters.</p>`;
+    return;
+  }
+
+  /* One week, nobody singled out: draw it like the Top 25 tab. */
+  if (week !== "all" && !S.pteam && !S.pcoach) {
+    const kind = rows[0].kind;
+    summary.innerHTML = `<p class="hist-summary-line"><strong>${esc(year)} &middot; ${esc(
+      histPollWeekLabel(Number(week), "")
+    )}</strong> &middot; ${kind === "cfp" ? "CFP rankings" : "AP Top 25"}</p>`;
+    const list = [...rows].sort((a, b) => a.rank - b.rank);
+    out.innerHTML = `<ol class="top25-list hist-poll">${list
+      .map((p) => {
+        const color = p.coach ? colorFor(p.team) : "";
+        return `
+        <li class="t25-row${p.coach ? " is-coach" : ""}"${color ? ` style="--team:${esc(color)}"` : ""}>
+          <span class="t25-rank">${esc(p.rank)}</span>
+          ${histLogoHtml(p.team)}
+          <span class="t25-who">
+            <span class="t25-team" title="${esc(p.team)}">${esc(p.team)}</span>
+            ${p.coach ? `<span class="t25-coach">${esc(p.coach)}</span>` : ""}
+          </span>
+          <span class="t25-record">${esc(p.record)}</span>
+          <span class="t25-trend"></span>
+        </li>`;
+      })
+      .join("")}</ol>`;
+    return;
+  }
+
+  /* Otherwise a timeline: newest first. */
+  rows.sort((a, b) => b.year - a.year || b.week - a.week || a.rank - b.rank);
+  const best = rows.reduce((m, p) => (p.rank < m.rank ? p : m), rows[0]);
+  const weeksRanked = new Set(rows.map((p) => `${p.year}-${p.week}`)).size;
+  const subject = S.pteam || S.pcoach;
+  summary.innerHTML = subject
+    ? `<div class="cm-stats hist-stats hist-stats-3">
+        ${statTile("Weeks ranked", weeksRanked)}
+        ${statTile("Peak", `#${best.rank}`, "gold")}
+        ${statTile("Peak came", `${best.year} · ${histPollWeekLabel(best.week, best.kind)}`)}
+      </div>`
+    : `<p class="hist-summary-line">${rows.length} poll entr${rows.length === 1 ? "y" : "ies"}</p>`;
+
+  const shown = rows.slice(0, HIST_LIMIT);
+  out.innerHTML = `
+    <ol class="hist-poll-rows">${shown
+      .map(
+        (p) => `
+      <li class="hpr${p.coach ? " is-coach" : ""}">
+        <span class="hpr-when"><span class="hg-year">${esc(p.year)}</span> ${esc(histPollWeekLabel(p.week, p.kind))}</span>
+        <span class="hpr-rank">#${esc(p.rank)}</span>
+        ${histLogoHtml(p.team)}
+        <span class="t25-who">
+          <span class="t25-team">${esc(p.team)}</span>
+          ${p.coach ? `<span class="t25-coach">${esc(p.coach)}</span>` : ""}
+        </span>
+        <span class="t25-record">${esc(p.record)}</span>
+      </li>`
+      )
+      .join("")}</ol>
+    ${
+      rows.length > shown.length
+        ? `<button type="button" class="hist-more" data-hist-more>Show more (${rows.length - shown.length} left)</button>`
+        : ""
+    }`;
+}
+
+function renderHistoryResults() {
+  if (!HIST_READY || !document.getElementById("hist-results")) return;
+  const h = historyData();
+  writeHistoryControls();
+  if (HIST_STATE.view === "polls") renderPollsResults(h);
+  else renderGamesResults(h);
+  syncHistoryHash();
+
+  const tag = document.getElementById("history-tag");
+  if (tag && h.seasons.length) {
+    const a = h.seasons[0], b = h.seasons[h.seasons.length - 1];
+    tag.textContent = a === b ? String(a) : `${a}–${b}`;
+  }
+}
+
 /* ------------------------------------------------------------
    TABS
    Tab state lives in the URL hash, so a refresh keeps your place
    and you can drop someone straight into #rankings in Discord.
    ------------------------------------------------------------ */
-const TABS = ["home", "schedule", "rankings", "top25", "roster"];
+const TABS = ["home", "schedule", "rankings", "top25", "roster", "history"];
 
 /* ------------------------------------------------------------
    TABS THAT ONLY EXIST FOR SOME LEAGUES
@@ -3054,8 +3584,13 @@ function setupTabs() {
      the tab system ignorant of the modal, which is the only reason
      both can be read at a glance. */
   const routeFromHash = (opts) => {
-    const [tab, kind, key] = location.hash.slice(1).split("/");
+    /* "#history?coach=alex" — the History tab keeps its filters in a
+       query after the tab name. Split off first so the tab name
+       stays clean for showTab. */
+    const [path, query = ""] = location.hash.slice(1).split("?");
+    const [tab, kind, key] = path.split("/");
     showTab(tab, opts);
+    if (tab === "history" && TABS.includes("history")) showHistory(query);
     if (kind === "coach" && key) openCoachModal(decodeURIComponent(key), { updateHash: false });
     else closeCoachModal();
   };
