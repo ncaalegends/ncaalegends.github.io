@@ -1,0 +1,60 @@
+# ============================================================
+#  RTA PING — offseason "who hasn't readied up" Discord post
+# ------------------------------------------------------------
+#  Fired by the daily dynasty task as a repository_dispatch of type
+#  "rta-ping". That task runs on a PC whose network reaches GitHub
+#  but not discord.com, so it hands the message here and the runner
+#  does the one webhook POST, exactly like the morning posts.
+#
+#  The payload is a single `payload` object:
+#    { league, stage, notReady: [...], ready: [...] }
+#  tools/rta.js validates every field against the league's roster
+#  and pings only the notReady coaches (never @everyone or a role).
+#
+#  Same discipline as league-update.yml: the payload reaches the
+#  runner through env:, never pasted into a run: line.
+# ============================================================
+
+name: RTA ping
+
+on:
+  repository_dispatch:
+    types: [rta-ping]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rta-ping
+  cancel-in-progress: false
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the site
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Write payload
+        env:
+          PAYLOAD: ${{ toJSON(github.event.client_payload.payload) }}
+        run: printf '%s' "$PAYLOAD" > "$RUNNER_TEMP/payload.json"
+
+      - name: Provide Discord config
+        env:
+          DISCORD_CONFIG: ${{ secrets.DISCORD_CONFIG }}
+        run: |
+          if [ -n "$DISCORD_CONFIG" ]; then
+            printf '%s' "$DISCORD_CONFIG" > tools/config.json
+          else
+            echo "::error::DISCORD_CONFIG secret is not set - nothing can be posted."
+            exit 1
+          fi
+
+      - name: Post the RTA ping
+        run: node tools/rta.js --payload "$RUNNER_TEMP/payload.json"
