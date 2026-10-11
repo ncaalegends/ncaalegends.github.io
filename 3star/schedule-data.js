@@ -240,7 +240,7 @@ const TEAM_SCHEDULES = [
       { week: 9, opponent: "Maryland", location: "at", stadium: "SECU Stadium", teamScore: 27, opponentScore: 15 },
       { week: 10, opponent: "Wisconsin", location: "vs", stadium: "SHI Stadium", teamScore: 35, opponentScore: 38 },
       { week: 11, opponent: "Iowa", location: "vs", stadium: "SHI Stadium", teamScore: 42, opponentScore: 35 },
-      { week: 12, opponent: "Indiana", location: "at", stadium: "Memorial Stadium" },
+      { week: 12, opponent: "Indiana", location: "at", stadium: "Memorial Stadium", teamScore: 59, opponentScore: 35 },
       { week: 13, opponent: "UCLA", location: "at", stadium: "Rose Bowl Stadium" },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, note: "BYE" },
@@ -382,7 +382,7 @@ const TEAM_SCHEDULES = [
          RekenCrew's block already has it as "at Charlotte", so the
          two agree. Venue filled in from Charlotte's other home games. */
       { week: 11, opponent: "Oklahoma State", location: "vs", stadium: "Jerry Richardson Stadium", teamScore: 7, opponentScore: 35 },
-      { week: 12, opponent: "Arkansas", location: "vs", stadium: "Jerry Richardson Stadium" },
+      { week: 12, opponent: "Arkansas", location: "vs", stadium: "Jerry Richardson Stadium", teamScore: 23, opponentScore: 17 },
       { week: 13, note: "BYE" },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, note: "BYE" },
