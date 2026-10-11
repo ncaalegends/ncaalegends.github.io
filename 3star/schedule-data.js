@@ -265,7 +265,7 @@ const TEAM_SCHEDULES = [
       { week: 10, opponent: "Rutgers", location: "at", stadium: "SHI Stadium", teamScore: 38, opponentScore: 35 },
       { week: 11, opponent: "Indiana", location: "vs", stadium: "Camp Randall Stadium", teamScore: 52, opponentScore: 17 },
       { week: 12, note: "BYE" },
-      { week: 13, opponent: "Oregon", location: "at", stadium: "Autzen Stadium" },
+      { week: 13, opponent: "Oregon", location: "at", stadium: "Autzen Stadium", teamScore: 34, opponentScore: 31 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, note: "BYE" },
     ],
