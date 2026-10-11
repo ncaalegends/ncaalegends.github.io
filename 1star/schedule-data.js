@@ -115,7 +115,7 @@ const TEAM_SCHEDULES = [
       { week: 12, opponent: "Arkansas State", location: "vs", teamScore: 27, opponentScore: 17 },
       { week: 13, opponent: "UL Monroe", location: "at", teamScore: 35, opponentScore: 14 },
       { week: 14, note: "Army-Navy Week" },
-      { week: 15, note: "BYE" },
+      { week: 15, opponent: "Appalachian State", location: "vs", neutral: true, title: "Sun Belt Championship", round: "ccg" },
     ],
   },
   {
@@ -144,7 +144,7 @@ const TEAM_SCHEDULES = [
       { week: 12, opponent: "James Madison", location: "at", teamScore: 63, opponentScore: 14 },
       { week: 13, opponent: "Dillon", location: "vs", teamScore: 14, opponentScore: 16 },
       { week: 14, note: "Army-Navy Week" },
-      { week: 15, note: "BYE" },
+      { week: 15, opponent: "Baldwin Wallace", location: "at", neutral: true, title: "Sun Belt Championship", round: "ccg" },
     ],
   },
   {
@@ -212,7 +212,7 @@ const TEAM_SCHEDULES = [
       { week: 12, opponent: "Central Michigan", location: "at", teamScore: 38, opponentScore: 9 },
       { week: 13, opponent: "North Shore", location: "vs", teamScore: 27, opponentScore: 34 },
       { week: 14, note: "Army-Navy Week" },
-      { week: 15, note: "BYE" },
+      { week: 15, opponent: "North Shore", location: "vs", neutral: true, title: "MAC Championship", round: "ccg" },
     ],
   },
   {
@@ -234,7 +234,7 @@ const TEAM_SCHEDULES = [
       { week: 12, opponent: "Eastern Michigan", location: "at", teamScore: 38, opponentScore: 10 },
       { week: 13, opponent: "New Glarus", location: "at", teamScore: 34, opponentScore: 27 },
       { week: 14, note: "Army-Navy Week" },
-      { week: 15, note: "BYE" },
+      { week: 15, opponent: "New Glarus", location: "at", neutral: true, title: "MAC Championship", round: "ccg" },
     ],
   },
 
@@ -258,7 +258,7 @@ const TEAM_SCHEDULES = [
       { week: 12, opponent: "Wawa University", location: "vs", teamScore: 37, opponentScore: 24 },
       { week: 13, opponent: "New Mexico State", location: "at", teamScore: 23, opponentScore: 16 },
       { week: 14, note: "Army-Navy Week" },
-      { week: 15, note: "BYE" },
+      { week: 15, opponent: "Wawa University", location: "vs", neutral: true, title: "C-USA Championship", round: "ccg" },
     ],
   },
   {
@@ -280,7 +280,7 @@ const TEAM_SCHEDULES = [
       { week: 12, opponent: "Patriot Tech", location: "at", teamScore: 24, opponentScore: 37 },
       { week: 13, opponent: "Kennesaw State", location: "at", teamScore: 10, opponentScore: 7 },
       { week: 14, note: "Army-Navy Week" },
-      { week: 15, note: "BYE" },
+      { week: 15, opponent: "Patriot Tech", location: "at", neutral: true, title: "C-USA Championship", round: "ccg" },
     ],
   },
   {
