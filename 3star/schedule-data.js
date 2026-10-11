@@ -439,7 +439,7 @@ const TEAM_SCHEDULES = [
       { week: 10, opponent: "Clemson", location: "vs", stadium: "Acrisure Bounce House", teamScore: 24, opponentScore: 30 },
       { week: 11, opponent: "Alabama", location: "at", stadium: "Saban Field at Bryant-Denny Stadium", teamScore: 22, opponentScore: 37 },
       { week: 12, opponent: "Kentucky", location: "vs", stadium: "Acrisure Bounce House", teamScore: 24, opponentScore: 21 },
-      { week: 13, opponent: "LSU", location: "at", stadium: "Tiger Stadium" },
+      { week: 13, opponent: "LSU", location: "at", stadium: "Tiger Stadium", teamScore: 44, opponentScore: 47 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, note: "BYE" },
     ],
