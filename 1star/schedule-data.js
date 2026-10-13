@@ -115,7 +115,7 @@ const TEAM_SCHEDULES = [
       { week: 12, opponent: "Arkansas State", location: "vs", teamScore: 27, opponentScore: 17 },
       { week: 13, opponent: "UL Monroe", location: "at", teamScore: 35, opponentScore: 14 },
       { week: 14, note: "Army-Navy Week" },
-      { week: 15, opponent: "Appalachian State", location: "vs", neutral: true, title: "Sun Belt Championship", round: "ccg" },
+      { week: 15, opponent: "Appalachian State", location: "vs", neutral: true, title: "Sun Belt Championship", round: "ccg", teamScore: 13, opponentScore: 21 },
     ],
   },
   {
@@ -144,7 +144,7 @@ const TEAM_SCHEDULES = [
       { week: 12, opponent: "James Madison", location: "at", teamScore: 63, opponentScore: 14 },
       { week: 13, opponent: "Dillon", location: "vs", teamScore: 14, opponentScore: 16 },
       { week: 14, note: "Army-Navy Week" },
-      { week: 15, opponent: "Baldwin Wallace", location: "at", neutral: true, title: "Sun Belt Championship", round: "ccg" },
+      { week: 15, opponent: "Baldwin Wallace", location: "at", neutral: true, title: "Sun Belt Championship", round: "ccg", teamScore: 21, opponentScore: 13 },
     ],
   },
   {
