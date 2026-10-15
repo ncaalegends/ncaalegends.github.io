@@ -116,6 +116,7 @@ const TEAM_SCHEDULES = [
       { week: 13, opponent: "UL Monroe", location: "at", teamScore: 35, opponentScore: 14 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, opponent: "Appalachian State", location: "vs", neutral: true, title: "Sun Belt Championship", round: "ccg", teamScore: 13, opponentScore: 21 },
+      { week: 16, opponent: "Tulsa", location: "at", neutral: true, title: "Myrtle Beach Bowl", round: "bowl-w1" },
     ],
   },
   {
@@ -145,6 +146,7 @@ const TEAM_SCHEDULES = [
       { week: 13, opponent: "Dillon", location: "vs", teamScore: 14, opponentScore: 16 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, opponent: "Baldwin Wallace", location: "at", neutral: true, title: "Sun Belt Championship", round: "ccg", teamScore: 21, opponentScore: 13 },
+      { week: 16, opponent: "TCU", location: "vs", neutral: true, title: "New Mexico Bowl", round: "bowl-w1", teamScore: 20, opponentScore: 17 },
     ],
   },
   {
@@ -167,6 +169,7 @@ const TEAM_SCHEDULES = [
       { week: 13, opponent: "Appalachian State", location: "at", teamScore: 16, opponentScore: 14 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, note: "BYE" },
+      { week: 16, opponent: "Wawa University", location: "vs", neutral: true, title: "New Orleans Bowl", round: "bowl-w1", teamScore: 41, opponentScore: 10 },
     ],
   },
 
@@ -191,6 +194,8 @@ const TEAM_SCHEDULES = [
       { week: 13, opponent: "Western Michigan", location: "at", teamScore: 21, opponentScore: 20 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, note: "BYE" },
+      { week: 16, note: "BYE" },
+      { week: 17, opponent: "Nevada", location: "at", neutral: true, title: "Xbox Bowl", round: "bowl-w2" },
     ],
   },
   {
@@ -213,6 +218,7 @@ const TEAM_SCHEDULES = [
       { week: 13, opponent: "North Shore", location: "vs", teamScore: 27, opponentScore: 34 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, opponent: "North Shore", location: "vs", neutral: true, title: "MAC Championship", round: "ccg", teamScore: 35, opponentScore: 38 },
+      { week: 16, opponent: "Indiana", location: "at", round: "cfp-r1", teamScore: 24, opponentScore: 27 },
     ],
   },
   {
@@ -235,6 +241,7 @@ const TEAM_SCHEDULES = [
       { week: 13, opponent: "New Glarus", location: "at", teamScore: 34, opponentScore: 27 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, opponent: "New Glarus", location: "at", neutral: true, title: "MAC Championship", round: "ccg", teamScore: 38, opponentScore: 35 },
+      { week: 16, opponent: "Wyoming", location: "at", neutral: true, title: "Arizona Bowl", round: "bowl-w1" },
     ],
   },
 
@@ -259,6 +266,7 @@ const TEAM_SCHEDULES = [
       { week: 13, opponent: "New Mexico State", location: "at", teamScore: 23, opponentScore: 16 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, opponent: "Wawa University", location: "vs", neutral: true, title: "C-USA Championship", round: "ccg", teamScore: 26, opponentScore: 34 },
+      { week: 16, opponent: "Buffalo", location: "at", neutral: true, title: "Cure Bowl", round: "bowl-w1", teamScore: 17, opponentScore: 13 },
     ],
   },
   {
@@ -281,6 +289,7 @@ const TEAM_SCHEDULES = [
       { week: 13, opponent: "Kennesaw State", location: "at", teamScore: 10, opponentScore: 7 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, opponent: "Patriot Tech", location: "at", neutral: true, title: "C-USA Championship", round: "ccg", teamScore: 34, opponentScore: 26 },
+      { week: 16, opponent: "Dillon", location: "at", neutral: true, title: "New Orleans Bowl", round: "bowl-w1", teamScore: 10, opponentScore: 41 },
     ],
   },
   {
@@ -303,6 +312,7 @@ const TEAM_SCHEDULES = [
       { week: 13, note: "BYE" },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, note: "BYE" },
+      { week: 16, opponent: "Troy", location: "at", neutral: true, title: "Boca Raton Bowl", round: "bowl-w1" },
     ],
   },
 ];
