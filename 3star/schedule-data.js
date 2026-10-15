@@ -118,7 +118,7 @@ const TEAM_SCHEDULES = [
       { week: 10, opponent: "California", location: "vs", stadium: "Kenan Stadium", teamScore: 33, opponentScore: 21 },
       { week: 11, opponent: "Duke", location: "vs", stadium: "Kenan Stadium", teamScore: 30, opponentScore: 27 },
       { week: 12, opponent: "SMU", location: "at", stadium: "Gerald J. Ford Stadium", teamScore: 16, opponentScore: 21 },
-      { week: 13, opponent: "NC State", location: "at", stadium: "Carter-Finley Stadium" },
+      { week: 13, opponent: "NC State", location: "at", stadium: "Carter-Finley Stadium", teamScore: 27, opponentScore: 19 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, note: "BYE" },
     ],
@@ -146,7 +146,7 @@ const TEAM_SCHEDULES = [
       { week: 12, opponent: "Miami", location: "vs", stadium: "Acrisure Stadium", teamScore: 55, opponentScore: 24 },
       { week: 13, opponent: "Boston College", location: "vs", stadium: "Acrisure Stadium", teamScore: 57, opponentScore: 21 },
       { week: 14, note: "Army-Navy Week" },
-      { week: 15, note: "BYE" },
+      { week: 15, opponent: "Miami", location: "vs", neutral: true, title: "ACC Championship", round: "ccg" },
     ],
   },
   {
@@ -243,7 +243,7 @@ const TEAM_SCHEDULES = [
       { week: 12, opponent: "Indiana", location: "at", stadium: "Memorial Stadium", teamScore: 59, opponentScore: 35 },
       { week: 13, opponent: "UCLA", location: "at", stadium: "Rose Bowl Stadium", teamScore: 24, opponentScore: 21 },
       { week: 14, note: "Army-Navy Week" },
-      { week: 15, note: "BYE" },
+      { week: 15, opponent: "Wisconsin", location: "at", neutral: true, title: "Big Ten Championship", round: "ccg" },
     ],
   },
   {
@@ -267,7 +267,7 @@ const TEAM_SCHEDULES = [
       { week: 12, note: "BYE" },
       { week: 13, opponent: "Oregon", location: "at", stadium: "Autzen Stadium", teamScore: 34, opponentScore: 31 },
       { week: 14, note: "Army-Navy Week" },
-      { week: 15, note: "BYE" },
+      { week: 15, opponent: "Rutgers", location: "vs", neutral: true, title: "Big Ten Championship", round: "ccg" },
     ],
   },
 
@@ -291,7 +291,7 @@ const TEAM_SCHEDULES = [
       { week: 12, opponent: "Houston", location: "vs", stadium: "McLane Stadium", teamScore: 37, opponentScore: 7 },
       { week: 13, opponent: "Kansas State", location: "at", stadium: "Bill Snyder Family Stadium", teamScore: 41, opponentScore: 17 },
       { week: 14, note: "Army-Navy Week" },
-      { week: 15, note: "BYE" },
+      { week: 15, opponent: "Oklahoma State", location: "vs", neutral: true, title: "Big 12 Championship", round: "ccg" },
     ],
   },
   {
@@ -357,7 +357,7 @@ const TEAM_SCHEDULES = [
       { week: 12, opponent: "BYU", location: "vs", stadium: "Boone Pickens Stadium", teamScore: 31, opponentScore: 6 },
       { week: 13, opponent: "Colorado", location: "at", stadium: "Folsom Field", teamScore: 48, opponentScore: 21 },
       { week: 14, note: "Army-Navy Week" },
-      { week: 15, note: "BYE" },
+      { week: 15, opponent: "Baylor", location: "at", neutral: true, title: "Big 12 Championship", round: "ccg" },
     ],
   },
 
@@ -409,7 +409,7 @@ const TEAM_SCHEDULES = [
       { week: 12, opponent: "Oklahoma", location: "at", stadium: "Gaylord-Oklahoma Memorial", teamScore: 31, opponentScore: 34 },
       { week: 13, note: "BYE" },
       { week: 14, note: "Army-Navy Week" },
-      { week: 15, note: "BYE" },
+      { week: 15, opponent: "Oklahoma", location: "at", neutral: true, title: "SEC Championship", round: "ccg" },
     ],
   },
   {
