@@ -39,8 +39,8 @@ const SEASON = {
      right and the weekday was the typo, so the generated text says
      Thursday now. This is the class of mistake the picker removes:
      nobody types the weekday any more. */
-  nextAdvanceAt: "2026-10-15T22:00:00-04:00",
-  nextAdvance: "Thursday, October 15th - 10:00 PM EDT",
+  nextAdvanceAt: "2026-10-18T18:00:00-04:00",
+  nextAdvance: "Sunday, October 18th - 6:00 PM EDT",
 };
 
 /* ------------------------------------------------------------
