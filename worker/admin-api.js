@@ -344,7 +344,12 @@ function checkPayload(payload, who) {
      below rather than threaded through them. */
   if (action === "vacation") return checkVacation(payload);
 
-  if (action !== "scores" && action !== "advance" && action !== "rollover") {
+  if (
+    action !== "scores" &&
+    action !== "advance" &&
+    action !== "deadline" &&
+    action !== "rollover"
+  ) {
     return "unknown action";
   }
   if (!ALLOWED_LEAGUES.includes(league)) return "unknown league";
@@ -372,10 +377,13 @@ function checkPayload(payload, who) {
 
   /* Which leagues this action may touch — the same split apply.js
      enforces. Today all three appear in both lists; the guard stays
-     general so a future scores-only league is still rejected here. */
-  const permitted = action === "advance" ? ADVANCE_LEAGUES : SCORE_LEAGUES;
+     general so a future scores-only league is still rejected here.
+     "deadline" edits the same SEASON block an advance does, so it is
+     gated on the same list. */
+  const isSeasonEdit = action === "advance" || action === "deadline";
+  const permitted = isSeasonEdit ? ADVANCE_LEAGUES : SCORE_LEAGUES;
   if (!permitted.includes(league)) {
-    return action === "advance"
+    return isSeasonEdit
       ? `${league} can't be advanced from the web`
       : `${league} can't be updated this way`;
   }
@@ -420,27 +428,37 @@ function checkPayload(payload, who) {
     }
   }
 
-  if (action === "advance") {
-    if (payload.confirm !== true) return "advance was not confirmed";
+  if (action === "advance" && payload.confirm !== true) {
+    return "advance was not confirmed";
+  }
 
-    /* The deadline is a date, not a sentence — the sentence the site
-       shows is generated from it downstream. Shape only: this checks
-       the two forms the admin page can produce and nothing more,
-       because apply.js re-parses it properly with the same code the
-       command-line tool uses. Rejecting it here just saves a
-       round-trip through Actions for an obviously wrong value.
+  /* THE DEADLINE IS A DATE, NOT A SENTENCE — the sentence the site
+     shows is generated from it downstream. Shape only: this checks
+     the two forms the admin page can produce and nothing more,
+     because apply.js re-parses it properly with the same code the
+     command-line tool uses. Rejecting it here just saves a
+     round-trip through Actions for an obviously wrong value.
 
-         2026-08-14T18:00:00-04:00   a day and a time
-         2026-08-14                  a day, no time shown */
-    if (payload.nextAt !== undefined) {
-      if (typeof payload.nextAt !== "string") return "deadline must be a string";
-      const at = payload.nextAt.trim();
-      const ok =
-        at === "" ||
-        /^\d{4}-\d{2}-\d{2}$/.test(at) ||
-        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?([+-]\d{2}:\d{2}|Z)$/.test(at);
-      if (!ok) return "deadline isn't a date like 2026-08-14T18:00:00-04:00";
-    }
+       2026-08-14T18:00:00-04:00   a day and a time
+       2026-08-14                  a day, no time shown
+       ""                          cleared, which hides the badge
+
+     Both actions are checked the same way on purpose: a deadline set
+     by an advance and one set by the deadline editor have to end up
+     in identical shape, or the advance-day heads-up would work after
+     one and not the other. */
+  if (isSeasonEdit && payload.nextAt !== undefined) {
+    if (typeof payload.nextAt !== "string") return "deadline must be a string";
+    const at = payload.nextAt.trim();
+    const ok =
+      at === "" ||
+      /^\d{4}-\d{2}-\d{2}$/.test(at) ||
+      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?([+-]\d{2}:\d{2}|Z)$/.test(at);
+    if (!ok) return "deadline isn't a date like 2026-08-14T18:00:00-04:00";
+  }
+
+  if (action === "deadline" && payload.nextAt === undefined) {
+    return "missing deadline date";
   }
 
   return null;

@@ -4,7 +4,8 @@
    ------------------------------------------------------------
    The bridge between the web admin page and the existing tools.
    Reads a JSON payload from disk and performs exactly one action:
-   record scores, or advance the week.
+   record scores, advance the week, or change the deadline the site
+   shows without touching the week at all.
 
      node tools/apply.js payload.json
 
@@ -69,7 +70,7 @@ const {
 const Vac = require("../vacation-core");
 const { applyScores, scoreableGames } = require("./scores");
 const { resolveEntries, ScoreError } = require("../score-core");
-const { updateSeason, buildMessage, post, webhookUrl, makeMentioner } = require("./advance");
+const { updateSeason, updateNextAdvance, buildMessage, post, webhookUrl, makeMentioner } = require("./advance");
 
 /* The rollover itself — archive, verify, reset — lives in
    tools/rollover.js and is called, never reimplemented. Its header
@@ -179,10 +180,21 @@ const ALLOWED_LEAGUES = [
   ...new Set([...SCORE_LEAGUES, ...ADVANCE_LEAGUES, ...ROLLOVER_LEAGUES]),
 ];
 
+/* "deadline" rides on ADVANCE_LEAGUES rather than getting a list of
+   its own: it edits the same SEASON block an advance does, just one
+   field of it, so anywhere the week can be advanced from the web the
+   deadline can also be nudged from the web. */
 function leaguesForAction(action) {
-  if (action === "advance") return ADVANCE_LEAGUES;
+  if (action === "advance" || action === "deadline") return ADVANCE_LEAGUES;
   if (action === "rollover") return ROLLOVER_LEAGUES;
   return SCORE_LEAGUES;
+}
+
+function verbFor(action) {
+  if (action === "advance") return "advanced";
+  if (action === "deadline") return "rescheduled";
+  if (action === "rollover") return "rolled over";
+  return "scored";
 }
 
 const MAX_ENTRIES = 40; // a 16-team league has at most ~16 games/week
@@ -204,6 +216,25 @@ const SAFE_TEXT = /^[\p{L}\p{N} .,:;·—–\-()&/'+!?]*$/u;
    ------------------------------------------------------------ */
 function bad(msg) {
   die(`payload rejected — ${msg}`);
+}
+
+/* The deadline action's reading of the date field. Same rule the
+   advance applies below: "" is a deliberate clear, otherwise a
+   timestamp or a bare date, and anything else fails the submission
+   loudly rather than being written somewhere no one re-reads. */
+function parseDeadlineField(value) {
+  if (typeof value !== "string") bad("deadline must be a string");
+  const at = value.trim();
+  if (at.length > 40) bad("deadline is longer than 40 characters");
+
+  const stored = Deadline.canonical(at);
+  if (stored === null) {
+    bad(
+      `deadline ${JSON.stringify(at)} isn't a date — expected ` +
+        `2026-08-14T18:00:00-04:00 or 2026-08-14`
+    );
+  }
+  return stored;
 }
 
 function requireString(value, field, max) {
@@ -301,11 +332,13 @@ function validate(payload) {
   if (
     action !== "scores" &&
     action !== "advance" &&
+    action !== "deadline" &&
     action !== "vacation" &&
     action !== "rollover"
   ) {
     bad(
-      `unknown action "${action}" — expected "scores", "advance", "rollover" or "vacation"`
+      `unknown action "${action}" — expected "scores", "advance", "deadline", ` +
+        `"rollover" or "vacation"`
     );
   }
 
@@ -363,7 +396,7 @@ function validate(payload) {
   const permitted = leaguesForAction(action);
   if (!permitted.includes(league)) {
     bad(
-      `league "${league}" cannot be ${action === "advance" ? "advanced" : "scored"} ` +
+      `league "${league}" cannot be ${verbFor(action)} ` +
         `this way. Allowed: ${permitted.join(", ")}`
     );
   }
@@ -476,6 +509,19 @@ function validate(payload) {
     out.status = payload.status === undefined ? undefined : requireSafeText(payload.status, "status");
   }
 
+  if (action === "deadline") {
+    /* The one field this action exists to change, and the only one it
+       may touch. Same date rule as an advance — a deadline set here
+       and a deadline set by an advance have to be stored identically,
+       or the heads-up would work after one and not the other.
+
+       An empty string stays legitimate: that's how the badge gets
+       hidden when there's no date to give yet. */
+    const rawAt = payload.nextAt !== undefined ? payload.nextAt : payload.next;
+    if (rawAt === undefined) bad("deadline requires a date");
+    out.nextAt = parseDeadlineField(rawAt);
+  }
+
   return out;
 }
 
@@ -547,6 +593,47 @@ function doScores(p, L) {
     changed: true,
     commit: `${L.label}: ${weekLabel(p.week)} scores (via ${p.actor})`,
     summary: answered.join("; ") + (syncNote ? ` · ${syncNote}` : ""),
+  };
+}
+
+/* ------------------------------------------------------------
+   DEADLINE — move the date without moving the week
+   ------------------------------------------------------------
+   Scheduling slips. Somebody's out Tuesday, the sim gets pushed to
+   Thursday, and until now the only way to say so on the site was to
+   run an advance — which also bumps the week and pings the whole
+   Discord. This writes the deadline and nothing else, and
+   deliberately posts nowhere: a date that moves twice in a week
+   shouldn't ping the whole league twice in a week. The badge on the
+   site is the announcement.
+
+   It writes the same PAIR an advance does — the timestamp and the
+   sentence generated from it — so a deadline moved here is just as
+   readable to the advance-day heads-up as one set by an advance.
+   Moving the date and having the morning post go quiet because of it
+   would be the worst possible failure for this particular feature.
+   ------------------------------------------------------------ */
+function doDeadline(p, L) {
+  const data = loadData(L.paths);
+  const was = data.SEASON.nextAdvance || "";
+  const now = p.nextAt ? Deadline.formatDeadline(p.nextAt) : "";
+
+  const changed = updateNextAdvance(L.paths.league, p.nextAt);
+
+  if (!changed) {
+    console.log(`\n  ${L.dir}/league-data.js already said "${now}". Nothing to write.\n`);
+    return { changed: false };
+  }
+
+  console.log(
+    `\n  ${L.label} deadline by ${p.actor}: "${was}" → "${now}" ` +
+      `(still on ${weekLabel(Number(data.SEASON.currentWeek) || 0).toLowerCase()})\n`
+  );
+
+  return {
+    changed: true,
+    commit: `${L.label}: deadline → ${now || "(cleared)"} (via ${p.actor})`,
+    summary: `Deadline changed from "${was}" to "${now || "(cleared)"}"`,
   };
 }
 
@@ -944,12 +1031,11 @@ async function main() {
 
   const L = resolveLeague(p.league);
 
-  const result =
-    p.action === "scores"
-      ? doScores(p, L)
-      : p.action === "rollover"
-      ? await doRollover(p, L)
-      : await doAdvance(p, L);
+  let result;
+  if (p.action === "scores") result = doScores(p, L);
+  else if (p.action === "deadline") result = doDeadline(p, L);
+  else if (p.action === "rollover") result = await doRollover(p, L);
+  else result = await doAdvance(p, L);
   emit(result);
 }
 

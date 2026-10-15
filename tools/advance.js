@@ -495,6 +495,48 @@ function replaceOne(src, re, repl, field) {
   return src.replace(re, repl);
 }
 
+/* Rewrite ONLY the deadline, leaving currentWeek and statusLine
+   exactly as they are. This is the "we're still on week 4 but Tuesday
+   turned into Thursday" case, which happens often enough that making
+   people fake an advance to fix it was its own hazard — an advance
+   posts to Discord and moves the week, neither of which is wanted here.
+   Returns false when the file already said that, same contract as
+   updateSeason().
+
+   Takes the same date-shaped value updateSeason() does, and writes
+   the same PAIR — timestamp plus generated sentence. A deadline
+   changed here and a deadline changed by an advance have to end up
+   in identical shape, or the heads-up would work after one and not
+   the other. "" clears both, which is how the badge gets hidden. */
+function updateNextAdvance(leagueFile, nextAdvanceAt) {
+  const src = fs.readFileSync(leagueFile, "utf8");
+  const { open, close, body } = seasonBlock(src, path.basename(leagueFile));
+
+  const stored = Deadline.canonical(nextAdvanceAt);
+  if (stored === null) {
+    die(`refusing to write an unreadable deadline: ${JSON.stringify(nextAdvanceAt)}`);
+  }
+  const text = stored ? Deadline.formatDeadline(stored) : "";
+
+  let next = replaceOne(
+    body,
+    /^(\s*nextAdvanceAt:\s*)"[^"]*"(,)/m,
+    `$1${JSON.stringify(stored)}$2`,
+    "nextAdvanceAt"
+  );
+  next = replaceOne(
+    next,
+    /^(\s*nextAdvance:\s*)"[^"]*"(,)/m,
+    `$1${JSON.stringify(text)}$2`,
+    "nextAdvance"
+  );
+
+  if (next === body) return false;
+
+  fs.writeFileSync(leagueFile, src.slice(0, open) + next + src.slice(close + 1), "utf8");
+  return true;
+}
+
 /* ------------------------------------------------------------
    DISCORD
    ------------------------------------------------------------ */
@@ -725,4 +767,12 @@ if (require.main === module) {
    identical case-insensitive lookup and identical allowed_mentions
    allowlist. A second copy would be a second place for a missing ID to
    go unnoticed. */
-module.exports = { updateSeason, buildMessage, seasonBlock, post, webhookUrl, makeMentioner };
+module.exports = {
+  updateSeason,
+  updateNextAdvance,
+  buildMessage,
+  seasonBlock,
+  post,
+  webhookUrl,
+  makeMentioner,
+};

@@ -279,6 +279,7 @@ $("signout-btn").addEventListener("click", () => {
   message($("signin-msg"), "");
   message($("scores-msg"), "");
   message($("advance-msg"), "");
+  message($("deadline-msg"), "");
   message($("rollover-msg"), "");
   $("rollover-panel").classList.add("hidden");
   message($("vacation-msg"), "");
@@ -322,6 +323,9 @@ async function switchLeague(slug) {
     $("advance-form").classList.remove("hidden");
     message($("advance-msg"), "");
   }
+  /* The deadline editor lives inside the advance panel and is gated by
+     the same list, so its message never outlives a league switch. */
+  message($("deadline-msg"), "");
 
   refreshWeekControls();
 }
@@ -381,7 +385,10 @@ function refreshWeekControls() {
   const picker = Deadline.toPickerFields(data.SEASON.nextAdvanceAt);
   $("advance-date").value = picker.date;
   $("advance-time").value = picker.time;
-  renderDeadlinePreview();
+  $("deadline-date").value = picker.date;
+  $("deadline-time").value = picker.time;
+  renderDeadlinePreview("advance");
+  renderDeadlinePreview("deadline");
 
   /* Read from the raw value, not from the coerced index. Both
      sentinels coerce so every week-axis question gets the right
@@ -1063,16 +1070,20 @@ $("save-scores").addEventListener("click", async () => {
 /* ------------------------------------------------------------
    THE DEADLINE PICKERS
    ------------------------------------------------------------
-   readDeadline() is the single place the two inputs become the one
-   value that gets sent. Returns:
+   Two places set a deadline — the advance form and the reschedule
+   box below it — and they must agree exactly, so both go through
+   this. `which` is the id prefix: "advance" or "deadline".
+
+   readDeadline() returns:
 
      { at, text }   a usable deadline
-     null           no date picked yet
+     null           no date picked
      false          a date that /deadline.js won't accept
 
    The three are kept distinct because "you haven't picked one" and
    "that isn't a real date" are different mistakes and deserve
-   different messages.
+   different messages — and because on the reschedule path, no date
+   is a legitimate instruction meaning "clear it".
 
    Time blank is not an error. It means a deadline stated as a day
    with no clock time, which is how two of the three leagues have
@@ -1080,9 +1091,9 @@ $("save-scores").addEventListener("click", async () => {
    assumed internally so the heads-up still knows whether the
    advance is ahead or behind.
    ------------------------------------------------------------ */
-function readDeadline() {
-  const date = $("advance-date").value.trim();
-  const time = $("advance-time").value.trim();
+function readDeadline(which) {
+  const date = $(`${which}-date`).value.trim();
+  const time = $(`${which}-time`).value.trim();
   if (!date) return null;
 
   const at = time ? Deadline.fromPickerFields(date, time) : Deadline.canonical(date);
@@ -1094,19 +1105,21 @@ function readDeadline() {
 /* Echo the generated sentence under the pickers. Nobody types this
    string any more, so this is the one chance to notice that the date
    says Thursday when you meant Tuesday — before 24 people see it. */
-function renderDeadlinePreview() {
-  const el = $("advance-preview");
+function renderDeadlinePreview(which) {
+  const el = $(`${which}-preview`);
   if (!el) return;
 
-  const d = readDeadline();
+  const d = readDeadline(which);
   el.classList.remove("bad");
 
   if (d === null) {
-    /* Only the offseason may leave this blank — say so here rather
-       than letting the picker read like a field the commissioner
-       forgot to fill in. */
+    /* Only the offseason may leave the advance date blank — say so here
+       rather than letting the picker read like a field the commissioner
+       forgot to fill in. On the reschedule box, blank means "clear it". */
     el.textContent =
-      $("advance-week").value === OFFSEASON
+      which === "deadline"
+        ? "No date — the deadline badge will be hidden."
+        : $("advance-week").value === OFFSEASON
         ? "Optional for the offseason — leave blank to hide the deadline badge."
         : "Pick a date and the site will read: …";
     return;
@@ -1119,9 +1132,12 @@ function renderDeadlinePreview() {
   el.innerHTML = `The site will read: <strong>${esc(d.text)}</strong>`;
 }
 
-$("advance-week").addEventListener("change", renderDeadlinePreview);
-$("advance-date").addEventListener("input", renderDeadlinePreview);
-$("advance-time").addEventListener("input", renderDeadlinePreview);
+["advance", "deadline"].forEach((which) => {
+  $(`${which}-date`).addEventListener("input", () => renderDeadlinePreview(which));
+  $(`${which}-time`).addEventListener("input", () => renderDeadlinePreview(which));
+});
+
+$("advance-week").addEventListener("change", () => renderDeadlinePreview("advance"));
 
 /* ------------------------------------------------------------
    ADVANCE — two steps, on purpose
@@ -1144,7 +1160,7 @@ $("advance-btn").addEventListener("click", () => {
   const week = advanceTarget();
   const msg = $("advance-msg");
 
-  const deadline = readDeadline();
+  const deadline = readDeadline("advance");
   /* THE OFFSEASON IS THE ONE ADVANCE WITH NO DEADLINE TO SET. Its
      steps are announced in Discord, so the site has nothing to count
      down to and league-data.js documents an empty deadline as the way
@@ -1224,7 +1240,7 @@ $("advance-yes").addEventListener("click", async () => {
   /* Re-read rather than trusting what step one showed. The pickers
      are still on the page behind the confirmation, and this is the
      click that actually sends. */
-  const deadline = readDeadline();
+  const deadline = readDeadline("advance");
   if (deadline === false || (deadline === null && week !== OFFSEASON)) {
     message(msg, "error", "The deadline stopped being valid — pick it again.");
     return;
@@ -1286,6 +1302,91 @@ $("advance-yes").addEventListener("click", async () => {
         "warn",
         `Sent, but the site still hasn't updated after 3 minutes.\n` +
           `Reload this page in a few minutes to check before advancing again.`
+      );
+    }
+  } catch (err) {
+    message(msg, "error", err.message);
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+
+/* ------------------------------------------------------------
+   DEADLINE — one step, also on purpose
+   ------------------------------------------------------------
+   No confirmation box here, deliberately. The advance is two-step
+   because it moves the week and pings the whole league; this rewrites
+   one date string and can be corrected by typing a different one. A
+   confirmation on something this reversible only trains people to
+   click through confirmations.
+   ------------------------------------------------------------ */
+$("deadline-btn").addEventListener("click", async () => {
+  const btn = $("deadline-btn");
+  const msg = $("deadline-msg");
+  const was = data.SEASON.nextAdvanceAt || "";
+
+  /* No date here means "clear it", which is a real instruction on
+     this path — unlike the advance form, where it's a mistake. An
+     invalid date is still a mistake in both places. */
+  const deadline = readDeadline("deadline");
+  if (deadline === false) {
+    message(msg, "error", "That date isn't valid.");
+    return;
+  }
+  const at = deadline ? deadline.at : "";
+  const next = deadline ? deadline.text : "";
+
+  if (at === was) {
+    message(msg, "warn", "That's already what the site says.");
+    return;
+  }
+
+  btn.disabled = true;
+  message(msg, "warn", at ? "Updating…" : "Clearing the deadline…");
+
+  try {
+    await api("/submit", {
+      code: accessCode,
+      payload: {
+        action: "deadline",
+        league: $("league-select").value,
+        /* Sent so the payload keeps the shape every action uses;
+           nothing on this path reads it to decide anything. */
+        week: Number(data.SEASON.currentWeek) || 0,
+        /* The timestamp, not the sentence — same contract as an
+           advance, so a rescheduled deadline is stored in the shape
+           the heads-up can read. */
+        nextAt: at,
+      },
+    });
+
+    message(msg, "warn", "Sent. Waiting for the site to publish…");
+    scrollToMessage(msg);
+
+    const fresh = await waitForPublish(
+      $("league-select").value,
+      (d) => (d.SEASON.nextAdvanceAt || "") === at,
+      (secs) => message(msg, "warn", `Sent. Waiting for the site to publish… (${secs}s)`)
+    );
+
+    if (fresh) {
+      /* Full refresh rather than patching the one field, so the
+         "next deadline …" status line is regenerated from the file
+         that actually shipped and not from what we hoped we sent. */
+      data = fresh;
+      refreshWeekControls();
+      message(
+        msg,
+        "ok",
+        at ? `Done — coaches now see ${next}.` : "Done — the deadline is hidden on the site."
+      );
+    } else {
+      message(
+        msg,
+        "warn",
+        "Sent, but the site still hasn't updated after 3 minutes.\n" +
+          "Reload this page in a few minutes to check before sending it again."
       );
     }
   } catch (err) {

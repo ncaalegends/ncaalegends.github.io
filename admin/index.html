@@ -520,6 +520,23 @@ details.entered .entered-body .game:first-child { border-top: 1px solid var(--li
 .confirm-box p { margin: 0 0 14px; color: var(--chalk); font-size: 15px; line-height: 1.55; }
 .confirm-box .what { font-family: var(--font-mono); color: var(--gold-bright); }
 
+/* The deadline editor sits under the advance form inside the same
+   panel — same subject, far lower stakes. The rule and the muted
+   heading are there to keep the eye from mistaking it for a second
+   half of the advance form. */
+.subpanel {
+  margin-top: 26px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+.subpanel h3 {
+  margin: 0 0 6px;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--steel);
+}
+
 /* THE ROLLOVER PANEL IS RED DOWN ITS EDGE, and it is the only panel
    on the page that is. Every other action here is a week's worth of
    data that a second submission corrects; this one writes a permanent
@@ -702,6 +719,34 @@ details.entered .entered-body .game:first-child { border-top: 1px solid var(--li
       </div>
 
       <div id="advance-msg"></div>
+
+      <!-- Change the deadline without advancing. Separate on purpose:
+           an advance moves the week and pings Discord, and neither of
+           those should happen because Tuesday turned into Thursday. -->
+      <div class="subpanel">
+        <h3>Change the deadline</h3>
+        <p class="hint">Updates the date coaches see on the site. Doesn't move the week and doesn't post to Discord — use this when the schedule slips. Clear the date to hide the deadline entirely.</p>
+
+        <!-- Same pickers as the advance form above, and deliberately
+             the same rules: a deadline moved here has to be stored in
+             exactly the shape an advance stores one, or the morning
+             heads-up would work after an advance and go quiet after a
+             reschedule — which is the one case it matters most. -->
+        <div class="field-pair">
+          <label class="field">
+            <span>Deadline — date</span>
+            <input type="date" id="deadline-date">
+          </label>
+          <label class="field narrow">
+            <span>Time (ET, optional)</span>
+            <input type="time" id="deadline-time">
+          </label>
+        </div>
+        <div class="deadline-preview" id="deadline-preview"></div>
+        <button class="btn btn-quiet" type="button" id="deadline-btn">Update deadline</button>
+
+        <div id="deadline-msg"></div>
+      </div>
     </section>
 
     <!-- ============ ADVANCE TO PRESEASON ============
