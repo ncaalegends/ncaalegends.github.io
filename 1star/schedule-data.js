@@ -241,7 +241,7 @@ const TEAM_SCHEDULES = [
       { week: 13, opponent: "New Glarus", location: "at", teamScore: 34, opponentScore: 27 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, opponent: "New Glarus", location: "at", neutral: true, title: "MAC Championship", round: "ccg", teamScore: 38, opponentScore: 35 },
-      { week: 16, opponent: "Wyoming", location: "at", neutral: true, title: "Arizona Bowl", round: "bowl-w1" },
+      { week: 16, opponent: "Wyoming", location: "at", neutral: true, title: "Arizona Bowl", round: "bowl-w1", teamScore: 47, opponentScore: 35 },
     ],
   },
 
