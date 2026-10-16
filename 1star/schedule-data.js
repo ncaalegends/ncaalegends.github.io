@@ -116,7 +116,7 @@ const TEAM_SCHEDULES = [
       { week: 13, opponent: "UL Monroe", location: "at", teamScore: 35, opponentScore: 14 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, opponent: "Appalachian State", location: "vs", neutral: true, title: "Sun Belt Championship", round: "ccg", teamScore: 13, opponentScore: 21 },
-      { week: 16, opponent: "Tulsa", location: "at", neutral: true, title: "Myrtle Beach Bowl", round: "bowl-w1" },
+      { week: 16, opponent: "Tulsa", location: "at", neutral: true, title: "Myrtle Beach Bowl", round: "bowl-w1", teamScore: 31, opponentScore: 15 },
     ],
   },
   {
@@ -312,7 +312,7 @@ const TEAM_SCHEDULES = [
       { week: 13, note: "BYE" },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, note: "BYE" },
-      { week: 16, opponent: "Troy", location: "at", neutral: true, title: "Boca Raton Bowl", round: "bowl-w1" },
+      { week: 16, opponent: "Troy", location: "at", neutral: true, title: "Boca Raton Bowl", round: "bowl-w1", teamScore: 14, opponentScore: 52 },
     ],
   },
 ];
