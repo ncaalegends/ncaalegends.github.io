@@ -195,7 +195,7 @@ const TEAM_SCHEDULES = [
       { week: 14, note: "Army-Navy Week" },
       { week: 15, note: "BYE" },
       { week: 16, note: "BYE" },
-      { week: 17, opponent: "Nevada", location: "at", neutral: true, title: "Xbox Bowl", round: "bowl-w2" },
+      { week: 17, opponent: "Nevada", location: "at", neutral: true, title: "Xbox Bowl", round: "bowl-w2", teamScore: 28, opponentScore: 7 },
     ],
   },
   {
