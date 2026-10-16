@@ -146,7 +146,7 @@ const TEAM_SCHEDULES = [
       { week: 12, opponent: "Miami", location: "vs", stadium: "Acrisure Stadium", teamScore: 55, opponentScore: 24 },
       { week: 13, opponent: "Boston College", location: "vs", stadium: "Acrisure Stadium", teamScore: 57, opponentScore: 21 },
       { week: 14, note: "Army-Navy Week" },
-      { week: 15, opponent: "Miami", location: "vs", neutral: true, title: "ACC Championship", round: "ccg" },
+      { week: 15, opponent: "Miami", location: "vs", neutral: true, title: "ACC Championship", round: "ccg", teamScore: 26, opponentScore: 22 },
     ],
   },
   {
