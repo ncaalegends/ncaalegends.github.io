@@ -48,10 +48,10 @@ const SEASON = {
   // main/league-data.js — it governs the seasons/<year>/ archive.
   year: 2027,
 
-  currentWeek: 18,
-  statusLine: "BOWL WEEK 3 (CFP SEMIFINALS)",
-  nextAdvanceAt: "2026-10-16",
-  nextAdvance: "Friday, October 16th",
+  currentWeek: 19,
+  statusLine: "BOWL WEEK 4 (NATIONAL CHAMPIONSHIP)",
+  nextAdvanceAt: "2026-10-16T22:00:00-04:00",
+  nextAdvance: "Friday, October 16th - 10:00 PM EDT",
 };
 
 /* ------------------------------------------------------------
