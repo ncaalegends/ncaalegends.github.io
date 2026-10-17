@@ -58,5 +58,8 @@ const POSTSEASON = {
       { home: "Ohio State", away: "USC", neutral: true, homeScore: 48, awayScore: 10 },
       { home: "Tennessee", away: "Notre Dame", neutral: true, homeScore: 29, awayScore: 25 },
     ]},
+    { id: "cfp-nc", label: "National Championship", games: [
+      { home: "Tennessee", away: "Ohio State", neutral: true, homeScore: 42, awayScore: 34 },
+    ]},
   ],
 };
