@@ -243,7 +243,7 @@ const TEAM_SCHEDULES = [
       { week: 12, opponent: "Indiana", location: "at", stadium: "Memorial Stadium", teamScore: 59, opponentScore: 35 },
       { week: 13, opponent: "UCLA", location: "at", stadium: "Rose Bowl Stadium", teamScore: 24, opponentScore: 21 },
       { week: 14, note: "Army-Navy Week" },
-      { week: 15, opponent: "Wisconsin", location: "at", neutral: true, title: "Big Ten Championship", round: "ccg" },
+      { week: 15, opponent: "Wisconsin", location: "at", neutral: true, title: "Big Ten Championship", round: "ccg", teamScore: 28, opponentScore: 48 },
     ],
   },
   {
@@ -267,7 +267,7 @@ const TEAM_SCHEDULES = [
       { week: 12, note: "BYE" },
       { week: 13, opponent: "Oregon", location: "at", stadium: "Autzen Stadium", teamScore: 34, opponentScore: 31 },
       { week: 14, note: "Army-Navy Week" },
-      { week: 15, opponent: "Rutgers", location: "vs", neutral: true, title: "Big Ten Championship", round: "ccg" },
+      { week: 15, opponent: "Rutgers", location: "vs", neutral: true, title: "Big Ten Championship", round: "ccg", teamScore: 48, opponentScore: 28 },
     ],
   },
 
