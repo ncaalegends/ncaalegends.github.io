@@ -221,7 +221,7 @@ const TEAM_SCHEDULES = [
       { week: 13, opponent: "Minnesota", location: "at", stadium: "Huntington Bank Stadium", teamScore: 35, opponentScore: 21 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, note: "BYE" },
-      { week: 16, opponent: "North Dakota State", location: "vs", stadium: "Reser Stadium", round: "cfp-r1" },
+      { week: 16, opponent: "North Dakota State", location: "vs", stadium: "Reser Stadium", round: "cfp-r1", teamScore: 32, opponentScore: 35 },
     ],
   },
   {
@@ -247,7 +247,7 @@ const TEAM_SCHEDULES = [
       { week: 13, opponent: "UCLA", location: "at", stadium: "Rose Bowl Stadium", teamScore: 24, opponentScore: 21 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, opponent: "Wisconsin", location: "at", neutral: true, title: "Big Ten Championship", round: "ccg", teamScore: 28, opponentScore: 48 },
-      { week: 16, opponent: "TCU", location: "vs", stadium: "SHI Stadium", round: "cfp-r1" },
+      { week: 16, opponent: "TCU", location: "vs", stadium: "SHI Stadium", round: "cfp-r1", teamScore: 37, opponentScore: 16 },
     ],
   },
   {
