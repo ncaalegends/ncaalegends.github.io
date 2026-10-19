@@ -199,6 +199,7 @@ const TEAM_SCHEDULES = [
       { week: 13, opponent: "USC", location: "at", stadium: "Los Angeles Memorial Coliseum" },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, note: "BYE" },
+      { week: 16, opponent: "Oregon State", location: "at", stadium: "Reser Stadium", round: "cfp-r1", teamScore: 35, opponentScore: 32 },
     ],
   },
   {
