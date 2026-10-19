@@ -44,6 +44,13 @@ const path = require("path");
 const ROOT = path.join(__dirname, "..");
 const read = (p) => fs.readFileSync(path.join(ROOT, p), "utf8");
 
+/* Parts 1 and 3 run on the live 1-star files, so the years they
+   expect come from there too. Hard-coding them passed exactly once:
+   the hold after the 2026 season, and never again. */
+const LIVE_YEAR = Number((read("1star/league-data.js").match(/^\s*year:\s*(\d{4}),/m) || [])[1]);
+if (!LIVE_YEAR) throw new Error("couldn't read SEASON.year from 1star/league-data.js");
+const NEXT_YEAR = LIVE_YEAR + 1;
+
 let failed = 0;
 const ok = (name, cond, detail) => {
   console.log(`    ${cond ? "ok  " : "FAIL"}  ${name}${cond || !detail ? "" : ` — ${detail}`}`);
@@ -71,8 +78,8 @@ function testFileSurgery() {
   const cfpFile = copy("cfp-data.js");
   const postFile = copy("postseason-data.js");
 
-  const reset = roll.resetLeagueData(leagueFile, 2027);
-  ok("SEASON.year is bumped", /^\s*year:\s*2027,/m.test(reset.text));
+  const reset = roll.resetLeagueData(leagueFile, NEXT_YEAR);
+  ok("SEASON.year is bumped", new RegExp(`^\\s*year:\\s*${NEXT_YEAR},`, "m").test(reset.text));
   ok('currentWeek becomes "PRESEASON"', /^\s*currentWeek:\s*"PRESEASON",/m.test(reset.text));
   ok('statusLine becomes "PRESEASON"', /^\s*statusLine:\s*"PRESEASON",/m.test(reset.text));
   ok("both deadline fields are cleared", /nextAdvanceAt:\s*""/.test(reset.text) && /nextAdvance:\s*""/.test(reset.text));
@@ -292,8 +299,8 @@ async function testPanel(JSDOM, VirtualConsole) {
     await settle(150);
 
     ok("the panel appears", !$("rollover-panel").classList.contains("hidden"));
-    ok("it names the archive folder", /1star\/seasons\/2026\//.test($("rollover-hint").textContent));
-    ok("and the year it starts", /2027/.test($("rollover-hint").textContent));
+    ok("it names the archive folder", $("rollover-hint").textContent.includes(`${LEAGUE}/seasons/${LIVE_YEAR}/`));
+    ok("and the year it starts", $("rollover-hint").textContent.includes(String(NEXT_YEAR)));
     ok("there is nothing to warn about", $("rollover-notes").innerHTML === "");
     ok("so the button is live with no tick-box", $("rollover-btn").disabled === false);
 
@@ -303,7 +310,7 @@ async function testPanel(JSDOM, VirtualConsole) {
 
     const text = $("rollover-confirm-text").textContent;
     ok("it says nothing is deleted", /Nothing is deleted/i.test(text));
-    ok("it names both years", /2026/.test(text) && /2027/.test(text));
+    ok("it names both years", text.includes(String(LIVE_YEAR)) && text.includes(String(NEXT_YEAR)));
     ok("it says departed coaches are marked inactive", /inactive/i.test(text));
 
     $("rollover-yes").dispatchEvent(new w.Event("click"));
@@ -312,7 +319,7 @@ async function testPanel(JSDOM, VirtualConsole) {
     const p = payload() || {};
     ok('the action is "rollover"', p.action === "rollover", JSON.stringify(p.action));
     ok("the league is sent", p.league === LEAGUE);
-    ok("the year the page was looking at is sent", p.year === 2026, JSON.stringify(p.year));
+    ok("the year the page was looking at is sent", p.year === LIVE_YEAR, JSON.stringify(p.year));
     ok("confirm is true", p.confirm === true);
     ok("force is false when there was nothing to acknowledge", p.force === false);
     ok("no week is sent", p.week === undefined);

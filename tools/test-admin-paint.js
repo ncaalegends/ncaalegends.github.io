@@ -57,6 +57,61 @@ const { applyScoresToSource, resolveEntries } = require("../score-core");
 const LEAGUE = "1star";
 
 /* ------------------------------------------------------------
+   THE FIXTURE — the live league with one week left unscored
+   ------------------------------------------------------------
+   The page needs a game to type a score into. Reading the live files
+   straight broke this test every offseason (and any time the league
+   happened to be caught up): there was nothing left to enter. So the
+   page gets the real 1-star files with every score in ONE regular-
+   season week removed, and that week made current — the normal
+   "enter this week's scores" situation, whatever the real league is
+   doing today.
+
+   The week is the first one with a coach-vs-coach game in it, so the
+   h2h run has a two-row game to save and the CPU run has the rest.
+   ------------------------------------------------------------ */
+function loadData(leagueSrc, scheduleSrc) {
+  return new Function(`
+    ${leagueSrc}
+    ${scheduleSrc}
+    return {
+      SEASON: typeof SEASON !== "undefined" ? SEASON : {},
+      COACHES: typeof COACHES !== "undefined" ? COACHES : [],
+      LEAGUE_INFO: typeof LEAGUE_INFO !== "undefined" ? LEAGUE_INFO : {},
+      TEAM_SCHEDULES: typeof TEAM_SCHEDULES !== "undefined" ? TEAM_SCHEDULES : [],
+      ALIASES: typeof SCHEDULE_TEAM_ALIASES !== "undefined" ? SCHEDULE_TEAM_ALIASES : {}
+    };`)();
+}
+
+function buildFixture() {
+  const { buildWeek } = require("../week-core");
+  const liveLeague = read(`${LEAGUE}/league-data.js`);
+  const liveSchedule = read(`${LEAGUE}/schedule-data.js`);
+  const D = loadData(liveLeague, liveSchedule);
+
+  let week = null;
+  for (let wk = 1; wk <= 13 && week === null; wk++) {
+    if (buildWeek(D, wk).league.length) week = wk;
+  }
+  if (week === null) throw new Error(`${LEAGUE} has no regular-season coach-vs-coach game to blank`);
+
+  const rowAt = new RegExp(`^(\\s*\\{\\s*week:\\s*${week},.*)$`, "gm");
+  const scheduleSrc = liveSchedule.replace(rowAt, (line) =>
+    line
+      .replace(/,?\s*teamScore:\s*-?\d+/, "")
+      .replace(/,?\s*opponentScore:\s*-?\d+/, "")
+  );
+  const leagueSrc = liveLeague
+    .replace(/^(\s*currentWeek:\s*)(?:"[A-Z]+"|\d+)(,)/m, `$1${week}$2`)
+    .replace(/^(\s*statusLine:\s*)"[^"]*"(,)/m, `$1"WEEK ${week}"$2`);
+
+  if (scheduleSrc === liveSchedule) throw new Error(`blanking week ${week} changed nothing`);
+  return { leagueSrc, scheduleSrc, week };
+}
+
+const FIXTURE = buildFixture();
+
+/* ------------------------------------------------------------
    ONE RUN OF THE PAGE
    ------------------------------------------------------------
      publishes  true  — the site catches up, as it does normally
@@ -65,8 +120,7 @@ const LEAGUE = "1star";
                 written, not one) over a CPU game
    ------------------------------------------------------------ */
 async function run({ publishes, h2h }) {
-  const scheduleSrc = read(`${LEAGUE}/schedule-data.js`);
-  const leagueSrc = read(`${LEAGUE}/league-data.js`);
+  const { scheduleSrc, leagueSrc } = FIXTURE;
 
   let submitted = null;
   let publishedText = scheduleSrc;
@@ -119,7 +173,8 @@ async function run({ publishes, h2h }) {
 
   if ($("workspace").classList.contains("hidden")) throw new Error("sign-in didn't complete");
 
-  /* Find a week that still has something to enter. */
+  /* Find a week that still has something to enter — the fixture's
+     blanked week, unless the page offers an earlier gap first. */
   const sel = $("week-select");
   const pickRow = () =>
     (h2h && w.document.querySelector(".game.is-league [data-inputs]")) ||
@@ -152,16 +207,7 @@ async function run({ publishes, h2h }) {
 
   /* Let the "published" file catch up, or don't. */
   if (publishes) {
-    const D = new w.Function(`
-      ${leagueSrc}
-      ${scheduleSrc}
-      return {
-        SEASON: typeof SEASON !== "undefined" ? SEASON : {},
-        COACHES: typeof COACHES !== "undefined" ? COACHES : [],
-        LEAGUE_INFO: typeof LEAGUE_INFO !== "undefined" ? LEAGUE_INFO : {},
-        TEAM_SCHEDULES: typeof TEAM_SCHEDULES !== "undefined" ? TEAM_SCHEDULES : [],
-        ALIASES: typeof SCHEDULE_TEAM_ALIASES !== "undefined" ? SCHEDULE_TEAM_ALIASES : {}
-      };`)();
+    const D = loadData(leagueSrc, scheduleSrc);
     const games = w.WeekCore.scoreableGames(w.WeekCore.buildWeek(D, week));
     const { edits } = resolveEntries(submitted.entries, games, week, D, false);
     publishedText = applyScoresToSource(scheduleSrc, edits).text;
@@ -198,6 +244,7 @@ function check(label, actual, expected) {
 }
 
 (async () => {
+  console.log(`\n  Fixture: ${LEAGUE} with week ${FIXTURE.week} unscored and current`);
   for (const h2h of [true, false]) {
     const kind = h2h ? "coach-vs-coach" : "CPU";
 
