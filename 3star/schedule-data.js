@@ -99,7 +99,7 @@ const TEAM_SCHEDULES = [
       { week: 13, opponent: "Miami", location: "vs", stadium: "California Memorial Stadium", teamScore: 6, opponentScore: 37 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, note: "BYE" },
-      { week: 16, opponent: "Vanderbilt", location: "vs", neutral: true, title: "Birmingham Bowl", round: "bowl-w1" },
+      { week: 16, opponent: "Vanderbilt", location: "vs", neutral: true, title: "Birmingham Bowl", round: "bowl-w1", teamScore: 20, opponentScore: 26 },
     ],
   },
   {
