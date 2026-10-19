@@ -375,4 +375,25 @@ const CFP_BRACKET = [
       { seed: 12, team: "USF", record: "10-2", auto: true },
     ],
   },
+  {
+    week: 15,
+    projected: false,
+    seeds: [
+      { seed:  1, team: "Ohio State", record: "13-0", auto: true },
+      { seed:  2, team: "California", record: "12-1" },
+      { seed:  3, team: "Texas", record: "13-0", auto: true },
+      { seed:  4, team: "Clemson", record: "13-0", auto: true },
+      { seed:  5, team: "Oregon", record: "11-2" },
+      { seed:  6, team: "Georgia", record: "10-3" },
+      { seed:  7, team: "TCU", record: "13-0", auto: true },
+      { seed:  8, team: "West Virginia", record: "12-1" },
+      { seed:  9, team: "Florida", record: "11-1" },
+      { seed: 10, team: "Notre Dame", record: "9-3", auto: true },
+      { seed: 11, team: "Tennessee", record: "9-3" },
+      { seed: 12, team: "USF", record: "10-2", auto: true },
+    ],
+    bowls: {
+      site: "New Orleans, LA",
+    },
+  },
 ];
