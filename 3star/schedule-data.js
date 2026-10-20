@@ -201,7 +201,7 @@ const TEAM_SCHEDULES = [
       { week: 14, note: "Army-Navy Week" },
       { week: 15, note: "BYE" },
       { week: 16, opponent: "Oregon State", location: "at", stadium: "Reser Stadium", round: "cfp-r1", teamScore: 35, opponentScore: 32 },
-      { week: 17, opponent: "Wisconsin", location: "at", neutral: true, title: "Rose Bowl", round: "cfp-qf" },
+      { week: 17, opponent: "Wisconsin", location: "at", neutral: true, title: "Rose Bowl", round: "cfp-qf", teamScore: 26, opponentScore: 30 },
     ],
   },
   {
@@ -276,7 +276,7 @@ const TEAM_SCHEDULES = [
       { week: 13, opponent: "Oregon", location: "at", stadium: "Autzen Stadium", teamScore: 34, opponentScore: 31 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, opponent: "Rutgers", location: "vs", neutral: true, title: "Big Ten Championship", round: "ccg", teamScore: 48, opponentScore: 28 },
-      { week: 17, opponent: "North Dakota State", location: "vs", neutral: true, title: "Rose Bowl", round: "cfp-qf" },
+      { week: 17, opponent: "North Dakota State", location: "vs", neutral: true, title: "Rose Bowl", round: "cfp-qf", teamScore: 30, opponentScore: 26 },
     ],
   },
 
