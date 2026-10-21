@@ -325,7 +325,7 @@ const TEAM_SCHEDULES = [
       { week: 14, note: "Army-Navy Week" },
       { week: 15, note: "BYE" },
       { week: 16, opponent: "Baylor", location: "at", stadium: "McLane Stadium", round: "cfp-r1", teamScore: 47, opponentScore: 17 },
-      { week: 17, opponent: "Oklahoma State", location: "at", neutral: true, title: "Sugar Bowl", round: "cfp-qf" },
+      { week: 17, opponent: "Oklahoma State", location: "at", neutral: true, title: "Sugar Bowl", round: "cfp-qf", teamScore: 28, opponentScore: 29 },
     ],
   },
   {
@@ -348,7 +348,7 @@ const TEAM_SCHEDULES = [
       { week: 13, opponent: "BYU", location: "vs", stadium: "Jack Trice Stadium", teamScore: 42, opponentScore: 14 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, note: "BYE" },
-      { week: 17, opponent: "Ole Miss", location: "vs", neutral: true, title: "Texas Bowl", round: "bowl-w2" },
+      { week: 17, opponent: "Ole Miss", location: "vs", neutral: true, title: "Texas Bowl", round: "bowl-w2", teamScore: 15, opponentScore: 31 },
     ],
   },
   {
@@ -371,7 +371,7 @@ const TEAM_SCHEDULES = [
       { week: 13, opponent: "Colorado", location: "at", stadium: "Folsom Field", teamScore: 48, opponentScore: 21 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, opponent: "Baylor", location: "at", neutral: true, title: "Big 12 Championship", round: "ccg", teamScore: 45, opponentScore: 27 },
-      { week: 17, opponent: "Colorado", location: "vs", neutral: true, title: "Sugar Bowl", round: "cfp-qf" },
+      { week: 17, opponent: "Colorado", location: "vs", neutral: true, title: "Sugar Bowl", round: "cfp-qf", teamScore: 29, opponentScore: 28 },
     ],
   },
 
@@ -400,7 +400,7 @@ const TEAM_SCHEDULES = [
       { week: 13, note: "BYE" },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, note: "BYE" },
-      { week: 17, opponent: "Indiana", location: "at", neutral: true, title: "Gator Bowl", round: "bowl-w2" },
+      { week: 17, opponent: "Indiana", location: "at", neutral: true, title: "Gator Bowl", round: "bowl-w2", teamScore: 21, opponentScore: 24 },
     ],
   },
   {
