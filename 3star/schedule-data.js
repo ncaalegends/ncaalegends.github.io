@@ -151,7 +151,7 @@ const TEAM_SCHEDULES = [
       { week: 15, opponent: "Miami", location: "vs", neutral: true, title: "ACC Championship", round: "ccg", teamScore: 26, opponentScore: 22 },
       { week: 17, opponent: "Rutgers", location: "vs", neutral: true, title: "Peach Bowl", round: "cfp-qf", teamScore: 36, opponentScore: 18 },
       { week: 18, opponent: "James Madison", location: "vs", neutral: true, title: "Orange Bowl", round: "cfp-sf", teamScore: 19, opponentScore: 7 },
-      { week: 19, opponent: "Wisconsin", location: "vs", neutral: true, title: "National Championship", round: "cfp-nc" },
+      { week: 19, opponent: "Wisconsin", location: "vs", neutral: true, title: "National Championship", round: "cfp-nc", teamScore: 7, opponentScore: 17 },
     ],
   },
   {
@@ -280,7 +280,7 @@ const TEAM_SCHEDULES = [
       { week: 15, opponent: "Rutgers", location: "vs", neutral: true, title: "Big Ten Championship", round: "ccg", teamScore: 48, opponentScore: 28 },
       { week: 17, opponent: "North Dakota State", location: "vs", neutral: true, title: "Rose Bowl", round: "cfp-qf", teamScore: 30, opponentScore: 26 },
       { week: 18, opponent: "Oklahoma State", location: "vs", neutral: true, title: "Cotton Bowl", round: "cfp-sf", teamScore: 38, opponentScore: 31 },
-      { week: 19, opponent: "Pittsburgh", location: "at", neutral: true, title: "National Championship", round: "cfp-nc" },
+      { week: 19, opponent: "Pittsburgh", location: "at", neutral: true, title: "National Championship", round: "cfp-nc", teamScore: 17, opponentScore: 7 },
     ],
   },
 
