@@ -426,7 +426,7 @@ const TEAM_SCHEDULES = [
       { week: 14, note: "Army-Navy Week" },
       { week: 15, opponent: "Oklahoma", location: "at", neutral: true, title: "SEC Championship", round: "ccg", teamScore: 35, opponentScore: 21 },
       { week: 16, opponent: "Missouri", location: "vs", stadium: "Bridgeforth Stadium", round: "cfp-r1", teamScore: 45, opponentScore: 35 },
-      { week: 17, opponent: "Oklahoma", location: "at", neutral: true, title: "Fiesta Bowl", round: "cfp-qf" },
+      { week: 17, opponent: "Oklahoma", location: "at", neutral: true, title: "Fiesta Bowl", round: "cfp-qf", teamScore: 38, opponentScore: 24 },
     ],
   },
   {
