@@ -122,7 +122,7 @@ const TEAM_SCHEDULES = [
       { week: 13, opponent: "NC State", location: "at", stadium: "Carter-Finley Stadium", teamScore: 27, opponentScore: 19 },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, note: "BYE" },
-      { week: 17, opponent: "Maryland", location: "vs", neutral: true, title: "Citrus Bowl", round: "bowl-w2" },
+      { week: 17, opponent: "Maryland", location: "vs", neutral: true, title: "Citrus Bowl", round: "bowl-w2", teamScore: 24, opponentScore: 30 },
     ],
   },
   {
