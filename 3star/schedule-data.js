@@ -150,7 +150,7 @@ const TEAM_SCHEDULES = [
       { week: 14, note: "Army-Navy Week" },
       { week: 15, opponent: "Miami", location: "vs", neutral: true, title: "ACC Championship", round: "ccg", teamScore: 26, opponentScore: 22 },
       { week: 17, opponent: "Rutgers", location: "vs", neutral: true, title: "Peach Bowl", round: "cfp-qf", teamScore: 36, opponentScore: 18 },
-      { week: 18, opponent: "James Madison", location: "vs", neutral: true, title: "Orange Bowl", round: "cfp-sf" },
+      { week: 18, opponent: "James Madison", location: "vs", neutral: true, title: "Orange Bowl", round: "cfp-sf", teamScore: 19, opponentScore: 7 },
     ],
   },
   {
@@ -278,7 +278,7 @@ const TEAM_SCHEDULES = [
       { week: 14, note: "Army-Navy Week" },
       { week: 15, opponent: "Rutgers", location: "vs", neutral: true, title: "Big Ten Championship", round: "ccg", teamScore: 48, opponentScore: 28 },
       { week: 17, opponent: "North Dakota State", location: "vs", neutral: true, title: "Rose Bowl", round: "cfp-qf", teamScore: 30, opponentScore: 26 },
-      { week: 18, opponent: "Oklahoma State", location: "vs", neutral: true, title: "Cotton Bowl", round: "cfp-sf" },
+      { week: 18, opponent: "Oklahoma State", location: "vs", neutral: true, title: "Cotton Bowl", round: "cfp-sf", teamScore: 38, opponentScore: 31 },
     ],
   },
 
@@ -374,7 +374,7 @@ const TEAM_SCHEDULES = [
       { week: 14, note: "Army-Navy Week" },
       { week: 15, opponent: "Baylor", location: "at", neutral: true, title: "Big 12 Championship", round: "ccg", teamScore: 45, opponentScore: 27 },
       { week: 17, opponent: "Colorado", location: "vs", neutral: true, title: "Sugar Bowl", round: "cfp-qf", teamScore: 29, opponentScore: 28 },
-      { week: 18, opponent: "Wisconsin", location: "at", neutral: true, title: "Cotton Bowl", round: "cfp-sf" },
+      { week: 18, opponent: "Wisconsin", location: "at", neutral: true, title: "Cotton Bowl", round: "cfp-sf", teamScore: 31, opponentScore: 38 },
     ],
   },
 
@@ -430,7 +430,7 @@ const TEAM_SCHEDULES = [
       { week: 15, opponent: "Oklahoma", location: "at", neutral: true, title: "SEC Championship", round: "ccg", teamScore: 35, opponentScore: 21 },
       { week: 16, opponent: "Missouri", location: "vs", stadium: "Bridgeforth Stadium", round: "cfp-r1", teamScore: 45, opponentScore: 35 },
       { week: 17, opponent: "Oklahoma", location: "at", neutral: true, title: "Fiesta Bowl", round: "cfp-qf", teamScore: 38, opponentScore: 24 },
-      { week: 18, opponent: "Pittsburgh", location: "at", neutral: true, title: "Orange Bowl", round: "cfp-sf" },
+      { week: 18, opponent: "Pittsburgh", location: "at", neutral: true, title: "Orange Bowl", round: "cfp-sf", teamScore: 7, opponentScore: 19 },
     ],
   },
   {
