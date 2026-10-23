@@ -134,7 +134,8 @@ const TEAM_SCHEDULES = [
       { week: 14, note: "Army-Navy Week" },
       { week: 15, opponent: "California", location: "at", neutral: true, title: "ACC Championship", round: "ccg", teamScore: 63, opponentScore: 38 },
       { week: 17, opponent: "Oregon", location: "vs", neutral: true, title: "Peach Bowl", round: "cfp-qf", teamScore: 38, opponentScore: 28 },
-      { week: 18, opponent: "Texas", location: "at", neutral: true, round: "cfp-sf" },
+      { week: 18, opponent: "Texas", location: "at", neutral: true, title: "Cotton Bowl", round: "cfp-sf", teamScore: 42, opponentScore: 36 },
+      { week: 19, opponent: "Ohio State", location: "at", neutral: true, title: "National Championship", round: "cfp-nc" },
     ],
   },
   {
@@ -297,6 +298,7 @@ const TEAM_SCHEDULES = [
       { week: 15, opponent: "Oregon", location: "vs", neutral: true, title: "Big Ten Championship", round: "ccg", teamScore: 40, opponentScore: 20 },
       { week: 17, opponent: "West Virginia", location: "vs", neutral: true, title: "Rose Bowl", round: "cfp-qf", teamScore: 52, opponentScore: 14 },
       { week: 18, opponent: "TCU", location: "vs", neutral: true, round: "cfp-sf", teamScore: 31, opponentScore: 3 },
+      { week: 19, opponent: "Clemson", location: "vs", neutral: true, title: "National Championship", round: "cfp-nc" },
     ],
   },
   {
@@ -320,7 +322,7 @@ const TEAM_SCHEDULES = [
       { week: 14, note: "Army-Navy Week" },
       { week: 15, opponent: "Georgia", location: "vs", neutral: true, title: "SEC Championship", round: "ccg", teamScore: 37, opponentScore: 21 },
       { week: 17, opponent: "Florida", location: "vs", neutral: true, title: "Sugar Bowl", round: "cfp-qf", teamScore: 31, opponentScore: 25 },
-      { week: 18, opponent: "Clemson", location: "vs", neutral: true, round: "cfp-sf" },
+      { week: 18, opponent: "Clemson", location: "vs", neutral: true, title: "Cotton Bowl", round: "cfp-sf", teamScore: 36, opponentScore: 42 },
     ],
   },
   {
