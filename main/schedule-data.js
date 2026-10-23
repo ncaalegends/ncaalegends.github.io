@@ -462,7 +462,7 @@ const TEAM_SCHEDULES = [
       { week: 13, note: "BYE" },
       { week: 14, note: "Army-Navy Week" },
       { week: 15, note: "BYE" },
-      { week: 17, opponent: "Washington State", location: "vs", neutral: true, title: "Sun Bowl", round: "bowl-w2" },
+      { week: 17, opponent: "Washington State", location: "vs", neutral: true, title: "Sun Bowl", round: "bowl-w2", teamScore: 20, opponentScore: 17 },
     ],
   },
   {
