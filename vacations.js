@@ -79,4 +79,5 @@ const VACATIONS = [
   { coach: "DiabeticSnail22", start: "2026-10-16", end: "2026-10-19", added: "2026-09-29" },
   { coach: "Dway", start: "2026-10-23", end: "2026-10-25", added: "2026-10-22" },
   { coach: "Brian52682", start: "2026-10-25", end: "2026-10-29", added: "2026-10-16" },
+  { coach: "Dway", start: "2026-10-28", end: "2026-11-01", added: "2026-10-27" },
 ];
