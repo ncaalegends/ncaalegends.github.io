@@ -46,12 +46,12 @@
 const SEASON = {
   // In-game year for this season's data. See the long note in
   // main/league-data.js — it governs the seasons/<year>/ archive.
-  year: 2027,
+  year: 2028,
 
-  currentWeek: "OFFSEASON",
-  statusLine: "OFFSEASON",
-  nextAdvanceAt: "2026-10-18T22:00:00-04:00",
-  nextAdvance: "Sunday, October 18th - 10:00 PM EDT",
+  currentWeek: "PRESEASON",
+  statusLine: "PRESEASON",
+  nextAdvanceAt: "",
+  nextAdvance: "",
 };
 
 /* ------------------------------------------------------------

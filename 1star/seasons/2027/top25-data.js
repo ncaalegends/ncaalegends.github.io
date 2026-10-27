@@ -1,0 +1,185 @@
+/* ============================================================
+   TOP 25 — the in-game AP poll, transcribed from screenshots
+   ------------------------------------------------------------
+   The 1-Star Dynasty's copy of the EA College Football 27 Top 25,
+   one entry per week. It is NOT the site's own computed Power
+   Rankings (that's the Rankings tab, built from head-to-head
+   results). This poll is mostly CPU teams with a handful of coaches
+   mixed in, and it drives two things on the site:
+
+     1. The Top 25 tab.
+     2. The "#N" rank badges on schedules. A game played in week N
+        shows each team's rank from THAT week's poll, so a schedule
+        always shows what a team was ranked WHEN the game was played,
+        even after they rise or fall later.
+
+   Because of (2), each week's poll is frozen history: once a week is
+   entered, never edit it to reflect a later poll — add a new week
+   instead.
+
+   EMPTY ON PURPOSE
+   Nobody has transcribed a 1-star poll yet. This file exists so that
+   the day someone starts, the only thing needed is a screenshot —
+   the data file, the tab, and the tooling are already in place and
+   the first upload just works.
+
+   An empty array is a supported state everywhere, not a half-finished
+   one. script.js drops the Top 25 tab entirely when there are no
+   polls, so the site shows no trace of this until the first week
+   lands; schedules render every game unranked, which is correct;
+   and the advance is not gated on the poll (see below), so nothing
+   about the league's weekly routine changes while this sits empty.
+
+   NO ADVANCE GATE HERE (this is the difference from main)
+   The main dynasty REFUSES to advance to week N until week N's poll is
+   in its file, so the poll and the new week always surface together.
+   1-star is deliberately not gated: advancing never waits on a
+   screenshot. Uploads are welcome any time, including weeks after the
+   fact, and they appear as soon as they're pushed. See
+   top25GateError() in tools/lib/league.js for where that lives.
+
+   HOW TO START
+   Screenshot the in-game Top 25 for the week, then run:
+
+     node tools/top25.js --league 1star --week N --file poll.txt
+
+   The --league flag is the part that's easy to forget; without it the
+   script writes to main. The first upload will report every team as
+   unrecognised if the poll is full of schools nobody in this league
+   has played — that's what --allow-new is for. See tools/README.md.
+
+   Start at whatever week you're on. There's no obligation to backfill
+   week 1: a missing week renders as unranked, not as an error.
+
+   Team names should match the roster / schedule spelling (the site
+   resolves them the same way, through SCHEDULE_TEAM_ALIASES, so "Cal"
+   vs "California" etc. still line up). `record` is whatever the poll
+   shows next to the team.
+
+     { rank, team, record }
+       rank    1 = best, 1..25
+       team    must resolve to a roster or schedule team name
+       record  the W-L string shown in the poll (e.g. "1-0")
+   ============================================================ */
+const TOP25 = [
+  {
+    week: 5,
+    teams: [
+      { rank: 1, team: "Notre Dame", record: "4-0" },
+      { rank: 2, team: "LSU", record: "4-0" },
+      { rank: 3, team: "Ohio State", record: "4-0" },
+      { rank: 4, team: "Georgia", record: "3-0" },
+      { rank: 5, team: "Indiana", record: "3-0" },
+      { rank: 6, team: "Penn State", record: "3-0" },
+      { rank: 7, team: "Miami", record: "2-1" },
+      { rank: 8, team: "Oklahoma", record: "2-1" },
+      { rank: 9, team: "South Carolina", record: "4-0" },
+      { rank: 10, team: "Nebraska", record: "3-0" },
+      { rank: 11, team: "Texas A&M", record: "2-1" },
+      { rank: 12, team: "BYU", record: "3-1" },
+      { rank: 13, team: "Tennessee", record: "4-0" },
+      { rank: 14, team: "USC", record: "4-0" },
+      { rank: 15, team: "Virginia", record: "3-2" },
+      { rank: 16, team: "Ole Miss", record: "3-1" },
+      { rank: 17, team: "Oregon", record: "2-1" },
+      { rank: 18, team: "Boise State", record: "3-1" },
+      { rank: 19, team: "Wisconsin", record: "2-2" },
+      { rank: 20, team: "Colorado", record: "2-1" },
+      { rank: 21, team: "Iowa", record: "3-1" },
+      { rank: 22, team: "Florida State", record: "1-2" },
+      { rank: 23, team: "Memphis", record: "3-1" },
+      { rank: 24, team: "Washington", record: "3-1" },
+      { rank: 25, team: "New Glarus", record: "3-1" },
+    ],
+  },
+  {
+    week: 6,
+    teams: [
+      { rank: 1, team: "Notre Dame", record: "4-0" },
+      { rank: 2, team: "LSU", record: "5-0" },
+      { rank: 3, team: "Ohio State", record: "4-0" },
+      { rank: 4, team: "Penn State", record: "4-0" },
+      { rank: 5, team: "Miami", record: "3-1" },
+      { rank: 6, team: "Oklahoma", record: "3-1" },
+      { rank: 7, team: "Texas A&M", record: "3-1" },
+      { rank: 8, team: "South Carolina", record: "5-0" },
+      { rank: 9, team: "Nebraska", record: "4-0" },
+      { rank: 10, team: "Georgia", record: "3-1" },
+      { rank: 11, team: "BYU", record: "4-1" },
+      { rank: 12, team: "Tennessee", record: "4-0" },
+      { rank: 13, team: "USC", record: "5-0" },
+      { rank: 14, team: "Oregon", record: "3-1" },
+      { rank: 15, team: "Indiana", record: "3-1" },
+      { rank: 16, team: "Boise State", record: "4-1" },
+      { rank: 17, team: "Iowa", record: "4-1" },
+      { rank: 18, team: "Memphis", record: "4-1" },
+      { rank: 19, team: "Washington", record: "4-1" },
+      { rank: 20, team: "New Glarus", record: "4-1" },
+      { rank: 21, team: "Missouri", record: "4-0" },
+      { rank: 22, team: "Houston", record: "5-0" },
+      { rank: 23, team: "Texas Tech", record: "3-2" },
+      { rank: 24, team: "Virginia", record: "3-2" },
+      { rank: 25, team: "Duke", record: "3-2" },
+    ],
+  },
+  {
+    week: 8,
+    teams: [
+      { rank: 1, team: "Ohio State", record: "6-0" },
+      { rank: 2, team: "Tennessee", record: "6-0" },
+      { rank: 3, team: "USC", record: "7-0" },
+      { rank: 4, team: "BYU", record: "6-1" },
+      { rank: 5, team: "LSU", record: "6-1" },
+      { rank: 6, team: "Indiana", record: "5-1" },
+      { rank: 7, team: "Penn State", record: "5-1" },
+      { rank: 8, team: "Notre Dame", record: "5-1" },
+      { rank: 9, team: "Boise State", record: "5-1" },
+      { rank: 10, team: "Oklahoma", record: "4-2" },
+      { rank: 11, team: "Washington", record: "5-1" },
+      { rank: 12, team: "Miami", record: "4-2" },
+      { rank: 13, team: "Georgia", record: "4-2" },
+      { rank: 14, team: "South Carolina", record: "6-1" },
+      { rank: 15, team: "New Glarus", record: "6-1" },
+      { rank: 16, team: "Oregon", record: "4-2" },
+      { rank: 17, team: "Texas Tech", record: "5-2" },
+      { rank: 18, team: "Texas A&M", record: "4-2" },
+      { rank: 19, team: "Michigan", record: "7-0" },
+      { rank: 20, team: "North Shore", record: "6-0" },
+      { rank: 21, team: "Colorado", record: "4-2" },
+      { rank: 22, team: "Memphis", record: "4-2" },
+      { rank: 23, team: "Iowa", record: "5-2" },
+      { rank: 24, team: "Fresno State", record: "5-1" },
+      { rank: 25, team: "Texas", record: "5-3" },
+    ],
+  },
+  {
+    week: 9,
+    teams: [
+      { rank: 1, team: "Ohio State", record: "7-0" },
+      { rank: 2, team: "LSU", record: "7-1" },
+      { rank: 3, team: "USC", record: "7-0" },
+      { rank: 4, team: "BYU", record: "7-1" },
+      { rank: 5, team: "Penn State", record: "6-1" },
+      { rank: 6, team: "Tennessee", record: "6-1" },
+      { rank: 7, team: "Washington", record: "6-1" },
+      { rank: 8, team: "Miami", record: "5-2" },
+      { rank: 9, team: "Georgia", record: "5-2" },
+      { rank: 10, team: "Texas A&M", record: "5-2" },
+      { rank: 11, team: "Oregon", record: "5-2" },
+      { rank: 12, team: "New Glarus", record: "6-1" },
+      { rank: 13, team: "Texas Tech", record: "5-2" },
+      { rank: 14, team: "South Carolina", record: "6-2" },
+      { rank: 15, team: "Colorado", record: "5-2" },
+      { rank: 16, team: "Fresno State", record: "6-1" },
+      { rank: 17, team: "Memphis", record: "5-2" },
+      { rank: 18, team: "Notre Dame", record: "5-2" },
+      { rank: 19, team: "Iowa", record: "5-2" },
+      { rank: 20, team: "Indiana", record: "5-2" },
+      { rank: 21, team: "Boise State", record: "5-2" },
+      { rank: 22, team: "Stanford", record: "6-1" },
+      { rank: 23, team: "Texas", record: "6-3" },
+      { rank: 24, team: "Arizona", record: "5-2" },
+      { rank: 25, team: "Michigan", record: "7-1" },
+    ],
+  },
+];
