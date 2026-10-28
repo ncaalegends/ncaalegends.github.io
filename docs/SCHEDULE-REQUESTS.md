@@ -152,6 +152,13 @@ series runs 2028–2029, continuing the alternation (2027 at UCLA → 2028 at Ca
 
 ## 2029 Season
 
+> **Home/away priority for 2029 (Josh, 2026-10-28):** these coaches were 6H/6A
+> in both 2027 and 2028 — give them **7 home / 5 away** in 2029 where the slots
+> allow: **Clemson (temptiger), Colorado (turt17), Michigan (projekt), Oregon
+> (Davey)**. Check their 2029 requested legs first: Clemson is already at home
+> for Ohio State, and Oregon–WVU is at WVU, so both need home CPU games in
+> their open slots to get there.
+
 | Matchup | Requested site | Notes | Status |
 |---|---|---|---|
 | Oregon (Davey) at Clemson (temptiger) | Clemson | Leg 1 of a 2029–2030 home-and-home | Pending |
