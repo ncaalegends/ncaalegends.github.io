@@ -25,6 +25,12 @@ season, not just that one.
    that kills most otherwise-attractive user matchups — check it first.
 4. **Locked (greyed-out) games can't move.** Conference games and fixed rivalry
    games are fixed; open weeks and non-greyed games are the only editable slots.
+   **An `OPEN` week is always schedulable, even when it shows a padlock.** The
+   padlock on an `OPEN` row only means the team is at its 12-game capacity — to
+   use that week, drop one of the team's non-greyed games. So a team's usable
+   weeks are its `OPEN` weeks plus its non-greyed games, and the number of new
+   games it can take is its count of non-greyed games. The one exception is
+   **week 14 (Army-Navy Week)** — never schedule over it.
 5. **Every user gets at least three head-to-head games.** Users short of that get
    paired with opponents of similar strength, matched on the site's computed
    **power ranking score** (not raw H2H win-loss record).
@@ -138,7 +144,8 @@ game (Texas–Michigan, the ACC slate, the SEC slate, Ohio State–Michigan, etc
 | Cal (BlueMiniMeaniee) at WVU (diabeticsnail22) | WVU | Leg 1 of a 2028–2029 home-and-home | Pending |
 | UCLA (Dway) at Cal (BlueMiniMeaniee) | Cal | **Leg 1 of a new 2028–2029 home-and-home.** Alternates from 2027, which was at UCLA. | Pending |
 | Ohio State (RekenCrew) at LSU (chompdaddy) | LSU | Leg 1 of a 2028–2029 home-and-home | Pending |
-| LSU (chompdaddy) at Texas (Big_Ry) | Texas | Leg 1 of a 2028–2029 home-and-home | Pending |
+| Clemson (temptiger) at Ohio State (RekenCrew) | Ohio State | Leg 1 — **moved up from 2029** on 2026-10-28. Replaces the in-game default Clemson at Notre Dame (100.7 vs 59.7 power score); Ohio State drops at Alabama to fit it. | Pending |
+| USC (Bl00dVayN3) at Arkansas (texan_hog) | Arkansas | Leg 1 of a 2028–2029 home-and-home. Added 2026-10-28 to work texan_hog's return and Bl00dVayN3's first full USC season in. | Pending |
 
 The 2026–2027 Cal–UCLA home-and-home closed out in 2027; a **new** Cal–UCLA
 series runs 2028–2029, continuing the alternation (2027 at UCLA → 2028 at Cal).
@@ -148,19 +155,18 @@ series runs 2028–2029, continuing the alternation (2027 at UCLA → 2028 at Ca
 | Matchup | Requested site | Notes | Status |
 |---|---|---|---|
 | Oregon (Davey) at Clemson (temptiger) | Clemson | Leg 1 of a 2029–2030 home-and-home | Pending |
-| Clemson (temptiger) at Ohio State (RekenCrew) | Ohio State | Leg 1 of a 2029–2030 home-and-home | Pending |
+| Ohio State (RekenCrew) at Clemson (temptiger) | Clemson | Leg 2 — series **moved up a year** on 2026-10-28 (was 2029 at OSU / 2030 at Clemson) | Pending |
 | Oregon (Davey) at WVU (diabeticsnail22) | WVU | **Leg 1** — deferred twice (out of 2027, then out of 2028). Return leg 2030 at Oregon. | Pending |
 | WVU (diabeticsnail22) at Cal (BlueMiniMeaniee) | Cal | Leg 2 of the 2028–2029 home-and-home | Pending |
 | Cal (BlueMiniMeaniee) at UCLA (Dway) | UCLA | Leg 2 of the 2028–2029 home-and-home | Pending |
 | LSU (chompdaddy) at Ohio State (RekenCrew) | Ohio State | Leg 2 of the 2028–2029 home-and-home | Pending |
-| Texas (Big_Ry) at LSU (chompdaddy) | LSU | Leg 2 of the 2028–2029 home-and-home | Pending |
+| Arkansas (texan_hog) at USC (Bl00dVayN3) | USC | Leg 2 of the 2028–2029 home-and-home | Pending |
 
 ## 2030 Season
 
 | Matchup | Requested site | Notes | Status |
 |---|---|---|---|
 | Clemson (temptiger) at Oregon (Davey) | Oregon | Leg 2 of the 2029–2030 home-and-home | Pending |
-| Ohio State (RekenCrew) at Clemson (temptiger) | Clemson | Leg 2 of the 2029–2030 home-and-home | Pending |
 | WVU (diabeticsnail22) at Oregon (Davey) | Oregon | Leg 2 of the twice-deferred Oregon–WVU series | Pending |
 
 ---
@@ -168,7 +174,8 @@ series runs 2028–2029, continuing the alternation (2027 at UCLA → 2028 at Ca
 > **Note — heavy loads in 2028:** Notre Dame (brian) carries **three** requested
 > non-conference games (TCU, Ohio State, Oregon), TCU (oldarmy) **three**
 > (Michigan, Notre Dame, Clemson), WVU (diabeticsnail22) **three** (Oklahoma,
-> LSU, Cal), and LSU (chompdaddy) **three** (WVU, Ohio State, Texas). Oregon
+> LSU, Cal), and LSU (chompdaddy) **two** (WVU, Ohio State) after LSU–Texas was
+> withdrawn. Oregon
 > (Davey) is down to **two** (Colorado, Notre Dame) after the WVU deferral.
 > Clemson (temptiger) carries two. Check editable-slot counts before promising
 > anything new to Oregon or WVU — both have already lost a leg once.
@@ -178,9 +185,9 @@ series runs 2028–2029, continuing the alternation (2027 at UCLA → 2028 at Ca
 >
 > **Home/away in 2028:** Clemson hosts Georgia and travels to TCU — 1H/1A.
 > Washington is left with **no requested game in 2028** after his return leg was
-> dropped. LSU (chompdaddy) now carries **three** (WVU, Ohio State, Texas) —
-> 2H/1A in 2028, 1H/1A in 2029. Ohio State ends up **2H/0A in 2029** (Clemson,
-> LSU); unavoidable without flipping one of those series.
+> dropped. LSU (chompdaddy) carries **two** (WVU, Ohio State) — 1H/1A in 2028,
+> 1H in 2029. Ohio State is **1H/1A in 2029** (LSU home, at Clemson) now that
+> the Clemson series moved up a year — this fixed the old 2H/0A problem.
 
 ## Restrictions — do not schedule
 
@@ -190,6 +197,7 @@ series runs 2028–2029, continuing the alternation (2027 at UCLA → 2028 at Ca
 | Florida State vs Ohio State (RekenCrew) | 2027+ | FSU doesn't want the matchup. Removed from the 2027 build. |
 | Florida State vs Georgia (Miles) | 2027+ | FSU doesn't want the matchup. Removed from the 2027 build. |
 | Any same-conference user pair, non-conference | all | See build rule 3. Their meetings come from the locked conference slate only. |
+| LSU (chompdaddy) vs Texas (Big_Ry), non-conference | 2028+ | Both SEC — the requested 2028–2029 home-and-home broke build rule 3 and was withdrawn 2026-10-28. |
 
 ---
 
@@ -255,17 +263,19 @@ series runs 2028–2029, continuing the alternation (2027 at UCLA → 2028 at Ca
 - 2029: at Clemson
 - 2030: at Oregon
 
-### Clemson (temptiger) ↔ Ohio State (RekenCrew) — home-and-home
-- 2029: at Ohio State
-- 2030: at Clemson
+### Clemson (temptiger) ↔ Ohio State (RekenCrew) — home-and-home — **moved up a year**
+- 2028: at Ohio State
+- 2029: at Clemson
+- Originally 2029 at OSU / 2030 at Clemson. Pulled forward on 2026-10-28 to give
+  Clemson a power-matched 2028 opponent in place of Notre Dame; 2030 is freed.
 
 ### LSU (chompdaddy) ↔ Ohio State (RekenCrew) — home-and-home
 - 2028: at LSU
 - 2029: at Ohio State
 
-### LSU (chompdaddy) ↔ Texas (Big_Ry) — home-and-home
-- 2028: at Texas
-- 2029: at LSU
+### USC (Bl00dVayN3) ↔ Arkansas (texan_hog) — home-and-home
+- 2028: at Arkansas
+- 2029: at USC
 
 ### Cal (BlueMiniMeaniee) ↔ UCLA (Dway) — ongoing, alternating
 - 2026: at Cal — played
