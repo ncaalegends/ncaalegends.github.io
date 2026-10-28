@@ -38,12 +38,12 @@ const SEASON = {
      In-game year, not real-world year: the roster is EA College
      Football 27's 2026 season, and in-game years drift away from real
      life as the dynasty runs. 2026 -> 2027 -> 2028 and so on. */
-  year: 2027,
+  year: 2028,
 
-  currentWeek: "OFFSEASON",
+  currentWeek: "PRESEASON",
 
   // Shown in the hero. Update as the league moves through phases.
-  statusLine: "OFFSEASON",
+  statusLine: "PRESEASON",
 
   /* ADVANCE DEADLINE — the one place real-world time appears.
      League rule: the next advance happens no later than 6:00 PM EDT
@@ -171,13 +171,13 @@ const LEAGUE_INFO = {
    computeH2H in week-core.js.
    ------------------------------------------------------------ */
 const COACHES = [
-  { name: "Bl00dVayN3",      team: "South Carolina",               conference: "SEC", color: "#A6192E", twitch: "https://www.twitch.tv/bl00dvayn3", espnId: "2579", departedAfterWeek: 6 },  // Left South Carolina after week 6 to take over USC (entry below, joinedAtWeek: 7). Weeks 0-6 stand as his; South Carolina is a CPU opponent from week 7 on.
+  { name: "Bl00dVayN3",      team: "South Carolina",               conference: "SEC", color: "#A6192E", twitch: "https://www.twitch.tv/bl00dvayn3", espnId: "2579", active: false },  // Left South Carolina after week 6 to take over USC (entry below, joinedAtWeek: 7). Weeks 0-6 stand as his; South Carolina is a CPU opponent from week 7 on.
   { name: "Temptiger",       team: "Clemson",                      conference: "ACC", color: "#F56600", twitch: "https://www.twitch.tv/temptiger", espnId: "228" },
   { name: "RekenCrew",       team: "Ohio State",                   conference: "B1G", color: "#CE2029", twitch: "https://www.twitch.tv/rekencrew", espnId: "194" },
   { name: "Turt17",          team: "Colorado",                     conference: "XII", color: "#CFB87C", twitch: "https://www.twitch.tv/turt17", espnId: "38" },
   { name: "Davey88",         team: "Oregon",                       conference: "B1G", color: "#FEE123", twitch: "https://www.twitch.tv/dbenjamin541", espnId: "2483" },  // UNVERIFIED — confirm via logo-check.html
   { name: "Pointdexter420",  team: "Oklahoma",                     conference: "SEC", color: "#C8102E", twitch: "https://www.twitch.tv/smackintaint", espnId: "201" },
-  { name: "Texan_hog",       team: "Washington",                   conference: "B1G", color: "#7A5BB5", twitch: "https://www.twitch.tv/texan_hog08", espnId: "264", departedAfterWeek: 7 },  // UNVERIFIED — confirm via logo-check.html // Went inactive in all leagues during week 8 — weeks 0-7 stand as real games; Washington is a CPU opponent from week 8 on (starting with Nebraska). Also left the 3-star dynasty (North Dakota State) in the same move.
+  { name: "Texan_hog",       team: "Washington",                   conference: "B1G", color: "#7A5BB5", twitch: "https://www.twitch.tv/texan_hog08", espnId: "264", active: false },  // UNVERIFIED — confirm via logo-check.html // Went inactive in all leagues during week 8 — weeks 0-7 stand as real games; Washington is a CPU opponent from week 8 on (starting with Nebraska). Also left the 3-star dynasty (North Dakota State) in the same move.
   { name: "Miles",           team: "Georgia",                      conference: "SEC", color: "#D6203A", twitch: "https://www.twitch.tv/kyrvach", espnId: "61" },
   { name: "BlueMiniMeaniee", team: "Cal",                          conference: "ACC", color: "#FDB515", twitch: "https://www.twitch.tv/blueminimeaniee", espnId: "25" },
   { name: "Woogity",         team: "Alabama",                      conference: "SEC", color: "#C7304A", twitch: "https://www.twitch.tv/kingwoogity", espnId: "333", active: false },  // Went inactive during week 5 — weeks 0-4 stand as real games; Alabama was CPU from week 5 until Trick whitey took it over in week 11 (below).
