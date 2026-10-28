@@ -90,6 +90,29 @@ function testFileSurgery() {
       (read("1star/league-data.js").match(/name:\s*"/g) || []).length
   );
 
+  /* The per-season flags, on a roster built to trip them: a takeover
+     flag in the code, the same words in a trailing comment (which must
+     survive), and a departure. */
+  const flagsFile = path.join(tmp, "flags-league-data.js");
+  fs.writeFileSync(
+    flagsFile,
+    read("1star/league-data.js").replace(
+      /const COACHES = \[\n/,
+      (m) =>
+        m +
+        `  { name: "Leaver", team: "Old U", conference: "SEC", twitch: "https://www.twitch.tv/x", espnId: "1", departedAfterWeek: 6 },  // moved on (entry below, joinedAtWeek: 7)\n` +
+        `  { name: "Leaver", team: "New U", conference: "B1G", twitch: "https://www.twitch.tv/x", espnId: "2", joinedAtWeek: 7 },  // took over in week 7\n`
+    ),
+    "utf8"
+  );
+  const flags = roll.resetLeagueData(flagsFile, NEXT_YEAR);
+  const flagLines = flags.text.split("\n").filter((l) => /name: "Leaver"/.test(l));
+  ok("the fixture roster was injected", flagLines.length === 2, `${flagLines.length} lines`);
+  ok("joinedAtWeek is dropped from the entry", !/espnId: "2", joinedAtWeek/.test(flags.text) && /espnId: "2" \}/.test(flags.text));
+  ok("joinedAtWeek is counted", flags.joined === 1, `joined=${flags.joined}`);
+  ok("departedAfterWeek becomes active: false", /espnId: "1", active: false \}/.test(flags.text));
+  ok("the trailing comment is left as written", /\(entry below, joinedAtWeek: 7\)/.test(flags.text));
+
   const sched = roll.clearSchedules(scheduleFile);
   /* Counted, not searched for absence: these files carry worked
      examples in their header comments that look exactly like a week

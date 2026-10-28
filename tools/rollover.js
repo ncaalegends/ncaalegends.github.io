@@ -48,6 +48,10 @@
      postseason      in the archive.
      departedAfterWeek
                      TRANSLATED to `active: false` — see below.
+     joinedAtWeek    DROPPED. A mid-season takeover is a fact about
+                     the season it happened in; carried forward, it
+                     would turn the coach's first N weeks of the NEW
+                     season into CPU games.
 
    DEPARTURES BECOME PERMANENT INACTIVITY.
    league-data.js already documents departedAfterWeek as per-season:
@@ -301,14 +305,42 @@ function resetLeagueData(file, nextYear) {
      being gone is a fact about the league, and `active: false` is the
      existing flag for it. Rewritten in place so the surrounding
      comment — which usually explains who left and when — survives
-     next to it. */
-  const departed = [];
-  src = src.replace(/departedAfterWeek:\s*\d+/g, (m) => {
-    departed.push(m);
-    return "active: false";
-  });
+     next to it.
 
-  return { text: src, departed: departed.length };
+     ARRIVALS BECOME ORDINARY COACHES. `joinedAtWeek: N` is the mirror
+     flag and just as per-season (league-data.js says "drop the flag at
+     rollover"), but nothing used to drop it — so a coach who took a
+     team over in week 7 started the NEXT season with weeks 0-6 counted
+     as CPU games. It is removed outright: a coach in from week 0 needs
+     no flag.
+
+     Both rewrites touch only the object literal of a roster entry —
+     the `{ name: ... }` part of the line — never the trailing comment,
+     which routinely says things like "(entry below, joinedAtWeek: 7)"
+     and must survive as written. */
+  let departed = 0;
+  let joined = 0;
+  src = src
+    .split("\n")
+    .map((line) => {
+      if (!/^\s*\{\s*name:/.test(line)) return line;
+      const end = line.indexOf("}");
+      if (end < 0) return line;
+      let code = line.slice(0, end + 1);
+      const rest = line.slice(end + 1);
+      code = code.replace(/departedAfterWeek:\s*\d+/g, () => {
+        departed++;
+        return "active: false";
+      });
+      code = code.replace(/,\s*joinedAtWeek:\s*\d+/g, () => {
+        joined++;
+        return "";
+      });
+      return code + rest;
+    })
+    .join("\n");
+
+  return { text: src, departed, joined };
 }
 
 /* Clear every team's week list, keeping the team and conference. The
@@ -428,11 +460,12 @@ function runRollover(opts = {}) {
   }
 
   if (dryRun) {
-    const { departed } = resetLeagueData(league.paths.league, nextYear);
+    const { departed, joined } = resetLeagueData(league.paths.league, nextYear);
     const { cleared } = clearSchedules(league.paths.schedule);
     log(`  Then the live folder would be reset:`);
     log(`    league-data.js     year ${year} -> ${nextYear}, currentWeek -> "PRESEASON", deadline cleared`);
     if (departed) log(`                       ${departed} departedAfterWeek -> active: false`);
+    if (joined) log(`                       ${joined} joinedAtWeek dropped (in from week 0 next season)`);
     log(`    schedule-data.js   ${cleared} team(s) emptied of weeks, teams and conferences kept`);
     log(`    top25-data.js      emptied`);
     log(`    cfp-data.js        emptied`);
@@ -459,6 +492,7 @@ function runRollover(opts = {}) {
       notes,
       files: present.map((f) => f.name),
       departed,
+      joined,
       cleared,
     };
   }
@@ -539,6 +573,9 @@ function runRollover(opts = {}) {
   if (reset.departed) {
     log(`    ${reset.departed} departed coach(es) marked active: false`);
   }
+  if (reset.joined) {
+    log(`    ${reset.joined} mid-season joinedAtWeek flag(s) dropped`);
+  }
   log(`    ${sched.cleared} schedule(s) emptied — teams and conferences kept`);
   log(`    polls, bracket and postseason emptied`);
 
@@ -578,6 +615,7 @@ function runRollover(opts = {}) {
     coaches,
     teams,
     departed: reset.departed,
+    joined: reset.joined,
     cleared: sched.cleared,
     wired: wired.changed ? wired.added : 0,
     wireWarning,
