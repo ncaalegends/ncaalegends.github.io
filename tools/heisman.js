@@ -26,6 +26,15 @@
    [label, value] pairs in the order the game shows them — the
    labels differ by position and the site prints them as given.
 
+   gameLog is optional: the player's View Player Stats > Game Log
+   screen, one entry per game, in the game's own columns:
+       "gameLog": [
+         { "week": 1, "opponent": "USF", "result": "W 38-17",
+           "stats": [["REC", 7], ["YDS", 118], ["TD", 1]] }, ...
+       ]
+   week and stats are required on each entry; opponent and result
+   are whatever the screen shows (leave out if it doesn't).
+
    FLAGS
      --week N        the week this snapshot is for, 0-19. Required.
      --league SLUG   main (default), 3star, 1star.
@@ -48,6 +57,16 @@ const LIST_SIZE = 4;
 const MIN_WEEK = 0;
 const MAX_WEEK = 19;
 const CARD_FIELDS = ["number", "archetype", "ovr", "height", "weight", "hometown"];
+
+function checkStatPairs(stats, at, problems) {
+  stats.forEach((s, j) => {
+    if (!Array.isArray(s) || s.length !== 2 || typeof s[0] !== "string" || !s[0].trim()) {
+      problems.push(`${at}: stat ${j + 1} must be ["LABEL", value]`);
+    } else if (typeof s[1] !== "number" && typeof s[1] !== "string") {
+      problems.push(`${at}: stat "${s[0]}" has a value that isn't a number or text`);
+    }
+  });
+}
 
 function readInput(args) {
   let text;
@@ -91,19 +110,34 @@ function checkPlayers(players) {
     if (!Array.isArray(p.stats)) {
       problems.push(`${at}: "stats" must be an array of [label, value] pairs ([] if not captured)`);
     } else {
-      p.stats.forEach((s, j) => {
-        if (!Array.isArray(s) || s.length !== 2 || typeof s[0] !== "string" || !s[0].trim()) {
-          problems.push(`${at}: stat ${j + 1} must be ["LABEL", value]`);
-        } else if (typeof s[1] !== "number" && typeof s[1] !== "string") {
-          problems.push(`${at}: stat "${s[0]}" has a value that isn't a number or text`);
-        }
-      });
+      checkStatPairs(p.stats, at, problems);
       const labels = p.stats.map((s) => Array.isArray(s) && String(s[0]).toUpperCase());
       const dup = labels.find((l, j) => l && labels.indexOf(l) !== j);
       if (dup) problems.push(`${at}: stat "${dup}" appears twice`);
     }
+    if (p.gameLog !== undefined) {
+      if (!Array.isArray(p.gameLog)) problems.push(`${at}: "gameLog" must be an array`);
+      else {
+        const wks = new Set();
+        p.gameLog.forEach((g, j) => {
+          const gat = `${at} game log row ${j + 1}`;
+          if (!g || typeof g !== "object") return problems.push(`${gat}: not an object`);
+          const w = Number(g.week);
+          if (!Number.isInteger(w) || w < MIN_WEEK || w > MAX_WEEK) problems.push(`${gat}: week must be ${MIN_WEEK}-${MAX_WEEK}`);
+          else if (wks.has(w)) problems.push(`${gat}: week ${w} appears twice`);
+          else wks.add(w);
+          for (const k of ["opponent", "result"]) {
+            if (g[k] !== undefined && (typeof g[k] !== "string" || g[k].includes('"'))) problems.push(`${gat}: "${k}" must be plain text`);
+          }
+          if (!Array.isArray(g.stats)) problems.push(`${gat}: "stats" must be an array of [label, value] pairs`);
+          else checkStatPairs(g.stats, gat, problems);
+          const ex = Object.keys(g).filter((k) => !["week", "opponent", "result", "stats"].includes(k));
+          if (ex.length) problems.push(`${gat}: unknown field ${ex.join(", ")}`);
+        });
+      }
+    }
     const extra = Object.keys(p).filter(
-      (k) => !["rank", "name", "pos", "team", "year", "stats", ...CARD_FIELDS].includes(k)
+      (k) => !["rank", "name", "pos", "team", "year", "stats", "gameLog", ...CARD_FIELDS].includes(k)
     );
     if (extra.length) problems.push(`${at}: unknown field${extra.length > 1 ? "s" : ""} ${extra.join(", ")}`);
   });
@@ -131,8 +165,14 @@ function renderBlock(week, players) {
           (k) => `${k}: ${lit(p[k])}`
         ),
       ].join(", ");
-      const stats = p.stats.map((s) => `[${lit(s[0].trim())}, ${lit(s[1])}]`).join(", ");
-      return `      { ${head},\n        stats: [${stats}] },`;
+      const pairs = (arr) => arr.map((s) => `[${lit(s[0].trim())}, ${lit(s[1])}]`).join(", ");
+      const log = Array.isArray(p.gameLog) && p.gameLog.length
+        ? `,\n        gameLog: [\n${[...p.gameLog]
+            .sort((a, b) => a.week - b.week)
+            .map((g) => `          { week: ${Number(g.week)}${g.opponent ? `, opponent: ${lit(g.opponent.trim())}` : ""}${g.result ? `, result: ${lit(g.result.trim())}` : ""}, stats: [${pairs(g.stats)}] },`)
+            .join("\n")}\n        ]`
+        : "";
+      return `      { ${head},\n        stats: [${pairs(p.stats)}]${log} },`;
     })
     .join("\n");
   return [`  {`, `    week: ${week},`, `    players: [`, rows, `    ],`, `  },`].join("\n");

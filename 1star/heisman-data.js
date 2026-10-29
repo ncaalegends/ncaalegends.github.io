@@ -41,5 +41,10 @@
                         RUSH ATT, RUSH YDS
                     WR  CATCHES, REC YDS, REC TD, LONG REC, REC YAC,
                         DROPS
+       gameLog    optional — View Player Stats > Game Log, one entry
+                  per game: { week, opponent, result, stats }, stats
+                  as [label, value] pairs in the game's own columns.
+                  The newest week's log is what the player history
+                  shows game by game.
    ============================================================ */
 const HEISMAN = [];

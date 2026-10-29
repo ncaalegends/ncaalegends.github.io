@@ -3731,3 +3731,4 @@ button:focus-visible, a:focus-visible {
 .hm-table th[scope="row"] { font-weight: 600; color: var(--chalk); }
 .hm-table .hm-rank { color: var(--gold); font-weight: 700; }
 .hm-note { margin: 10px 0 0; font-size: 0.78rem; color: var(--steel); }
+.hm-table .hm-l { text-align: left; color: var(--steel); font-family: var(--font-body); }

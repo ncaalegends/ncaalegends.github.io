@@ -1624,6 +1624,35 @@ function heismanHistoryHtml(key) {
       </table></div>`
     : `<p class="hw-nostats">No stats captured yet.</p>`;
 
+  /* Game by game: the newest snapshot that carries a game log is
+     the most complete one, since the log only ever grows. */
+  let logRows = null;
+  for (let i = seen.length - 1; i >= 0 && !logRows; i--) {
+    if (Array.isArray(seen[i].p.gameLog) && seen[i].p.gameLog.length) logRows = seen[i].p.gameLog;
+  }
+  let gameLog = "";
+  if (logRows) {
+    const gl = [];
+    logRows.forEach((g) => (g.stats || []).forEach((st) => { if (!gl.includes(st[0])) gl.push(st[0]); }));
+    const hasOpp = logRows.some((g) => g.opponent);
+    const hasRes = logRows.some((g) => g.result);
+    gameLog = `<h3 class="hm-sub">Game log</h3>
+      <div class="hm-table-wrap"><table class="hm-table">
+        <thead><tr><th scope="col">Week</th>${hasOpp ? `<th scope="col" class="hm-l">Opponent</th>` : ""}${hasRes ? `<th scope="col" class="hm-l">Result</th>` : ""}${gl
+          .map((l) => `<th scope="col">${esc(l)}</th>`)
+          .join("")}</tr></thead>
+        <tbody>${[...logRows]
+          .sort((x, y) => Number(x.week) - Number(y.week))
+          .map((g) => {
+            const m = new Map((g.stats || []).map((st) => [st[0], st[1]]));
+            return `<tr><th scope="row">Wk ${esc(g.week)}</th>${hasOpp ? `<td class="hm-l">${esc(g.opponent || "")}</td>` : ""}${hasRes ? `<td class="hm-l">${esc(g.result || "")}</td>` : ""}${gl
+              .map((l) => `<td>${m.has(l) ? esc(m.get(l)) : "&ndash;"}</td>`)
+              .join("")}</tr>`;
+          })
+          .join("")}</tbody>
+      </table></div>`;
+  }
+
   return `
     <div class="cm-head">
       <span class="t25-logo hw-logo">
@@ -1644,6 +1673,7 @@ function heismanHistoryHtml(key) {
     </div>
     <h3 class="hm-sub">Rank by week</h3>
     <ol class="hm-strip">${strip}</ol>
+    ${gameLog}
     <h3 class="hm-sub">Weekly snapshots</h3>
     ${table}
     <p class="hm-note">Season totals as the Heisman Watch screen showed them each week he was on it.</p>`;
