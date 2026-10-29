@@ -128,27 +128,51 @@ game (Texas–Michigan, the ACC slate, the SEC slate, Ohio State–Michigan, etc
 
 ---
 
-## 2028 Season
+## 2028 Season — BUILT
+
+Written to `main/schedule-data.js` on 2026-10-28 after an in-game check of all 20
+coached slates. 20 coached teams, 240 game rows, byes and week 14/15 notes
+included. Member preview at `main/2028-preview.html` (temporary — remove once
+the season starts). Every request below was placed.
 
 | Matchup | Requested site | Notes | Status |
 |---|---|---|---|
-| Michigan (projekt) at TCU (oldarmy) | TCU | Leg 2 of the 2027–2028 home-and-home | Pending |
-| Oregon (Davey) at Colorado (turt17) | Colorado | Leg 2 of the 2027–2028 home-and-home | Pending |
-| Clemson (temptiger) at TCU (oldarmy) | TCU | **Replaces the Clemson–Washington return leg.** One-off, not a home-and-home — the 2027 leg was blocked. | Pending |
-| Georgia (Miles) at Clemson (temptiger) | Clemson | Leg 2 — **reversed from the old plan** because the 2027 leg flipped | Pending |
-| TCU (oldarmy) at Notre Dame (brian) | Notre Dame | Leg 2 of the 2027–2028 home-and-home | Pending |
-| Notre Dame (brian) at Ohio State (RekenCrew) | Ohio State | Leg 2 of the 2027–2028 home-and-home | Pending |
-| Notre Dame (brian) at Oregon (Davey) | Oregon | Leg 2 of the 2027–2028 home-and-home | Pending |
-| WVU (diabeticsnail22) at Oklahoma (Pointdexter) | Oklahoma | Leg 2 of the 2027–2028 home-and-home | Pending |
-| LSU (chompdaddy) at WVU (diabeticsnail22) | WVU | Leg 2 of the 2027–2028 home-and-home | Pending |
-| Cal (BlueMiniMeaniee) at WVU (diabeticsnail22) | WVU | Leg 1 of a 2028–2029 home-and-home | Pending |
-| UCLA (Dway) at Cal (BlueMiniMeaniee) | Cal | **Leg 1 of a new 2028–2029 home-and-home.** Alternates from 2027, which was at UCLA. | Pending |
-| Ohio State (RekenCrew) at LSU (chompdaddy) | LSU | Leg 1 of a 2028–2029 home-and-home | Pending |
-| Clemson (temptiger) at Ohio State (RekenCrew) | Ohio State | Leg 1 — **moved up from 2029** on 2026-10-28. Replaces the in-game default Clemson at Notre Dame (100.7 vs 59.7 power score); Ohio State drops at Alabama to fit it. | Pending |
-| USC (Bl00dVayN3) at Arkansas (texan_hog) | Arkansas | Leg 1 of a 2028–2029 home-and-home. Added 2026-10-28 to work texan_hog's return and Bl00dVayN3's first full USC season in. | Pending |
+| Michigan (projekt) at TCU (oldarmy) | TCU | Leg 2 of the 2027–2028 home-and-home | **Scheduled** — Week 3, at TCU |
+| Oregon (Davey) at Colorado (turt17) | Colorado | Leg 2 of the 2027–2028 home-and-home | **Scheduled** — Week 1, at Colorado |
+| Clemson (temptiger) at TCU (oldarmy) | TCU | **Replaces the Clemson–Washington return leg.** One-off, not a home-and-home — the 2027 leg was blocked. | **Scheduled** — Week 7, at TCU |
+| Georgia (Miles) at Clemson (temptiger) | Clemson | Leg 2 — **reversed from the old plan** because the 2027 leg flipped | **Scheduled** — Week 3, at Clemson |
+| TCU (oldarmy) at Notre Dame (brian) | Notre Dame | Leg 2 of the 2027–2028 home-and-home | **Scheduled** — Week 0, at Notre Dame |
+| Notre Dame (brian) at Ohio State (RekenCrew) | Ohio State | Leg 2 of the 2027–2028 home-and-home | **Scheduled** — Week 3, at Ohio State |
+| Notre Dame (brian) at Oregon (Davey) | Oregon | Leg 2 of the 2027–2028 home-and-home | **Scheduled** — Week 4, at Oregon |
+| WVU (diabeticsnail22) at Oklahoma (Pointdexter) | Oklahoma | Leg 2 of the 2027–2028 home-and-home | **Scheduled** — Week 1, at Oklahoma |
+| LSU (chompdaddy) at WVU (diabeticsnail22) | WVU | Leg 2 of the 2027–2028 home-and-home | **Scheduled** — Week 3, at WVU |
+| Cal (BlueMiniMeaniee) at WVU (diabeticsnail22) | WVU | Leg 1 of a 2028–2029 home-and-home | **Scheduled** — Week 0, at WVU |
+| UCLA (Dway) at Cal (BlueMiniMeaniee) | Cal | **Leg 1 of a new 2028–2029 home-and-home.** Alternates from 2027, which was at UCLA. | **Scheduled** — Week 3, at Cal |
+| Ohio State (RekenCrew) at LSU (chompdaddy) | LSU | Leg 1 of a 2028–2029 home-and-home | **Scheduled** — Week 1, at LSU |
+| Clemson (temptiger) at Ohio State (RekenCrew) | Ohio State | Leg 1 — **moved up from 2029** on 2026-10-28. Replaces the in-game default Clemson at Notre Dame (100.7 vs 59.7 power score); Ohio State drops at Alabama to fit it. | **Scheduled** — Week 0, at Ohio State |
+| USC (Bl00dVayN3) at Arkansas (texan_hog) | Arkansas | Leg 1 of a 2028–2029 home-and-home. Added 2026-10-28 to work texan_hog's return and Bl00dVayN3's first full USC season in. | **Scheduled** — Week 2, at Arkansas |
 
 The 2026–2027 Cal–UCLA home-and-home closed out in 2027; a **new** Cal–UCLA
 series runs 2028–2029, continuing the alternation (2027 at UCLA → 2028 at Cal).
+
+### Additional head-to-head games in 2028
+
+Not requested. Listed so 2029 can vary opponents.
+
+| Week | Game | How it got there |
+|---|---|---|
+| 0 | Colorado at Oklahoma | Replaced Colorado at Florida (26.0 vs 62.9 power score) |
+| 1 | Arkansas vs Wake Forest, Mercedes-Benz Stadium (neutral) | In-game default, kept |
+| 2 | Oklahoma at Notre Dame | Power-score fill for Notre Dame |
+| 3 | Colorado at Miami | In-game default; site flipped to Miami for home balance |
+
+Removed from the in-game defaults: Clemson at Notre Dame (100.7 vs 59.7),
+Miami / Arkansas / Texas at Notre Dame, FSU at Georgia (restricted).
+
+### Home/away notes for 2028
+
+Georgia (Miles) finished at **5 true home games** (plus Florida at EverBank and
+Indiana at Mercedes-Benz, both neutral) — accepted. Every other coach is at 6 or 7.
 
 ## 2029 Season
 
@@ -294,7 +318,4 @@ series runs 2028–2029, continuing the alternation (2027 at UCLA → 2028 at Ca
 
 ---
 
-*Last updated: 2026-10-27 — Clemson's 2028 return at Washington replaced by
-Clemson at TCU; Cal–UCLA renewed as a 2028–2029 home-and-home; LSU–Ohio State
-and LSU–Texas added for 2028–2029; Cal–WVU added for 2028–2029; Oregon–WVU
-deferred again to 2029–2030.*
+*Last updated: 2026-10-28 — 2028 slate built and written to `main/schedule-data.js`; every 2028 request scheduled; Clemson–Ohio State moved up to 2028–2029; USC–Arkansas added; LSU–Texas withdrawn.*
