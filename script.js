@@ -1520,7 +1520,9 @@ function heismanRowHtml(p, week) {
         <div class="hw-who">
           <div class="hw-line">
             <span class="hw-pos">${esc(p.pos)}</span>
-            <button type="button" class="hw-name hw-open" data-player="${esc(heismanKey(p.name))}">${esc(p.name)}</button>
+            ${coach
+              ? `<button type="button" class="hw-name hw-open" data-player="${esc(heismanKey(p.name))}">${esc(p.name)}</button>`
+              : `<span class="hw-name">${esc(p.name)}</span>`}
             <span class="hw-year">${esc(p.year)}</span>
           </div>
           <div class="hw-line hw-teamline">${heismanTeamHtml(p.team, week)}</div>
@@ -1683,6 +1685,13 @@ function openHeismanModal(key) {
   const dlg = document.getElementById("heisman-modal");
   const body = document.getElementById("heisman-modal-body");
   if (!dlg || !body) return;
+  /* Users' players only. A CPU player has a card on the list but no
+     history pop-up — the daily task doesn't collect his game log. */
+  const latestOf = heismanWeeksShown()
+    .map((w) => HEISMAN_BY_WEEK.get(w).players.find((x) => heismanKey(x.name) === key))
+    .filter(Boolean)
+    .pop();
+  if (!latestOf || !isLeagueTeam(latestOf.team)) return;
   const html = heismanHistoryHtml(key);
   if (!html) return;
   const anyWeek = heismanWeeksShown()

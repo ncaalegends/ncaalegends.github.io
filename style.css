@@ -3632,7 +3632,8 @@ button:focus-visible, a:focus-visible {
   text-align: left;
   min-width: 0;
 }
-.hw-name:hover { color: var(--gold-bright); }
+button.hw-name:hover { color: var(--gold-bright); }
+span.hw-name { cursor: default; }
 .hw-name:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 .hw-year { font-family: var(--font-mono); font-size: 0.75rem; color: var(--steel); }
 .hw-teamline { font-size: 0.88rem; color: var(--steel); }
