@@ -1448,6 +1448,245 @@ const setText = (el, s) => {
   if (el) el.textContent = s;
 };
 
+/* ============================================================
+   HEISMAN WATCH
+   ------------------------------------------------------------
+   The in-game watch list, four players a week (heisman-data.js).
+   Shown under the poll on the Top 25 tab, newest week the season
+   has reached by default, with a button per earlier week. Each
+   player's history is every week he appears in — there is no
+   per-player record beyond the weekly snapshots, so a player who
+   drops off simply has a gap.
+
+   Same reveal rule as the poll: a week added for a week the season
+   hasn't reached stays hidden until the advance.
+   ============================================================ */
+const HEISMAN_DATA =
+  typeof HEISMAN !== "undefined" && Array.isArray(HEISMAN) ? HEISMAN : [];
+const HEISMAN_BY_WEEK = new Map();
+HEISMAN_DATA.forEach((w) => {
+  if (w && w.week != null && Array.isArray(w.players)) HEISMAN_BY_WEEK.set(Number(w.week), w);
+});
+const heismanKey = (name) => String(name ?? "").trim().toLowerCase();
+const heismanWeeksShown = () =>
+  [...HEISMAN_BY_WEEK.keys()].filter((w) => w <= currentSeasonWeek()).sort((a, b) => a - b);
+let HEISMAN_WEEK = null; // the week the reader picked; null = newest
+
+function heismanPrevWeek(week) {
+  const earlier = heismanWeeksShown().filter((w) => w < week);
+  return earlier.length ? earlier[earlier.length - 1] : null;
+}
+
+function heismanMoveHtml(p, week) {
+  const prevWeek = heismanPrevWeek(week);
+  if (prevWeek == null) return "";
+  const prev = HEISMAN_BY_WEEK.get(prevWeek).players.find((x) => heismanKey(x.name) === heismanKey(p.name));
+  if (!prev) return `<span class="t25-move up" title="New to the list">NEW</span>`;
+  const diff = Number(prev.rank) - Number(p.rank);
+  if (diff > 0) return `<span class="t25-move up" title="Up ${diff}">&#9650;${diff}</span>`;
+  if (diff < 0) return `<span class="t25-move down" title="Down ${-diff}">&#9660;${-diff}</span>`;
+  return `<span class="t25-move same" title="No change">&ndash;</span>`;
+}
+
+function heismanStatsHtml(stats) {
+  if (!Array.isArray(stats) || !stats.length) {
+    return `<p class="hw-nostats">No stats this week.</p>`;
+  }
+  return `<dl class="hw-stats">${stats
+    .map((s) => `<div class="hw-stat"><dt>${esc(s[0])}</dt><dd>${esc(s[1])}</dd></div>`)
+    .join("")}</dl>`;
+}
+
+function heismanTeamHtml(team, week) {
+  const src = teamLogoSrc(team);
+  const mono = monogramFor(rosterEntryFor(team)?.team || team);
+  const coach = isLeagueTeam(team, week) ? coachFor(team, week) : "";
+  return `
+    <span class="t25-logo hw-logo">
+      <span class="t25-mono">${esc(mono)}</span>
+      ${src ? `<img src="${esc(src)}" alt="" loading="lazy" onerror="this.remove()">` : ""}
+    </span>
+    <span class="hw-team">${rankBadgeHtml(team, week)}${esc(team)}</span>
+    ${coach ? `<span class="t25-coach">${esc(coach)}</span>` : ""}`;
+}
+
+function heismanRowHtml(p, week) {
+  const coach = isLeagueTeam(p.team, week) ? coachFor(p.team, week) : "";
+  const color = coach ? colorFor(p.team, week) : "";
+  return `
+    <li class="hw-card${coach ? " is-coach" : ""}"${color ? ` style="--team:${esc(color)}"` : ""}>
+      <div class="hw-top">
+        <span class="hw-rank">${esc(p.rank)}</span>
+        <div class="hw-who">
+          <div class="hw-line">
+            <span class="hw-pos">${esc(p.pos)}</span>
+            <button type="button" class="hw-name hw-open" data-player="${esc(heismanKey(p.name))}">${esc(p.name)}</button>
+            <span class="hw-year">${esc(p.year)}</span>
+          </div>
+          <div class="hw-line hw-teamline">${heismanTeamHtml(p.team, week)}</div>
+        </div>
+        <span class="hw-trend">${heismanMoveHtml(p, week)}</span>
+      </div>
+      ${heismanStatsHtml(p.stats)}
+    </li>`;
+}
+
+function renderHeisman() {
+  const wrap = document.getElementById("heisman");
+  const list = document.getElementById("heisman-list");
+  if (!wrap || !list) return;
+
+  const weeks = heismanWeeksShown();
+  if (!weeks.length) {
+    wrap.hidden = true;
+    return;
+  }
+  const week = weeks.includes(HEISMAN_WEEK) ? HEISMAN_WEEK : weeks[weeks.length - 1];
+  const players = [...HEISMAN_BY_WEEK.get(week).players].sort((a, b) => Number(a.rank) - Number(b.rank));
+
+  setText(document.getElementById("heisman-week-label"), `WEEK ${week}`);
+  const picker = document.getElementById("heisman-weeks");
+  if (picker) {
+    picker.innerHTML =
+      weeks.length > 1
+        ? weeks
+            .map(
+              (w) =>
+                `<button type="button" class="hw-week" data-hw-week="${w}" aria-pressed="${w === week}">Wk ${w}</button>`
+            )
+            .join("")
+        : "";
+  }
+  list.innerHTML = players.map((p) => heismanRowHtml(p, week)).join("");
+  wrap.hidden = false;
+}
+
+function heismanHistoryHtml(key) {
+  const weeks = heismanWeeksShown();
+  const seen = weeks
+    .map((w) => ({ week: w, p: HEISMAN_BY_WEEK.get(w).players.find((x) => heismanKey(x.name) === key) }))
+    .filter((r) => r.p);
+  if (!seen.length) return "";
+
+  const latest = seen[seen.length - 1].p;
+  const card = (k) => {
+    for (let i = seen.length - 1; i >= 0; i--) {
+      const v = seen[i].p[k];
+      if (v !== undefined && v !== null && v !== "") return v;
+    }
+    return null;
+  };
+  const shownWeek = weeks.includes(HEISMAN_WEEK) ? HEISMAN_WEEK : weeks[weeks.length - 1];
+  const onNow = HEISMAN_BY_WEEK.get(shownWeek).players.find((x) => heismanKey(x.name) === key);
+  const coach = isLeagueTeam(latest.team) ? coachFor(latest.team) : "";
+
+  const meta = [
+    latest.year,
+    card("number") != null ? `#${card("number")}` : null,
+    card("archetype"),
+    card("ovr") != null ? `${card("ovr")} OVR` : null,
+  ].filter(Boolean);
+  const body = [
+    card("height") && card("weight") ? `${card("height")} · ${card("weight")} lbs` : card("height") || (card("weight") ? `${card("weight")} lbs` : null),
+    card("hometown"),
+  ].filter(Boolean);
+
+  const strip = weeks
+    .map((w) => {
+      const hit = seen.find((r) => r.week === w);
+      return `<li class="hm-wk${hit ? "" : " is-off"}${w === shownWeek ? " is-now" : ""}">
+        <span class="hm-wk-n">Wk ${w}</span>
+        <span class="hm-wk-r">${hit ? esc(hit.p.rank) : "&ndash;"}</span>
+      </li>`;
+    })
+    .join("");
+
+  const labels = [];
+  seen.forEach((r) =>
+    (r.p.stats || []).forEach((s) => {
+      if (!labels.includes(s[0])) labels.push(s[0]);
+    })
+  );
+  const table = labels.length
+    ? `<div class="hm-table-wrap"><table class="hm-table">
+        <thead><tr><th scope="col">Week</th><th scope="col">Rank</th>${labels
+          .map((l) => `<th scope="col">${esc(l)}</th>`)
+          .join("")}</tr></thead>
+        <tbody>${[...seen]
+          .reverse()
+          .map((r) => {
+            const m = new Map((r.p.stats || []).map((s) => [s[0], s[1]]));
+            return `<tr><th scope="row">Wk ${r.week}</th><td class="hm-rank">${esc(r.p.rank)}</td>${labels
+              .map((l) => `<td>${m.has(l) ? esc(m.get(l)) : "&ndash;"}</td>`)
+              .join("")}</tr>`;
+          })
+          .join("")}</tbody>
+      </table></div>`
+    : `<p class="hw-nostats">No stats captured yet.</p>`;
+
+  return `
+    <div class="cm-head">
+      <span class="t25-logo hw-logo">
+        <span class="t25-mono">${esc(monogramFor(rosterEntryFor(latest.team)?.team || latest.team))}</span>
+        ${teamLogoSrc(latest.team) ? `<img src="${esc(teamLogoSrc(latest.team))}" alt="" loading="lazy" onerror="this.remove()">` : ""}
+      </span>
+      <div class="cm-id">
+        <p class="hm-meta"><span class="hw-pos">${esc(latest.pos)}</span> ${esc(meta.join(" · "))}</p>
+        <h2 class="cm-team" id="hm-title">${esc(latest.name)}</h2>
+        <p class="cm-coach">${esc(latest.team)}${coach ? ` · ${esc(coach)}` : ""}${body.length ? ` · ${esc(body.join(" · "))}` : ""}</p>
+      </div>
+      <div class="hm-now">
+        <span class="hm-now-k">Watch rank</span>
+        <span class="hm-now-v">${onNow ? esc(onNow.rank) : "&ndash;"}</span>
+        <span class="hm-now-w">${onNow ? `Week ${shownWeek}` : `Off the list in week ${shownWeek}`}</span>
+      </div>
+      <button type="button" class="cm-close" aria-label="Close">&times;</button>
+    </div>
+    <h3 class="hm-sub">Rank by week</h3>
+    <ol class="hm-strip">${strip}</ol>
+    <h3 class="hm-sub">Weekly snapshots</h3>
+    ${table}
+    <p class="hm-note">Season totals as the Heisman Watch screen showed them each week he was on it.</p>`;
+}
+
+function openHeismanModal(key) {
+  const dlg = document.getElementById("heisman-modal");
+  const body = document.getElementById("heisman-modal-body");
+  if (!dlg || !body) return;
+  const html = heismanHistoryHtml(key);
+  if (!html) return;
+  const anyWeek = heismanWeeksShown()
+    .map((w) => HEISMAN_BY_WEEK.get(w).players.find((x) => heismanKey(x.name) === key))
+    .filter(Boolean)
+    .pop();
+  const coach = anyWeek && isLeagueTeam(anyWeek.team) ? colorFor(anyWeek.team) : "";
+  dlg.style.setProperty("--team", coach || "var(--gold)");
+  body.innerHTML = html;
+  if (!dlg.open) dlg.showModal();
+}
+
+function setupHeisman() {
+  const dlg = document.getElementById("heisman-modal");
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest) return;
+    const wk = e.target.closest(".hw-week");
+    if (wk) {
+      HEISMAN_WEEK = Number(wk.dataset.hwWeek);
+      renderHeisman();
+      document.querySelector(`.hw-week[data-hw-week="${HEISMAN_WEEK}"]`)?.focus();
+      return;
+    }
+    const open = e.target.closest(".hw-open");
+    if (open) openHeismanModal(open.dataset.player);
+  });
+  if (!dlg) return;
+  dlg.addEventListener("click", (e) => {
+    if (e.target === dlg) dlg.close();
+    if (e.target.closest && e.target.closest(".cm-close")) dlg.close();
+  });
+}
+
+
 /* ------------------------------------------------------------
    CFP BRACKET
    ------------------------------------------------------------
@@ -3789,6 +4028,7 @@ function init() {
   renderThisWeekGames();
   renderRankings();
   renderTop25();
+  renderHeisman();
   renderRoster();
   renderLiveNow();
   initLiveStatus();
@@ -3798,6 +4038,7 @@ function init() {
   /* Before setupTabs — it reads the hash on load and may need to open
      the modal, which requires the listeners to already be attached. */
   setupCoachModal();
+  setupHeisman();
   setupTabs();
 }
 

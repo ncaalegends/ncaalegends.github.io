@@ -190,6 +190,19 @@
       <span class="section-tag" id="top25-week-label"></span>
     </div>
     <ol class="top25-list" id="top25-list"></ol>
+
+    <!-- HEISMAN WATCH
+         The in-game watch list, four players a week, under the poll.
+         Hidden until heisman-data.js has a week the season has
+         reached; renderHeisman() fills and unhides it. -->
+    <div class="heisman-wrap" id="heisman" hidden>
+      <div class="section-head hw-head">
+        <h2 class="section-title" id="heisman-title">Heisman Watch</h2>
+        <span class="section-tag" id="heisman-week-label"></span>
+        <div class="hw-weeks" id="heisman-weeks" role="group" aria-label="Heisman Watch week"></div>
+      </div>
+      <ol class="hw-list" id="heisman-list"></ol>
+    </div>
   </section>
 
   <!-- ROSTER -->
@@ -223,6 +236,12 @@
   <div class="cm-body" id="coach-modal-body"></div>
 </dialog>
 
+<!-- HEISMAN PLAYER HISTORY — same <dialog> pattern as the coach card.
+     Filled by openHeismanModal(). -->
+<dialog id="heisman-modal" class="coach-modal hw-modal" aria-labelledby="hm-title">
+  <div class="cm-body" id="heisman-modal-body"></div>
+</dialog>
+
 <footer class="site-footer">
   <div class="footer-status" id="footer-status"></div>
   <div class="footer-links" id="footer-links"></div>
@@ -237,6 +256,7 @@
 <script src="league-data.js" defer></script>
 <script src="schedule-data.js" defer></script>
 <script src="top25-data.js" defer></script>
+<script src="heisman-data.js" defer></script>
 <script src="cfp-data.js" defer></script>
 <script src="postseason-data.js" defer></script>
 <script src="../people.js" defer></script>

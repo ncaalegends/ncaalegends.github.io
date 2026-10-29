@@ -536,6 +536,33 @@ with `preview.cmd`, then:
 git add -A && git commit -m "Week 4 scores" && git push
 ```
 
+## heisman.js
+
+Writes a week's in-game Heisman Watch into `heisman-data.js`. Always
+four players; the site shows them under the Top 25 and builds each
+player's history from the weeks he appears in.
+
+```
+node tools/heisman.js --week 3 --file watch.json
+node tools/heisman.js --week 3 --file watch.json --dry-run
+```
+
+Input is JSON: an array of four players (or `{ "players": [...] }`),
+each with `rank`, `name`, `pos`, `team`, `year` and `stats`, plus any
+of the player-card fields `number`, `archetype`, `ovr`, `height`,
+`weight`, `hometown`. `stats` is the SEASON STATS panel as
+`[label, value]` pairs in screen order — `[]` if not captured. The
+labels differ by position and the site prints them as given.
+
+The six the screen shows, in order — QB: `PASS YDS`, `PASS TD`,
+`PASS COMP %`, `PASS INT`, `RUSH ATT`, `RUSH YDS`. WR: `CATCHES`,
+`REC YDS`, `REC TD`, `LONG REC`, `REC YAC`, `DROPS`.
+
+It refuses a week that already exists (`--force` overwrites, only on
+request), checks team spellings the way `top25.js` does (`--allow-new`
+after checking the screen), and prints each player's movement from
+the previous week. It does not gate an advance.
+
 ## top25.js
 
 Writes a week's in-game Top 25 into `top25-data.js`.

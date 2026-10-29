@@ -85,6 +85,7 @@ const ARCHIVED_FILES = [
   "top25-data.js",
   "cfp-data.js",
   "postseason-data.js",
+  "heisman-data.js",
 ];
 
 /* ------------------------------------------------------------
@@ -154,6 +155,7 @@ ${body
       POSTSEASON: typeof POSTSEASON !== "undefined" ? POSTSEASON : null,
       CFP_POLL: typeof CFP_POLL !== "undefined" ? CFP_POLL : null,
       CFP_BRACKET: typeof CFP_BRACKET !== "undefined" ? CFP_BRACKET : null,
+      HEISMAN: typeof HEISMAN !== "undefined" ? HEISMAN : [],
     };
   })();
 
@@ -468,6 +470,7 @@ function runRollover(opts = {}) {
     if (joined) log(`                       ${joined} joinedAtWeek dropped (in from week 0 next season)`);
     log(`    schedule-data.js   ${cleared} team(s) emptied of weeks, teams and conferences kept`);
     log(`    top25-data.js      emptied`);
+    log(`    heisman-data.js    emptied (if present)`);
     log(`    cfp-data.js        emptied`);
     log(`    postseason-data.js emptied`);
 
@@ -477,7 +480,7 @@ function runRollover(opts = {}) {
     ]);
     log(
       `\n  And the site would be pointed at the archive:` +
-        `\n    seasons/${year}/archive.js written (the five files above, scoped for the browser)` +
+        `\n    seasons/${year}/archive.js written (the files above, scoped for the browser)` +
         `\n    ${league.dir}/index.html ` +
         (wouldWire.changed
           ? `gains ${wouldWire.added} <script> tag(s) before league-data.js`
@@ -523,6 +526,7 @@ function runRollover(opts = {}) {
       top25: path.join(dest, "top25-data.js"),
       cfp: path.join(dest, "cfp-data.js"),
       postseason: path.join(dest, "postseason-data.js"),
+      heisman: path.join(dest, "heisman-data.js"),
     });
   } catch (e) {
     die(`the archive doesn't load: ${e.message}\n  Nothing live has been changed.`);
@@ -556,6 +560,12 @@ function runRollover(opts = {}) {
       : null;
   if (t25) fs.writeFileSync(league.paths.top25, t25, "utf8");
 
+  const heis =
+    league.paths.heisman && fs.existsSync(league.paths.heisman)
+      ? emptyArray(league.paths.heisman, "HEISMAN")
+      : null;
+  if (heis) fs.writeFileSync(league.paths.heisman, heis, "utf8");
+
   if (league.paths.cfp && fs.existsSync(league.paths.cfp)) {
     let cfpSrc = emptyArray(league.paths.cfp, "CFP_POLL");
     if (cfpSrc) fs.writeFileSync(league.paths.cfp, cfpSrc, "utf8");
@@ -577,7 +587,7 @@ function runRollover(opts = {}) {
     log(`    ${reset.joined} mid-season joinedAtWeek flag(s) dropped`);
   }
   log(`    ${sched.cleared} schedule(s) emptied — teams and conferences kept`);
-  log(`    polls, bracket and postseason emptied`);
+  log(`    polls, bracket, postseason and Heisman Watch emptied`);
 
   /* --- 4. point the site at every archived season --- */
   const indexFile = path.join(dir, "index.html");

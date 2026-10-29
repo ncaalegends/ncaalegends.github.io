@@ -112,6 +112,9 @@ function resolveLeague(slug = "main") {
       // Optional: conference championships, CFP and bowls. Shape is
       // documented at buildPostseason() in week-core.js.
       postseason: path.join(ROOT, meta.dir, "postseason-data.js"),
+      // Optional: the in-game Heisman Watch, one four-player snapshot
+      // per week. Shape is documented in the file's own header.
+      heisman: path.join(ROOT, meta.dir, "heisman-data.js"),
     },
     // Completed seasons live here, one folder per in-game year.
     seasonsDir: path.join(ROOT, meta.dir, "seasons"),
@@ -174,6 +177,7 @@ function loadCareer(league) {
       top25: path.join(dir, "top25-data.js"),
       cfp: path.join(dir, "cfp-data.js"),
       postseason: path.join(dir, "postseason-data.js"),
+      heisman: path.join(dir, "heisman-data.js"),
     });
     /* The folder name wins over the file's own SEASON.year. They
        should agree; if they don't, the location on disk is the thing
@@ -229,6 +233,10 @@ function loadData(paths) {
      existed), not an error. */
   if (paths.postseason && fs.existsSync(paths.postseason)) run(paths.postseason);
 
+  // heisman-data.js is optional — main first, and archived seasons
+  // from before it existed have none.
+  if (paths.heisman && fs.existsSync(paths.heisman)) run(paths.heisman);
+
   return {
     SEASON: ctx.SEASON || {},
     COACHES: ctx.COACHES || [],
@@ -239,6 +247,7 @@ function loadData(paths) {
     CFP_POLL: ctx.CFP_POLL || [],
     CFP_BRACKET: ctx.CFP_BRACKET || [],
     POSTSEASON: ctx.POSTSEASON || null,
+    HEISMAN: ctx.HEISMAN || [],
   };
 }
 
