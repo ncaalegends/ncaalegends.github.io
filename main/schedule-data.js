@@ -179,7 +179,7 @@ const TEAM_SCHEDULES = [
     team: "Florida State",
     conference: "ACC",
     weeks: [
-      { week: 0, opponent: "Alabama", location: "vs", stadium: "Doak Campbell Stadium" },
+      { week: 0, opponent: "Alabama", location: "vs", stadium: "Doak Campbell Stadium", teamScore: 33, opponentScore: 24 },
       { week: 1, opponent: "Duke", location: "vs", stadium: "Doak Campbell Stadium" },
       { week: 2, opponent: "Wisconsin", location: "at", stadium: "Camp Randall Stadium" },
       { week: 3, note: "BYE" },
