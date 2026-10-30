@@ -69,7 +69,7 @@ const TEAM_SCHEDULES = [
     team: "California",
     conference: "ACC",
     weeks: [
-      { week: 0, opponent: "West Virginia", location: "at", stadium: "Milan Puskar Stadium" },
+      { week: 0, opponent: "West Virginia", location: "at", stadium: "Milan Puskar Stadium", teamScore: 24, opponentScore: 52 },
       { week: 1, note: "BYE" },
       { week: 2, opponent: "San Jose State", location: "vs", stadium: "California Memorial Stadium" },
       { week: 3, opponent: "UCLA", location: "vs", stadium: "California Memorial Stadium" },
@@ -113,7 +113,7 @@ const TEAM_SCHEDULES = [
     team: "Clemson",
     conference: "ACC",
     weeks: [
-      { week: 0, opponent: "Ohio State", location: "at", stadium: "Ohio Stadium" },
+      { week: 0, opponent: "Ohio State", location: "at", stadium: "Ohio Stadium", teamScore: 21, opponentScore: 58 },
       { week: 1, opponent: "Syracuse", location: "vs", stadium: "Clemson Memorial Stadium" },
       { week: 2, opponent: "Pittsburgh", location: "at", stadium: "Acrisure Stadium" },
       { week: 3, opponent: "Georgia", location: "vs", stadium: "Clemson Memorial Stadium" },
@@ -222,7 +222,7 @@ const TEAM_SCHEDULES = [
     team: "Ohio State",
     conference: "Big Ten",
     weeks: [
-      { week: 0, opponent: "Clemson", location: "vs", stadium: "Ohio Stadium" },
+      { week: 0, opponent: "Clemson", location: "vs", stadium: "Ohio Stadium", teamScore: 58, opponentScore: 21 },
       { week: 1, opponent: "LSU", location: "at", stadium: "Tiger Stadium" },
       { week: 2, note: "BYE" },
       { week: 3, opponent: "Notre Dame", location: "vs", stadium: "Ohio Stadium" },
@@ -266,7 +266,7 @@ const TEAM_SCHEDULES = [
     team: "USC",
     conference: "Big Ten",
     weeks: [
-      { week: 0, opponent: "Fresno State", location: "vs", stadium: "Los Angeles Memorial Coliseum" },
+      { week: 0, opponent: "Fresno State", location: "vs", stadium: "Los Angeles Memorial Coliseum", teamScore: 27, opponentScore: 24 },
       { week: 1, note: "BYE" },
       { week: 2, opponent: "Arkansas", location: "at", stadium: "DW Reynolds Razorback Stadium" },
       { week: 3, opponent: "Purdue", location: "vs", stadium: "Los Angeles Memorial Coliseum" },
@@ -332,7 +332,7 @@ const TEAM_SCHEDULES = [
     team: "West Virginia",
     conference: "Big 12",
     weeks: [
-      { week: 0, opponent: "California", location: "vs", stadium: "Milan Puskar Stadium" },
+      { week: 0, opponent: "California", location: "vs", stadium: "Milan Puskar Stadium", teamScore: 52, opponentScore: 24 },
       { week: 1, opponent: "Oklahoma", location: "at", stadium: "Gaylord-Oklahoma Memorial" },
       { week: 2, note: "BYE" },
       { week: 3, opponent: "LSU", location: "vs", stadium: "Milan Puskar Stadium" },
