@@ -198,7 +198,7 @@ const TEAM_SCHEDULES = [
     team: "New Glarus",
     conference: "MAC",
     weeks: [
-      { week: 0, opponent: "Iowa State", location: "vs" },
+      { week: 0, opponent: "Iowa State", location: "vs", teamScore: 42, opponentScore: 3 },
       { week: 1, opponent: "Florida State", location: "at" },
       { week: 2, note: "BYE" },
       { week: 3, opponent: "Westeros", location: "at" },
