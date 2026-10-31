@@ -193,6 +193,14 @@ const TEAM_SCHEDULES = [
     ],
   },
   {
+    team: "Mississippi State",
+    conference: "SEC",
+    /* Trick whitey's team from 2028 (he coached Maryland through
+       week 14 of 2027). */
+    weeks: [
+    ],
+  },
+  {
     team: "North Texas",
     conference: "SEC",
     /* No 2027 schedule: DiabeticSnail22 is inactive, so this team is CPU
