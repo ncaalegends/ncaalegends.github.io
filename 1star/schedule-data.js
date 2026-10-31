@@ -101,7 +101,7 @@ const TEAM_SCHEDULES = [
     team: "Baldwin Wallace",
     conference: "Sun Belt",
     weeks: [
-      { week: 0, opponent: "California", location: "vs" },
+      { week: 0, opponent: "California", location: "vs", teamScore: 45, opponentScore: 14 },
       { week: 1, opponent: "Ole Miss", location: "at" },
       { week: 2, opponent: "Middle Tennessee", location: "at" },
       { week: 3, note: "BYE" },
