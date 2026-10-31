@@ -30,10 +30,10 @@
 const SEASON = {
   // In-game year for this season's data. See the long note in
   // main/league-data.js — it governs the seasons/<year>/ archive.
-  year: 2027,
+  year: 2028,
 
-  currentWeek: "OFFSEASON",
-  statusLine: "OFFSEASON",
+  currentWeek: "PRESEASON",
+  statusLine: "PRESEASON",
   /* Entered as "Monday, August 13th" on the Week 9 advance, back
      when this was free text. The 13th is a Thursday — the date was
      right and the weekday was the typo, so the generated text says
@@ -87,8 +87,8 @@ const COACHES = [
   { name: "Oldarmy324",      team: "Pittsburgh",         conference: "ACC", color: "#F5C542", twitch: "https://www.twitch.tv/oldarmy324", espnId: "221" },
   { name: "Cleveland",       team: "Virginia Tech",      conference: "ACC", color: "#E8703F", twitch: "https://www.twitch.tv/buckeyefan_", espnId: "259", active: false },  // Left the league from week 15, the same way Trick whitey did — weeks 0-14 stand as real head-to-head games; Virginia Tech is CPU from week 15 on, so Oldarmy324's ACC Championship win over Virginia Tech is a CPU game, and so is RonRicoFSU's Pop-Tarts Bowl.
   { name: "Trick whitey",    team: "Maryland",           conference: "B1G", color: "#FFD24D", twitch: "https://www.twitch.tv/trickwhitey44", espnId: "120", active: false },  // Left the league during championship week for personal reasons — weeks 0-14 stand as real head-to-head games; Maryland is CPU from week 15 on, so Salzy's Big Ten Championship win over Maryland is a CPU game, not a head-to-head result. Also left the main dynasty (Alabama) in the same move.
-  { name: "Texan_hog",       team: "North Dakota State", conference: "B1G", color: "#35B86A", twitch: "https://www.twitch.tv/texan_hog08", espnId: "2449", departedAfterWeek: 9 },  // Went inactive in all leagues during week 10 — weeks 0-9 stand as real games; North Dakota State is a CPU opponent for weeks 10-15 (he came back for the playoff — entry below, joinedAtWeek: 16). Also left the main dynasty (Washington) in the same move.
-  { name: "Texan_hog",       team: "North Dakota State", conference: "B1G", color: "#35B86A", twitch: "https://www.twitch.tv/texan_hog08", espnId: "2449", joinedAtWeek: 16 },  // Back to active as of Bowl Week 1 (CFP first round), 3-star only — still out of the main dynasty. Weeks 10-15 stay CPU for North Dakota State; from week 16 it is a league team again, so the first-round game at Oregon State is head-to-head. Keep this entry AFTER his departed one: current identity reads the last matching roster entry.
+  { name: "Texan_hog",       team: "North Dakota State", conference: "B1G", color: "#35B86A", twitch: "https://www.twitch.tv/texan_hog08", espnId: "2449", active: false },  // Went inactive in all leagues during week 10 — weeks 0-9 stand as real games; North Dakota State is a CPU opponent for weeks 10-15 (he came back for the playoff — entry below, joinedAtWeek: 16). Also left the main dynasty (Washington) in the same move.
+  { name: "Texan_hog",       team: "North Dakota State", conference: "B1G", color: "#35B86A", twitch: "https://www.twitch.tv/texan_hog08", espnId: "2449" },  // Back to active as of Bowl Week 1 (CFP first round), 3-star only — still out of the main dynasty. Weeks 10-15 stay CPU for North Dakota State; from week 16 it is a league team again, so the first-round game at Oregon State is head-to-head. Keep this entry AFTER his departed one: current identity reads the last matching roster entry.
   { name: "RonRicoFSU",      team: "Colorado",           conference: "XII", color: "#CFB87C", twitch: "https://www.twitch.tv/ronricofsu", espnId: "38" },
   { name: "EHDC12",          team: "North Carolina",     conference: "ACC", color: "#7BAFD4", twitch: "https://www.twitch.tv/DCGQManOfTheYear7", espnId: "153" },
   { name: "wacky9speedy",    team: "Charlotte",          conference: "SEC", color: "#4FAE84", twitch: "https://www.twitch.tv/wacky9speedy", espnId: "2429" },
