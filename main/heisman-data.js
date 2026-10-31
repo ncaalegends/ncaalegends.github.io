@@ -61,4 +61,17 @@ const HEISMAN = [
         stats: [["PASS YDS", 0], ["PASS TD", 0], ["PASS COMP %", 0], ["PASS INT", 0], ["RUSH ATT", 0], ["RUSH YDS", 0]] },
     ],
   },
+  {
+    week: 1,
+    players: [
+      { rank: 1, name: "Malachi Toney", pos: "WR", team: "Miami", year: "SR", number: 1, archetype: "Elusive Route Runner", ovr: 98, height: "5'11\"", weight: 190, hometown: "Freeport, FL",
+        stats: [["CATCHES", 0], ["REC YDS", 0], ["REC TD", 0], ["LONG REC", 0], ["REC YAC", 0]] },
+      { rank: 2, name: "Dakorien Moore", pos: "WR", team: "Oregon", year: "SR", number: 1, archetype: "Gadget", ovr: 98, height: "5'11\"", weight: 199, hometown: "Duncanville, TX",
+        stats: [["CATCHES", 0], ["REC YDS", 0], ["REC TD", 0], ["LONG REC", 0], ["REC YAC", 0]] },
+      { rank: 3, name: "Tavien St. Clair", pos: "QB", team: "Ohio State", year: "SR", number: 9, archetype: "Dual Threat", ovr: 94, height: "6'4\"", weight: 233, hometown: "Perry, OH",
+        stats: [["PASS YDS", 304], ["PASS TD", 5], ["PASS COMP %", 69], ["PASS INT", 0], ["RUSH ATT", 5], ["RUSH YDS", 29]] },
+      { rank: 4, name: "Drew Mestemaker", pos: "QB", team: "Texas", year: "SR (RS)", number: 11, archetype: "Pocket Passer", ovr: 94, height: "6'3\"", weight: 218, hometown: "Austin, TX",
+        stats: [["PASS YDS", 0], ["PASS TD", 0], ["PASS COMP %", 0], ["PASS INT", 0], ["RUSH ATT", 0], ["RUSH YDS", 0]] },
+    ],
+  },
 ];
