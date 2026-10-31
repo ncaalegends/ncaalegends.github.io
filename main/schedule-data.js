@@ -91,7 +91,7 @@ const TEAM_SCHEDULES = [
     team: "TCU",
     conference: "Big 12",
     weeks: [
-      { week: 0, opponent: "Notre Dame", location: "at", stadium: "Notre Dame Stadium" },
+      { week: 0, opponent: "Notre Dame", location: "at", stadium: "Notre Dame Stadium", teamScore: 21, opponentScore: 31 },
       { week: 1, note: "BYE" },
       { week: 2, opponent: "Texas Tech", location: "vs", stadium: "Amon G. Carter Stadium" },
       { week: 3, opponent: "Michigan", location: "vs", stadium: "Amon G. Carter Stadium" },
@@ -354,7 +354,7 @@ const TEAM_SCHEDULES = [
     team: "Colorado",
     conference: "Big 12",
     weeks: [
-      { week: 0, opponent: "Oklahoma", location: "at", stadium: "Gaylord-Oklahoma Memorial" },
+      { week: 0, opponent: "Oklahoma", location: "at", stadium: "Gaylord-Oklahoma Memorial", teamScore: 28, opponentScore: 19 },
       { week: 1, opponent: "Oregon", location: "vs", stadium: "Folsom Field" },
       { week: 2, note: "BYE" },
       { week: 3, opponent: "Miami", location: "at", stadium: "Hard Rock Stadium" },
@@ -420,7 +420,7 @@ const TEAM_SCHEDULES = [
     team: "Miami",
     conference: "ACC",
     weeks: [
-      { week: 0, opponent: "USF", location: "vs", stadium: "Hard Rock Stadium" },
+      { week: 0, opponent: "USF", location: "vs", stadium: "Hard Rock Stadium", teamScore: 31, opponentScore: 23 },
       { week: 1, opponent: "Texas A&M", location: "at", stadium: "Kyle Field" },
       { week: 2, opponent: "Stanford", location: "vs", stadium: "Hard Rock Stadium" },
       { week: 3, opponent: "Colorado", location: "vs", stadium: "Hard Rock Stadium" },
@@ -442,7 +442,7 @@ const TEAM_SCHEDULES = [
     team: "Notre Dame",
     conference: "Independent",
     weeks: [
-      { week: 0, opponent: "TCU", location: "vs", stadium: "Notre Dame Stadium" },
+      { week: 0, opponent: "TCU", location: "vs", stadium: "Notre Dame Stadium", teamScore: 31, opponentScore: 21 },
       { week: 1, note: "BYE" },
       { week: 2, opponent: "Oklahoma", location: "vs", stadium: "Notre Dame Stadium" },
       { week: 3, opponent: "Ohio State", location: "at", stadium: "Ohio Stadium" },
@@ -471,7 +471,7 @@ const TEAM_SCHEDULES = [
     team: "Oklahoma",
     conference: "SEC",
     weeks: [
-      { week: 0, opponent: "Colorado", location: "vs", stadium: "Gaylord-Oklahoma Memorial" },
+      { week: 0, opponent: "Colorado", location: "vs", stadium: "Gaylord-Oklahoma Memorial", teamScore: 19, opponentScore: 28 },
       { week: 1, opponent: "West Virginia", location: "vs", stadium: "Gaylord-Oklahoma Memorial" },
       { week: 2, opponent: "Notre Dame", location: "at", stadium: "Notre Dame Stadium" },
       { week: 3, opponent: "Houston", location: "vs", stadium: "Gaylord-Oklahoma Memorial" },
@@ -530,7 +530,7 @@ const TEAM_SCHEDULES = [
     conference: "SEC",
     /* Texan_hog returned in the 2028 preseason, taking Arkansas from week 0. */
     weeks: [
-      { week: 0, opponent: "Kansas State", location: "vs", stadium: "DW Reynolds Razorback Stadium" },
+      { week: 0, opponent: "Kansas State", location: "vs", stadium: "DW Reynolds Razorback Stadium", teamScore: 38, opponentScore: 45 },
       { week: 1, opponent: "Wake Forest", location: "vs", neutral: true, stadium: "Mercedes-Benz Stadium" },
       { week: 2, opponent: "USC", location: "vs", stadium: "DW Reynolds Razorback Stadium" },
       { week: 3, opponent: "Texas A&M", location: "at", stadium: "Kyle Field" },
