@@ -32,15 +32,15 @@ const SEASON = {
   // main/league-data.js — it governs the seasons/<year>/ archive.
   year: 2028,
 
-  currentWeek: "PRESEASON",
-  statusLine: "PRESEASON",
+  currentWeek: 0,
+  statusLine: "WEEK 0",
   /* Entered as "Monday, August 13th" on the Week 9 advance, back
      when this was free text. The 13th is a Thursday — the date was
      right and the weekday was the typo, so the generated text says
      Thursday now. This is the class of mistake the picker removes:
      nobody types the weekday any more. */
-  nextAdvanceAt: "",
-  nextAdvance: "",
+  nextAdvanceAt: "2026-11-02T22:00:00-05:00",
+  nextAdvance: "Monday, November 2nd - 10:00 PM EST",
 };
 
 /* ------------------------------------------------------------
