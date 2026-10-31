@@ -208,7 +208,7 @@ const TEAM_SCHEDULES = [
     team: "Oregon State",
     conference: "B1G",
     weeks: [
-      { week: 0, opponent: "Stanford", location: "vs", stadium: "Reser Stadium" },
+      { week: 0, opponent: "Stanford", location: "vs", stadium: "Reser Stadium", teamScore: 45, opponentScore: 28 },
       { week: 1, opponent: "BYU", location: "at", stadium: "LaVell Edwards Stadium" },
       { week: 2, opponent: "Nevada", location: "vs", stadium: "Reser Stadium" },
       { week: 3, note: "BYE" },
