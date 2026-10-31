@@ -90,6 +90,14 @@ if (args.season) {
 }
 const data = loadData(paths);
 const EXPECT = Number(args.games || 12);
+
+/* The commissioner's scheduling rules — no FCS opponents, at least
+   three head-to-head games, the 6-7 home-game target — apply to the
+   main dynasty only. 3-star and 1-star play whatever the game hands
+   them, so for those leagues this tool checks only that the slate was
+   transcribed correctly (game counts, week coverage, mirroring,
+   stadiums, CPU double-bookings). */
+const SCHEDULING_RULES = league.slug === "main";
 const QUIET = !!args.quiet;
 
 const R = makeResolver(data);
@@ -222,7 +230,7 @@ for (const t of slates) {
       fail(`${t.team} wk${r.week}: location is "${r.location}", must be "vs" or "at"`);
     }
     if (!r.stadium) fail(`${t.team} wk${r.week} vs ${r.opponent}: no stadium`);
-    if (FCS_SET.has(String(r.opponent).toLowerCase())) {
+    if (SCHEDULING_RULES && FCS_SET.has(String(r.opponent).toLowerCase())) {
       fail(`${t.team} wk${r.week}: ${r.opponent} is FCS — not allowed on a user's slate`);
     }
   }
@@ -271,7 +279,7 @@ for (const t of slates) {
 const MIN_H2H = 3;
 for (const t of slates) {
   const n = h2hCount.get(t.team) || 0;
-  if (n < MIN_H2H) {
+  if (SCHEDULING_RULES && n < MIN_H2H) {
     fail(`${t.team} (${handleFor(t.team)}): only ${n} head-to-head game${n === 1 ? "" : "s"} — minimum is ${MIN_H2H}`);
   }
 }
@@ -332,6 +340,7 @@ for (const t of slates) {
     maxH = Math.max(maxH, runH); maxA = Math.max(maxA, runA);
   }
   balance.push({ team: t.team, handle: handleFor(t.team), home, away, neutral, maxH, maxA, h2h: h2hCount.get(t.team) || 0 });
+  if (!SCHEDULING_RULES) continue;
   if (home < 5) warn(`${t.team}: only ${home} true home game${home === 1 ? "" : "s"} (${neutral} neutral) — target is 6-7`);
   if (maxH >= 5) warn(`${t.team}: ${maxH} straight home games`);
   if (maxA >= 4) warn(`${t.team}: ${maxA} straight road games`);
