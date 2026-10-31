@@ -152,7 +152,7 @@ const TEAM_SCHEDULES = [
     team: "Dillon",
     conference: "Sun Belt",
     weeks: [
-      { week: 0, opponent: "Cincinnati", location: "at" },
+      { week: 0, opponent: "Cincinnati", location: "at", teamScore: 28, opponentScore: 17 },
       { week: 1, opponent: "Auburn", location: "at" },
       { week: 2, opponent: "Michigan", location: "vs" },
       { week: 3, note: "BYE" },
