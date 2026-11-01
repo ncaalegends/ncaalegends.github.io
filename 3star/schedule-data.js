@@ -279,7 +279,7 @@ const TEAM_SCHEDULES = [
     team: "Baylor",
     conference: "XII",
     weeks: [
-      { week: 0, opponent: "James Madison", location: "vs", stadium: "McLane Stadium" },
+      { week: 0, opponent: "James Madison", location: "vs", stadium: "McLane Stadium", teamScore: 8, opponentScore: 58 },
       { week: 1, opponent: "North Texas", location: "vs", stadium: "McLane Stadium" },
       { week: 2, note: "BYE" },
       { week: 3, opponent: "Florida", location: "at", stadium: "Ben Hill Griffin Stadium" },
@@ -391,7 +391,7 @@ const TEAM_SCHEDULES = [
     team: "James Madison",
     conference: "SEC",
     weeks: [
-      { week: 0, opponent: "Baylor", location: "at", stadium: "McLane Stadium" },
+      { week: 0, opponent: "Baylor", location: "at", stadium: "McLane Stadium", teamScore: 58, opponentScore: 8 },
       { week: 1, opponent: "Delaware", location: "vs", stadium: "Bridgeforth Stadium" },
       { week: 2, opponent: "Oklahoma", location: "vs", stadium: "Bridgeforth Stadium" },
       { week: 3, opponent: "Virginia Tech", location: "vs", stadium: "Bridgeforth Stadium" },
