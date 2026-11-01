@@ -114,7 +114,7 @@ const TEAM_SCHEDULES = [
     conference: "ACC",
     weeks: [
       { week: 0, opponent: "Ohio State", location: "at", stadium: "Ohio Stadium", teamScore: 21, opponentScore: 58 },
-      { week: 1, opponent: "Syracuse", location: "vs", stadium: "Clemson Memorial Stadium" },
+      { week: 1, opponent: "Syracuse", location: "vs", stadium: "Clemson Memorial Stadium", teamScore: 45, opponentScore: 37 },
       { week: 2, opponent: "Pittsburgh", location: "at", stadium: "Acrisure Stadium" },
       { week: 3, opponent: "Georgia", location: "vs", stadium: "Clemson Memorial Stadium" },
       { week: 4, opponent: "Georgia Tech", location: "vs", stadium: "Clemson Memorial Stadium" },
@@ -223,7 +223,7 @@ const TEAM_SCHEDULES = [
     conference: "Big Ten",
     weeks: [
       { week: 0, opponent: "Clemson", location: "vs", stadium: "Ohio Stadium", teamScore: 58, opponentScore: 21 },
-      { week: 1, opponent: "LSU", location: "at", stadium: "Tiger Stadium" },
+      { week: 1, opponent: "LSU", location: "at", stadium: "Tiger Stadium", teamScore: 21, opponentScore: 52 },
       { week: 2, note: "BYE" },
       { week: 3, opponent: "Notre Dame", location: "vs", stadium: "Ohio Stadium" },
       { week: 4, opponent: "UCLA", location: "at", stadium: "Rose Bowl Stadium" },
@@ -245,7 +245,7 @@ const TEAM_SCHEDULES = [
     conference: "SEC",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "Louisiana Tech", location: "vs", stadium: "Texas Memorial Stadium" },
+      { week: 1, opponent: "Louisiana Tech", location: "vs", stadium: "Texas Memorial Stadium", teamScore: 63, opponentScore: 0 },
       { week: 2, note: "BYE" },
       { week: 3, opponent: "Indiana", location: "at", stadium: "Memorial Stadium" },
       { week: 4, opponent: "Baylor", location: "vs", stadium: "Texas Memorial Stadium" },
@@ -311,7 +311,7 @@ const TEAM_SCHEDULES = [
     conference: "Big Ten",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "Maryland", location: "vs", stadium: "Michigan Stadium" },
+      { week: 1, opponent: "Maryland", location: "vs", stadium: "Michigan Stadium", teamScore: 36, opponentScore: 21 },
       { week: 2, note: "BYE" },
       { week: 3, opponent: "TCU", location: "at", stadium: "Amon G. Carter Stadium" },
       { week: 4, opponent: "Purdue", location: "at", stadium: "Ross-Ade Stadium" },
@@ -508,7 +508,7 @@ const TEAM_SCHEDULES = [
     conference: "SEC",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "Ohio State", location: "vs", stadium: "Tiger Stadium" },
+      { week: 1, opponent: "Ohio State", location: "vs", stadium: "Tiger Stadium", teamScore: 52, opponentScore: 21 },
       { week: 2, note: "BYE" },
       { week: 3, opponent: "West Virginia", location: "at", stadium: "Milan Puskar Stadium" },
       { week: 4, opponent: "Missouri State", location: "vs", stadium: "Tiger Stadium" },
