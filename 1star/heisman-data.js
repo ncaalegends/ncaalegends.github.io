@@ -61,4 +61,17 @@ const HEISMAN = [
         stats: [["PASS YDS", 0], ["PASS TD", 0], ["PASS COMP %", 0], ["PASS INT", 0], ["RUSH ATT", 0], ["RUSH YDS", 0]] },
     ],
   },
+  {
+    week: 1,
+    players: [
+      { rank: 1, name: "Donovan Olugbode", pos: "WR", team: "Texas Tech", year: "SR", number: 17, archetype: "Contested Specialist", ovr: 95, height: "6'2\"", weight: 210, hometown: "Chicago, IL",
+        stats: [["CATCHES", 7], ["REC YDS", 96], ["REC TD", 0], ["LONG REC", 36], ["REC YAC", 34], ["DROPS", 0]] },
+      { rank: 2, name: "Grant Lawless", pos: "QB", team: "Clemson", year: "SO (RS)", number: 11, archetype: "Pure Runner", ovr: 91, height: "6'4\"", weight: 200, hometown: "Wendell, NC",
+        stats: [["PASS YDS", 0], ["PASS TD", 0], ["PASS COMP %", 0], ["PASS INT", 0], ["RUSH ATT", 0], ["RUSH YDS", 0]] },
+      { rank: 3, name: "Jake Fette", pos: "QB", team: "Texas A&M", year: "SO (RS)", number: 16, archetype: "Pure Runner", ovr: 90, height: "6'1\"", weight: 201, hometown: "El Paso, TX",
+        stats: [["PASS YDS", 0], ["PASS TD", 0], ["PASS COMP %", 0], ["PASS INT", 0], ["RUSH ATT", 0], ["RUSH YDS", 0]] },
+      { rank: 4, name: "Bryce Underwood", pos: "QB", team: "LSU", year: "SR", number: 19, archetype: "Backfield Creator", ovr: 90, height: "6'4\"", weight: 230, hometown: "Detroit, MI",
+        stats: [["PASS YDS", 0], ["PASS TD", 0], ["PASS COMP %", 0], ["PASS INT", 0], ["RUSH ATT", 0], ["RUSH YDS", 0]] },
+    ],
+  },
 ];
