@@ -158,7 +158,7 @@ const TEAM_SCHEDULES = [
     conference: "Big Ten",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "Colorado", location: "at", stadium: "Folsom Field" },
+      { week: 1, opponent: "Colorado", location: "at", stadium: "Folsom Field", teamScore: 38, opponentScore: 10 },
       { week: 2, note: "BYE" },
       { week: 3, opponent: "Oregon State", location: "at", stadium: "Reser Stadium" },
       { week: 4, opponent: "Notre Dame", location: "vs", stadium: "Autzen Stadium" },
@@ -333,7 +333,7 @@ const TEAM_SCHEDULES = [
     conference: "Big 12",
     weeks: [
       { week: 0, opponent: "California", location: "vs", stadium: "Milan Puskar Stadium", teamScore: 52, opponentScore: 24 },
-      { week: 1, opponent: "Oklahoma", location: "at", stadium: "Gaylord-Oklahoma Memorial" },
+      { week: 1, opponent: "Oklahoma", location: "at", stadium: "Gaylord-Oklahoma Memorial", teamScore: 56, opponentScore: 44 },
       { week: 2, note: "BYE" },
       { week: 3, opponent: "LSU", location: "vs", stadium: "Milan Puskar Stadium" },
       { week: 4, note: "BYE" },
@@ -355,7 +355,7 @@ const TEAM_SCHEDULES = [
     conference: "Big 12",
     weeks: [
       { week: 0, opponent: "Oklahoma", location: "at", stadium: "Gaylord-Oklahoma Memorial", teamScore: 28, opponentScore: 19 },
-      { week: 1, opponent: "Oregon", location: "vs", stadium: "Folsom Field" },
+      { week: 1, opponent: "Oregon", location: "vs", stadium: "Folsom Field", teamScore: 10, opponentScore: 38 },
       { week: 2, note: "BYE" },
       { week: 3, opponent: "Miami", location: "at", stadium: "Hard Rock Stadium" },
       { week: 4, note: "BYE" },
@@ -377,7 +377,7 @@ const TEAM_SCHEDULES = [
     conference: "ACC",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "Arkansas", location: "at", neutral: true, stadium: "Mercedes-Benz Stadium" },
+      { week: 1, opponent: "Arkansas", location: "at", neutral: true, stadium: "Mercedes-Benz Stadium", teamScore: 34, opponentScore: 14 },
       { week: 2, opponent: "Purdue", location: "vs", stadium: "Allegacy Federal Credit Union (truncated)" },
       { week: 3, opponent: "Virginia Tech", location: "at", stadium: "Lane Stadium" },
       { week: 4, opponent: "East Carolina", location: "vs", stadium: "Allegacy Federal Credit Union Stadium" },
@@ -472,7 +472,7 @@ const TEAM_SCHEDULES = [
     conference: "SEC",
     weeks: [
       { week: 0, opponent: "Colorado", location: "vs", stadium: "Gaylord-Oklahoma Memorial", teamScore: 19, opponentScore: 28 },
-      { week: 1, opponent: "West Virginia", location: "vs", stadium: "Gaylord-Oklahoma Memorial" },
+      { week: 1, opponent: "West Virginia", location: "vs", stadium: "Gaylord-Oklahoma Memorial", teamScore: 44, opponentScore: 56 },
       { week: 2, opponent: "Notre Dame", location: "at", stadium: "Notre Dame Stadium" },
       { week: 3, opponent: "Houston", location: "vs", stadium: "Gaylord-Oklahoma Memorial" },
       { week: 4, opponent: "Auburn", location: "at", stadium: "Jordan-Hare Stadium" },
@@ -531,7 +531,7 @@ const TEAM_SCHEDULES = [
     /* Texan_hog returned in the 2028 preseason, taking Arkansas from week 0. */
     weeks: [
       { week: 0, opponent: "Kansas State", location: "vs", stadium: "DW Reynolds Razorback Stadium", teamScore: 38, opponentScore: 45 },
-      { week: 1, opponent: "Wake Forest", location: "vs", neutral: true, stadium: "Mercedes-Benz Stadium" },
+      { week: 1, opponent: "Wake Forest", location: "vs", neutral: true, stadium: "Mercedes-Benz Stadium", teamScore: 14, opponentScore: 34 },
       { week: 2, opponent: "USC", location: "vs", stadium: "DW Reynolds Razorback Stadium" },
       { week: 3, opponent: "Texas A&M", location: "at", stadium: "Kyle Field" },
       { week: 4, note: "BYE" },
