@@ -83,7 +83,7 @@ const TEAM_SCHEDULES = [
     team: "California",
     conference: "ACC",
     weeks: [
-      { week: 0, opponent: "South Carolina", location: "at", stadium: "Williams-Brice Stadium" },
+      { week: 0, opponent: "South Carolina", location: "at", stadium: "Williams-Brice Stadium", teamScore: 31, opponentScore: 10 },
       { week: 1, opponent: "UCLA", location: "vs", stadium: "California Memorial Stadium" },
       { week: 2, opponent: "North Dakota State", location: "vs", stadium: "California Memorial Stadium" },
       { week: 3, note: "BYE" },
@@ -233,7 +233,7 @@ const TEAM_SCHEDULES = [
        the CPU weeks it created belong to 2026 and live in
        seasons/2026/. */
     weeks: [
-      { week: 0, opponent: "Georgia", location: "at", stadium: "Sanford Stadium" },
+      { week: 0, opponent: "Georgia", location: "at", stadium: "Sanford Stadium", teamScore: 50, opponentScore: 47 },
       { week: 1, opponent: "UConn", location: "vs", stadium: "SHI Stadium" },
       { week: 2, opponent: "Ole Miss", location: "vs", stadium: "SHI Stadium" },
       { week: 3, opponent: "Kent State", location: "vs", stadium: "SHI Stadium" },
