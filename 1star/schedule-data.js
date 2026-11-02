@@ -131,7 +131,7 @@ const TEAM_SCHEDULES = [
     conference: "Sun Belt",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "Duke", location: "vs" },
+      { week: 1, opponent: "Duke", location: "vs", teamScore: 56, opponentScore: 17 },
       { week: 2, opponent: "James Madison", location: "at" },
       { week: 3, opponent: "Charlotte", location: "vs" },
       { week: 4, note: "BYE" },
@@ -289,7 +289,7 @@ const TEAM_SCHEDULES = [
     conference: "CUSA",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "Baylor", location: "vs" },
+      { week: 1, opponent: "Baylor", location: "vs", teamScore: 10, opponentScore: 44 },
       { week: 2, opponent: "South Carolina", location: "vs" },
       { week: 3, opponent: "New Glarus", location: "vs" },
       { week: 4, opponent: "Miami University", location: "at" },
