@@ -256,7 +256,7 @@ const TEAM_SCHEDULES = [
     conference: "B1G",
     weeks: [
       { week: 0, opponent: "Notre Dame", location: "at", stadium: "Notre Dame Stadium", teamScore: 27, opponentScore: 0 },
-      { week: 1, opponent: "Marshall", location: "vs", stadium: "Camp Randall Stadium" },
+      { week: 1, opponent: "Marshall", location: "vs", stadium: "Camp Randall Stadium", teamScore: 52, opponentScore: 10 },
       { week: 2, opponent: "Ball State", location: "vs", stadium: "Camp Randall Stadium" },
       { week: 3, note: "BYE" },
       { week: 4, opponent: "Northwestern", location: "vs", stadium: "Camp Randall Stadium" },
