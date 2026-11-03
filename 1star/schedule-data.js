@@ -102,7 +102,7 @@ const TEAM_SCHEDULES = [
     conference: "Sun Belt",
     weeks: [
       { week: 0, opponent: "California", location: "vs", teamScore: 45, opponentScore: 14 },
-      { week: 1, opponent: "Ole Miss", location: "at" },
+      { week: 1, opponent: "Ole Miss", location: "at", teamScore: 33, opponentScore: 7 },
       { week: 2, opponent: "Middle Tennessee", location: "at" },
       { week: 3, note: "BYE" },
       { week: 4, opponent: "James Madison", location: "vs" },
@@ -177,7 +177,7 @@ const TEAM_SCHEDULES = [
     conference: "MAC",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "Army", location: "vs" },
+      { week: 1, opponent: "Army", location: "vs", teamScore: 21, opponentScore: 15 },
       { week: 2, opponent: "Kentucky", location: "at" },
       { week: 3, opponent: "Rutgers", location: "at" },
       { week: 4, opponent: "Arizona State", location: "vs" },
@@ -267,7 +267,7 @@ const TEAM_SCHEDULES = [
     conference: "CUSA",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "Utah", location: "at" },
+      { week: 1, opponent: "Utah", location: "at", teamScore: 17, opponentScore: 9 },
       { week: 2, opponent: "Central Michigan", location: "vs" },
       { week: 3, opponent: "Florida Atlantic", location: "at" },
       { week: 4, opponent: "Minnesota", location: "vs" },
