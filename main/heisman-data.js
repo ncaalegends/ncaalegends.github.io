@@ -74,4 +74,31 @@ const HEISMAN = [
         stats: [["PASS YDS", 0], ["PASS TD", 0], ["PASS COMP %", 0], ["PASS INT", 0], ["RUSH ATT", 0], ["RUSH YDS", 0]] },
     ],
   },
+  {
+    week: 2,
+    players: [
+      { rank: 1, name: "Malachi Toney", pos: "WR", team: "Miami", year: "SR", number: 1, archetype: "Elusive Route Runner", ovr: 98, height: "5'11\"", weight: 190, hometown: "Freeport, FL",
+        stats: [["CATCHES", 2], ["REC YDS", 14], ["REC TD", 0], ["LONG REC", 7], ["REC YAC", 1], ["DROPS", 0]],
+        gameLog: [
+          { week: 0, opponent: "USF", result: "W 31-23", stats: [["REC", 0], ["YARDS", 0], ["AVG", 0], ["TD", 0], ["RAC", 0], ["RAC AVG", 0], ["LONG", 0], ["SNAPS", 58]] },
+          { week: 1, opponent: "Texas A&M", result: "L 38-17", stats: [["REC", 2], ["YARDS", 14], ["AVG", 7], ["TD", 0], ["RAC", 1], ["RAC AVG", 0.5], ["LONG", 7], ["SNAPS", 54]] },
+        ] },
+      { rank: 2, name: "Dakorien Moore", pos: "WR", team: "Oregon", year: "SR", number: 1, archetype: "Gadget", ovr: 98, height: "5'11\"", weight: 199, hometown: "Duncanville, TX",
+        stats: [["CATCHES", 3], ["REC YDS", 63], ["REC TD", 1], ["LONG REC", 55], ["REC YAC", 57], ["DROPS", 0]],
+        gameLog: [
+          { week: 1, opponent: "Colorado", result: "W 38-10", stats: [["REC", 3], ["YARDS", 63], ["AVG", 21], ["TD", 1], ["RAC", 57], ["RAC AVG", 19], ["LONG", 55], ["SNAPS", 47]] },
+        ] },
+      { rank: 3, name: "Tavien St. Clair", pos: "QB", team: "Ohio State", year: "SR", number: 9, archetype: "Dual Threat", ovr: 94, height: "6'4\"", weight: 233, hometown: "Perry, OH",
+        stats: [["PASS YDS", 574], ["PASS TD", 8], ["PASS COMP %", 62], ["PASS INT", 3], ["RUSH ATT", 17], ["RUSH YDS", 53]],
+        gameLog: [
+          { week: 0, opponent: "Clemson", result: "W 58-21", stats: [["RATING", 230.9], ["YARDS", 304], ["TD", 5], ["INT", 0], ["LONG", 74], ["SACKS", 0], ["COMP", 18], ["ATT", 26], ["COMP%", 69], ["YPA", 11.7], ["SNAPS", 44]] },
+          { week: 1, opponent: "LSU", result: "L 52-21", stats: [["RATING", 133], ["YARDS", 270], ["TD", 3], ["INT", 3], ["LONG", 47], ["SACKS", 5], ["COMP", 20], ["ATT", 35], ["COMP%", 57], ["YPA", 7.7], ["SNAPS", 57]] },
+        ] },
+      { rank: 4, name: "Drew Mestemaker", pos: "QB", team: "Texas", year: "SR (RS)", number: 11, archetype: "Pocket Passer", ovr: 94, height: "6'3\"", weight: 218, hometown: "Austin, TX",
+        stats: [["PASS YDS", 287], ["PASS TD", 4], ["PASS COMP %", 79], ["PASS INT", 0], ["RUSH ATT", 0], ["RUSH YDS", 0]],
+        gameLog: [
+          { week: 1, opponent: "Louisiana Tech", result: "W 63-0", stats: [["RATING", 189.1], ["YARDS", 287], ["TD", 4], ["INT", 0], ["LONG", 36], ["SACKS", 0], ["COMP", 27], ["ATT", 34], ["COMP%", 79], ["YPA", 8.4], ["SNAPS", 66]] },
+        ] },
+    ],
+  },
 ];
