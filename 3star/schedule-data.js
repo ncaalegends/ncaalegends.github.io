@@ -84,7 +84,7 @@ const TEAM_SCHEDULES = [
     conference: "ACC",
     weeks: [
       { week: 0, opponent: "South Carolina", location: "at", stadium: "Williams-Brice Stadium", teamScore: 31, opponentScore: 10 },
-      { week: 1, opponent: "UCLA", location: "vs", stadium: "California Memorial Stadium" },
+      { week: 1, opponent: "UCLA", location: "vs", stadium: "California Memorial Stadium", teamScore: 40, opponentScore: 38 },
       { week: 2, opponent: "North Dakota State", location: "vs", stadium: "California Memorial Stadium" },
       { week: 3, note: "BYE" },
       { week: 4, opponent: "Clemson", location: "at", stadium: "Clemson Memorial Stadium" },
@@ -346,7 +346,7 @@ const TEAM_SCHEDULES = [
     conference: "XII",
     weeks: [
       { week: 0, opponent: "Ohio State", location: "at", stadium: "Ohio Stadium", teamScore: 49, opponentScore: 24 },
-      { week: 1, opponent: "Tulsa", location: "vs", stadium: "Boone Pickens Stadium" },
+      { week: 1, opponent: "Tulsa", location: "vs", stadium: "Boone Pickens Stadium", teamScore: 49, opponentScore: 17 },
       { week: 2, opponent: "Cincinnati", location: "at", stadium: "Nippert Stadium" },
       { week: 3, note: "BYE" },
       { week: 4, opponent: "Southern Mississippi", location: "vs", stadium: "Boone Pickens Stadium" },
@@ -416,7 +416,7 @@ const TEAM_SCHEDULES = [
        week 14 of 2027). */
     weeks: [
       { week: 0, opponent: "Maryland", location: "at", stadium: "SECU Stadium", teamScore: 42, opponentScore: 14 },
-      { week: 1, opponent: "Wake Forest", location: "vs", stadium: "Davis Wade Stadium" },
+      { week: 1, opponent: "Wake Forest", location: "vs", stadium: "Davis Wade Stadium", teamScore: 34, opponentScore: 3 },
       { week: 2, note: "BYE" },
       { week: 3, opponent: "Memphis", location: "vs", stadium: "Davis Wade Stadium" },
       { week: 4, opponent: "Missouri State", location: "vs", stadium: "Davis Wade Stadium" },
