@@ -136,7 +136,7 @@ const TEAM_SCHEDULES = [
     conference: "SEC",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "Arizona State", location: "at", neutral: true, stadium: "Nissan Stadium" },
+      { week: 1, opponent: "Arizona State", location: "at", neutral: true, stadium: "Nissan Stadium", teamScore: 45, opponentScore: 21 },
       { week: 2, opponent: "USF", location: "vs", stadium: "Ben Hill Griffin Stadium" },
       { week: 3, note: "BYE" },
       { week: 4, opponent: "Rutgers", location: "vs", stadium: "Ben Hill Griffin Stadium" },
@@ -180,7 +180,7 @@ const TEAM_SCHEDULES = [
     conference: "ACC",
     weeks: [
       { week: 0, opponent: "Alabama", location: "vs", stadium: "Doak Campbell Stadium", teamScore: 33, opponentScore: 24 },
-      { week: 1, opponent: "Duke", location: "vs", stadium: "Doak Campbell Stadium" },
+      { week: 1, opponent: "Duke", location: "vs", stadium: "Doak Campbell Stadium", teamScore: 42, opponentScore: 35 },
       { week: 2, opponent: "Wisconsin", location: "at", stadium: "Camp Randall Stadium" },
       { week: 3, note: "BYE" },
       { week: 4, opponent: "SMU", location: "at", stadium: "Gerald J. Ford Stadium" },
@@ -289,7 +289,7 @@ const TEAM_SCHEDULES = [
     conference: "SEC",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "Indiana", location: "at", neutral: true, stadium: "Mercedes-Benz Stadium" },
+      { week: 1, opponent: "Indiana", location: "at", neutral: true, stadium: "Mercedes-Benz Stadium", teamScore: 37, opponentScore: 34 },
       { week: 2, opponent: "Duke", location: "vs", stadium: "Sanford Stadium" },
       { week: 3, opponent: "Clemson", location: "at", stadium: "Clemson Memorial Stadium" },
       { week: 4, note: "BYE" },
@@ -399,7 +399,7 @@ const TEAM_SCHEDULES = [
     conference: "Big Ten",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "Stanford", location: "vs", stadium: "Rose Bowl Stadium" },
+      { week: 1, opponent: "Stanford", location: "vs", stadium: "Rose Bowl Stadium", teamScore: 38, opponentScore: 7 },
       { week: 2, opponent: "Washington", location: "at", stadium: "Husky Stadium" },
       { week: 3, opponent: "California", location: "at", stadium: "California Memorial Stadium" },
       { week: 4, opponent: "Ohio State", location: "vs", stadium: "Rose Bowl Stadium" },
@@ -421,7 +421,7 @@ const TEAM_SCHEDULES = [
     conference: "ACC",
     weeks: [
       { week: 0, opponent: "USF", location: "vs", stadium: "Hard Rock Stadium", teamScore: 31, opponentScore: 23 },
-      { week: 1, opponent: "Texas A&M", location: "at", stadium: "Kyle Field" },
+      { week: 1, opponent: "Texas A&M", location: "at", stadium: "Kyle Field", teamScore: 17, opponentScore: 38 },
       { week: 2, opponent: "Stanford", location: "vs", stadium: "Hard Rock Stadium" },
       { week: 3, opponent: "Colorado", location: "vs", stadium: "Hard Rock Stadium" },
       { week: 4, note: "BYE" },
