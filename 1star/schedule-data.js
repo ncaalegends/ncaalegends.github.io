@@ -221,7 +221,7 @@ const TEAM_SCHEDULES = [
     conference: "MAC",
     weeks: [
       { week: 0, note: "BYE" },
-      { week: 1, opponent: "Eastern Michigan", location: "at" },
+      { week: 1, opponent: "Eastern Michigan", location: "at", teamScore: 31, opponentScore: 7 },
       { week: 2, opponent: "Arkansas", location: "at" },
       { week: 3, opponent: "West Virginia", location: "at" },
       { week: 4, opponent: "FCS West", location: "vs" },
