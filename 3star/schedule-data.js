@@ -129,7 +129,7 @@ const TEAM_SCHEDULES = [
     /* Oldarmy324's team from 2028 (he coached Pittsburgh through 2027). */
     weeks: [
       { week: 0, opponent: "Texas A&M", location: "vs", stadium: "Bobby Dodd Stadium", teamScore: 54, opponentScore: 3 },
-      { week: 1, opponent: "Auburn", location: "vs", stadium: "Bobby Dodd Stadium" },
+      { week: 1, opponent: "Auburn", location: "vs", stadium: "Bobby Dodd Stadium", teamScore: 66, opponentScore: 7 },
       { week: 2, note: "BYE" },
       { week: 3, opponent: "Louisville", location: "at", stadium: "L&N Stadium" },
       { week: 4, opponent: "Florida State", location: "at", stadium: "Doak Campbell Stadium" },
@@ -280,7 +280,7 @@ const TEAM_SCHEDULES = [
     conference: "XII",
     weeks: [
       { week: 0, opponent: "James Madison", location: "vs", stadium: "McLane Stadium", teamScore: 8, opponentScore: 58 },
-      { week: 1, opponent: "North Texas", location: "vs", stadium: "McLane Stadium" },
+      { week: 1, opponent: "North Texas", location: "vs", stadium: "McLane Stadium", teamScore: 42, opponentScore: 13 },
       { week: 2, note: "BYE" },
       { week: 3, opponent: "Florida", location: "at", stadium: "Ben Hill Griffin Stadium" },
       { week: 4, opponent: "Colorado", location: "vs", stadium: "McLane Stadium" },
