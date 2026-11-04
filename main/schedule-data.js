@@ -93,7 +93,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, opponent: "Notre Dame", location: "at", stadium: "Notre Dame Stadium", teamScore: 21, opponentScore: 31 },
       { week: 1, note: "BYE" },
-      { week: 2, opponent: "Texas Tech", location: "vs", stadium: "Amon G. Carter Stadium" },
+      { week: 2, opponent: "Texas Tech", location: "vs", stadium: "Amon G. Carter Stadium", teamScore: 59, opponentScore: 17 },
       { week: 3, opponent: "Michigan", location: "vs", stadium: "Amon G. Carter Stadium" },
       { week: 4, note: "BYE" },
       { week: 5, opponent: "Kansas", location: "at", stadium: "David Booth Kansas Memorial Stadium" },
@@ -137,7 +137,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "Arizona State", location: "at", neutral: true, stadium: "Nissan Stadium", teamScore: 45, opponentScore: 21 },
-      { week: 2, opponent: "USF", location: "vs", stadium: "Ben Hill Griffin Stadium" },
+      { week: 2, opponent: "USF", location: "vs", stadium: "Ben Hill Griffin Stadium", teamScore: 49, opponentScore: 10 },
       { week: 3, note: "BYE" },
       { week: 4, opponent: "Rutgers", location: "vs", stadium: "Ben Hill Griffin Stadium" },
       { week: 5, opponent: "LSU", location: "vs", stadium: "Ben Hill Griffin Stadium" },
