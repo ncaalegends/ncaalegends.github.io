@@ -74,4 +74,17 @@ const HEISMAN = [
         stats: [["PASS YDS", 0], ["PASS TD", 0], ["PASS COMP %", 0], ["PASS INT", 0], ["RUSH ATT", 0], ["RUSH YDS", 0]] },
     ],
   },
+  {
+    week: 2,
+    players: [
+      { rank: 1, name: "Donovan Olugbode", pos: "WR", team: "Texas Tech", year: "SR", number: 17, archetype: "Contested Specialist", ovr: 95, height: "6'2\"", weight: 210, hometown: "Chicago, IL",
+        stats: [["CATCHES", 11], ["REC YDS", 146], ["REC TD", 0], ["LONG REC", 36], ["REC YAC", 52], ["DROPS", 1]] },
+      { rank: 2, name: "Grant Lawless", pos: "QB", team: "Clemson", year: "SO (RS)", number: 11, archetype: "Pure Runner", ovr: 91, height: "6'4\"", weight: 200, hometown: "Wendell, NC",
+        stats: [["PASS YDS", 268], ["PASS TD", 4], ["PASS COMP %", 57], ["PASS INT", 0], ["RUSH ATT", 14], ["RUSH YDS", 84]] },
+      { rank: 3, name: "Jake Fette", pos: "QB", team: "Texas A&M", year: "SO (RS)", number: 16, archetype: "Pure Runner", ovr: 90, height: "6'1\"", weight: 201, hometown: "El Paso, TX",
+        stats: [["PASS YDS", 182], ["PASS TD", 3], ["PASS COMP %", 50], ["PASS INT", 0], ["RUSH ATT", 13], ["RUSH YDS", 82]] },
+      { rank: 4, name: "Landon Duckworth", pos: "QB", team: "Texas A&M", year: "SO (RS)", number: 4, archetype: "Pure Runner", ovr: 90, height: "6'4\"", weight: 213, hometown: "Jackson, AL",
+        stats: [["PASS YDS", 0], ["PASS TD", 0], ["PASS COMP %", 0], ["PASS INT", 0], ["RUSH ATT", 0], ["RUSH YDS", 0]] },
+    ],
+  },
 ];
