@@ -132,7 +132,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "Duke", location: "vs", teamScore: 56, opponentScore: 17 },
-      { week: 2, opponent: "James Madison", location: "at" },
+      { week: 2, opponent: "James Madison", location: "at", teamScore: 59, opponentScore: 13 },
       { week: 3, opponent: "Charlotte", location: "vs" },
       { week: 4, note: "BYE" },
       { week: 5, opponent: "NC State", location: "vs" },
@@ -154,7 +154,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, opponent: "Cincinnati", location: "at", teamScore: 28, opponentScore: 17 },
       { week: 1, opponent: "Auburn", location: "at", teamScore: 25, opponentScore: 44 },
-      { week: 2, opponent: "Michigan", location: "vs" },
+      { week: 2, opponent: "Michigan", location: "vs", teamScore: 25, opponentScore: 32 },
       { week: 3, note: "BYE" },
       { week: 4, opponent: "Boston College", location: "vs" },
       { week: 5, opponent: "Louisiana Tech", location: "at" },
@@ -246,7 +246,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, note: "BYE" },
-      { week: 2, opponent: "East Carolina", location: "vs" },
+      { week: 2, opponent: "East Carolina", location: "vs", teamScore: 31, opponentScore: 3 },
       { week: 3, opponent: "Boise State", location: "at" },
       { week: 4, opponent: "Louisiana", location: "vs" },
       { week: 5, opponent: "Westeros", location: "vs" },
