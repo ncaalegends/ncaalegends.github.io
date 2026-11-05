@@ -105,7 +105,7 @@ const TEAM_SCHEDULES = [
     team: "North Carolina",
     conference: "ACC",
     weeks: [
-      { week: 0, opponent: "Florida", location: "at", stadium: "Ben Hill Griffin Stadium" },
+      { week: 0, opponent: "Florida", location: "at", stadium: "Ben Hill Griffin Stadium", teamScore: 37, opponentScore: 34 },
       { week: 1, opponent: "South Carolina", location: "vs", stadium: "Kenan Stadium" },
       { week: 2, opponent: "Kennesaw State", location: "vs", stadium: "Kenan Stadium" },
       { week: 3, opponent: "Pittsburgh", location: "at", stadium: "Acrisure Stadium" },
@@ -187,7 +187,7 @@ const TEAM_SCHEDULES = [
        schedule screen ("7th in Big Ten Division 1") and league-data.js. */
     weeks: [
       { week: 0, opponent: "Arkansas", location: "at", stadium: "DW Reynolds Razorback Stadium", teamScore: 45, opponentScore: 7 },
-      { week: 1, opponent: "New Mexico State", location: "vs", stadium: "North Dakota State Stadium" },
+      { week: 1, opponent: "New Mexico State", location: "vs", stadium: "North Dakota State Stadium", teamScore: 35, opponentScore: 0 },
       { week: 2, opponent: "California", location: "at", stadium: "California Memorial Stadium" },
       { week: 3, note: "BYE" },
       { week: 4, opponent: "Washington", location: "at", stadium: "Husky Stadium" },
@@ -301,8 +301,8 @@ const TEAM_SCHEDULES = [
     team: "Colorado",
     conference: "XII",
     weeks: [
-      { week: 0, opponent: "Florida State", location: "at", stadium: "Doak Campbell Stadium" },
-      { week: 1, opponent: "Colorado State", location: "vs", stadium: "Folsom Field" },
+      { week: 0, opponent: "Florida State", location: "at", stadium: "Doak Campbell Stadium", teamScore: 41, opponentScore: 9 },
+      { week: 1, opponent: "Colorado State", location: "vs", stadium: "Folsom Field", teamScore: 63, opponentScore: 7 },
       { week: 2, note: "BYE" },
       { week: 3, opponent: "West Virginia", location: "vs", stadium: "Folsom Field" },
       { week: 4, opponent: "Baylor", location: "at", stadium: "McLane Stadium" },
@@ -323,8 +323,8 @@ const TEAM_SCHEDULES = [
     team: "Iowa State",
     conference: "XII",
     weeks: [
-      { week: 0, opponent: "Minnesota", location: "at", stadium: "Huntington Bank Stadium" },
-      { week: 1, opponent: "Tulane", location: "vs", stadium: "Jack Trice Stadium" },
+      { week: 0, opponent: "Minnesota", location: "at", stadium: "Huntington Bank Stadium", teamScore: 14, opponentScore: 27 },
+      { week: 1, opponent: "Tulane", location: "vs", stadium: "Jack Trice Stadium", teamScore: 48, opponentScore: 3 },
       { week: 2, opponent: "Iowa", location: "at", stadium: "Kinnick Stadium" },
       { week: 3, opponent: "Texas Tech", location: "vs", stadium: "Jack Trice Stadium" },
       { week: 4, opponent: "West Virginia", location: "vs", stadium: "Jack Trice Stadium" },
@@ -369,8 +369,8 @@ const TEAM_SCHEDULES = [
     team: "Charlotte",
     conference: "SEC",
     weeks: [
-      { week: 0, opponent: "Clemson", location: "at", stadium: "Clemson Memorial Stadium" },
-      { week: 1, opponent: "Georgia Southern", location: "vs", stadium: "Jerry Richardson Stadium" },
+      { week: 0, opponent: "Clemson", location: "at", stadium: "Clemson Memorial Stadium", teamScore: 34, opponentScore: 18 },
+      { week: 1, opponent: "Georgia Southern", location: "vs", stadium: "Jerry Richardson Stadium", teamScore: 16, opponentScore: 10 },
       { week: 2, opponent: "Boise State", location: "vs", stadium: "Jerry Richardson Stadium" },
       { week: 3, opponent: "Appalachian State", location: "vs", stadium: "Jerry Richardson Stadium" },
       { week: 4, opponent: "Florida", location: "at", stadium: "Ben Hill Griffin Stadium" },
@@ -392,7 +392,7 @@ const TEAM_SCHEDULES = [
     conference: "SEC",
     weeks: [
       { week: 0, opponent: "Baylor", location: "at", stadium: "McLane Stadium", teamScore: 58, opponentScore: 8 },
-      { week: 1, opponent: "Delaware", location: "vs", stadium: "Bridgeforth Stadium" },
+      { week: 1, opponent: "Delaware", location: "vs", stadium: "Bridgeforth Stadium", teamScore: 42, opponentScore: 3 },
       { week: 2, opponent: "Oklahoma", location: "vs", stadium: "Bridgeforth Stadium" },
       { week: 3, opponent: "Virginia Tech", location: "vs", stadium: "Bridgeforth Stadium" },
       { week: 4, opponent: "Kentucky", location: "at", stadium: "Kroger Field" },
