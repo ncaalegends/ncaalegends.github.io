@@ -178,7 +178,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "Army", location: "vs", teamScore: 21, opponentScore: 15 },
-      { week: 2, opponent: "Kentucky", location: "at" },
+      { week: 2, opponent: "Kentucky", location: "at", teamScore: 14, opponentScore: 45 },
       { week: 3, opponent: "Rutgers", location: "at" },
       { week: 4, opponent: "Arizona State", location: "vs" },
       { week: 5, note: "BYE" },
@@ -268,7 +268,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "Utah", location: "at", teamScore: 17, opponentScore: 9 },
-      { week: 2, opponent: "Central Michigan", location: "vs" },
+      { week: 2, opponent: "Central Michigan", location: "vs", teamScore: 22, opponentScore: 25 },
       { week: 3, opponent: "Florida Atlantic", location: "at" },
       { week: 4, opponent: "Minnesota", location: "vs" },
       { week: 5, note: "BYE" },
