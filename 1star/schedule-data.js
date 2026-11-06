@@ -269,7 +269,7 @@ const TEAM_SCHEDULES = [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "Utah", location: "at", teamScore: 17, opponentScore: 9 },
       { week: 2, opponent: "Central Michigan", location: "vs", teamScore: 22, opponentScore: 25 },
-      { week: 3, opponent: "Florida Atlantic", location: "at" },
+      { week: 3, opponent: "Florida Atlantic", location: "at", teamScore: 20, opponentScore: 17 },
       { week: 4, opponent: "Minnesota", location: "vs" },
       { week: 5, note: "BYE" },
       { week: 6, opponent: "Westeros", location: "at" },
