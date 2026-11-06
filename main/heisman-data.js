@@ -101,4 +101,21 @@ const HEISMAN = [
         ] },
     ],
   },
+  {
+    week: 3,
+    players: [
+      { rank: 1, name: "Luke Kromenhoek", pos: "QB", team: "Kansas State", year: "SR (RS)", number: 17, archetype: "Pure Runner", ovr: 88, height: "6'4\"", weight: 223, hometown: "Savannah, GA",
+        stats: [["PASS YDS", 696], ["PASS TD", 8], ["PASS COMP %", 69], ["PASS INT", 0], ["RUSH ATT", 29], ["RUSH YDS", 213]] },
+      { rank: 2, name: "Doug Schau", pos: "QB", team: "SMU", year: "SO", number: 18, archetype: "Dual Threat", ovr: 83, height: "6'1\"", weight: 199, hometown: "Mount Pleasant, TX",
+        stats: [["PASS YDS", 1053], ["PASS TD", 8], ["PASS COMP %", 64], ["PASS INT", 0], ["RUSH ATT", 34], ["RUSH YDS", 123]] },
+      { rank: 3, name: "Sawyer Anderson", pos: "QB", team: "Texas Tech", year: "JR (RS)", number: 4, archetype: "Pure Runner", ovr: 87, height: "5'11\"", weight: 188, hometown: "Dallas, TX",
+        stats: [["PASS YDS", 755], ["PASS TD", 6], ["PASS COMP %", 65], ["PASS INT", 1], ["RUSH ATT", 28], ["RUSH YDS", 76]] },
+      { rank: 4, name: "Corey Smith", pos: "HB", team: "West Virginia", year: "SR (RS)", number: 20, archetype: "East/West Playmaker", ovr: 87, height: "5'10\"", weight: 178, hometown: "Milwaukee, WI",
+        stats: [["RUSH ATT", 26], ["RUSH YDS", 303], ["YPC", 11], ["RUSH TD", 3], ["CATCHES", 3], ["REC YDS", 89]],
+        gameLog: [
+          { week: 0, opponent: "California", result: "W 52-24", stats: [["CAR", 15], ["YARDS", 176], ["AVG", 11.7], ["TD", 2], ["FUMB", 0], ["BTK", 0], ["YAC", 21], ["LONG", 81], ["SNAPS", 33]] },
+          { week: 1, opponent: "Oklahoma", result: "W 56-44", stats: [["CAR", 11], ["YARDS", 127], ["AVG", 11.5], ["TD", 1], ["FUMB", 1], ["BTK", 0], ["YAC", 16], ["LONG", 63], ["SNAPS", 44]] },
+        ] },
+    ],
+  },
 ];
