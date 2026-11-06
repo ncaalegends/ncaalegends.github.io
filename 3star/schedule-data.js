@@ -106,7 +106,7 @@ const TEAM_SCHEDULES = [
     conference: "ACC",
     weeks: [
       { week: 0, opponent: "Florida", location: "at", stadium: "Ben Hill Griffin Stadium", teamScore: 37, opponentScore: 34 },
-      { week: 1, opponent: "South Carolina", location: "vs", stadium: "Kenan Stadium" },
+      { week: 1, opponent: "South Carolina", location: "vs", stadium: "Kenan Stadium", teamScore: 27, opponentScore: 37 },
       { week: 2, opponent: "Kennesaw State", location: "vs", stadium: "Kenan Stadium" },
       { week: 3, opponent: "Pittsburgh", location: "at", stadium: "Acrisure Stadium" },
       { week: 4, opponent: "Duke", location: "at", stadium: "Wallace Wade Stadium" },
@@ -209,7 +209,7 @@ const TEAM_SCHEDULES = [
     conference: "B1G",
     weeks: [
       { week: 0, opponent: "Stanford", location: "vs", stadium: "Reser Stadium", teamScore: 45, opponentScore: 28 },
-      { week: 1, opponent: "BYU", location: "at", stadium: "LaVell Edwards Stadium" },
+      { week: 1, opponent: "BYU", location: "at", stadium: "LaVell Edwards Stadium", teamScore: 41, opponentScore: 24 },
       { week: 2, opponent: "Nevada", location: "vs", stadium: "Reser Stadium" },
       { week: 3, note: "BYE" },
       { week: 4, opponent: "New Mexico State", location: "vs", stadium: "Reser Stadium" },
@@ -234,7 +234,7 @@ const TEAM_SCHEDULES = [
        seasons/2026/. */
     weeks: [
       { week: 0, opponent: "Georgia", location: "at", stadium: "Sanford Stadium", teamScore: 50, opponentScore: 47 },
-      { week: 1, opponent: "UConn", location: "vs", stadium: "SHI Stadium" },
+      { week: 1, opponent: "UConn", location: "vs", stadium: "SHI Stadium", teamScore: 38, opponentScore: 24 },
       { week: 2, opponent: "Ole Miss", location: "vs", stadium: "SHI Stadium" },
       { week: 3, opponent: "Kent State", location: "vs", stadium: "SHI Stadium" },
       { week: 4, opponent: "Illinois", location: "at", stadium: "Gies Memorial Stadium" },
