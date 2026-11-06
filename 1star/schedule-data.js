@@ -222,7 +222,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "Eastern Michigan", location: "at", teamScore: 31, opponentScore: 7 },
-      { week: 2, opponent: "Arkansas", location: "at" },
+      { week: 2, opponent: "Arkansas", location: "at", teamScore: 28, opponentScore: 24 },
       { week: 3, opponent: "West Virginia", location: "at" },
       { week: 4, opponent: "FCS West", location: "vs" },
       { week: 5, opponent: "Central Michigan", location: "at" },
@@ -290,7 +290,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "Baylor", location: "vs", teamScore: 10, opponentScore: 44 },
-      { week: 2, opponent: "South Carolina", location: "vs" },
+      { week: 2, opponent: "South Carolina", location: "vs", teamScore: 3, opponentScore: 31 },
       { week: 3, opponent: "New Glarus", location: "vs" },
       { week: 4, opponent: "Miami University", location: "at" },
       { week: 5, opponent: "Patriot Tech", location: "at" },
