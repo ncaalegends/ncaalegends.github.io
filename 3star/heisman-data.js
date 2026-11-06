@@ -81,4 +81,21 @@ const HEISMAN = [
         stats: [["PASS YDS", 0], ["PASS TD", 0], ["PASS COMP %", 0], ["PASS INT", 0], ["RUSH ATT", 0], ["RUSH YDS", 0]] },
     ],
   },
+  {
+    week: 2,
+    players: [
+      { rank: 1, name: "Savion Hiter", pos: "HB", team: "Ohio State", year: "JR", number: 19, archetype: "East/West Playmaker", ovr: 93, height: "6'0\"", weight: 217, hometown: "Hampton, VA",
+        stats: [["RUSH ATT", 27], ["RUSH YDS", 170], ["YPC", 6], ["RUSH TD", 0], ["CATCHES", 3], ["REC YDS", 42]] },
+      { rank: 2, name: "Dierre Hill Jr.", pos: "HB", team: "Wisconsin", year: "SR", number: 22, archetype: "East/West Playmaker", ovr: 93, height: "5'11\"", weight: 210, hometown: "Centralia, IL",
+        stats: [["RUSH ATT", 31], ["RUSH YDS", 227], ["YPC", 7], ["RUSH TD", 2], ["CATCHES", 3], ["REC YDS", 25]],
+        gameLog: [
+          { week: 0, opponent: "Notre Dame", result: "W 27-0", stats: [["CAR", 21], ["YARDS", 91], ["AVG", 4.3], ["TD", 2], ["FUMB", 0], ["BTK", 0], ["YAC", 28], ["LONG", 16], ["SNAPS", 34]] },
+          { week: 1, opponent: "Marshall", result: "W 52-10", stats: [["CAR", 10], ["YARDS", 136], ["AVG", 13.6], ["TD", 0], ["FUMB", 0], ["BTK", 0], ["YAC", 29], ["LONG", 31], ["SNAPS", 42]] },
+        ] },
+      { rank: 3, name: "Landon Duckworth", pos: "QB", team: "Alabama", year: "SO (RS)", number: 11, archetype: "Pure Runner", ovr: 90, height: "6'4\"", weight: 222, hometown: "Jackson, AL",
+        stats: [["PASS YDS", 346], ["PASS TD", 2], ["PASS COMP %", 66], ["PASS INT", 1], ["RUSH ATT", 7], ["RUSH YDS", 44]] },
+      { rank: 4, name: "Deuce Knight", pos: "QB", team: "Ole Miss", year: "SO (RS)", number: 11, archetype: "Pure Runner", ovr: 90, height: "6'5\"", weight: 234, hometown: "Lucedale, MS",
+        stats: [["PASS YDS", 294], ["PASS TD", 1], ["PASS COMP %", 78], ["PASS INT", 0], ["RUSH ATT", 15], ["RUSH YDS", 37]] },
+    ],
+  },
 ];
