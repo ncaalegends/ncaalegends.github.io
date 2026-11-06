@@ -71,7 +71,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, opponent: "West Virginia", location: "at", stadium: "Milan Puskar Stadium", teamScore: 24, opponentScore: 52 },
       { week: 1, note: "BYE" },
-      { week: 2, opponent: "San Jose State", location: "vs", stadium: "California Memorial Stadium" },
+      { week: 2, opponent: "San Jose State", location: "vs", stadium: "California Memorial Stadium", teamScore: 59, opponentScore: 9 },
       { week: 3, opponent: "UCLA", location: "vs", stadium: "California Memorial Stadium" },
       { week: 4, opponent: "Louisville", location: "vs", stadium: "California Memorial Stadium" },
       { week: 5, opponent: "Miami", location: "vs", stadium: "California Memorial Stadium" },
@@ -115,7 +115,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, opponent: "Ohio State", location: "at", stadium: "Ohio Stadium", teamScore: 21, opponentScore: 58 },
       { week: 1, opponent: "Syracuse", location: "vs", stadium: "Clemson Memorial Stadium", teamScore: 45, opponentScore: 37 },
-      { week: 2, opponent: "Pittsburgh", location: "at", stadium: "Acrisure Stadium" },
+      { week: 2, opponent: "Pittsburgh", location: "at", stadium: "Acrisure Stadium", teamScore: 45, opponentScore: 31 },
       { week: 3, opponent: "Georgia", location: "vs", stadium: "Clemson Memorial Stadium" },
       { week: 4, opponent: "Georgia Tech", location: "vs", stadium: "Clemson Memorial Stadium" },
       { week: 5, note: "BYE" },
@@ -181,7 +181,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, opponent: "Alabama", location: "vs", stadium: "Doak Campbell Stadium", teamScore: 33, opponentScore: 24 },
       { week: 1, opponent: "Duke", location: "vs", stadium: "Doak Campbell Stadium", teamScore: 42, opponentScore: 35 },
-      { week: 2, opponent: "Wisconsin", location: "at", stadium: "Camp Randall Stadium" },
+      { week: 2, opponent: "Wisconsin", location: "at", stadium: "Camp Randall Stadium", teamScore: 21, opponentScore: 16 },
       { week: 3, note: "BYE" },
       { week: 4, opponent: "SMU", location: "at", stadium: "Gerald J. Ford Stadium" },
       { week: 5, opponent: "Virginia", location: "vs", stadium: "Doak Campbell Stadium" },
@@ -268,7 +268,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, opponent: "Fresno State", location: "vs", stadium: "Los Angeles Memorial Coliseum", teamScore: 27, opponentScore: 24 },
       { week: 1, note: "BYE" },
-      { week: 2, opponent: "Arkansas", location: "at", stadium: "DW Reynolds Razorback Stadium" },
+      { week: 2, opponent: "Arkansas", location: "at", stadium: "DW Reynolds Razorback Stadium", teamScore: 27, opponentScore: 35 },
       { week: 3, opponent: "Purdue", location: "vs", stadium: "Los Angeles Memorial Coliseum" },
       { week: 4, opponent: "Michigan State", location: "at", stadium: "Spartan Stadium" },
       { week: 5, note: "BYE" },
@@ -290,7 +290,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "Indiana", location: "at", neutral: true, stadium: "Mercedes-Benz Stadium", teamScore: 37, opponentScore: 34 },
-      { week: 2, opponent: "Duke", location: "vs", stadium: "Sanford Stadium" },
+      { week: 2, opponent: "Duke", location: "vs", stadium: "Sanford Stadium", teamScore: 52, opponentScore: 3 },
       { week: 3, opponent: "Clemson", location: "at", stadium: "Clemson Memorial Stadium" },
       { week: 4, note: "BYE" },
       { week: 5, opponent: "Auburn", location: "vs", stadium: "Sanford Stadium" },
@@ -378,7 +378,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, note: "BYE" },
       { week: 1, opponent: "Arkansas", location: "at", neutral: true, stadium: "Mercedes-Benz Stadium", teamScore: 34, opponentScore: 14 },
-      { week: 2, opponent: "Purdue", location: "vs", stadium: "Allegacy Federal Credit Union (truncated)" },
+      { week: 2, opponent: "Purdue", location: "vs", stadium: "Allegacy Federal Credit Union (truncated)", teamScore: 30, opponentScore: 31 },
       { week: 3, opponent: "Virginia Tech", location: "at", stadium: "Lane Stadium" },
       { week: 4, opponent: "East Carolina", location: "vs", stadium: "Allegacy Federal Credit Union Stadium" },
       { week: 5, opponent: "NC State", location: "vs", stadium: "Allegacy Federal Credit Union Stadium" },
@@ -422,7 +422,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, opponent: "USF", location: "vs", stadium: "Hard Rock Stadium", teamScore: 31, opponentScore: 23 },
       { week: 1, opponent: "Texas A&M", location: "at", stadium: "Kyle Field", teamScore: 17, opponentScore: 38 },
-      { week: 2, opponent: "Stanford", location: "vs", stadium: "Hard Rock Stadium" },
+      { week: 2, opponent: "Stanford", location: "vs", stadium: "Hard Rock Stadium", teamScore: 45, opponentScore: 28 },
       { week: 3, opponent: "Colorado", location: "vs", stadium: "Hard Rock Stadium" },
       { week: 4, note: "BYE" },
       { week: 5, opponent: "California", location: "at", stadium: "California Memorial Stadium" },
@@ -444,7 +444,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, opponent: "TCU", location: "vs", stadium: "Notre Dame Stadium", teamScore: 31, opponentScore: 21 },
       { week: 1, note: "BYE" },
-      { week: 2, opponent: "Oklahoma", location: "vs", stadium: "Notre Dame Stadium" },
+      { week: 2, opponent: "Oklahoma", location: "vs", stadium: "Notre Dame Stadium", teamScore: 21, opponentScore: 32 },
       { week: 3, opponent: "Ohio State", location: "at", stadium: "Ohio Stadium" },
       { week: 4, opponent: "Oregon", location: "at", stadium: "Autzen Stadium" },
       { week: 5, opponent: "Boise State", location: "vs", stadium: "Notre Dame Stadium" },
@@ -473,7 +473,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, opponent: "Colorado", location: "vs", stadium: "Gaylord-Oklahoma Memorial", teamScore: 19, opponentScore: 28 },
       { week: 1, opponent: "West Virginia", location: "vs", stadium: "Gaylord-Oklahoma Memorial", teamScore: 44, opponentScore: 56 },
-      { week: 2, opponent: "Notre Dame", location: "at", stadium: "Notre Dame Stadium" },
+      { week: 2, opponent: "Notre Dame", location: "at", stadium: "Notre Dame Stadium", teamScore: 32, opponentScore: 21 },
       { week: 3, opponent: "Houston", location: "vs", stadium: "Gaylord-Oklahoma Memorial" },
       { week: 4, opponent: "Auburn", location: "at", stadium: "Jordan-Hare Stadium" },
       { week: 5, opponent: "Alabama", location: "vs", stadium: "Gaylord-Oklahoma Memorial" },
@@ -532,7 +532,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, opponent: "Kansas State", location: "vs", stadium: "DW Reynolds Razorback Stadium", teamScore: 38, opponentScore: 45 },
       { week: 1, opponent: "Wake Forest", location: "vs", neutral: true, stadium: "Mercedes-Benz Stadium", teamScore: 14, opponentScore: 34 },
-      { week: 2, opponent: "USC", location: "vs", stadium: "DW Reynolds Razorback Stadium" },
+      { week: 2, opponent: "USC", location: "vs", stadium: "DW Reynolds Razorback Stadium", teamScore: 35, opponentScore: 27 },
       { week: 3, opponent: "Texas A&M", location: "at", stadium: "Kyle Field" },
       { week: 4, note: "BYE" },
       { week: 5, opponent: "Ole Miss", location: "vs", stadium: "DW Reynolds Razorback Stadium" },
