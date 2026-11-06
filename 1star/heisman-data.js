@@ -87,4 +87,22 @@ const HEISMAN = [
         stats: [["PASS YDS", 0], ["PASS TD", 0], ["PASS COMP %", 0], ["PASS INT", 0], ["RUSH ATT", 0], ["RUSH YDS", 0]] },
     ],
   },
+  {
+    week: 3,
+    players: [
+      { rank: 1, name: "Quincy Porter", pos: "WR", team: "Miami", year: "JR (RS)", number: 80, archetype: "Contested Specialist", ovr: 90, height: "6'4\"", weight: 213, hometown: "Cherry Hill, NJ",
+        stats: [["CATCHES", 13], ["REC YDS", 233], ["REC TD", 6], ["LONG REC", 52], ["REC YAC", 110], ["DROPS", 1]] },
+      { rank: 2, name: "Gerald Ezekiel", pos: "QB", team: "Baldwin Wallace", year: "FR", number: 9, archetype: "Dual Threat", ovr: 73, height: "6'3\"", weight: 218, hometown: "Danville, KY",
+        stats: [["PASS YDS", 584], ["PASS TD", 4], ["PASS COMP %", 70], ["PASS INT", 2], ["RUSH ATT", 47], ["RUSH YDS", 236]],
+        gameLog: [
+          { week: 0, opponent: "California", result: "W 45-14", stats: [["RATING", 160.8], ["YARDS", 193], ["TD", 2], ["INT", 0], ["LONG", 27], ["SACKS", 0], ["COMP", 19], ["ATT", 26], ["COMP%", 73], ["YPA", 7.4], ["SNAPS", 60]] },
+          { week: 1, opponent: "Ole Miss", result: "W 33-7", stats: [["RATING", 104.8], ["YARDS", 121], ["TD", 0], ["INT", 2], ["LONG", 16], ["SACKS", 2], ["COMP", 19], ["ATT", 24], ["COMP%", 79], ["YPA", 5], ["SNAPS", 59]] },
+          { week: 2, opponent: "Middle Tennessee", result: "W 28-10", stats: [["RATING", 163], ["YARDS", 270], ["TD", 2], ["INT", 0], ["LONG", 65], ["SACKS", 5], ["COMP", 18], ["ATT", 29], ["COMP%", 62], ["YPA", 9.3], ["SNAPS", 62]] },
+        ] },
+      { rank: 3, name: "Nick Bercovici", pos: "QB", team: "Oklahoma", year: "SO", number: 15, archetype: "Pure Runner", ovr: 85, height: "6'5\"", weight: 204, hometown: "Wichita Falls, TX",
+        stats: [["PASS YDS", 437], ["PASS TD", 6], ["PASS COMP %", 75], ["PASS INT", 0], ["RUSH ATT", 34], ["RUSH YDS", 210]] },
+      { rank: 4, name: "Jayden Sellers", pos: "WR", team: "South Carolina", year: "SR", number: 17, archetype: "Elusive Route Runner", ovr: 83, height: "5'11\"", weight: 190, hometown: "Florence, SC",
+        stats: [["CATCHES", 17], ["REC YDS", 275], ["REC TD", 4], ["LONG REC", 81], ["REC YAC", 140], ["DROPS", 0]] },
+    ],
+  },
 ];
