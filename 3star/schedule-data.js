@@ -210,7 +210,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, opponent: "Stanford", location: "vs", stadium: "Reser Stadium", teamScore: 45, opponentScore: 28 },
       { week: 1, opponent: "BYU", location: "at", stadium: "LaVell Edwards Stadium", teamScore: 41, opponentScore: 24 },
-      { week: 2, opponent: "Nevada", location: "vs", stadium: "Reser Stadium" },
+      { week: 2, opponent: "Nevada", location: "vs", stadium: "Reser Stadium", teamScore: 52, opponentScore: 26 },
       { week: 3, note: "BYE" },
       { week: 4, opponent: "New Mexico State", location: "vs", stadium: "Reser Stadium" },
       { week: 5, opponent: "Michigan State", location: "at", stadium: "Spartan Stadium" },
@@ -347,7 +347,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, opponent: "Ohio State", location: "at", stadium: "Ohio Stadium", teamScore: 49, opponentScore: 24 },
       { week: 1, opponent: "Tulsa", location: "vs", stadium: "Boone Pickens Stadium", teamScore: 49, opponentScore: 17 },
-      { week: 2, opponent: "Cincinnati", location: "at", stadium: "Nippert Stadium" },
+      { week: 2, opponent: "Cincinnati", location: "at", stadium: "Nippert Stadium", teamScore: 35, opponentScore: 21 },
       { week: 3, note: "BYE" },
       { week: 4, opponent: "Southern Mississippi", location: "vs", stadium: "Boone Pickens Stadium" },
       { week: 5, opponent: "Kansas State", location: "vs", stadium: "Boone Pickens Stadium" },
@@ -393,7 +393,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, opponent: "Baylor", location: "at", stadium: "McLane Stadium", teamScore: 58, opponentScore: 8 },
       { week: 1, opponent: "Delaware", location: "vs", stadium: "Bridgeforth Stadium", teamScore: 42, opponentScore: 3 },
-      { week: 2, opponent: "Oklahoma", location: "vs", stadium: "Bridgeforth Stadium" },
+      { week: 2, opponent: "Oklahoma", location: "vs", stadium: "Bridgeforth Stadium", teamScore: 30, opponentScore: 38 },
       { week: 3, opponent: "Virginia Tech", location: "vs", stadium: "Bridgeforth Stadium" },
       { week: 4, opponent: "Kentucky", location: "at", stadium: "Kroger Field" },
       { week: 5, note: "BYE" },
