@@ -235,7 +235,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, opponent: "Georgia", location: "at", stadium: "Sanford Stadium", teamScore: 50, opponentScore: 47 },
       { week: 1, opponent: "UConn", location: "vs", stadium: "SHI Stadium", teamScore: 38, opponentScore: 24 },
-      { week: 2, opponent: "Ole Miss", location: "vs", stadium: "SHI Stadium" },
+      { week: 2, opponent: "Ole Miss", location: "vs", stadium: "SHI Stadium", teamScore: 45, opponentScore: 27 },
       { week: 3, opponent: "Kent State", location: "vs", stadium: "SHI Stadium" },
       { week: 4, opponent: "Illinois", location: "at", stadium: "Gies Memorial Stadium" },
       { week: 5, opponent: "Washington", location: "vs", stadium: "SHI Stadium" },
@@ -325,7 +325,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, opponent: "Minnesota", location: "at", stadium: "Huntington Bank Stadium", teamScore: 14, opponentScore: 27 },
       { week: 1, opponent: "Tulane", location: "vs", stadium: "Jack Trice Stadium", teamScore: 48, opponentScore: 3 },
-      { week: 2, opponent: "Iowa", location: "at", stadium: "Kinnick Stadium" },
+      { week: 2, opponent: "Iowa", location: "at", stadium: "Kinnick Stadium", teamScore: 24, opponentScore: 16 },
       { week: 3, opponent: "Texas Tech", location: "vs", stadium: "Jack Trice Stadium" },
       { week: 4, opponent: "West Virginia", location: "vs", stadium: "Jack Trice Stadium" },
       { week: 5, opponent: "Utah", location: "at", stadium: "Rice-Eccles Stadium" },
@@ -371,7 +371,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, opponent: "Clemson", location: "at", stadium: "Clemson Memorial Stadium", teamScore: 34, opponentScore: 18 },
       { week: 1, opponent: "Georgia Southern", location: "vs", stadium: "Jerry Richardson Stadium", teamScore: 16, opponentScore: 10 },
-      { week: 2, opponent: "Boise State", location: "vs", stadium: "Jerry Richardson Stadium" },
+      { week: 2, opponent: "Boise State", location: "vs", stadium: "Jerry Richardson Stadium", teamScore: 10, opponentScore: 14 },
       { week: 3, opponent: "Appalachian State", location: "vs", stadium: "Jerry Richardson Stadium" },
       { week: 4, opponent: "Florida", location: "at", stadium: "Ben Hill Griffin Stadium" },
       { week: 5, note: "BYE" },
