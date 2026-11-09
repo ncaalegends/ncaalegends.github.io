@@ -85,7 +85,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, opponent: "South Carolina", location: "at", stadium: "Williams-Brice Stadium", teamScore: 31, opponentScore: 10 },
       { week: 1, opponent: "UCLA", location: "vs", stadium: "California Memorial Stadium", teamScore: 40, opponentScore: 38 },
-      { week: 2, opponent: "North Dakota State", location: "vs", stadium: "California Memorial Stadium" },
+      { week: 2, opponent: "North Dakota State", location: "vs", stadium: "California Memorial Stadium", teamScore: 40, opponentScore: 44 },
       { week: 3, note: "BYE" },
       { week: 4, opponent: "Clemson", location: "at", stadium: "Clemson Memorial Stadium" },
       { week: 5, opponent: "Boise State", location: "at", stadium: "Albertsons Stadium" },
@@ -107,7 +107,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, opponent: "Florida", location: "at", stadium: "Ben Hill Griffin Stadium", teamScore: 37, opponentScore: 34 },
       { week: 1, opponent: "South Carolina", location: "vs", stadium: "Kenan Stadium", teamScore: 27, opponentScore: 37 },
-      { week: 2, opponent: "Kennesaw State", location: "vs", stadium: "Kenan Stadium" },
+      { week: 2, opponent: "Kennesaw State", location: "vs", stadium: "Kenan Stadium", teamScore: 34, opponentScore: 26 },
       { week: 3, opponent: "Pittsburgh", location: "at", stadium: "Acrisure Stadium" },
       { week: 4, opponent: "Duke", location: "at", stadium: "Wallace Wade Stadium" },
       { week: 5, note: "BYE" },
@@ -188,7 +188,7 @@ const TEAM_SCHEDULES = [
     weeks: [
       { week: 0, opponent: "Arkansas", location: "at", stadium: "DW Reynolds Razorback Stadium", teamScore: 45, opponentScore: 7 },
       { week: 1, opponent: "New Mexico State", location: "vs", stadium: "North Dakota State Stadium", teamScore: 35, opponentScore: 0 },
-      { week: 2, opponent: "California", location: "at", stadium: "California Memorial Stadium" },
+      { week: 2, opponent: "California", location: "at", stadium: "California Memorial Stadium", teamScore: 44, opponentScore: 40 },
       { week: 3, note: "BYE" },
       { week: 4, opponent: "Washington", location: "at", stadium: "Husky Stadium" },
       { week: 5, opponent: "Maryland", location: "vs", stadium: "North Dakota State Stadium" },
