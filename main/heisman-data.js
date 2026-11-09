@@ -118,4 +118,22 @@ const HEISMAN = [
         ] },
     ],
   },
+  {
+    week: 4,
+    players: [
+      { rank: 1, name: "Luke Kromenhoek", pos: "QB", team: "Kansas State", year: "SR (RS)", number: 17, archetype: "Pure Runner", ovr: 88, height: "6'4\"", weight: 223, hometown: "Savannah, GA",
+        stats: [["PASS YDS", 894], ["PASS TD", 10], ["PASS COMP %", 67], ["PASS INT", 1], ["RUSH ATT", 43], ["RUSH YDS", 268]] },
+      { rank: 2, name: "Bo Jackson", pos: "HB", team: "Ohio State", year: "SR", number: 25, archetype: "East/West Playmaker", ovr: 96, height: "6'0\"", weight: 225, hometown: "Cleveland, OH",
+        stats: [["RUSH ATT", 32], ["RUSH YDS", 506], ["YPC", 15], ["RUSH TD", 5], ["CATCHES", 13], ["REC YDS", 120]],
+        gameLog: [
+          { week: 0, opponent: "Clemson", result: "W 58-21", stats: [["CAR", 13], ["YARDS", 291], ["AVG", 22.4], ["TD", 2], ["FUMB", 0], ["BTK", 3], ["YAC", 27], ["LONG", 86], ["SNAPS", 43]] },
+          { week: 1, opponent: "LSU", result: "L 52-21", stats: [["CAR", 9], ["YARDS", 36], ["AVG", 4], ["TD", 0], ["FUMB", 1], ["BTK", 1], ["YAC", 11], ["LONG", 9], ["SNAPS", 56]] },
+          { week: 3, opponent: "Notre Dame", result: "W 50-26", stats: [["CAR", 10], ["YARDS", 179], ["AVG", 17.9], ["TD", 3], ["FUMB", 0], ["BTK", 1], ["YAC", 12], ["LONG", 68], ["SNAPS", 29]] },
+        ] },
+      { rank: 3, name: "Doug Schau", pos: "QB", team: "SMU", year: "SO", number: 18, archetype: "Dual Threat", ovr: 83, height: "6'1\"", weight: 199, hometown: "Mount Pleasant, TX",
+        stats: [["PASS YDS", 1369], ["PASS TD", 10], ["PASS COMP %", 65], ["PASS INT", 0], ["RUSH ATT", 43], ["RUSH YDS", 142]] },
+      { rank: 4, name: "KaMario Taylor", pos: "QB", team: "Auburn", year: "JR (RS)",
+        stats: [["PASS YDS", 918], ["PASS TD", 7], ["PASS COMP %", 70], ["PASS INT", 1], ["RUSH ATT", 33], ["RUSH YDS", 268]] },
+    ],
+  },
 ];
