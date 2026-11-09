@@ -98,4 +98,37 @@ const HEISMAN = [
         stats: [["PASS YDS", 294], ["PASS TD", 1], ["PASS COMP %", 78], ["PASS INT", 0], ["RUSH ATT", 15], ["RUSH YDS", 37]] },
     ],
   },
+  {
+    week: 3,
+    players: [
+      { rank: 1, name: "Mitch Sanderson", pos: "HB", team: "Rutgers", year: "SR (RS)", number: 38, archetype: "East/West Playmaker", ovr: 87, height: "6'0\"", weight: 209, hometown: "Irvington, NJ",
+        stats: [["RUSH ATT", 55], ["RUSH YDS", 624], ["YPC", 11], ["RUSH TD", 6], ["CATCHES", 7], ["REC YDS", 158]],
+        gameLog: [
+          { week: 0, opponent: "Georgia", result: "W 50-47", stats: [["CAR", 27], ["YARDS", 163], ["AVG", 6], ["TD", 2], ["FUMB", 0], ["BTK", 2], ["YAC", 39], ["LONG", 20], ["SNAPS", 57]] },
+          { week: 1, opponent: "UConn", result: "W 38-24", stats: [["CAR", 15], ["YARDS", 226], ["AVG", 15.1], ["TD", 2], ["FUMB", 0], ["BTK", 0], ["YAC", 17], ["LONG", 82], ["SNAPS", 28]] },
+          { week: 2, opponent: "Ole Miss", result: "W 45-27", stats: [["CAR", 13], ["YARDS", 235], ["AVG", 18.1], ["TD", 2], ["FUMB", 0], ["BTK", 1], ["YAC", 21], ["LONG", 79], ["SNAPS", 21]] },
+        ] },
+      { rank: 2, name: "Quinton Martin Jr.", pos: "HB", team: "Oklahoma State", year: "SR (RS)", number: 9, archetype: "East/West Playmaker", ovr: 87, height: "6'1\"", weight: 207, hometown: "Belle Vernon, PA",
+        stats: [["RUSH ATT", 47], ["RUSH YDS", 484], ["YPC", 10], ["RUSH TD", 5], ["CATCHES", 6], ["REC YDS", 157]],
+        gameLog: [
+          { week: 0, opponent: "Ohio State", result: "W 49-24", stats: [["CAR", 15], ["YARDS", 137], ["AVG", 9.1], ["TD", 2], ["FUMB", 0], ["BTK", 0], ["YAC", 23], ["LONG", 49], ["SNAPS", 43]] },
+          { week: 1, opponent: "Tulsa", result: "W 49-17", stats: [["CAR", 14], ["YARDS", 105], ["AVG", 7.5], ["TD", 0], ["FUMB", 0], ["BTK", 2], ["YAC", 27], ["LONG", 18], ["SNAPS", 36]] },
+          { week: 2, opponent: "Cincinnati", result: "W 35-21", stats: [["CAR", 18], ["YARDS", 242], ["AVG", 13.4], ["TD", 3], ["FUMB", 0], ["BTK", 3], ["YAC", 25], ["LONG", 69], ["SNAPS", 47]] },
+        ] },
+      { rank: 3, name: "Karson Cox", pos: "HB", team: "California", year: "JR (RS)", number: 33, archetype: "East/West Playmaker", ovr: 86, height: "5'11\"", weight: 221, hometown: "Moreno Valley, CA",
+        stats: [["RUSH ATT", 65], ["RUSH YDS", 611], ["YPC", 9], ["RUSH TD", 3], ["CATCHES", 16], ["REC YDS", 247]],
+        gameLog: [
+          { week: 0, opponent: "South Carolina", result: "W 31-10", stats: [["CAR", 22], ["YARDS", 160], ["AVG", 7.3], ["TD", 0], ["FUMB", 0], ["BTK", 1], ["YAC", 39], ["LONG", 52], ["SNAPS", 38]] },
+          { week: 1, opponent: "UCLA", result: "W 40-38", stats: [["CAR", 32], ["YARDS", 333], ["AVG", 10.4], ["TD", 2], ["FUMB", 0], ["BTK", 3], ["YAC", 59], ["LONG", 81], ["SNAPS", 54]] },
+          { week: 2, opponent: "North Dakota State", result: "L 44-40", stats: [["CAR", 11], ["YARDS", 118], ["AVG", 10.7], ["TD", 1], ["FUMB", 1], ["BTK", 5], ["YAC", 5], ["LONG", 81], ["SNAPS", 34]] },
+        ] },
+      { rank: 4, name: "Dierre Hill Jr.", pos: "HB", team: "Wisconsin", year: "SR", number: 22, ovr: 93, height: "5'11\"", weight: 210,
+        stats: [["RUSH ATT", 51], ["RUSH YDS", 413], ["YPC", 8], ["RUSH TD", 4], ["CATCHES", 6], ["REC YDS", 52]],
+        gameLog: [
+          { week: 0, opponent: "Notre Dame", result: "W 27-0", stats: [["CAR", 21], ["YARDS", 91], ["AVG", 4.3], ["TD", 2], ["FUMB", 0], ["BTK", 0], ["YAC", 28], ["LONG", 16], ["SNAPS", 34]] },
+          { week: 1, opponent: "Marshall", result: "W 52-10", stats: [["CAR", 10], ["YARDS", 136], ["AVG", 13.6], ["TD", 0], ["FUMB", 0], ["BTK", 0], ["YAC", 29], ["LONG", 31], ["SNAPS", 42]] },
+          { week: 2, opponent: "Ball State", result: "W 51-3", stats: [["CAR", 20], ["YARDS", 186], ["AVG", 9.3], ["TD", 2], ["FUMB", 0], ["BTK", 2], ["YAC", 33], ["LONG", 25], ["SNAPS", 32]] },
+        ] },
+    ],
+  },
 ];
