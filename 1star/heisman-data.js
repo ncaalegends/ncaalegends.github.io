@@ -105,4 +105,17 @@ const HEISMAN = [
         stats: [["CATCHES", 17], ["REC YDS", 275], ["REC TD", 4], ["LONG REC", 81], ["REC YAC", 140], ["DROPS", 0]] },
     ],
   },
+  {
+    week: 4,
+    players: [
+      { rank: 1, name: "Quincy Porter", pos: "WR", team: "Miami", year: "JR (RS)", number: 80, archetype: "Contested Specialist", ovr: 90, height: "6'4\"", weight: 213, hometown: "Cherry Hill, NJ",
+        stats: [["CATCHES", 19], ["REC YDS", 417], ["REC TD", 8], ["LONG REC", 84], ["REC YAC", 235], ["DROPS", 1]] },
+      { rank: 2, name: "Chris Denson", pos: "QB", team: "Miami", year: "JR (RS)", number: 15, archetype: "Pure Runner", ovr: 87, height: "6'2\"", weight: 203, hometown: "Plant City, FL",
+        stats: [["PASS YDS", 1117], ["PASS TD", 13], ["PASS COMP %", 65], ["PASS INT", 3], ["RUSH ATT", 30], ["RUSH YDS", 161]] },
+      { rank: 3, name: "Bryce Underwood", pos: "QB", team: "LSU", year: "SR", number: 19, archetype: "Backfield Creator", ovr: 91, height: "6'4\"", weight: 230, hometown: "Detroit, MI",
+        stats: [["PASS YDS", 857], ["PASS TD", 9], ["PASS COMP %", 70], ["PASS INT", 1], ["RUSH ATT", 30], ["RUSH YDS", 164]] },
+      { rank: 4, name: "Jake Fette", pos: "QB", team: "Texas A&M", year: "SO (RS)", number: 16, archetype: "Pure Runner", ovr: 90, height: "6'1\"", weight: 201, hometown: "El Paso, TX",
+        stats: [["PASS YDS", 767], ["PASS TD", 9], ["PASS COMP %", 63], ["PASS INT", 1], ["RUSH ATT", 43], ["RUSH YDS", 273]] },
+    ],
+  },
 ];
