@@ -282,7 +282,7 @@ const TEAM_SCHEDULES = [
       { week: 0, opponent: "James Madison", location: "vs", stadium: "McLane Stadium", teamScore: 8, opponentScore: 58 },
       { week: 1, opponent: "North Texas", location: "vs", stadium: "McLane Stadium", teamScore: 42, opponentScore: 13 },
       { week: 2, note: "BYE" },
-      { week: 3, opponent: "Florida", location: "at", stadium: "Ben Hill Griffin Stadium" },
+      { week: 3, opponent: "Florida", location: "at", stadium: "Ben Hill Griffin Stadium", teamScore: 31, opponentScore: 38 },
       { week: 4, opponent: "Colorado", location: "vs", stadium: "McLane Stadium" },
       { week: 5, note: "BYE" },
       { week: 6, opponent: "Texas Tech", location: "at", stadium: "Jones Stadium" },
