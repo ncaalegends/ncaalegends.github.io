@@ -118,4 +118,17 @@ const HEISMAN = [
         stats: [["PASS YDS", 767], ["PASS TD", 9], ["PASS COMP %", 63], ["PASS INT", 1], ["RUSH ATT", 43], ["RUSH YDS", 273]] },
     ],
   },
+  {
+    week: 5,
+    players: [
+      { rank: 1, name: "Jake Fette", pos: "QB", team: "Texas A&M", year: "SO (RS)", number: 16, archetype: "Pure Runner", ovr: 90, height: "6'1\"", weight: 201, hometown: "El Paso, TX",
+        stats: [["PASS YDS", 1089], ["PASS TD", 11], ["PASS COMP %", 68], ["PASS INT", 1], ["RUSH ATT", 54], ["RUSH YDS", 403]] },
+      { rank: 2, name: "Chris Denson", pos: "QB", team: "Miami", year: "JR (RS)", number: 15, archetype: "Pure Runner", ovr: 87, height: "6'2\"", weight: 203, hometown: "Plant City, FL",
+        stats: [["PASS YDS", 1495], ["PASS TD", 17], ["PASS COMP %", 69], ["PASS INT", 4], ["RUSH ATT", 40], ["RUSH YDS", 162]] },
+      { rank: 3, name: "Quincy Porter", pos: "WR", team: "Miami", year: "JR (RS)", number: 80, archetype: "Contested Specialist", ovr: 91, height: "6'4\"", weight: 213, hometown: "Cherry Hill, NJ",
+        stats: [["CATCHES", 24], ["REC YDS", 479], ["REC TD", 9], ["LONG REC", 84], ["REC YAC", 257], ["DROPS", 2]] },
+      { rank: 4, name: "Jimmy Simon", pos: "QB", team: "USC", year: "SO", number: 1, archetype: "Backfield Creator", ovr: 82, height: "6'3\"", weight: 196, hometown: "Concord, CA",
+        stats: [["PASS YDS", 1357], ["PASS TD", 10], ["PASS COMP %", 63], ["PASS INT", 2], ["RUSH ATT", 38], ["RUSH YDS", 130]] },
+    ],
+  },
 ];
