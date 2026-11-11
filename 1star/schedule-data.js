@@ -106,7 +106,7 @@ const TEAM_SCHEDULES = [
       { week: 2, opponent: "Middle Tennessee", location: "at", teamScore: 28, opponentScore: 10 },
       { week: 3, note: "BYE" },
       { week: 4, opponent: "James Madison", location: "vs", teamScore: 45, opponentScore: 13 },
-      { week: 5, opponent: "Old Dominion", location: "at" },
+      { week: 5, opponent: "Old Dominion", location: "at", teamScore: 42, opponentScore: 10 },
       { week: 6, note: "BYE" },
       { week: 7, opponent: "Coastal Carolina", location: "vs" },
       { week: 8, opponent: "Louisiana", location: "at" },
