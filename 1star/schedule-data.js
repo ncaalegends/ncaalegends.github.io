@@ -203,7 +203,7 @@ const TEAM_SCHEDULES = [
       { week: 2, note: "BYE" },
       { week: 3, opponent: "Westeros", location: "at", teamScore: 31, opponentScore: 7 },
       { week: 4, opponent: "Central Michigan", location: "at", teamScore: 43, opponentScore: 14 },
-      { week: 5, opponent: "Buffalo", location: "vs" },
+      { week: 5, opponent: "Buffalo", location: "vs", teamScore: 35, opponentScore: 7 },
       { week: 6, opponent: "SMU", location: "vs" },
       { week: 7, opponent: "Western Michigan", location: "at" },
       { week: 8, opponent: "Eastern Michigan", location: "vs" },
