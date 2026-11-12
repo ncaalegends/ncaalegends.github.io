@@ -136,4 +136,30 @@ const HEISMAN = [
         stats: [["PASS YDS", 918], ["PASS TD", 7], ["PASS COMP %", 70], ["PASS INT", 1], ["RUSH ATT", 33], ["RUSH YDS", 268]] },
     ],
   },
+  {
+    week: 5,
+    players: [
+      { rank: 1, name: "Luke Kromenhoek", pos: "QB", team: "Kansas State", year: "SR (RS)", number: 17, archetype: "Pure Runner", ovr: 88, height: "6'4\"", weight: 223, hometown: "Savannah, GA",
+        stats: [["PASS YDS", 1077], ["PASS TD", 11], ["PASS COMP %", 69], ["PASS INT", 1], ["RUSH ATT", 55], ["RUSH YDS", 289]] },
+      { rank: 2, name: "Bo Jackson", pos: "HB", team: "Ohio State", year: "SR", number: 25, archetype: "East/West Playmaker", ovr: 96, height: "6'0\"", weight: 225, hometown: "Cleveland, OH",
+        stats: [["RUSH ATT", 51], ["RUSH YDS", 661], ["YPC", 12], ["RUSH TD", 6], ["CATCHES", 14], ["REC YDS", 140]],
+        gameLog: [
+          { week: 0, opponent: "Clemson", result: "W 58-21", stats: [["CAR", 13], ["YARDS", 291], ["AVG", 22.4], ["TD", 2], ["FUMB", 0], ["BTK", 3], ["YAC", 27], ["LONG", 86], ["SNAPS", 43]] },
+          { week: 1, opponent: "LSU", result: "L 52-21", stats: [["CAR", 9], ["YARDS", 36], ["AVG", 4], ["TD", 0], ["FUMB", 1], ["BTK", 1], ["YAC", 11], ["LONG", 9], ["SNAPS", 56]] },
+          { week: 3, opponent: "Notre Dame", result: "W 50-26", stats: [["CAR", 10], ["YARDS", 179], ["AVG", 17.9], ["TD", 3], ["FUMB", 0], ["BTK", 1], ["YAC", 12], ["LONG", 68], ["SNAPS", 29]] },
+          { week: 4, opponent: "UCLA", result: "W 24-13", stats: [["CAR", 19], ["YARDS", 155], ["AVG", 8.2], ["TD", 1], ["FUMB", 0], ["BTK", 3], ["YAC", 47], ["LONG", 30], ["SNAPS", 37]] },
+        ] },
+      { rank: 3, name: "C.J. Kubah-Taylor", pos: "MIKE", team: "Clemson", year: "SR (RS)", number: 26, archetype: "Lurker", ovr: 85, height: "6'2\"", weight: 228, hometown: "Frederick, MD",
+        stats: [["INT", 5], ["PASS DEF", 1], ["TACKLES", 12], ["TACKLE ASSISTS", 18], ["SACKS", 1], ["GAMES STARTED", 5]],
+        gameLog: [
+          { week: 0, opponent: "Ohio State", result: "L 58-21", stats: [["SOLO", 2], ["ASSISTS", 2], ["TAK", 4], ["TFL", 0], ["SACK", 0], ["INT", 0], ["INT YDS", 0], ["INT AVG", 0], ["INT LG", 0], ["DEFL", 0], ["CTHA", 0], ["FFUMB", 0]] },
+          { week: 1, opponent: "Syracuse", result: "W 45-37", stats: [["SOLO", 3], ["ASSISTS", 4], ["TAK", 7], ["TFL", 3], ["SACK", 1], ["INT", 1], ["INT YDS", 57], ["INT AVG", 57], ["INT LG", 57], ["DEFL", 0], ["CTHA", 0], ["FFUMB", 0]] },
+          { week: 2, opponent: "Pittsburgh", result: "W 45-31", stats: [["SOLO", 4], ["ASSISTS", 2], ["TAK", 6], ["TFL", 4], ["SACK", 0], ["INT", 0], ["INT YDS", 0], ["INT AVG", 0], ["INT LG", 0], ["DEFL", 0], ["CTHA", 0], ["FFUMB", 0]] },
+          { week: 3, opponent: "Georgia", result: "W 41-7", stats: [["SOLO", 2], ["ASSISTS", 6], ["TAK", 8], ["TFL", 1], ["SACK", 0], ["INT", 3], ["INT YDS", 10], ["INT AVG", 3.3], ["INT LG", 6], ["DEFL", 0], ["CTHA", 0], ["FFUMB", 0]] },
+          { week: 4, opponent: "Georgia Tech", result: "W 59-24", stats: [["SOLO", 1], ["ASSISTS", 4], ["TAK", 5], ["TFL", 3], ["SACK", 0], ["INT", 1], ["INT YDS", 8], ["INT AVG", 8], ["INT LG", 8], ["DEFL", 1], ["CTHA", 0], ["FFUMB", 0]] },
+        ] },
+      { rank: 4, name: "Doug Schau", pos: "QB", team: "SMU", year: "SO", number: 18, archetype: "Dual Threat", height: "6'1\"", weight: 199, hometown: "Mount Pleasant, TX",
+        stats: [["PASS YDS", 1501], ["PASS TD", 12], ["PASS COMP %", 67], ["PASS INT", 0], ["RUSH ATT", 49], ["RUSH YDS", 144]] },
+    ],
+  },
 ];
