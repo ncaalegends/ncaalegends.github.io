@@ -447,7 +447,7 @@ const TEAM_SCHEDULES = [
       { week: 2, opponent: "Oklahoma", location: "vs", stadium: "Notre Dame Stadium", teamScore: 21, opponentScore: 32 },
       { week: 3, opponent: "Ohio State", location: "at", stadium: "Ohio Stadium", teamScore: 26, opponentScore: 50 },
       { week: 4, opponent: "Oregon", location: "at", stadium: "Autzen Stadium", teamScore: 21, opponentScore: 35 },
-      { week: 5, opponent: "Boise State", location: "vs", stadium: "Notre Dame Stadium" },
+      { week: 5, opponent: "Boise State", location: "vs", stadium: "Notre Dame Stadium", teamScore: 24, opponentScore: 16 },
       { week: 6, opponent: "Auburn", location: "at", stadium: "Jordan-Hare Stadium" },
       { week: 7, opponent: "Stanford", location: "vs", stadium: "Notre Dame Stadium" },
       { week: 8, opponent: "Boston College", location: "vs", stadium: "Notre Dame Stadium" },
