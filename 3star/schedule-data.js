@@ -373,7 +373,7 @@ const TEAM_SCHEDULES = [
       { week: 1, opponent: "Georgia Southern", location: "vs", stadium: "Jerry Richardson Stadium", teamScore: 16, opponentScore: 10 },
       { week: 2, opponent: "Boise State", location: "vs", stadium: "Jerry Richardson Stadium", teamScore: 10, opponentScore: 14 },
       { week: 3, opponent: "Appalachian State", location: "vs", stadium: "Jerry Richardson Stadium", teamScore: 30, opponentScore: 27 },
-      { week: 4, opponent: "Florida", location: "at", stadium: "Ben Hill Griffin Stadium" },
+      { week: 4, opponent: "Florida", location: "at", stadium: "Ben Hill Griffin Stadium", teamScore: 28, opponentScore: 7 },
       { week: 5, note: "BYE" },
       { week: 6, opponent: "Arkansas", location: "vs", stadium: "Jerry Richardson Stadium" },
       { week: 7, note: "BYE" },
