@@ -44,10 +44,11 @@ const SITE_ROOT = "https://ncaalegends.github.io";
    line here — nothing else in either tool is league-specific. */
 /*
    `gateOnTop25` decides whether an advance is allowed to proceed
-   before that week's poll has been transcribed. Only main blocks. See
-   top25GateError() below for why the other two deliberately don't. */
+   before that week's poll has been transcribed. No league blocks on it
+   now — main was turned off in Nov 2026 so a week can advance before
+   the screenshot is in. Flip it back to true to restore the gate. */
 const LEAGUES = {
-  main: { label: "Main Dynasty", dir: "main", gateOnTop25: true },
+  main: { label: "Main Dynasty", dir: "main", gateOnTop25: false },
   "3star": { label: "3-Star Dynasty", dir: "3star", gateOnTop25: false },
   "1star": { label: "1-Star Dynasty", dir: "1star", gateOnTop25: false },
 };

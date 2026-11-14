@@ -605,8 +605,7 @@ function main() {
     } else if (week > currentWeek) {
       console.log(
         `  The season is on week ${currentWeek}, so this poll stays invisible on the site until\n` +
-          `  you advance to week ${week}. That's the intended order — the advance gate was\n` +
-          `  waiting on exactly this.\n`
+          `  you advance to week ${week}.\n`
       );
     }
   }
