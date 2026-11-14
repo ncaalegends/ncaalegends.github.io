@@ -162,4 +162,29 @@ const HEISMAN = [
         stats: [["PASS YDS", 1501], ["PASS TD", 12], ["PASS COMP %", 67], ["PASS INT", 0], ["RUSH ATT", 49], ["RUSH YDS", 144]] },
     ],
   },
+  {
+    week: 6,
+    players: [
+      { rank: 1, name: "Luke Kromenhoek", pos: "QB", team: "Kansas State", year: "SR (RS)", number: 17, archetype: "Pure Runner", ovr: 90, height: "6'4\"", weight: 223, hometown: "Savannah, GA",
+        stats: [["PASS YDS", 1474], ["PASS TD", 11], ["PASS COMP %", 68], ["PASS INT", 2], ["RUSH ATT", 65], ["RUSH YDS", 294]] },
+      { rank: 2, name: "Doug Schau", pos: "QB", team: "SMU", year: "SO", number: 18, archetype: "Dual Threat", ovr: 83, height: "6'1\"", weight: 199, hometown: "Mount Pleasant, TX",
+        stats: [["PASS YDS", 1702], ["PASS TD", 16], ["PASS COMP %", 65], ["PASS INT", 0], ["RUSH ATT", 56], ["RUSH YDS", 152]] },
+      { rank: 3, name: "Kaliq Lockett", pos: "WR", team: "Texas", year: "JR (RS)", number: 7, archetype: "Gadget", ovr: 94, height: "6'2\"", weight: 191, hometown: "Dallas, TX",
+        stats: [["CATCHES", 31], ["REC YDS", 416], ["REC TD", 5], ["LONG REC", 58], ["REC YAC", 159]],
+        gameLog: [
+          { week: 1, opponent: "Louisiana Tech", result: "W 63-0", stats: [["REC", 10], ["YARDS", 129], ["AVG", 12.9], ["TD", 1], ["RAC", 68], ["RAC AVG", 6.8], ["LONG", 36], ["SNAPS", 66]] },
+          { week: 3, opponent: "Indiana", result: "W 45-17", stats: [["REC", 6], ["YARDS", 92], ["AVG", 15.3], ["TD", 2], ["RAC", 23], ["RAC AVG", 3.8], ["LONG", 30], ["SNAPS", 62]] },
+          { week: 4, opponent: "Baylor", result: "W 57-10", stats: [["REC", 4], ["YARDS", 14], ["AVG", 3.5], ["TD", 0], ["RAC", 4], ["RAC AVG", 1], ["LONG", 14], ["SNAPS", 77]] },
+          { week: 5, opponent: "Mississippi State", result: "W 48-0", stats: [["REC", 11], ["YARDS", 181], ["AVG", 16.5], ["TD", 2], ["RAC", 64], ["RAC AVG", 5.8], ["LONG", 58], ["SNAPS", 77]] },
+        ] },
+      { rank: 4, name: "Bo Jackson", pos: "HB", team: "Ohio State", year: "SR", number: 25, archetype: "East/West Playmaker", ovr: 96, height: "6'0\"", weight: 225, hometown: "Cleveland, OH",
+        stats: [["RUSH ATT", 51], ["RUSH YDS", 661], ["YPC", 13], ["RUSH TD", 6], ["CATCHES", 14], ["REC YDS", 140]],
+        gameLog: [
+          { week: 0, opponent: "Clemson", result: "W 58-21", stats: [["CAR", 13], ["YARDS", 291], ["AVG", 22.4], ["TD", 2], ["FUMB", 0], ["BTK", 3], ["YAC", 27], ["LONG", 86], ["SNAPS", 43]] },
+          { week: 1, opponent: "LSU", result: "L 52-21", stats: [["CAR", 9], ["YARDS", 36], ["AVG", 4], ["TD", 0], ["FUMB", 1], ["BTK", 1], ["YAC", 11], ["LONG", 9], ["SNAPS", 56]] },
+          { week: 3, opponent: "Notre Dame", result: "W 50-26", stats: [["CAR", 10], ["YARDS", 179], ["AVG", 17.9], ["TD", 3], ["FUMB", 0], ["BTK", 1], ["YAC", 12], ["LONG", 68], ["SNAPS", 29]] },
+          { week: 4, opponent: "UCLA", result: "W 24-13", stats: [["CAR", 19], ["YARDS", 155], ["AVG", 8.2], ["TD", 1], ["FUMB", 0], ["BTK", 3], ["YAC", 47], ["LONG", 30], ["SNAPS", 37]] },
+        ] },
+    ],
+  },
 ];
