@@ -131,4 +131,25 @@ const HEISMAN = [
         stats: [["PASS YDS", 1357], ["PASS TD", 10], ["PASS COMP %", 63], ["PASS INT", 2], ["RUSH ATT", 38], ["RUSH YDS", 130]] },
     ],
   },
+  {
+    week: 6,
+    players: [
+      { rank: 1, name: "Jake Fette", pos: "QB", team: "Texas A&M", year: "SO (RS)", number: 16, archetype: "Pure Runner", ovr: 90, height: "6'1\"", weight: 201, hometown: "El Paso, TX",
+        stats: [["PASS YDS", 1277], ["PASS TD", 11], ["PASS COMP %", 68], ["PASS INT", 1], ["RUSH ATT", 64], ["RUSH YDS", 472]] },
+      { rank: 2, name: "Chris Denson", pos: "QB", team: "Miami", year: "JR (RS)", number: 15, archetype: "Pure Runner", ovr: 87, height: "6'2\"", weight: 203, hometown: "Plant City, FL",
+        stats: [["PASS YDS", 1665], ["PASS TD", 20], ["PASS COMP %", 65], ["PASS INT", 4], ["RUSH ATT", 48], ["RUSH YDS", 231]] },
+      { rank: 3, name: "Connor Salmin", pos: "WR", team: "Dillon", year: "SO (RS)", number: 6, archetype: "Gadget", ovr: 88, height: "6'1\"", weight: 195, hometown: "Winchester, VA",
+        stats: [["CATCHES", 51], ["REC YDS", 815], ["REC TD", 10], ["LONG REC", 71], ["REC YAC", 444], ["DROPS", 1]],
+        gameLog: [
+          { week: 0, opponent: "Cincinnati", result: "W 28-17", stats: [["REC", 10], ["YARDS", 147], ["AVG", 14.7], ["TD", 1], ["RAC", 58], ["RAC AVG", 5.8], ["LONG", 60], ["SNAPS", 58]] },
+          { week: 1, opponent: "Auburn", result: "L 44-25", stats: [["REC", 7], ["YARDS", 90], ["AVG", 12.9], ["TD", 0], ["RAC", 28], ["RAC AVG", 4], ["LONG", 27], ["SNAPS", 87]] },
+          { week: 2, opponent: "Michigan", result: "L 32-25", stats: [["REC", 6], ["YARDS", 40], ["AVG", 6.7], ["TD", 1], ["RAC", 15], ["RAC AVG", 2.5], ["LONG", 17], ["SNAPS", 56]] },
+          { week: 4, opponent: "Boston College", result: "W 45-27", stats: [["REC", 10], ["YARDS", 222], ["AVG", 22.2], ["TD", 3], ["RAC", 154], ["RAC AVG", 15.4], ["LONG", 58], ["SNAPS", 52]] },
+          { week: 5, opponent: "Louisiana Tech", result: "W 49-34", stats: [["REC", 9], ["YARDS", 210], ["AVG", 23.3], ["TD", 3], ["RAC", 121], ["RAC AVG", 13.4], ["LONG", 71], ["SNAPS", 44]] },
+          { week: 6, opponent: "Marshall", result: "W 41-10", stats: [["REC", 9], ["YARDS", 106], ["AVG", 11.8], ["TD", 2], ["RAC", 68], ["RAC AVG", 7.6], ["LONG", 23], ["SNAPS", 59]] },
+        ] },
+      { rank: 4, name: "Bryce Underwood", pos: "QB", team: "LSU", year: "SR", number: 19, archetype: "Backfield Creator", ovr: 91, height: "6'4\"", weight: 230, hometown: "Detroit, MI",
+        stats: [["PASS YDS", 1249], ["PASS TD", 12], ["PASS COMP %", 71], ["PASS INT", 1], ["RUSH ATT", 42], ["RUSH YDS", 187]] },
+    ],
+  },
 ];
