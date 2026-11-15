@@ -81,4 +81,5 @@ const VACATIONS = [
   { coach: "Brian52682", start: "2026-10-25", end: "2026-10-29", added: "2026-10-16" },
   { coach: "Dway", start: "2026-10-28", end: "2026-11-01", added: "2026-10-27" },
   { coach: "Brian52682", start: "2026-12-05", end: "2026-12-12", added: "2026-10-29" },
+  { coach: "Alex", start: "2026-12-16", end: "2026-12-18", added: "2026-11-14" },
 ];
