@@ -187,4 +187,31 @@ const HEISMAN = [
         ] },
     ],
   },
+  {
+    week: 7,
+    players: [
+      { rank: 1, name: "Kaliq Lockett", pos: "WR", team: "Texas", year: "JR (RS)", number: 7, archetype: "Gadget", ovr: 94, height: "6'2\"", weight: 191, hometown: "Dallas, TX",
+        stats: [["CATCHES", 43], ["REC YDS", 580], ["REC TD", 7], ["LONG REC", 58], ["REC YAC", 226], ["DROPS", 0]],
+        gameLog: [
+          { week: 1, opponent: "Louisiana Tech", result: "W 63-0", stats: [["REC", 10], ["YARDS", 129], ["AVG", 12.9], ["TD", 1], ["RAC", 68], ["RAC AVG", 6.8], ["LONG", 36], ["SNAPS", 66]] },
+          { week: 3, opponent: "Indiana", result: "W 45-17", stats: [["REC", 6], ["YARDS", 92], ["AVG", 15.3], ["TD", 2], ["RAC", 23], ["RAC AVG", 3.8], ["LONG", 30], ["SNAPS", 62]] },
+          { week: 4, opponent: "Baylor", result: "W 57-10", stats: [["REC", 4], ["YARDS", 14], ["AVG", 3.5], ["TD", 0], ["RAC", 4], ["RAC AVG", 1], ["LONG", 14], ["SNAPS", 77]] },
+          { week: 5, opponent: "Mississippi State", result: "W 48-0", stats: [["REC", 11], ["YARDS", 181], ["AVG", 16.5], ["TD", 2], ["RAC", 64], ["RAC AVG", 5.8], ["LONG", 58], ["SNAPS", 77]] },
+          { week: 6, opponent: "Kentucky", result: "W 49-31", stats: [["REC", 12], ["YARDS", 164], ["AVG", 13.7], ["TD", 2], ["RAC", 67], ["RAC AVG", 5.6], ["LONG", 51], ["SNAPS", 75]] },
+        ] },
+      { rank: 2, name: "Bo Jackson", pos: "HB", team: "Ohio State", year: "SR", number: 25, archetype: "East/West Playmaker", ovr: 96, height: "6'0\"", weight: 225, hometown: "Cleveland, OH",
+        stats: [["RUSH ATT", 73], ["RUSH YDS", 789], ["YPC", 10], ["RUSH TD", 9], ["CATCHES", 16], ["REC YDS", 163]],
+        gameLog: [
+          { week: 0, opponent: "Clemson", result: "W 58-21", stats: [["CAR", 13], ["YARDS", 291], ["AVG", 22.4], ["TD", 2], ["FUMB", 0], ["BTK", 3], ["YAC", 27], ["LONG", 86], ["SNAPS", 43]] },
+          { week: 1, opponent: "LSU", result: "L 52-21", stats: [["CAR", 9], ["YARDS", 36], ["AVG", 4], ["TD", 0], ["FUMB", 1], ["BTK", 1], ["YAC", 11], ["LONG", 9], ["SNAPS", 56]] },
+          { week: 3, opponent: "Notre Dame", result: "W 50-26", stats: [["CAR", 10], ["YARDS", 179], ["AVG", 17.9], ["TD", 3], ["FUMB", 0], ["BTK", 1], ["YAC", 12], ["LONG", 68], ["SNAPS", 29]] },
+          { week: 4, opponent: "UCLA", result: "W 24-13", stats: [["CAR", 19], ["YARDS", 155], ["AVG", 8.2], ["TD", 1], ["FUMB", 0], ["BTK", 3], ["YAC", 47], ["LONG", 30], ["SNAPS", 37]] },
+          { week: 6, opponent: "Washington", result: "W 45-13", stats: [["CAR", 22], ["YARDS", 128], ["AVG", 5.8], ["TD", 3], ["FUMB", 0], ["BTK", 1], ["YAC", 38], ["LONG", 16], ["SNAPS", 48]] },
+        ] },
+      { rank: 3, name: "Luke Kromenhoek", pos: "QB", team: "Kansas State", year: "SR (RS)", number: 17, archetype: "Pure Runner", ovr: 90, height: "6'4\"", weight: 223, hometown: "Savannah, GA",
+        stats: [["PASS YDS", 1823], ["PASS TD", 13], ["PASS COMP %", 68], ["PASS INT", 2], ["RUSH ATT", 82], ["RUSH YDS", 300]] },
+      { rank: 4, name: "Tyler Chambers", pos: "QB", team: "South Carolina", year: "JR (RS)", number: 12, archetype: "Pure Runner", ovr: 84, height: "6'5\"", weight: 209, hometown: "Gastonia, NC",
+        stats: [["PASS YDS", 1723], ["PASS TD", 17], ["PASS COMP %", 66], ["PASS INT", 5], ["RUSH ATT", 62], ["RUSH YDS", 286]] },
+    ],
+  },
 ];
