@@ -137,7 +137,7 @@ const TEAM_SCHEDULES = [
       { week: 4, note: "BYE" },
       { week: 5, opponent: "NC State", location: "vs", teamScore: 45, opponentScore: 28 },
       { week: 6, opponent: "Coastal Carolina", location: "vs", teamScore: 49, opponentScore: 20 },
-      { week: 7, opponent: "Troy", location: "vs" },
+      { week: 7, opponent: "Troy", location: "vs", teamScore: 42, opponentScore: 7 },
       { week: 8, opponent: "Texas Tech", location: "at" },
       { week: 9, opponent: "Baldwin Wallace", location: "vs" },
       { week: 10, opponent: "UL Monroe", location: "vs" },
