@@ -192,7 +192,7 @@ const TEAM_SCHEDULES = [
       { week: 3, note: "BYE" },
       { week: 4, opponent: "Washington", location: "at", stadium: "Husky Stadium", teamScore: 31, opponentScore: 44 },
       { week: 5, opponent: "Maryland", location: "vs", stadium: "North Dakota State Stadium", teamScore: 24, opponentScore: 20 },
-      { week: 6, opponent: "Tulane", location: "vs", stadium: "North Dakota State Stadium" },
+      { week: 6, opponent: "Tulane", location: "vs", stadium: "North Dakota State Stadium", teamScore: 38, opponentScore: 24 },
       { week: 7, opponent: "Michigan", location: "at", stadium: "Michigan Stadium" },
       { week: 8, opponent: "Penn State", location: "vs", stadium: "North Dakota State Stadium" },
       { week: 9, note: "BYE" },
