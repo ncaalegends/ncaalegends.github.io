@@ -205,7 +205,7 @@ const TEAM_SCHEDULES = [
       { week: 4, opponent: "Central Michigan", location: "at", teamScore: 43, opponentScore: 14 },
       { week: 5, opponent: "Buffalo", location: "vs", teamScore: 35, opponentScore: 7 },
       { week: 6, opponent: "SMU", location: "vs", teamScore: 24, opponentScore: 17 },
-      { week: 7, opponent: "Western Michigan", location: "at" },
+      { week: 7, opponent: "Western Michigan", location: "at", teamScore: 38, opponentScore: 23 },
       { week: 8, opponent: "Eastern Michigan", location: "vs" },
       { week: 9, note: "BYE" },
       { week: 10, opponent: "North Shore", location: "at" },
