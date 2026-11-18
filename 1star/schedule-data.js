@@ -183,7 +183,7 @@ const TEAM_SCHEDULES = [
       { week: 4, opponent: "Arizona State", location: "vs", teamScore: 28, opponentScore: 24 },
       { week: 5, note: "BYE" },
       { week: 6, opponent: "Toledo", location: "vs", teamScore: 21, opponentScore: 14 },
-      { week: 7, opponent: "Sacramento State", location: "vs" },
+      { week: 7, opponent: "Sacramento State", location: "vs", teamScore: 35, opponentScore: 24 },
       { week: 8, opponent: "Miami University", location: "vs" },
       { week: 9, opponent: "North Shore", location: "vs" },
       { week: 10, opponent: "UMass", location: "at" },
