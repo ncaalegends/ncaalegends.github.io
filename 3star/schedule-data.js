@@ -397,7 +397,7 @@ const TEAM_SCHEDULES = [
       { week: 3, opponent: "Virginia Tech", location: "vs", stadium: "Bridgeforth Stadium", teamScore: 52, opponentScore: 42 },
       { week: 4, opponent: "Kentucky", location: "at", stadium: "Kroger Field", teamScore: 42, opponentScore: 14 },
       { week: 5, note: "BYE" },
-      { week: 6, opponent: "Vanderbilt", location: "vs", stadium: "Bridgeforth Stadium" },
+      { week: 6, opponent: "Vanderbilt", location: "vs", stadium: "Bridgeforth Stadium", teamScore: 63, opponentScore: 21 },
       { week: 7, opponent: "Clemson", location: "at", stadium: "Clemson Memorial Stadium" },
       { week: 8, note: "BYE" },
       { week: 9, opponent: "Texas A&M", location: "vs", stadium: "Bridgeforth Stadium" },
