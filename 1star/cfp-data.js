@@ -124,6 +124,59 @@
    the main dynasty's advance to week 10+ is gated on this file
    having that week.
    ============================================================ */
-const CFP_POLL = [];
+const CFP_POLL = [
+  {
+    week: 10,
+    teams: [
+      { rank: 1, team: "USC", record: "7-1" },
+      { rank: 2, team: "Georgia", record: "7-1" },
+      { rank: 3, team: "Iowa", record: "8-0" },
+      { rank: 4, team: "New Glarus", record: "8-0" },
+      { rank: 5, team: "Michigan", record: "8-1" },
+      { rank: 6, team: "Texas A&M", record: "7-1" },
+      { rank: 7, team: "BYU", record: "7-1" },
+      { rank: 8, team: "Ohio State", record: "6-2" },
+      { rank: 9, team: "Baldwin Wallace", record: "8-0" },
+      { rank: 10, team: "South Carolina", record: "6-2" },
+      { rank: 11, team: "UAB", record: "8-0" },
+      { rank: 12, team: "Alabama", record: "7-1" },
+      { rank: 13, team: "Penn State", record: "7-1" },
+      { rank: 14, team: "Kansas State", record: "9-0" },
+      { rank: 15, team: "Indiana", record: "6-2" },
+      { rank: 16, team: "Washington", record: "7-2" },
+      { rank: 17, team: "Tennessee", record: "6-2" },
+      { rank: 18, team: "Miami", record: "6-2" },
+      { rank: 19, team: "Clemson", record: "7-1" },
+      { rank: 20, team: "Boise State", record: "8-0" },
+      { rank: 21, team: "North Shore", record: "8-1" },
+      { rank: 22, team: "LSU", record: "6-2" },
+      { rank: 23, team: "Appalachian State", record: "7-1" },
+      { rank: 24, team: "Colorado", record: "7-1" },
+      { rank: 25, team: "SMU", record: "6-2" },
+    ],
+  },
+];
 
-const CFP_BRACKET = [];
+const CFP_BRACKET = [
+  {
+    week: 10,
+    projected: true,
+    seeds: [
+      { seed:  1, team: "USC", record: "7-1" },
+      { seed:  2, team: "Georgia", record: "7-1" },
+      { seed:  3, team: "Iowa", record: "8-0", auto: true },
+      { seed:  4, team: "New Glarus", record: "8-0", auto: true },
+      { seed:  5, team: "Michigan", record: "8-1" },
+      { seed:  6, team: "Texas A&M", record: "7-1" },
+      { seed:  7, team: "BYU", record: "7-1" },
+      { seed:  8, team: "Ohio State", record: "6-2" },
+      { seed:  9, team: "Baldwin Wallace", record: "8-0" },
+      { seed: 10, team: "Kansas State", record: "9-0", auto: true },
+      { seed: 11, team: "Clemson", record: "7-1", auto: true },
+      { seed: 12, team: "LSU", record: "6-2", auto: true },
+    ],
+    bowls: {
+      site: "Tampa, FL",
+    },
+  },
+];
