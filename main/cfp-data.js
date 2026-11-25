@@ -124,6 +124,59 @@
    the main dynasty's advance to week 10+ is gated on this file
    having that week.
    ============================================================ */
-const CFP_POLL = [];
+const CFP_POLL = [
+  {
+    week: 10,
+    teams: [
+      { rank: 1, team: "Texas", record: "8-0" },
+      { rank: 2, team: "Clemson", record: "8-1" },
+      { rank: 3, team: "Ohio State", record: "7-1" },
+      { rank: 4, team: "West Virginia", record: "8-0" },
+      { rank: 5, team: "LSU", record: "8-1" },
+      { rank: 6, team: "Michigan", record: "8-1" },
+      { rank: 7, team: "UCLA", record: "7-1" },
+      { rank: 8, team: "Florida State", record: "7-1" },
+      { rank: 9, team: "Oregon", record: "7-1" },
+      { rank: 10, team: "Colorado", record: "7-1" },
+      { rank: 11, team: "California", record: "6-2" },
+      { rank: 12, team: "Georgia", record: "7-2" },
+      { rank: 13, team: "Wyoming", record: "7-1" },
+      { rank: 14, team: "TCU", record: "7-2" },
+      { rank: 15, team: "UConn", record: "8-0" },
+      { rank: 16, team: "Iowa", record: "6-2" },
+      { rank: 17, team: "Tennessee", record: "6-2" },
+      { rank: 18, team: "Wake Forest", record: "6-2" },
+      { rank: 19, team: "Utah", record: "7-1" },
+      { rank: 20, team: "Appalachian State", record: "7-1" },
+      { rank: 21, team: "Notre Dame", record: "7-3" },
+      { rank: 22, team: "Boise State", record: "7-1" },
+      { rank: 23, team: "Arkansas", record: "6-3" },
+      { rank: 24, team: "Florida", record: "5-4" },
+      { rank: 25, team: "Tulane", record: "6-2" },
+    ],
+  },
+];
 
-const CFP_BRACKET = [];
+const CFP_BRACKET = [
+  {
+    week: 10,
+    projected: true,
+    seeds: [
+      { seed:  1, team: "Texas", record: "8-0", auto: true },
+      { seed:  2, team: "Clemson", record: "8-1", auto: true },
+      { seed:  3, team: "Ohio State", record: "7-1" },
+      { seed:  4, team: "West Virginia", record: "8-0" },
+      { seed:  5, team: "LSU", record: "8-1" },
+      { seed:  6, team: "Michigan", record: "8-1", auto: true },
+      { seed:  7, team: "UCLA", record: "7-1" },
+      { seed:  8, team: "Florida State", record: "7-1" },
+      { seed:  9, team: "Oregon", record: "7-1" },
+      { seed: 10, team: "Colorado", record: "7-1", auto: true },
+      { seed: 11, team: "California", record: "6-2" },
+      { seed: 12, team: "Wyoming", record: "7-1", auto: true },
+    ],
+    bowls: {
+      site: "Tampa, FL",
+    },
+  },
+];
