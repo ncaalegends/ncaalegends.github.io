@@ -124,6 +124,59 @@
    the main dynasty's advance to week 10+ is gated on this file
    having that week.
    ============================================================ */
-const CFP_POLL = [];
+const CFP_POLL = [
+  {
+    week: 10,
+    teams: [
+      { rank: 1, team: "Wisconsin", record: "9-0" },
+      { rank: 2, team: "Rutgers", record: "9-0" },
+      { rank: 3, team: "Oklahoma", record: "8-1" },
+      { rank: 4, team: "Oregon State", record: "8-0" },
+      { rank: 5, team: "Colorado", record: "8-0" },
+      { rank: 6, team: "Mississippi State", record: "9-0" },
+      { rank: 7, team: "Oklahoma State", record: "8-0" },
+      { rank: 8, team: "James Madison", record: "7-1" },
+      { rank: 9, team: "Georgia", record: "7-2" },
+      { rank: 10, team: "Michigan", record: "7-1" },
+      { rank: 11, team: "Missouri", record: "7-1" },
+      { rank: 12, team: "Iowa State", record: "8-1" },
+      { rank: 13, team: "California", record: "7-1" },
+      { rank: 14, team: "Tennessee", record: "7-1" },
+      { rank: 15, team: "Georgia Tech", record: "8-0" },
+      { rank: 16, team: "North Dakota State", record: "6-2" },
+      { rank: 17, team: "South Carolina", record: "7-1" },
+      { rank: 18, team: "Charlotte", record: "6-2" },
+      { rank: 19, team: "Baylor", record: "5-3" },
+      { rank: 20, team: "Indiana", record: "7-1" },
+      { rank: 21, team: "Eastern Michigan", record: "7-1" },
+      { rank: 22, team: "UTEP", record: "8-0" },
+      { rank: 23, team: "Clemson", record: "5-3" },
+      { rank: 24, team: "Boise State", record: "7-1" },
+      { rank: 25, team: "LSU", record: "5-3" },
+    ],
+  },
+];
 
-const CFP_BRACKET = [];
+const CFP_BRACKET = [
+  {
+    week: 10,
+    projected: true,
+    seeds: [
+      { seed:  1, team: "Wisconsin", record: "9-0" },
+      { seed:  2, team: "Rutgers", record: "9-0", auto: true },
+      { seed:  3, team: "Oklahoma", record: "8-1" },
+      { seed:  4, team: "Oregon State", record: "8-0" },
+      { seed:  5, team: "Colorado", record: "8-0", auto: true },
+      { seed:  6, team: "Mississippi State", record: "9-0", auto: true },
+      { seed:  7, team: "Oklahoma State", record: "8-0" },
+      { seed:  8, team: "James Madison", record: "7-1" },
+      { seed:  9, team: "Georgia", record: "7-2" },
+      { seed: 10, team: "Michigan", record: "7-1" },
+      { seed: 11, team: "Missouri", record: "7-1", auto: true },
+      { seed: 12, team: "Georgia Tech", record: "8-0", auto: true },
+    ],
+    bowls: {
+      site: "Tampa, FL",
+    },
+  },
+];
